@@ -1,0 +1,39 @@
+$def with (events, results)
+
+$code
+    def format_points(points: float) -> str:
+        if points is not None:
+            return str(points)
+        else:
+            return ''
+
+
+<table style="border-collapse: collapse">
+$for class_name, ranked_results in results:
+    <thead>
+        <tr><th colspan="4" style="text-align:left;padding-top:3em"><h3>$class_name</h3></th></tr>
+        <tr class="dt">
+            <th class="dt">Rank</th>
+            <th class="dt">Name</th>
+            <th class="dt">Club</th>
+            <th class="dt">Points</th>
+            $for e in events:
+                <th class="dt">$e.series</th>
+        </tr>
+    </thead>
+    <tbody>
+    $for result in ranked_results:
+        $if result['races'] != {}:
+            <tr class="dt">
+                <td class="dt">$(str(result.get('rank', None)) if result.get('rank', None) is not None else '')</td>
+                <td class="dt">$result.get('first_name', '') $result.get('last_name', '')</td>
+                <td class="dt">$result.get('club', '')</td>
+                <td class="dt" style="text-align:right">$format_points(result.get('sum', None))</td>
+                $for i in range(len(events)):
+                    $if i in result['organizer'].keys():
+                        <td class="dt" style="text-align:right">($format_points(result['organizer'].get(i, None)))</td>
+                    $else:
+                        <td class="dt" style="text-align:right">$format_points(result['races'].get(i, None))</td>
+            </tr>
+    </tbody>
+</table>

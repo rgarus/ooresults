@@ -1,0 +1,84 @@
+$def with (event, competitors)
+
+$ date = event.get('date', '')
+
+
+$def format_year(year) -> str:
+    $if year is not None:
+        $return str(year)
+    $else:
+        $return ''
+
+$def format_time(time):
+    $if time is not None:
+        $return '{:d}:{:02d}'.format(time//60, time%60)
+    $else:
+        $return ''
+
+$def format_date(time):
+    $if time is not None:
+        $return time.strftime('%H:%M:%S')
+    $else:
+        $return ''
+
+
+<div id="entr.event">
+    <table style="text-align: left">
+        <tr>
+            <th style="padding-right: 10px">Event name:</th>
+            <td>$event.get('name', '')</td>
+        </tr>
+        <tr>
+            <th style="padding-right: 10px">Event date:</th>
+            <td>$(date.isoformat() if date != '' else '')</td>
+        </tr>
+    </table>
+</div>
+
+<p/>
+
+<input oninput="w3.filterHTML('#entries_tbody', 'tr', this.value)" placeholder="Search ...">
+<p/>
+
+<div>
+    <table class="dt" id="entr.table" onclick="entr_highlight(event)">
+        <thead>
+            <tr class="dt">
+                <th class="dt">First name</th>
+                <th class="dt">Last name</th>
+                <th class="dt">Gender</th>
+                <th class="dt">Year</th>
+                <th class="dt">Chip</th>
+                <th class="dt">Club</th>
+                <th class="dt">Class</th>
+                $if event:
+                    $for i in range(len(event.fields)):
+                        <th class="dt">$event.fields[i]</th>
+                <th class="dt">&nbsp;&nbsp;NC&nbsp;&nbsp;</th>
+                <th class="dt">Start</th>
+                <th class="dt">Time</th>
+                <th class="dt">Status</th>
+            </tr>
+        </thead>
+        <tbody id="entries_tbody">
+        $for competitor in competitors:
+            <tr class="dt" id="$competitor.get('id', '')">
+                <td class="dt">$competitor.get('first_name', '')</td>
+                <td class="dt" id="entr_table_lastname">$competitor.get('last_name', '')</td>
+                <td class="dt">$competitor.get('gender', '')</td>
+                <td class="dt">$format_year(competitor.get('year', None))</td>
+                <td class="dt" style="text-align:right">$competitor.get('chip', '')</td>
+                <td class="dt">$competitor.get('club', '')</td>
+                <td class="dt">$competitor.get('class_', '')</td>
+                <td class="dt" style="text-align: center;">$('X' if competitor.get('not_competing', False) else '')</td>
+                $if event:
+                    $for i in range(len(event.fields)):
+                        <td class="dt">$competitor.fields.get(i, '')</td>
+                <td class="dt" style="text-align:right">$(format_date(competitor.start.start_time))</td>
+                <td class="dt" style="text-align:right">$(format_time(competitor.result.extensions.get('running_time', competitor.result.time)))</td>
+                <td class="dt">$MAP_STATUS[competitor.result.status]</td>
+            </tr> 
+        </tbody>
+    </table>
+</div>
+

@@ -1,0 +1,320 @@
+$def with (courses_table)
+ 
+<!-- Tab content -->
+<div id="Courses" class="tabcontent">
+  <div class="actions">
+    <!-- Trigger/Open The Modal -->
+    <button id="cou.myBtnReload" onclick="cou_myReload()">Reload</button>
+    <button id="cou.myBtnImport" onclick="cou_myImport()">Import ...</button>
+    <button id="cou.myBtnExport" onclick="cou_myExport()">Export ...</button>
+    <button id="cou.myBtnAdd" onclick="cou_myAdd()">Add course ...</button>
+    <button id="cou.myBtnEdit" disabled onclick="cou_myEdit()">Edit course ...</button>
+    <button id="cou.myBtnDelete" disabled onclick="cou_myDelete()">Delete course</button>
+  </div>
+
+  <div id=cou.data class="data">
+    $:courses_table
+  </div>
+
+  <div class="modal" id="cou.importDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('cou.importDialog').style.display='none'">&times;</span>
+      <form id="cou.import.form" class="form-container" onsubmit="cou_submitImport(); return false;">
+        <p>Format</p>
+        <div>
+          <input id="oo_1" name="cou_import" type="radio" value="cou.import.1"
+                 onchange="updateDisplayedParams('cou_import')" required checked/>
+          <label for="cou.import.1">IOF Interface Standard 3.0 Course Data</label>
+        </div>
+        <p>Settings</p>
+        <div id="cou_import">
+          <div id="cou.import.1" class="params">
+            <table>
+              <tr>
+                <th class="input-header"><label for="file1">File</label></th>
+                <td><input id="file1" name="browse1" type="file" class="required" accept=".xml"/></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <p></p>
+        <p></p>
+        <button type="submit" class="btn">Import</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('cou.importDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="cou.exportDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('cou.exportDialog').style.display='none'">&times;</span>
+      <form id="cou.export.form" class="form-container" onsubmit="cou_submitExport(); return false;">
+        <p>Format</p>
+         <div>
+          <input id="oo_1" name="cou_export" type="radio" value="cou.export.1"
+                 onchange="updateDisplayedParams('cou_export')" required checked/>
+          <label for="cou.export.1">IOF Interface Standard 3.0 Course Data</label>
+        </div>
+        <p>Settings</p>
+        <div id="cou_export">
+          <div id="cou.export.1" class="params">
+          </div>
+        </div>
+        <p></p>
+        <p></p>
+        <button type="submit" class="btn">Export</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('cou.exportDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="cou.addDialog">
+  </div> 
+
+  <!-- The Modal -->
+  <div class="modal" id="cou.deleteDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('cou.deleteDialog').style.display='none'">&times;</span>
+      <form id="cou.formDelete" class="form-container" onsubmit="cou_submitDelete(); return false;">
+        <input id="cou.deleteId" name="id" type="text" hidden/>
+        <p>Confirm: Delete the selected course?</p>
+        <button type="submit" class="btn">Delete</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('cou.deleteDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    var cou_selected = document.getElementById('cou.table').getElementsByClassName('selected')[0];
+
+    function cou_highlight(e) {
+        if (e.target.tagName == "TD") {
+            if (cou_selected) cou_selected.className = '';
+            cou_selected = e.target.parentNode;
+            cou_selected.className = 'selected';
+            document.getElementById('cou.myBtnEdit').disabled = false;
+            document.getElementById('cou.myBtnDelete').disabled = false;
+        }
+    }
+
+    function cou_myReload() {
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "course/update", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function cou_myImport() {
+        document.getElementById('cou.importDialog').style.display='block';
+        updateDisplayedParams("cou_import");
+    }
+
+    function cou_myExport() {
+        document.getElementById('cou.exportDialog').style.display='block';
+        updateDisplayedParams("cou_export");
+    }
+
+    function cou_myAdd() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById('cou.addDialog').innerHTML = this.responseText;
+                document.getElementById('cou.addDialog').style.display='block';
+                align_form_table('cou.addFormTable');
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "course/fill_edit_form", true);
+        //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.responseType = "html";
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        data.append('id', '');
+        xhr.send(data);
+    }
+
+    function cou_myDelete() {
+        var table = document.getElementById('cou.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") {
+                document.getElementById('cou.deleteId').value=table.rows[i].id
+                document.getElementById('cou.deleteDialog').style.display='block'
+            }
+        }
+    }
+
+    function cou_myEdit() {
+        var table = document.getElementById('cou.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") { 
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('cou.addDialog').innerHTML = this.responseText;
+                        document.getElementById('cou.addDialog').style.display='block';
+                        align_form_table('cou.addFormTable');
+                    }
+                    if (this.readyState == 4 && this.status == 409) {
+                        window.alert(this.responseText);
+                    }
+                    if (this.readyState == 4 && this.status == 500) {
+                        window.alert(this.responseText);
+                    }
+                };
+                xhr.open("POST", "course/fill_edit_form", true);
+                //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                xhr.responseType = "html";
+                var data = new FormData();
+                data.append('event_id', window.event_id);
+                data.append('id', table.rows[i].id);
+                xhr.send(data);
+            }
+        }
+    }
+
+    function cou_submitImport() {
+        var form = document.getElementById('cou.import.form');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                cou_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "course/import", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function cou_submitExport() {
+        var filename = '';
+        var form = document.getElementById('cou.export.form');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var selected = document.querySelector('input[name="cou_export"]:checked').value;
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                download(filename, this.response);
+                document.getElementById('cou.exportDialog').style.display = "none";
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "course/export", true);
+        xhr.responseType = "arraybuffer";
+        if (selected == "cou.export.1") {
+            filename = "CourseData.xml";
+        }
+        xhr.send(data);
+    }
+
+    function cou_submitAdd() {
+        var form = document.getElementById('cou.formAdd');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                cou_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "course/add", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function cou_submitDelete() {
+        var form = document.getElementById('cou.formDelete');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                cou_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "course/delete", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function cou_update() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                cou_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "course/update", true);
+        xhr.responseType = "html";
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        xhr.send(data);
+    }
+
+    function cou_updateTable(content) {
+        // Get all elements with class="modal" and hide them
+        modal = document.getElementsByClassName("modal");
+        for (i = 0; i < modal.length; i++) {
+            modal[i].style.display = "none";
+        }
+        document.getElementById('cou.data').innerHTML = content;
+        document.getElementById('cou.myBtnEdit').disabled = true;
+        document.getElementById('cou.myBtnDelete').disabled = true;
+    }
+</script>

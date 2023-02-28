@@ -1,0 +1,170 @@
+$def with (results)
+ 
+<!-- Tab content -->
+<div id="Results" class="tabcontent">
+  <div class="actions">
+    <!-- Trigger/Open The Modal -->
+    <button id="res.myBtnReload" onclick="res_myReload()">Reload</button>
+    <button id="res.myBtnPdfResult" onclick="res_myPdfResult()">Print results ...</button>
+    <button id="res.myBtnPdfSplittimes" onclick="res_myPdfSplittimes()">Print splittimes ...</button>
+  </div>
+
+  <div id="res.results" class="data">
+    $:results
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="res.pdfResultDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('res.pdfResultDialog').style.display='none'">&times;</span>
+      <form id="res.pdfResult.form" class="form-container" onsubmit="res_submitPdfResult(); return false;">
+         <div>
+          <input id="pdf_r_i" name="res_include_dns" type="checkbox" value="res.include_dns"/>
+          <label for="res.include_dns">Include not started competitors</label>
+        </div>
+        <p></p>
+        <button type="submit" class="btn">Create PDF</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('res.pdfResultDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="res.pdfSplittimesDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('res.pdfSplittimesDialog').style.display='none'">&times;</span>
+      <form id="res.pdfSplittimes.form" class="form-container" onsubmit="res_submitPdfSplittimes(); return false;">
+         <div>
+          <input id="pdf_sp_l" name="res_landscape" type="checkbox" value="res.landscape"/>
+          <label for="res.landscape">Landscape (page orientation)</label>
+        </div>
+        <p></p>
+        <button type="submit" class="btn">Create PDF</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('res.pdfSplittimesDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+    function res_myReload() {
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "result/update", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function res_myPdfResult() {
+        document.getElementById('res.pdfResultDialog').style.display='block';
+    }
+
+    function res_myPdfSplittimes() {
+        document.getElementById('res.pdfSplittimesDialog').style.display='block';
+    }
+
+    function res_submitPdfResult() {
+        var filename = 'result.pdf';
+        var form = document.getElementById('res.pdfResult.form');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                downloadpdf(filename, this.response);
+                document.getElementById('res.pdfResultDialog').style.display = "none";
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert('Internal error');
+            }
+        };
+        xhr.open("POST", "result/pdfResult", true);
+        xhr.responseType = "blob";
+        xhr.send(data);
+    }
+
+    function res_submitPdfSplittimes() {
+        var filename = 'splittimes.pdf';
+        var form = document.getElementById('res.pdfSplittimes.form');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                downloadpdf(filename, this.response);
+                document.getElementById('res.pdfSplittimesDialog').style.display = "none";
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert('Internal error');
+            }
+        };
+        xhr.open("POST", "result/pdfSplittimes", true);
+        xhr.responseType = "blob";
+        xhr.send(data);
+    }
+
+    function downloadpdf(fileName, data) {
+        var textFileAsBlob = new Blob([data], {type: 'application/pdf'});
+        var downloadLink = document.createElement("a");
+        downloadLink.download = fileName;
+        if (window.webkitURL != null) {
+            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+        } else {
+            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+            downloadLink.onclick = document.body.removeChild(event.target);
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+        }
+        downloadLink.click();
+    }
+
+    function res_update() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                res_updateResults(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "result/update", true);
+        xhr.responseType = "html";
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        xhr.send(data);
+    }
+
+    function res_updateResults(content) {
+        // Get all elements with class="modal" and hide them
+        modal = document.getElementsByClassName("modal");
+        for (i = 0; i < modal.length; i++) {
+            modal[i].style.display = "none";
+        }
+        document.getElementById('res.results').innerHTML = content;
+    }
+</script>

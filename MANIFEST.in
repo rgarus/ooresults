@@ -1,0 +1,8 @@
+include ooresults/pdf/fonts/*.ttf
+include ooresults/schema/*.json
+include ooresults/schema/*.xsd
+include ooresults/static/*.css
+include ooresults/static/*.js
+include ooresults/templates/*.html
+include ooresults/templates/si/*.html
+recursive-include tests *.py

@@ -1,0 +1,44 @@
+$def with (events)
+
+<div id="evnt.event">
+    <table style="text-align: left">
+        <tr>
+            <th style="padding-right: 10px">Event name:</th>
+            <td id="evnt.event_name"></td>
+        </tr>
+        <tr>
+            <th style="padding-right: 10px">Event date:</th>
+            <td id="evnt.event_date"></td>
+        </tr>
+    </table>
+</div>
+
+<p/>
+
+<input oninput="w3.filterHTML('#events_tbody', 'tr', this.value)" placeholder="Search ...">
+<p/>
+
+<table class="dt" id="evnt.table" onclick="evnt_highlight(event)">
+    <thead>
+        <tr class="dt">
+            <th class="dt">Name</th>
+            <th class="dt">Date</th>
+            <th class="dt">Key</th>
+            <th class="dt">Publish</th>
+            <th class="dt">Series</th>
+            <th class="dt">Fields</th>
+        </tr>
+    </thead>
+    <tbody id="events_tbody">
+    $for event in events:
+        <tr class="dt" id="$event.id">
+            <td class="dt">$event.name</td>
+            <td class="dt">$event.date.isoformat()</td>
+            <td class="dt">$('***' if event.key is not None else '')</td>
+            <td class="dt">$('yes' if event.publish else 'no')</td>
+            <td class="dt">$(event.series if event.series is not None else '')</td>
+            <td class="dt">$', '.join(event.fields)</td>
+        </tr>
+    </tbody>
+</table>
+

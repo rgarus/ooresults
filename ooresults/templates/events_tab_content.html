@@ -1,0 +1,239 @@
+$def with (events_table)
+ 
+<!-- Tab content -->
+<div id="Events" class="tabcontent">
+  <div class="actions">
+    <!-- Trigger/Open The Modal -->
+    <button id="evnt.myBtnReload" onclick="evnt_myReload()">Reload</button>
+    <button id="evnt.myBtnAdd" onclick="evnt_myAdd()">Add event ...</button>
+    <button id="evnt.myBtnEdit" disabled onclick="evnt_myEdit()">Edit event ...</button>
+    <button id="evnt.myBtnDelete" disabled onclick="evnt_myDelete()">Delete event</button>
+  </div>
+
+  <div id="evnt.results" class="data">
+    $:events_table
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="evnt.addDialog">
+  </div> 
+
+  <!-- The Modal -->
+  <div class="modal" id="evnt.deleteDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('evnt.deleteDialog').style.display='none'">&times;</span>
+      <form id="evnt.formDelete" class="form-container" onsubmit="evnt_submitDelete(); return false;">
+        <input id="evnt.deleteId" name="id" type="text" hidden/>
+        <p>Confirm: Delete the selected event and all associated data (entries, results, classes, courses)?</p>
+        <button type="submit" class="btn">Delete</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('evnt.deleteDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="evnt.selectEventDialog">
+  </div>
+</div>
+
+<script>
+    var evnt_selected = document.getElementById('evnt.table').getElementsByClassName('selected')[0];
+
+    function evnt_highlight(e) {
+        if (e.target.tagName == "TD") {
+            if (evnt_selected) evnt_selected.className = '';
+            evnt_selected = e.target.parentNode;
+            evnt_selected.className = 'selected';
+            document.getElementById('evnt.myBtnEdit').disabled = false;
+            document.getElementById('evnt.myBtnDelete').disabled = false;
+            document.getElementById('tab.entries').disabled = false;
+            document.getElementById('tab.classes').disabled = false;
+            document.getElementById('tab.courses').disabled = false;
+            document.getElementById('tab.results').disabled = false;
+            document.getElementById('tab.reader').disabled = (evnt_selected.getElementsByTagName('TD')[2].innerHTML == '');
+
+            window.event_id = evnt_selected.id;
+            element = document.getElementById('evnt.event_name');
+            element.innerHTML = evnt_selected.getElementsByTagName('TD')[0].innerHTML;
+            element = document.getElementById('evnt.event_date');
+            element.innerHTML = evnt_selected.getElementsByTagName('TD')[1].innerHTML;
+        }
+    }
+
+    function evnt_myReload() {
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "event/update", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function evnt_myAdd() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById('evnt.addDialog').innerHTML = this.responseText;
+                document.getElementById('evnt.addDialog').style.display='block';
+                align_form_table('evnt.addFormTable');
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "event/fill_edit_form", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.responseType = "html";
+        xhr.send("id=");
+    }
+
+    function evnt_myDelete() {
+        var table = document.getElementById('evnt.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") {
+                document.getElementById('evnt.deleteId').value=table.rows[i].id
+                document.getElementById('evnt.deleteDialog').style.display='block'
+            }
+        }
+    }
+
+    function evnt_myEdit() {
+        var table = document.getElementById('evnt.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") { 
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('evnt.addDialog').innerHTML = this.responseText;
+                        document.getElementById('evnt.addDialog').style.display='block';
+                        align_form_table('evnt.addFormTable');
+                    }
+                    if (this.readyState == 4 && this.status == 409) {
+                        window.alert(this.responseText);
+                    }
+                    if (this.readyState == 4 && this.status == 500) {
+                        window.alert(this.responseText);
+                    }
+                };
+                xhr.open("POST", "event/fill_edit_form", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                xhr.responseType = "html";
+                xhr.send("id=".concat(table.rows[i].id));
+            }
+        }
+    }
+
+    function evnt_submitAdd() {
+        var form = document.getElementById('evnt.formAdd');
+        var data = new FormData(form);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                evnt_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "event/add", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function evnt_submitDelete() {
+        var form = document.getElementById('evnt.formDelete');
+        var data = new FormData(form);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                evnt_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "event/delete", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function evnt_update() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                evnt_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "event/update", true);
+        xhr.responseType = "html";
+        xhr.send();
+    }
+
+    function evnt_updateTable(content) {
+        // Get all elements with class="modal" and hide them
+        modal = document.getElementsByClassName("modal");
+        for (i = 0; i < modal.length; i++) {
+            modal[i].style.display = "none";
+        }
+        evnt_selected = null;
+        document.getElementById('evnt.results').innerHTML = content;
+        document.getElementById('evnt.myBtnEdit').disabled = true;
+        document.getElementById('evnt.myBtnDelete').disabled = true;
+        document.getElementById('tab.entries').disabled = true;
+        document.getElementById('tab.classes').disabled = true;
+        document.getElementById('tab.courses').disabled = true;
+        document.getElementById('tab.results').disabled = true;
+        document.getElementById('tab.reader').disabled = true;
+
+        var table = document.getElementById('evnt.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].id == window.event_id) {
+                evnt_selected = table.rows[i]
+                evnt_selected.className = 'selected';
+                document.getElementById('evnt.myBtnEdit').disabled = false;
+                document.getElementById('evnt.myBtnDelete').disabled = false;
+                document.getElementById('tab.entries').disabled = false;
+                document.getElementById('tab.classes').disabled = false;
+                document.getElementById('tab.courses').disabled = false;
+                document.getElementById('tab.results').disabled = false;
+                document.getElementById('tab.reader').disabled = (evnt_selected.getElementsByTagName('TD')[2].innerHTML == '');
+
+                element = document.getElementById('evnt.event_name');
+                element.innerHTML = evnt_selected.getElementsByTagName('TD')[0].innerHTML;
+                element = document.getElementById('evnt.event_date');
+                element.innerHTML = evnt_selected.getElementsByTagName('TD')[1].innerHTML;
+            }
+        }
+        if (evnt_selected == null) {
+            window.event_id = '';
+        }
+    }
+
+</script>

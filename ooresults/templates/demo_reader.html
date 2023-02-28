@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ooresults Demo reader</title>
+        <link rel="stylesheet" href="mystatic/style.css">
+        <link rel="stylesheet" href="mystatic/style-tab.css">
+        <style>
+            .bgr {background-color: #ff7070;}
+            .bgy {background-color: #ffff00;}
+            .bgg {background-color: #70ff70;}
+            .s1 {font-size: 1.5em;}
+            .s2 {font-size: 2.5em;} 
+        </style>
+    </head>
+    <body>
+    <div id="page"><p>Offline</p></div>
+    <form id="demo" class="form-container" autocomplete="off" onsubmit="demo(); return false;">
+
+        <table style="border-collapse: collapse">
+            <thead>
+                <tr class="dt">
+                    <th class="dt">Event key:</th>
+                    <td class="dt" style="text-align:right"><input id="key" name='key' type="text" size="8" data-noreset="true" required/></td>
+                </tr>
+            </thead>
+
+            <thead>
+                <tr class="dt">
+                    <tr>
+                        <th colspan="2" style="padding-top:2em"></th>
+                    </tr>
+                    <th class="dt">Control code</th>
+                    <th class="dt">Punch time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="dt">
+                    <td class="dt" style="text-align:right"><input name="code" type="text" size="8" readonly value="Check" data-noreset="true"/></td>
+                    <td class="dt" style="text-align:right"><input name="time" type="time" step="1" value=""/></td>
+                </tr>
+                <tr class="dt">
+                    <td class="dt" style="text-align:right"><input name="code" type="text" size="8" readonly value="Start" data-noreset="true"/></td>
+                    <td class="dt" style="text-align:right"><input name="time" type="time" step="1" value=""/></td>
+                </tr>
+                $for i in range(8):
+                    <tr class="dt">
+                        <td class="dt" style="text-align:right"><input name="code" type="number" size="8" min="20" max="999"/></td>
+                        <td class="dt" style="text-align:right"><input name="time" type="time" step="1" value=""/></td>
+                    </tr>
+                <tr class="dt">
+                    <td class="dt" style="text-align:right"><input name="code" type="text" size="8" readonly value="Finish" data-noreset="true"/></td>
+                    <td class="dt" style="text-align:right"><input name="time" type="time" step="1" value=""/></td>
+                </tr>
+            </tbody>
+
+            <thead>
+                <tr class="dt">
+                    <tr>
+                        <th colspan="2" style="padding-top:2em"></th>
+                    </tr>
+                    <th class="dt">SI card:</th>
+                    <td class="dt" style="text-align:right"><input name="card" type="number" size="8" min="1000" max="9999999" required/></td>
+                    <td></td>
+                </tr>
+            </thead>
+        </table>
+        <p></p>
+        <button id="clear" type="button" class="btn" onclick="myclear()">Clear</button>
+        <button id="submit" type="submit">Insert card</button>
+
+    </form>
+
+    <script>
+        function connectMessage(message) {
+            document.getElementById('page').innerHTML = '<p>' + message +'</p>';
+        };
+
+        function start(websocketServerLocation){
+
+            ws.onopen = function(event) {
+                connectMessage('Online');
+                tp = setTimeout(function() {ping()}, 10000);
+            };
+            ws.onerror = function(event) {
+                connectMessage('Error');
+            };
+            ws.onclose = function(event) {
+                connectMessage('Offline');
+                // Try to reconnect in 5 seconds
+                ws = null;
+                clearTimeout(tp);
+                setTimeout(function(){start(websocketServerLocation)}, 5000);
+            };
+            ws.onmessage = function(event) {
+                var msg = event.data;
+                if (msg == '__pong__') {
+                    pong();
+                    return;
+                }
+                connectMessage('XXX: ' + event.data);
+            };
+
+            // workaround to detect lost websocket connection in the browser
+            // see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
+            function ping() {
+                ws.send('__ping__');
+                tm = setTimeout(function() {nopong()}, 10000);
+            };
+            function pong() {
+                clearTimeout(tm);
+                tp = setTimeout(function() {ping()}, 15000);
+            };
+            function nopong() {
+                ws.close();
+                connectMessage('Offline');
+            };
+
+            function send(data) {
+                ws.send(data)
+            };
+        };
+
+        var ws_uri;
+        if (window.location.protocol === "https:") {
+            ws_uri = "wss:";
+        } else {
+            ws_uri = "ws:";
+        };
+        ws_uri += "//" + window.location.hostname + ":8081" + window.location.pathname;
+
+        var ws = new WebSocket(ws_uri);
+        start(ws_uri);
+    </script>
+
+    <script>
+        function myclear() {
+            var fieldsToReset = document.querySelectorAll("input:not([data-noreset='true'])")
+            for (var i=0; i < fieldsToReset.length; i++) {
+                fieldsToReset[i].value = null;
+            }
+        }
+
+        function demo() {
+            var form = document.getElementById('demo');
+            var formData = new FormData(form);
+
+            var object = {};
+            formData.forEach((value, key) => {
+                // Reflect.has in favor of: object.hasOwnProperty(key)
+                if(!Reflect.has(object, key)){
+                    object[key] = value;
+                    return;
+                }
+                if(!Array.isArray(object[key])){
+                    object[key] = [object[key]];
+                }
+                object[key].push(value);
+            });
+
+            ws.send(JSON.stringify(object));
+        }
+    </script>
+
+    </body>
+</html>
+
+

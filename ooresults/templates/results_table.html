@@ -1,0 +1,126 @@
+$def with (event, class_results, columns)
+
+$ date = event.get('date', '')
+
+
+$def format_rank(rank, not_competing: bool) -> str:
+    $if rank is not None:
+        $return str(rank)
+    $elif not_competing:
+        $return 'NC'
+    $else:
+        $return ''
+
+
+$def format_time(time: int, status: ResultStatus) -> str:
+    $if status == ResultStatus.OK and time is not None:
+        $return '{:d}:{:02d}'.format(time // 60, time % 60)
+    $else:
+        $return ''
+
+
+$def format_points(points: float, status: ResultStatus) -> str:
+    $if status == ResultStatus.OK and points is not None:
+        $return '{:.2f}'.format(points)
+    $else:
+        $return ''
+
+
+$def format_time_total(time: int, status: ResultStatus, start_time=None) -> str:
+    $if status == ResultStatus.OK:
+        $return '{:d}:{:02d}'.format(time // 60, time % 60)
+    $elif status == ResultStatus.INACTIVE and start_time is not None:
+        $return 'Start at ' + start_time.strftime('%H:%M:%S')
+    $else:
+        $return MAP_STATUS[status]
+
+
+$def format_points_total(points: float, status: ResultStatus, start_time=None) -> str:
+    $if status == ResultStatus.OK:
+        $return '{:.2f}'.format(points)
+    $elif status == ResultStatus.INACTIVE and start_time is not None:
+        $return 'Start at ' + start_time.strftime('%H:%M:%S')
+    $else:
+        $return MAP_STATUS[status]
+
+
+$def voided_legs(ranked_results):
+    $if ranked_results and ranked_results[0]['result'] is not None:
+        $ voided_legs = ranked_results[0]['result'].voided_legs()
+        $if voided_legs:
+            $return ' (Voided legs: ' + ', '.join(voided_legs) + ')'
+        $else:
+            $return ''
+
+
+<div id="res.event">
+    <table style="text-align: left">
+        <tr>
+            <th style="padding-right: 10px">Event name:</th>
+            <td>$event.get('name', '')</td>
+        </tr>
+        <tr>
+            <th style="padding-right: 10px">Event date:</th>
+            <td>$(date.isoformat() if date != '' else '')</td>
+        </tr>
+    </table>
+</div>
+
+
+<div id="res.result">
+
+<table style="border-collapse: collapse">
+$for class_, ranked_results in class_results:
+    <thead>
+        <tr><th colspan="4" style="text-align:left;padding-top:3em"><h3>$class_.name$voided_legs(ranked_results)</h3></th></tr>
+        <tr class="dt">
+            <th class="dt">Rank</th>
+            <th class="dt">Name</th>
+            <th class="dt">Club</th>
+            $if columns == []:
+                <th class="dt">Time</th>
+            $else:
+                $if 'factor' in columns:
+                    <th class="dt">Handicap</th>
+                $if class_.params.otype == 'score':
+                    <th class="dt">Run time</th>
+                    <th class="dt">Score controls</th>
+                    <th class="dt">Score overtime</th>
+                    <th class="dt">Total score</th>
+                $else:
+                    <th class="dt">Run time</th>
+                    $if 'penalties_controls' in columns:
+                        <th class="dt">Penalty controls</th>
+                    $if 'penalties_overtime' in columns:
+                        <th class="dt">Penalty overtime</th>
+                    <th class="dt">Total time</th>
+        </tr>
+    </thead>
+    <tbody>
+    $for result in ranked_results:
+        <tr class="dt">
+            <td class="dt">$format_rank(result.get('rank', None), result['not_competing'])</td>
+            <td class="dt">$result.get('first_name', '') $result.get('last_name', '')</td>
+            <td class="dt">$result.get('club', '')</td>
+            $if columns == []:
+                <td class="dt" style="text-align:right">$format_time_total(result['result'].time, result['result'].status, result['start'].start_time)</td>
+            $else:
+                $if 'factor' in columns:
+                    <td class="dt" style="text-align:right">$'{:1.4f}'.format(result.result.extensions.get('factor', 1))</td>
+                $if class_.params.otype == 'score':
+                     <td class="dt" style="text-align:right">$format_time(result['result'].time, result['result'].status)</td>
+                     <td class="dt" style="text-align:right">$format_points(result.result.extensions.get('score_controls', None), result['result'].status)</td>
+                     <td class="dt" style="text-align:right">$format_points(result.result.extensions.get('score_overtime', None), result['result'].status)</td>
+                     <td class="dt" style="text-align:right">$format_points_total(result.result.extensions.get('score', None), result['result'].status, result['start'].start_time)</td>
+                $else:
+                    <td class="dt" style="text-align:right">$format_time(result.result.extensions.get('running_time', None), result['result'].status)</td>
+                    $if 'penalties_controls' in columns:
+                        <td class="dt" style="text-align:right">$format_time(result.result.extensions.get('penalties_controls', None), result['result'].status)</td>
+                    $if 'penalties_overtime' in columns:
+                        <td class="dt" style="text-align:right">$format_time(result.result.extensions.get('penalties_overtime', None), result['result'].status)</td>
+                    <td class="dt" style="text-align:right">$format_time_total(result['result'].time, result['result'].status, result['start'].start_time)</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+

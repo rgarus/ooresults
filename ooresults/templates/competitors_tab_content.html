@@ -1,0 +1,312 @@
+$def with (competitors_table)
+ 
+<!-- Tab content -->
+<div id="Competitors" class="tabcontent">
+  <div class="actions">
+    <!-- Trigger/Open The Modal -->
+    <button id="comp.myBtnReload" onclick="comp_myReload()">Reload</button>
+    <button id="comp.myBtnImport" onclick="comp_myImport()">Import ...</button>
+    <button id="comp.myBtnExport" onclick="comp_myExport()">Export ...</button>
+    <button id="comp.myBtnAdd" onclick="comp_myAdd()">Add competitor ...</button>
+    <button id="comp.myBtnEdit" disabled onclick="comp_myEdit()">Edit competitor ...</button>
+    <button id="comp.myBtnDelete" disabled onclick="comp_myDelete()">Delete competitor</button>
+  </div>
+
+  <div id=comp.data class="data">
+    $:competitors_table
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="comp.addDialog">
+  </div> 
+
+  <!-- The Modal -->
+  <div class="modal" id="comp.importDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('comp.importDialog').style.display='none'">&times;</span>
+      <form id="comp.import.form" class="form-container" onsubmit="comp_submitImport(); return false;">
+        <p>Format</p>
+        <div>
+          <input id="oo_1" name="comp_import" type="radio" value="comp.import.1"
+                 onchange="updateDisplayedParams('comp_import')" required checked/>
+          <label for="comp.import.1">IOF Interface Standard 3.0 Competitor List</label>
+        </div>
+        <p>Settings</p>
+        <div id="comp_import">
+          <div id="comp.import.1" class="params">
+            <table>
+              <tr>
+                <th class="input-header"><label for="file1">File</label></th>
+                <td><input id="file1" name="browse1" type="file" class="required"/></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <p></p>
+        <p></p>
+        <button type="submit" class="btn">Import</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('comp.importDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="comp.exportDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('comp.exportDialog').style.display='none'">&times;</span>
+      <form id="comp.export.form" class="form-container" onsubmit="comp_submitExport(); return false;">
+        <p>Format</p>
+        <div>
+          <input id="oo_1" name="comp_export" type="radio" value="comp.export.1"
+                 onchange="updateDisplayedParams('comp_export')" required checked/>
+          <label for="comp.export.1">IOF Interface Standard 3.0 Competitor List</label>
+        </div>
+        <p>Settings</p>
+        <div id="comp_export">
+          <div id="comp.export.1" class="params">
+          </div>
+        </div>
+        <p></p>
+        <p></p>
+        <button type="submit" class="btn">Export</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('comp.exportDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="comp.deleteDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('comp.deleteDialog').style.display='none'">&times;</span>
+      <form id="comp.formDelete" class="form-container" onsubmit="comp_submitDelete(); return false;">
+        <input id="comp.deleteId" name="id" type="text" hidden/>
+        <p>Confirm: Delete the selected runner?</p>
+        <button type="submit" class="btn">Delete</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('comp.deleteDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    var comp_selected = document.getElementById('comp.table').getElementsByClassName('selected')[0];
+
+    function comp_highlight(e) {
+        if (e.target.tagName == "TD") {
+            if (comp_selected) comp_selected.className = '';
+            comp_selected = e.target.parentNode;
+            comp_selected.className = 'selected';
+            document.getElementById('comp.myBtnEdit').disabled = false;
+            document.getElementById('comp.myBtnDelete').disabled = false;
+        }
+    }
+
+    function comp_myReload() {
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "competitor/update", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function comp_myAdd() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById('comp.addDialog').innerHTML = this.responseText;
+                document.getElementById('comp.addDialog').style.display='block';
+                align_form_table('comp.addFormTable');
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "competitor/fill_edit_form", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.responseType = "html";
+        xhr.send("id=");
+    }
+
+    function comp_myDelete() {
+        var table = document.getElementById('comp.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") {
+                document.getElementById('comp.deleteId').value=table.rows[i].id
+                document.getElementById('comp.deleteDialog').style.display='block'
+            }
+        }
+    }
+
+    function comp_myImport() {
+        document.getElementById('comp.importDialog').style.display='block';
+        updateDisplayedParams("comp_import");
+    }
+
+    function comp_myExport() {
+        document.getElementById('comp.exportDialog').style.display='block';
+        updateDisplayedParams("comp_export");
+    }
+
+    function comp_myEdit() {
+        var table = document.getElementById('comp.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") { 
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('comp.addDialog').innerHTML = this.responseText;
+                        document.getElementById('comp.addDialog').style.display='block';
+                        align_form_table('comp.addFormTable');
+                    }
+                    if (this.readyState == 4 && this.status == 409) {
+                        window.alert(this.responseText);
+                    }
+                    if (this.readyState == 4 && this.status == 500) {
+                        window.alert(this.responseText);
+                    }
+                };
+                xhr.open("POST", "competitor/fill_edit_form", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                xhr.responseType = "html";
+                xhr.send("id=".concat(table.rows[i].id));
+            }
+        }
+    }
+
+    function comp_submitAdd() {
+        var form = document.getElementById('comp.formAdd');
+        var data = new FormData(form);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                comp_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "competitor/add", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function comp_submitImport() {
+        var form = document.getElementById('comp.import.form');
+        var data = new FormData(form);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                comp_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "competitor/import", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function comp_submitExport() {
+        var filename = '';
+        var form = document.getElementById('comp.export.form');
+        var data = new FormData(form);
+        var selected = document.querySelector('input[name="comp_export"]:checked').value;
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                download(filename, this.response);
+                document.getElementById('comp.exportDialog').style.display = "none";
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert('Internal error');
+            }
+        };
+        xhr.open("POST", "competitor/export", true);
+        xhr.responseType = "arraybuffer";
+        if (selected == "comp.export.1") {
+            filename = "CompetitorList.xml";
+        }
+        if (selected == "comp.export.2") {
+            filename = "competitors.csv";
+        }
+        xhr.send(data);
+    }
+
+    function comp_submitDelete() {
+        var form = document.getElementById('comp.formDelete');
+        var data = new FormData(form);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                comp_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "competitor/delete", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function comp_update() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                comp_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "competitor/update", true);
+        xhr.responseType = "html";
+        xhr.send();
+    }
+
+    function comp_updateTable(content) {
+        // Get all elements with class="modal" and hide them
+        modal = document.getElementsByClassName("modal");
+        for (i = 0; i < modal.length; i++) {
+            modal[i].style.display = "none";
+        }
+        document.getElementById('comp.data').innerHTML = content;
+        document.getElementById('comp.myBtnEdit').disabled = true;
+        document.getElementById('comp.myBtnDelete').disabled = true;
+    }
+</script>

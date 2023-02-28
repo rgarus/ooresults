@@ -1,0 +1,44 @@
+$def with (event, courses)
+
+$ date = event.get('date', '')
+
+<div id="cou.event">
+    <table style="text-align: left">
+        <tr>
+            <th style="padding-right: 10px">Event name:</th>
+            <td>$event.get('name', '')</td>
+        </tr>
+        <tr>
+            <th style="padding-right: 10px">Event date:</th>
+            <td>$(date.isoformat() if date != '' else '')</td>
+        </tr>
+    </table>
+</div>
+
+<p/>
+
+<input oninput="w3.filterHTML('#courses_tbody', 'tr', this.value)" placeholder="Search ...">
+<p/>
+
+<div>
+    <table class="dt" id="cou.table" onclick="cou_highlight(event)">
+        <thead>
+            <tr class="dt">
+                <th class="dt">Name</th>
+                <th class="dt">Length</th>
+                <th class="dt">Climb</th>
+                <th class="dt">Controls</th>
+            </tr>
+        </thead>
+        <tbody id="courses_tbody">
+        $for course in courses:
+            <tr class="dt" id="$course.id">
+                <td class="dt">$course.name</td>
+                <td class="dt" style="text-align:right">$(str(round(course.length)) if course.length is not None else '')</td>
+                <td class="dt" style="text-align:right">$(str(round(course.climb)) if course.climb is not None else '')</td>
+                <td class="dt">$' - '.join(course.controls)</td>
+            </tr> 
+        </tbody>
+    </table>
+</div>
+

@@ -1,0 +1,119 @@
+$def with (entry, classes, clubs, results, fields)
+
+$def format_date(time):
+    $if time is not None:
+        $return time.strftime('%H:%M:%S')
+    $else:
+        $return ''
+
+<!-- Modal content -->
+<div class="modal-content">
+    <span class="close" onclick="document.getElementById('entr.addDialog').style.display='none'">&times;</span>
+    <form id="entr.formAdd" class="form-container" autocomplete="off" onsubmit="entr_submitAdd(); return false;">
+        <input id="entr.addId" name="id" type="text" value="$entry.id" hidden/>
+        <input id="entr.addCompId" name="competitor_id" type="text" value="$entry.competitor_id" hidden/>
+        <table id="entr.addFormTable">
+            <tr>
+                <th class="input-header"><label for="first_name">First name *</label></th>
+                <td><input id="first_name" name="first_name" type="text" value="$entry.first_name" onchange="mark_label(this)" required/>
+                    $if not entry.id:
+                        <button type="button" id="entr.myBtnCompetitors" onclick="entr_myCompetitors()">Competitors ...</button>
+                </td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="last_name">Last name *</label></th>
+                <td><input id="last_name" name="last_name" type="text" value="$entry.last_name" onchange="mark_label(this)" required/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="gender">Gender</label></th>
+                <td>
+                    <select id="gender" name="gender" onchange="mark_label(this)">
+                    $for gender in ['', 'F', 'M']:
+                        $if str(gender) == str(entry.gender):
+                            <option value="$gender" selected>$gender</option>
+                        $else:
+                            <option value="$gender">$gender</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="year">Year</label></th>
+                <td><input id="year" name="year" type="number" min="1900" max="2099"
+                           value="$(str(entry.year) if entry.year is not None else '')" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="chip">Chip</label></th>
+                <td><input id="chip" name="chip" type="text" value="$entry.chip" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="club">Club</label></th>
+                <td>
+                    <select id="club" name="club" onchange="mark_label(this)">
+                    $if entry.club_id is None:
+                        <option value="" selected></option>
+                    $else:
+                        <option value=""></option>
+                    $for club in clubs:
+                        $if club.id == entry.club_id:
+                            <option value="$club.id" selected>$club.name</option>
+                        $else:
+                            <option value="$club.id">$club.name</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="class_">Class *</label></th>
+                <td>
+                    <select id="class" name="class_" onchange="mark_label(this)" required>
+                    $for class_ in classes:
+                        $if class_.id == entry.class_id:
+                            <option value="$class_.id" selected>$class_.name</option>
+                        $else:
+                            <option value="$class_.id">$class_.name</option>
+                    </select>
+                </td>
+            </tr>
+            $for i in range(len(fields)):
+                $ name = 'f' + str(i)
+                <tr>
+                    <th class="input-header"><label for="$name">$(fields[i])</label></th>
+                    <td><input id="$name") name="$name" type="text" value="$entry.fields.get(i, '')" onchange="mark_label(this)"/></td>
+                </tr>
+            <tr>
+                <th class="input-header"><label for="not_competing">Not competing</label></th>
+                <td><input id="not_competing" name="not_competing" type="checkbox" value="true" onchange="mark_label(this)" $('checked' if entry.not_competing else '')/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="start_time">Start time</label></th>
+                <td><input id="start_time" name="start_time" type="time" step="1" value="$(format_date(entry.start.get('start_time', None)))" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="status">Status</label></th>
+                <td>
+                    <select id="status" name="status" onchange="mark_label(this)">
+                    $for status in list(ResultStatus):
+                        $if status == entry.result.status:
+                            <option value="$status.value" selected>$MAP_STATUS[status]</option>
+                        $else:
+                            <option value="$status.value">$MAP_STATUS[status]</option>
+                    </select>
+                </td>
+            </tr>
+            $if results != []:
+                <tr>
+                    <th class="input-header"><label for="result">Result</label></th>
+                    <td>
+                        <select id="result" name="result" onchange="mark_label(this)">
+                            <option value="" selected></option>
+                            $for r in results:
+                                <option value="$str(r['key'])">$r['value']</option>
+                        </select>
+                    </td>
+                </tr>
+        </table>
+        <p></p>
+        <button type="submit" class="btn">Save</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('entr.addDialog').style.display='none'">Cancel</button>
+    </form>
+</div>
+ 

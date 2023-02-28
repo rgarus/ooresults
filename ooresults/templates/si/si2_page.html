@@ -1,0 +1,103 @@
+$def with (id, key)
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SI reader</title>
+        <link rel="stylesheet" href="mystatic/style.css">
+        <link rel="stylesheet" href="mystatic/style-tab.css">
+        <style>
+            .bgr {background-color: #ff7070;}
+            .bgy {background-color: #ffff00;}
+            .bgg {background-color: #70ff70;}
+            .s1 {font-size: 1.5em;}
+            .s2 {font-size: 2.5em; color: red;}
+        </style>
+    </head>
+    <body>
+        <div id="page"></div>
+        <script>
+            var status = 'offline';
+
+            function statusMessage() {
+                var text = '';
+
+                switch (status) {
+                    case 'noAccess':
+                        text = 'No access rights';
+                        break;
+                    case 'error':
+                        text = 'Error';
+                        break;
+                    case 'offline':
+                        text = 'Offline';
+                        break;
+                };
+                document.getElementById('page').innerHTML = '<p class="s2">' + text + '</p>';
+            };
+
+            function start(websocketServerLocation){
+                var ws = new WebSocket(websocketServerLocation);
+
+                ws.onopen = function(event) {
+                    ws.send($:('"' + str(id) + ',' + str(key) + '"'));
+                    tp = setTimeout(function() {ping()}, 10000);
+                };
+                ws.onerror = function(event) {
+                    status = 'error';
+                    statusMessage();
+                };
+                ws.onclose = function(event) {
+                    if (status != 'noAccess') {
+                        status = 'offline';
+                        statusMessage();
+                        // Try to reconnect in 5 seconds
+                        ws = null;
+                        clearTimeout(tp);
+                        setTimeout(function(){start(websocketServerLocation)}, 5000);
+                    }
+                };
+                ws.onmessage = function(event) {
+                    var msg = event.data;
+                    if (msg == '__pong__') {
+                        pong();
+                        return;
+                    }
+                    if (msg == '__no_access__') {
+                        ws.close();
+                        status = 'noAccess';
+                        statusMessage();
+                        return;
+                    }
+                    var elem = document.getElementById('page');
+                    elem.innerHTML = msg;
+                    window.scrollTo(0, 100000);
+                };
+
+                // workaround to detect lost websocket connection in the browser
+                // see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
+                function ping() {
+                    ws.send('__ping__');
+                    tm = setTimeout(function() {nopong()}, 10000);
+                };
+                function pong() {
+                    clearTimeout(tm);
+                    tp = setTimeout(function() {ping()}, 15000);
+                };
+                function nopong() {
+                    ws.close();
+                };
+            };
+
+            var ws_uri;
+            if (window.location.protocol === "https:") {
+                ws_uri = "wss:";
+            } else {
+                ws_uri = "ws:";
+            };
+            ws_uri += "//" + window.location.hostname + ":8081/si2";
+            start(ws_uri);
+        </script>
+    </body>
+</html>
+ 

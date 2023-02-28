@@ -1,0 +1,78 @@
+$def with (status, event, messages)
+
+$ date = event.get('date', '') if event is not None else ''
+
+$code
+    def format(time: int) -> str:
+        if time is not None and time > 0:
+            return '{:d}:{:02d} min'.format(time // 60, time % 60)
+        else:
+            return ''
+    
+    def color(status: ResultStatus) -> str:
+        if status == ResultStatus.OK:
+            return '#70ff70'  # green
+        elif status in (ResultStatus.MISSING_PUNCH, ResultStatus.DID_NOT_FINISH, ResultStatus.OVER_TIME):
+            return '#ff7070'  # red
+        else:
+            return '#ffff00'  # yellow
+
+    def format_cardreader_status(status: str) -> str:
+        if status is None or status == 'offline':
+            return '<p style="color:red;">Card reader offline</p>'
+        elif status in ['readerConnected', 'cardRead', 'cardRemoved']:
+            return '<p style="color:green;">Card reader connected</p>'
+        elif status in ['online', 'readerDisconnected']:
+            return '<p style="color:red;">Card reader disconnected</p>'
+        elif status == 'cardInserted':
+            return '<p style="color:green;">Reading card</p>'
+
+
+<div id="cls.event">
+    <table style="text-align: left">
+        <tr>
+            <th style="padding-right: 10px">Event name:</th>
+            <td>$(event.get('name', '') if event is not None else '')</td>
+        </tr>
+        <tr>
+            <th style="padding-right: 10px">Event date:</th>
+            <td>$(date.isoformat() if date != '' else '')</td>
+        </tr>
+    </table>
+</div>
+
+<p></p>
+
+<div>
+    <table class="dt">
+        <thead>
+            <tr class="dt">
+                <th class="dt">Read</th>
+                <th class="dt">Control card</th>
+                <th class="dt">Status</th>
+                <th class="dt">Time</th>
+                <th class="dt">Name</th>
+                <th class="dt">Class</th>
+            </tr>
+        </thead>
+        <tbody>
+        $for result in messages:
+            $if event.get('id', -1) == result.get('eventId', '-2'):
+                <tr class="dt" style="background-color: $color(result.get('status'))">
+                    <td class="dt">$result.get('entryTime', '')</td>
+                    <td class="dt" style="text-align:right">$result.get('controlCard')</td>
+                    <td class="dt">$MAP_STATUS[result.get('status')]</td>
+                    <td class="dt" style="text-align:right">$format(result.get('time', 0))</td>
+                    $if result.get('status') in (ResultStatus.OK, ResultStatus.MISSING_PUNCH, ResultStatus.DID_NOT_FINISH, ResultStatus.OVER_TIME):
+                        <td class="dt">$result.get('lastName', ''), $result.get('firstName', '')</td>
+                        <td class="dt">$result.get('class', '')</td>
+                    $else:
+                        <td class="dt" colspan="2">$result.get('error', '')</td>
+                </tr>
+        </tbody>
+    </table>
+</div>
+
+<p></p>
+
+<div>$:format_cardreader_status(status)</div>

@@ -1,0 +1,195 @@
+$def with (clubs_table)
+ 
+<!-- Tab content -->
+<div id="Clubs" class="tabcontent">
+  <div class="actions">
+    <!-- Trigger/Open The Modal -->
+    <button id="clb.myBtnReload" onclick="clb_myReload()">Reload</button>
+    <button id="clb.myBtnAdd" onclick="clb_myAdd()">Add club ...</button>
+    <button id="clb.myBtnEdit" disabled onclick="clb_myEdit()">Edit club ...</button>
+    <button id="clb.myBtnDelete" disabled onclick="clb_myDelete()">Delete club</button>
+  </div>
+
+  <div id=clb.data class="data">
+    $:clubs_table
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="clb.addDialog">
+  </div> 
+
+  <!-- The Modal -->
+  <div class="modal" id="clb.deleteDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('clb.deleteDialog').style.display='none'">&times;</span>
+      <form id="clb.formDelete" class="form-container" onsubmit="clb_submitDelete(); return false;">
+        <input id="clb.deleteId" name="id" type="text" hidden/>
+        <p>Confirm: Delete the selected club?</p>
+        <button type="submit" class="btn">Delete</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('clb.deleteDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    var clb_selected = document.getElementById('clb.table').getElementsByClassName('selected')[0];
+
+    function clb_highlight(e) {
+        if (e.target.tagName == "TD") {
+            if (clb_selected) clb_selected.className = '';
+            clb_selected = e.target.parentNode;
+            clb_selected.className = 'selected';
+            document.getElementById('clb.myBtnEdit').disabled = false;
+            document.getElementById('clb.myBtnDelete').disabled = false;
+        }
+    }
+
+    function clb_myReload() {
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "club/update", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function clb_myAdd() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById('clb.addDialog').innerHTML = this.responseText;
+                document.getElementById('clb.addDialog').style.display='block';
+                align_form_table('clb.addFormTable');
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "club/fill_edit_form", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.responseType = "html";
+        xhr.send("id=");
+    }
+
+    function clb_myDelete() {
+        var table = document.getElementById('clb.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") {
+                document.getElementById('clb.deleteId').value=table.rows[i].id
+                document.getElementById('clb.deleteDialog').style.display='block'
+            }
+        }
+    }
+
+    function clb_myEdit() {
+        var table = document.getElementById('clb.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") { 
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('clb.addDialog').innerHTML = this.responseText;
+                        document.getElementById('clb.addDialog').style.display='block';
+                        align_form_table('clb.addFormTable');
+                    }
+                    if (this.readyState == 4 && this.status == 409) {
+                        window.alert(this.responseText);
+                    }
+                    if (this.readyState == 4 && this.status == 500) {
+                        window.alert(this.responseText);
+                    }
+                };
+                xhr.open("POST", "club/fill_edit_form", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                xhr.responseType = "html";
+                xhr.send("id=".concat(table.rows[i].id));
+            }
+        }
+    }
+
+    function clb_submitAdd() {
+        var form = document.getElementById('clb.formAdd');
+        var data = new FormData(form);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                clb_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "club/add", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function clb_submitDelete() {
+        var form = document.getElementById('clb.formDelete');
+        var data = new FormData(form);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                clb_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "club/delete", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function clb_update() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                clb_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "club/update", true);
+        xhr.responseType = "html";
+        xhr.send();
+    }
+
+    function clb_updateTable(content) {
+        // Get all elements with class="modal" and hide them
+        modal = document.getElementsByClassName("modal");
+        for (i = 0; i < modal.length; i++) {
+            modal[i].style.display = "none";
+        }
+        document.getElementById('clb.data').innerHTML = content;
+        document.getElementById('clb.myBtnEdit').disabled = true;
+        document.getElementById('clb.myBtnDelete').disabled = true;
+    }
+</script>

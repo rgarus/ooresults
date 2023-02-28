@@ -1,0 +1,26 @@
+$def with (message)
+
+$code
+    def format(status: str, time: int) -> str:
+        if status == ResultStatus.OK:
+            return MAP_STATUS[status] + ', {:d}:{:02d} min'.format(time // 60, time % 60)
+        else:
+            return MAP_STATUS[status]
+    
+    def background(status: str) -> str:
+        if status == ResultStatus.OK:
+            return "bgg"
+        else:
+            return "bgr"
+
+<div class="$background(message.get('status', ''))">
+    <div style="height: 37vh;" class="vertical-center">
+        <p class="s2">$message['lastName'], $message['firstName']</p>
+    </div>
+    <div style="height: 26vh;" class="vertical-center">
+        <p class="s1">$message['controlCard'], $message.get('class', '')</p>
+    </div>
+    <div style="height: 37vh;" class="vertical-center">
+        <p class="s2">$format(message.get('status', ResultStatus.INACTIVE), message.get('time', 0))</p>
+    </div>
+</div>

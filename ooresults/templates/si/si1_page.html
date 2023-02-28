@@ -1,0 +1,189 @@
+$def with (id, key)
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SI reader</title>
+        <style>
+            .bgr {background-color: #ff7070;}
+            .bgy {background-color: #ffff00;}
+            .bgg {background-color: #70ff70;}
+            .s1 {font-size: 1.5em;}
+            .s2 {font-size: 2.5em;}
+            .vertical-center {
+                display: flex;
+                align-items: center;
+                padding-left: 4%;
+        </style>
+    </head>
+    <body style="margin: 0">
+        <div id="page"></div>
+        <script>
+            /* Function to open fullscreen mode */
+            function openFullscreen() {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+            };
+
+            var timer = null;
+            var status = 'unknown';
+            var data = '';
+            
+            function message () {
+                var text = '';
+                var color = 'black';
+
+                switch (status) {
+                    case 'noAccess':
+                        text = 'No access rights';
+                        color = 'red';
+                        break;
+                    case 'offline':
+                        text = 'Card reader offline';
+                        color = 'red';
+                        break;
+                    case 'unknown':
+                        text = 'Offline';
+                        color = 'red';
+                        break;
+                    case 'online':
+                    case 'readerDisconnected':
+                        text = 'Card reader disconnected';
+                        color = 'red';
+                        break;
+                    case 'readerConnected':
+                    case 'cardRemoved':
+                        text = 'Card reader connected';
+                        break;
+                    case 'cardInserted':
+                        text = 'Reading card ' + data + ' ...';
+                        break;
+
+                }
+                document.getElementById('page').innerHTML =
+                    '<p style="text-align: right; margin: 10px"><button onclick="openFullscreen();">' + window.wakeStatus + '</button></p>' +
+                    '<p class="s2" style="padding-left: 4%; color: ' + color + '">' + text + '</p>';
+            };
+            
+            function start(websocketServerLocation) {
+                var ws = new WebSocket(websocketServerLocation);
+                var elem = document.getElementById('page')
+
+                ws.onopen = function(event) {
+                    ws.send($:('"' + str(id) + ',' + str(key) + '"'))
+                    status = 'offline';
+                    message();
+                    tp = setTimeout(function() {ping()}, 10000);
+                };
+                ws.onclose = function(event) {
+                    if (status != 'noAccess') {
+                        status = 'unknown';
+                        message();
+                        // Try to reconnect in 5 seconds
+                        ws = null;
+                        clearTimeout(tp);
+                        setTimeout(function() {start(websocketServerLocation)}, 5000);
+                    }
+                };
+                ws.onmessage = function(event) {
+                    var msg = event.data;
+                    if (msg == '__pong__') {
+                        pong();
+                        return;
+                    }
+                    if (msg == '__no_access__') {
+                        ws.close();
+                        status = 'noAccess';
+                        message();
+                        return;
+                    }
+                    const obj = JSON.parse(event.data)
+                    clearTimeout(timer);
+                    if (obj.status == 'cardRead') {
+                        status = 'readerConnected';
+                        document.getElementById('page').innerHTML = obj.data;
+                        timer = setTimeout(message, 15000);
+                    } else if (obj.status != null) {
+                        status = obj.status;
+                        data = obj.data;
+                        message();
+                    }
+                };
+
+                // workaround to detect lost websocket connection in the browser
+                // see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
+                function ping() {
+                    ws.send('__ping__');
+                    tm = setTimeout(function() {nopong()}, 10000);
+                };
+                function pong() {
+                    clearTimeout(tm);
+                    tp = setTimeout(function() {ping()}, 15000);
+                };
+                function nopong() {
+                    ws.close();
+                };
+            };
+
+            var ws_uri;
+            if (window.location.protocol === "https:") {
+                ws_uri = "wss:";
+            } else {
+                ws_uri = "ws:";
+            };
+            ws_uri += "//" + window.location.hostname + ":8081" + window.location.pathname;
+            start(ws_uri);
+        </script>
+        <script>
+            // prevent screen from dimming or locking
+            // see https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API
+            var isSupported = false;
+            var wakeStatus = '&nbsp;';
+
+            if ('wakeLock' in navigator) {
+                isSupported = true;
+            }
+
+            if (isSupported) {
+                // create a reference for the wake lock
+                var wakeLock = null;
+
+                // create an async function to request a wake lock
+                const requestWakeLock = async () => {
+                    try {
+                        wakeLock = await navigator.wakeLock.request('screen');
+
+                        // change up our interface to reflect wake lock active
+                        wakeStatus = 'wake on';
+
+                        wakeLock.addEventListener('release', () => {
+                            // if wake lock is released alter the button accordingly
+                            wakeStatus = '&nbsp;';
+                        });
+
+                    } catch (err) {
+                        // if wake lock request fails - usually system related, such as battery
+                        wakeStatus = '&nbsp;';
+
+                    }
+                } // requestWakeLock()
+
+                requestWakeLock()
+
+                const handleVisibilityChange = () => {
+                    if (wakeLock !== null && document.visibilityState === 'visible') {
+                        requestWakeLock();
+                    }
+                }
+
+                reaquireCheck.addEventListener('change', () => {
+                    document.addEventListener('visibilitychange', handleVisibilityChange);
+                });
+
+            } // isSupported
+        </script>
+
+    </body>
+</html>
+ 

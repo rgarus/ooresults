@@ -1,0 +1,23 @@
+$def with (results_table)
+
+<html>
+<head>
+    <title>ooresults</title>
+    <link rel="stylesheet" href="mystatic/style.css">
+    <link rel="stylesheet" href="mystatic/style-tab.css">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+</head>
+<body>
+
+<a href="admin">Administration</a>
+</p>
+
+$if results_table is None:
+    <h2>No results available</h2>
+$else:
+    $:results_table
+
+</body>
+</html>

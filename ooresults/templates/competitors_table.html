@@ -1,0 +1,29 @@
+$def with (competitors)
+
+<input oninput="w3.filterHTML('#competitors_tbody', 'tr', this.value)" placeholder="Search ..."/>
+<p/>
+
+<table class="dt" id="comp.table" onclick="comp_highlight(event)">
+    <thead>
+        <tr class="dt">
+            <th class="dt">First name</th>
+            <th class="dt">Last name</th>
+            <th class="dt">Gender</th>
+            <th class="dt">Year</th>
+            <th class="dt">Chip</th>
+            <th class="dt">Club</th>
+        </tr>
+    </thead>
+    <tbody id="competitors_tbody">
+    $for competitor in competitors:
+        <tr class="dt" id="$competitor.id">
+            <td class="dt">$competitor.first_name</td>
+            <td class="dt">$competitor.last_name</td>
+            <td class="dt">$competitor.gender</td>
+            <td class="dt">$(str(competitor.year) if competitor.year is not None else '')</td>
+            <td class="dt" style="text-align:right">$competitor.chip</td>
+            <td class="dt">$competitor.club_name</td>
+        </tr> 
+    </tbody>
+</table>
+

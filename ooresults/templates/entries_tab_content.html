@@ -1,0 +1,465 @@
+$def with (entries_table)
+ 
+<!-- Tab content -->
+<div id="Entries" class="tabcontent">
+  <div class="actions">
+    <!-- Trigger/Open The Modal -->
+    <button id="entr.myBtnReload" onclick="entr_myReload()">Reload</button>
+    <button id="entr.myBtnImport" onclick="entr_myImport()">Import ...</button>
+    <button id="entr.myBtnExport" onclick="entr_myExport()">Export ...</button>
+    <button id="entr.myBtnAdd" onclick="entr_myAdd()">Add entry ...</button>
+    <button id="entr.myBtnEdit" disabled onclick="entr_myEdit()">Edit entry ...</button>
+    <button id="entr.myBtnDelete" disabled onclick="entr_myDelete()">Delete entry</button>
+    <button id="entr.myBtnResult" disabled onclick="entr_myResult()">Show result ...</button>
+  </div>
+
+  <div id="entr.results" class="data">
+    $:entries_table
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="entr.importDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('entr.importDialog').style.display='none'">&times;</span>
+      <form id="entr.import.form" class="form-container" onsubmit="entr_submitImport(); return false;">
+        <p>Format</p>
+        <div>
+          <input id="oo_1" name="entr_import" type="radio" value="entr.import.1"
+                 onchange="updateDisplayedParams('entr_import')" required checked/>
+          <label for="entr.import.1">IOF Interface Standard 3.0 Entry List</label>
+        </div>
+        <div>
+          <input id="oo_2" name="entr_import" type="radio" value="entr.import.2"
+                 onchange="updateDisplayedParams('entr_import')" required checked/>
+          <label for="entr.import.2">IOF Interface Standard 3.0 Result List</label>
+        </div>
+        <div>
+          <input id="oo_3" name="entr_import" type="radio" value="entr.import.3"
+                 onchange="updateDisplayedParams('entr_import')" required checked/>
+          <label for="entr.import.3">OE2003 csv</label>
+        </div>
+        $if EXPERIMENTAL:
+          <div>
+            <input id="oo_4" name="entr_import" type="radio" value="entr.import.4"
+                   onchange="updateDisplayedParams('entr_import')" required/>
+            <label for="entr.import.4">Text</label>
+          </div>
+        <p>Settings</p>
+        <div id="entr_import">
+          <div id="entr.import.1" class="params">
+            <table>
+              <tr>
+                <th class="input-header"><label for="browse1">File</label></th>
+                <td><input id="file1" name="browse1" type="file" class="required" accept=".xml"/></td>
+              </tr>
+            </table>
+          </div>
+          <div id="entr.import.2" class="params">
+            <table>
+              <tr>
+                <th class="input-header"><label for="browse2">File</label></th>
+                <td><input id="file2" name="browse2" type="file" class="required" accept=".xml"/></td>
+              </tr>
+            </table>
+          </div>
+          <div id="entr.import.3" class="params">
+            <table>
+              <tr>
+                <th class="input-header"><label for="browse3">File</label></th>
+                <td><input id="file3" name="browse3" type="file" class="required" accept=".csv,.txt"/></td>
+              </tr>
+            </table>
+          </div>
+          <div id="entr.import.4" class="params">
+            <table>
+              <tr>
+                <th class="input-header"><label for="browse4">File</label></th>
+                <td><input id="file4" name="browse4" type="file" class="required"/></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <p></p>
+        <p></p>
+        <button type="submit" class="btn">Import</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('entr.importDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="entr.exportDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('entr.exportDialog').style.display='none'">&times;</span>
+      <form id="entr.export.form" class="form-container" onsubmit="entr_submitExport(); return false;">
+        <p>Format</p>
+        <div>
+          <input id="oo_1" name="entr_export" type="radio" value="entr.export.1"
+                 onchange="updateDisplayedParams('entr_export')" required checked/>
+          <label for="entr.export.1">IOF Interface Standard 3.0 Entry List</label>
+        </div>
+        <div>
+          <input id="oo_2" name="entr_export" type="radio" value="entr.export.2"
+                 onchange="updateDisplayedParams('entr_export')" required checked/>
+          <label for="entr.export.2">IOF Interface Standard 3.0 Result List</label>
+        </div>
+        <div>
+          <input id="oo_3" name="entr_export" type="radio" value="entr.export.3"
+                 onchange="updateDisplayedParams('entr_export')" required checked/>
+          <label for="entr.export.3">OE2003 csv</label>
+        </div>
+        <p>Settings</p>
+        <div id="entr_export">
+          <div id="entr.export.1" class="params">
+          </div>
+          <div id="entr.export.2" class="params">
+          </div>
+          <div id="entr.export.3" class="params">
+          </div>
+        </div>
+        <p></p>
+        <p></p>
+        <button type="submit" class="btn">Export</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('entr.exportDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="entr.addDialog">
+  </div> 
+
+  <!-- The Modal -->
+  <div class="modal" id="entr.competitorsDialog">
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="entr.deleteDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('entr.deleteDialog').style.display='none'">&times;</span>
+      <form id="entr.formDelete" class="form-container" onsubmit="entr_submitDelete(); return false;">
+        <input id="entr.deleteId" name="id" type="text" hidden/>
+        <p>Confirm: Delete the selected entry?</p>
+        <button type="submit" class="btn">Delete</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('entr.deleteDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- The Modal -->
+  <div class="modal" id="entr.resultDialog">
+  </div>
+
+</div>
+
+
+<script>
+    var entr_comp_selected = document.getElementById('entry.comp.table').getElementsByClassName('selected')[0];
+
+    function entr_comp_highlight(e) {
+        if (e.target.tagName == "TD") {
+            if (entr_comp_selected) entr_comp_selected.className = '';
+            entr_comp_selected = e.target.parentNode;
+            entr_comp_selected.className = 'selected';
+            document.getElementById('entry.comp.add').disabled = false;
+        }
+    }
+
+    function entr_comp_save() {
+        document.getElementById('entr.addCompId').value = entr_comp_selected.id;
+        document.getElementById('first_name').value = entr_comp_selected.getElementsByTagName('TD')[0].innerHTML;
+        document.getElementById('last_name').value = entr_comp_selected.getElementsByTagName('TD')[1].innerHTML;
+        document.getElementById('gender').value = entr_comp_selected.getElementsByTagName('TD')[2].innerHTML;
+        document.getElementById('year').value = entr_comp_selected.getElementsByTagName('TD')[3].innerHTML;
+        document.getElementById('chip').value = entr_comp_selected.getElementsByTagName('TD')[4].innerHTML;
+        document.getElementById('club').value = entr_comp_selected.getElementsByTagName('TD')[6].innerHTML;
+        document.getElementById('entr.competitorsDialog').style.display = 'none';
+    }
+
+    var entr_selected = document.getElementById('entr.table').getElementsByClassName('selected')[0];
+
+    function entr_highlight(e) {
+        if (e.target.tagName == "TD") {
+            if (entr_selected) entr_selected.className = '';
+            entr_selected = e.target.parentNode;
+            entr_selected.className = 'selected';
+            document.getElementById('entr.myBtnDelete').disabled = false;
+            document.getElementById('entr.myBtnResult').disabled = false;
+            ln = entr_selected.querySelector('[id="entr_table_lastname"]').innerHTML == '';
+            document.getElementById('entr.myBtnEdit').disabled = ln;
+        }
+    }
+
+    function entr_myReload() {
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "entry/update", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function entr_myImport() {
+        document.getElementById('entr.importDialog').style.display='block';
+        updateDisplayedParams("entr_import");
+    }
+
+    function entr_myExport() {
+        document.getElementById('entr.exportDialog').style.display='block';
+        updateDisplayedParams("entr_export");
+    }
+
+    function entr_myAdd() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById('entr.addDialog').innerHTML = this.responseText;
+                document.getElementById('entr.addDialog').style.display='block';
+                align_form_table('entr.addFormTable');
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "entry/fill_edit_form", true);
+        //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.responseType = "html";
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        data.append('id', '');
+        xhr.send(data);
+    }
+
+    function entr_myCompetitors() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById('entr.competitorsDialog').innerHTML = this.responseText;
+                document.getElementById('entr.competitorsDialog').style.display='block'
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "entry/fill_competitors_form", true);
+        //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.responseType = "html";
+        var data = {'event_id': window.event_id};
+        xhr.send(data);
+    }
+
+    function entr_myEdit() {
+        var table = document.getElementById('entr.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") { 
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('entr.addDialog').innerHTML = this.responseText;
+                        document.getElementById('entr.addDialog').style.display='block';
+                        align_form_table('entr.addFormTable');
+                    }
+                    if (this.readyState == 4 && this.status == 409) {
+                        window.alert(this.responseText);
+                    }
+                    if (this.readyState == 4 && this.status == 500) {
+                        window.alert(this.responseText);
+                    }
+                };
+                xhr.open("POST", "entry/fill_edit_form", true);
+                //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                xhr.responseType = "html";
+                var data = new FormData();
+                data.append('event_id', window.event_id);
+                data.append('id', table.rows[i].id);
+                xhr.send(data);
+            }
+        }
+    }
+
+    function entr_myDelete() {
+        var table = document.getElementById('entr.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") {
+                document.getElementById('entr.deleteId').value=table.rows[i].id;
+                document.getElementById('entr.deleteDialog').style.display='block'
+            }
+        }
+    }
+
+    function entr_myResult() {
+        var table = document.getElementById('entr.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('entr.resultDialog').innerHTML = this.responseText;
+                        document.getElementById('entr.resultDialog').style.display='block'
+                    }
+                    if (this.readyState == 4 && this.status == 409) {
+                        window.alert(this.responseText);
+                    }
+                    if (this.readyState == 4 && this.status == 500) {
+                        window.alert(this.responseText);
+                    }
+                };
+                xhr.open("POST", "entry/fill_result_form", true);
+                //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                xhr.responseType = "html";
+                var data = new FormData();
+                data.append('event_id', window.event_id);
+                data.append('id', table.rows[i].id);
+                xhr.send(data);
+            }
+        }
+    }
+
+    function entr_submitImport() {
+        var form = document.getElementById('entr.import.form');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "entry/import", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function entr_submitExport() {
+        var filename = '';
+        var form = document.getElementById('entr.export.form');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var selected = document.querySelector('input[name="entr_export"]:checked').value;
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                download(filename, this.response);
+                document.getElementById('entr.exportDialog').style.display = "none";
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "entry/export", true);
+        xhr.responseType = "arraybuffer";
+        if (selected == "entr.export.1") {
+            filename = "EntryList.xml";
+        }
+        if (selected == "entr.export.2") {
+            filename = "ResultList.xml";
+        }
+        if (selected == "entr.export.3") {
+            filename = "entries.csv";
+        }
+        xhr.send(data);
+    }
+
+    function entr_submitAdd() {
+        var form = document.getElementById('entr.formAdd');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "entry/add", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function entr_submitDelete() {
+        var form = document.getElementById('entr.formDelete');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "entry/delete", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function entr_update() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "entry/update", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.responseType = "html";
+        xhr.send("event_id=".concat(window.event_id));
+    }
+
+    function entr_updateTable(content) {
+        // Get all elements with class="modal" and hide them
+        modal = document.getElementsByClassName("modal");
+        for (i = 0; i < modal.length; i++) {
+            modal[i].style.display = "none";
+        }
+        document.getElementById('entr.results').innerHTML = content;
+        document.getElementById('entr.myBtnEdit').disabled = true;
+        document.getElementById('entr.myBtnDelete').disabled = true;
+        document.getElementById('entr.myBtnResult').disabled = true;
+    }
+
+</script>

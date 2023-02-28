@@ -1,0 +1,47 @@
+$def with (event)
+
+<!-- Modal content -->
+<div class="modal-content">
+    <span class="close" onclick="document.getElementById('evnt.addDialog').style.display='none'">&times;</span>
+    <form id="evnt.formAdd" class="form-container" autocomplete="off" onsubmit="evnt_submitAdd(); return false;">
+        <input id="evnt.addId" name="id" type="text" value="$event.id" hidden/>
+        <table id="evnt.addFormTable">
+            <tr>
+                <th class="input-header"><label for="name">Name *</label></th>
+                <td><input name="name" type="text" value="$event.get('name', '')" required onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="date">Date *</label></th>
+                <td><input name="date" type="date" min="2000-01-01" max="2099-12-31" value="$event.get('date', '')" required onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="key">Key</label></th>
+                <td><input name="key" type="text" value="$(event.key if event.key is not None else '')" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="publish">Publish</label></th>
+                <td>
+                    <select id="publish" name="publish" onchange="mark_label(this)">
+                    $for publish in ['no', 'yes']:
+                        $if publish == ('yes' if event.publish else 'no'):
+                            <option value="$publish" selected>$publish</option>
+                        $else:
+                            <option value="$publish">$publish</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="series">Series</label></th>
+                <td><input name="series" type="text" value="$(event.series if event.series is not None else '')" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="fields">Fields</label></th>
+                <td><input name="fields" type="text" value="$', '.join(event.fields)" onchange="mark_label(this)"/></td>
+            </tr>
+        </table>
+        <p></p>
+        <button type="submit" class="btn">Save</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('evnt.addDialog').style.display='none'">Cancel</button>
+    </form>
+</div>
+ 

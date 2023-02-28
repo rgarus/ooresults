@@ -1,0 +1,164 @@
+$def with (events_tab_content, entries_tab_content, classes_tab_content, courses_tab_content, results_tab_content, series_tab_content, competitors_tab_content, clubs_tab_content)
+
+<!-- Tab links -->
+<div class="tab">
+  <button class="tablinks active" onclick="evnt_update(); openTab(event, 'Events')">Events</button>
+  <button id="tab.entries" disabled class="tablinks" onclick="entr_update(); openTab(event, 'Entries')">Entries</button>
+  <button id="tab.classes" disabled class="tablinks" onclick="cls_update(); openTab(event, 'Classes')">Classes</button>
+  <button id="tab.courses" disabled class="tablinks" onclick="cou_update(); openTab(event, 'Courses')">Courses</button>
+  <button id="tab.results" disabled class="tablinks" onclick="res_update(); openTab(event, 'Results')">Results</button>
+  <button class="tablinks" onclick="ser_update(); openTab(event, 'Series')">Series</button>
+  <button class="tablinks" onclick="comp_update(); openTab(event, 'Competitors')">Competitors</button>
+  <button class="tablinks" onclick="clb_update(); openTab(event, 'Clubs')">Clubs</button>
+  <button id="tab.reader" disabled class="tablinks" onclick="evnt_mySIReader()">SI Reader ...</button>
+</div>
+
+<script>
+    function myfunction() {
+        document.getElementById("tab.entries").disabled = true;
+        document.getElementById("tab.classes").disabled = true;
+        document.getElementById("tab.courses").disabled = true;
+        document.getElementById("tab.results").disabled = true;
+        document.getElementById("tab.reader").disabled = true;
+        document.getElementById('Events').style.display = "block";
+    }
+</script>
+
+<!-- Events tab content -->
+$:events_tab_content
+
+<!-- Entries tab content -->
+$:entries_tab_content
+
+<!-- Classes tab content -->
+$:classes_tab_content
+
+<!-- Courses tab content -->
+$:courses_tab_content
+
+<!-- Results tab content -->
+$:results_tab_content
+
+<!-- Series tab content -->
+$:series_tab_content
+
+<!-- Competitors tab content -->
+$:competitors_tab_content
+
+<!-- Clubs tab content -->
+$:clubs_tab_content
+
+
+<script>
+    var event_id = "";
+    
+    function openTab(evt, tabName) {
+        // Declare all variables
+        var i, tabcontent, tablinks;
+
+        // Get all elements with class="tabcontent" and hide them
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        // Get all elements with class="tablinks" and remove the class "active"
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    } 
+</script>
+
+
+<script>
+    function updateDisplayedParams(root) {
+        // Declare all variables
+        var i, nodes, element, selected;
+        
+        selected = document.querySelector('input'.concat('[name = "', root, '"]:checked')).value
+
+        // Get all elements with class="params" and hide them
+        nodes = document.getElementsByClassName("params");
+        for (i = 0; i < nodes.length; i++) {
+            nodes[i].style.display = "none";
+        }
+
+        // Get all elements with class="required" below root"
+        // and set required attribute to false
+        element = document.getElementById(root);
+        required = element.getElementsByClassName("required");
+        for (i = 0; i < required.length; i++) {
+            required[i].required = false;
+        }
+
+        // Show the parameters
+        document.getElementById(selected).style.display = "block";
+
+        // Get all elements with class="required" below selected
+        // and set required attribute to true
+        element = document.getElementById(selected);
+        required = element.getElementsByClassName("required");
+        for (i = 0; i < required.length; i++) {
+            required[i].required= true;
+        }
+    } 
+
+    function mark_label(node) {
+        // find form element
+        elem = node.parentElement;
+        while (elem != null && elem.tagName != "FORM") {
+            elem = elem.parentElement;
+        }
+        // find label element
+        if (elem != null) {
+            label = elem.querySelector("label[for=" + node.name + "]");
+            if (label != null) {
+                 label.style.color = "red";
+            }
+        }
+    }
+</script>
+
+<script>
+    function align_form_table(id) {
+        var h = 0;
+        var table = document.getElementById(id);
+        for (var i = 0; i < table.rows.length; i++) {
+            if (h < table.rows[i].offsetHeight) {
+                h = table.rows[i].offsetHeight;
+            }
+        }
+        for (var i = 0; i < table.rows.length; i++) {
+            table.rows[i].style.height = h.toString() + "px";
+        }
+    }
+</script>
+
+<script>
+    function evnt_mySIReader() {
+        url = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/si2?id=' + window.event_id
+        window.open(url, '_blank')
+    }
+</script>
+
+<script>
+    function download(fileName, text) {
+        var textFileAsBlob = new Blob([text], {type: 'text/plain'});
+        var downloadLink = document.createElement("a");
+        downloadLink.download = fileName;
+        if (window.webkitURL != null) {
+            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+        } else {
+            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+            downloadLink.onclick = document.body.removeChild(event.target);
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+        }
+        downloadLink.click();
+    }
+</script>

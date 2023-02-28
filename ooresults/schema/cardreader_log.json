@@ -1,0 +1,69 @@
+{
+    "title": "cardreader log entry",
+    "type": "object",
+    "properties": {
+        "entryType": {
+            "type": "string",
+            "enum" : ["readerDetected", "readerConnected", "readerDisconnected", "cardInserted", "cardRemoved", "cardRead"]
+        },
+        "entryTime": {
+            "type": "string",
+            "description" : "time in iso format of creating this entry"
+        }
+    },
+    "required": [
+        "entryType",
+        "entryTime"
+    ],
+    "if": {
+        "properties": { "entryType": { "const": "cardRead" } }
+    },
+    "then": {
+        "properties": {
+            "controlCard": {
+                "type": "string",
+                "description" : "card number of the si card"
+            },
+            "startTime": {
+                "type": "string",
+                "description" : "time in iso format of punching the start station"
+            },
+            "finishTime": {
+                "type": "string",
+                "description" : "time in iso format of punching the finish station"
+            },
+            "checkTime": {
+                "type": "string",
+                "description" : "time in iso format of punching the check station"
+            },
+            "clearTime": {
+                "type": "string",
+                "description" : "time in iso format of punching the clear station"
+            },
+            "punches": {
+                "type": "array",
+                "items": {
+                    "controlCode": {
+                        "type": "string",
+                        "description" : "control code of the station"
+                    },
+                    "punchTime": {
+                        "type": "string",
+                        "description" : "time in iso format of punching the station"
+                    }
+                }
+            }
+        },
+        "required": [
+            "controlCard"
+        ]
+    },
+    "else": {
+        "properties": {
+            "controlCard": {
+                "type": "string",
+                "description" : "card number of the si card"
+            }
+        }
+    }
+}

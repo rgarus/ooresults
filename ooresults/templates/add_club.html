@@ -1,0 +1,19 @@
+$def with (club)
+
+<!-- Modal content -->
+<div class="modal-content">
+    <span class="close" onclick="document.getElementById('clb.addDialog').style.display='none'">&times;</span>
+    <form id="clb.formAdd" class="form-container" autocomplete="off" onsubmit="clb_submitAdd(); return false;">
+        <input id="clb.addId" name="id" type="text" value="$club.id" hidden/>
+        <table id="clb.addFormTable">
+            <tr>
+                <th class="input-header"><label for="name">Name *</label></th>
+                <td><input name="name" type="text" value="$club.name" required onchange="mark_label(this)"/></td>
+            </tr>
+        </table>
+        <p></p>
+        <button type="submit" class="btn">Save</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('clb.addDialog').style.display='none'">Cancel</button>
+    </form>
+</div>
+ 

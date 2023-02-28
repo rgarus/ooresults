@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ooresults"
+version = "0.2.0"
+authors = [
+  {name="Rainer Garus"},
+]
+description = "A software for the evaluation of the results of orienteering events"
+readme = "README.rst"
+license = {file = "LICENSE"}
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: End Users/Desktop",
+    "Development Status :: 4 - Beta",
+]
+keywords = ["orienteering", "sportident"]
+
+[project.scripts]
+ooresults-server = "ooresults._server:main"
+ooresults-reader = "ooresults._reader:main"
+
+[project.urls]
+Repository = "https://github.com/rgarus/ooresults"
+Documentation = "https://ooresults.readthedocs.io/en/latest"
+

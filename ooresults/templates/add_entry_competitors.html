@@ -1,0 +1,40 @@
+$def with (competitors)
+
+
+<!-- Modal content -->
+<div class="modal-content" style="margin: 5% auto">
+    <span class="close" onclick="document.getElementById('entr.competitorsDialog').style.display='none'">&times;</span>
+    <input oninput="w3.filterHTML('#competitors_tbody', 'tr', this.value)" placeholder="Search ..."/>
+    <p/>
+    <div style="display: block; height: 50%; overflow: auto">
+        <table class="dt" id="entry.comp.table" onclick="entr_comp_highlight(event)" >
+            <thead>
+                <tr class="dt">
+                    <th class="dt">First name</th>
+                    <th class="dt">Last name</th>
+                    <th class="dt">Gender</th>
+                    <th class="dt">Year</th>
+                    <th class="dt">Chip</th>
+                    <th class="dt">Club</th>
+                </tr>
+            </thead>
+            <tbody id="competitors_tbody" >
+            $for competitor in competitors:
+                <tr class="dt" id="$competitor.id">
+                    <td class="dt">$competitor.first_name</td>
+                    <td class="dt">$competitor.last_name</td>
+                    <td class="dt">$competitor.gender</td>
+                    <td class="dt">$(str(competitor.year) if competitor.year is not None else '')</td>
+                    <td class="dt" style="text-align:right">$competitor.chip</td>
+                    <td class="dt">$competitor.club_name</td>
+                    <td class="dt" hidden>$competitor.club_id</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p></p>
+    <button id="entry.comp.add" class="btn" onclick="entr_comp_save()" disabled>Save</button>
+    <button class="btn cancel" onclick="document.getElementById('entr.competitorsDialog').style.display='none'">Cancel</button>
+</div>
+
+

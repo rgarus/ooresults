@@ -1,0 +1,31 @@
+$def with (course)
+
+<!-- Modal content -->
+<div class="modal-content">
+    <span class="close" onclick="document.getElementById('cou.addDialog').style.display='none'">&times;</span>
+    <form id="cou.formAdd" class="form-container" autocomplete="off" onsubmit="cou_submitAdd(); return false;">
+        <input id="cou.addId" name="id" type="text" value="$course.id" hidden/>
+        <table id="cou.addFormTable">
+            <tr>
+                <th class="input-header"><label for="name">Name *</label></th>
+                <td><input name="name" type="text" value="$course.name" required onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="length">Length</label></th>
+                <td><input name="length" type="number" min="0" max="99999" value="$(str(round(course.length)) if course.length is not None else '')" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="climb">Climb</label></th>
+                <td><input name="climb" type="number" min="0" max="99999" value="$(str(round(course.climb)) if course.climb is not None else '')" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="controls">Controls</label></th>
+                <td><input name="controls" type="text" placeholder="c1 - c2 - c3" value="$' - '.join(course.controls)" onchange="mark_label(this)"/></td>
+            </tr>
+        </table>
+        <p></p>
+        <button type="submit" class="btn">Save</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('cou.addDialog').style.display='none'">Cancel</button>
+    </form>
+</div>
+ 

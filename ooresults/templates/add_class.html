@@ -1,0 +1,118 @@
+$def with (class_, courses)
+
+
+$def format_time(time):
+    $if time is not None:
+        $return '{:d}:{:02d}'.format(time//60, time%60)
+    $else:
+        $return ''
+
+$def format_date(time):
+    $if time is not None:
+        $return time.strftime('%H:%M:%S')
+    $else:
+        $return ''
+
+$def format_int(value):
+    $return str(value) if value is not None else ''
+
+$def format_voided_legs(legs):
+    $ s = []
+    $for i in legs:
+        $s.append(i[0] + '-' + i[1])
+    $return ', '.join(s)
+
+
+<!-- Modal content -->
+<div class="modal-content">
+    <span class="close" onclick="document.getElementById('cls.addDialog').style.display='none'">&times;</span>
+    <form id="cls.formAdd" class="form-container" autocomplete="off" onsubmit="cls_submitAdd(); return false;">
+        <input id="cls.addId" name="id" type="text" value="$class_.id" hidden/>
+        <table id="cls.addFormTable">
+            <tr>
+                <th class="input-header"><label for="name">Name *</label></th>
+                <td><input name="name" type="text" value="$class_.name" required onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="short_name">Short name</label></th>
+                <td><input name="short_name" type="text" value="$(class_.short_name if class_.short_name is not None else '')" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="course">Course</label></th>
+                <td>
+                    <select id="course" name="course" onchange="mark_label(this)">
+                    $if class_.course_id is None:
+                        <option value="" selected></option>
+                    $else:
+                        <option value=""></option>
+                    $for course in courses:
+                        $if course.id == class_.course_id:
+                            <option value="$course.id" selected>$course.name</option>
+                        $else:
+                            <option value="$course.id">$course.name</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="voided_legs">Voided legs</label></th>
+                <td><input name="voided_legs" type="text" placeholder="c1-c2, c3-c4, ..." value="$format_voided_legs(class_.params.voided_legs)" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="type">Type</label></th>
+                <td>
+                    <select id="type" name="type" onchange="mark_label(this)">
+                        $for value, text in (('standard', 'Standard'), ('net', 'Net'), ('score', 'Score'))
+                            $if value == class_.params.otype:
+                                <option value="$str(value)" selected>$text</option>
+                            $else:
+                                <option value="$str(value)">$text</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="startControl">Using start control</label></th>
+                <td>
+                    <select id="startControl" name="startControl" onchange="mark_label(this)">
+                        $for value, text in (('if_punched', 'If punched'), ('no', 'No'), ('yes', 'Yes'))
+                            $if value == class_.params.using_start_control:
+                                <option value="$str(value)" selected>$text</option>
+                            $else:
+                                <option value="$str(value)">$text</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="handicap">Apply handicap rule</label></th>
+                <td>
+                    <select id="handicap" name="handicap" onchange="mark_label(this)">
+                        $for value, text in ((0, 'No'), (1, 'Yes'))
+                            $if value == class_.params.apply_handicap_rule:
+                                <option value="$str(value)" selected>$text</option>
+                            $else:
+                                <option value="$str(value)">$text</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="massStart">Mass start</label></th>
+                <td><input id="massStart" name="massStart" type="time" step="1" value="$format_date(class_.params.get('mass_start', None))" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="timeLimit">Time limit</label></th>
+                <td><input id="timeLimit" name="timeLimit" type="str" pattern="[0-9]+:[0-5][0-9]" placeholder="m:ss" value="$format_time(class_.params.get('time_limit', None))" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="penaltyControls">Penalty controls</label></th>
+                <td><input id="penaltyControls" name="penaltyControls" type="number" min="1" placeholder="seconds" value="$format_int(class_.params.get('penalty_controls', None))" onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="penaltyOvertime">Penalty time limit</label></th>
+                <td><input id="penaltyOvertime" name="penaltyOvertime" type="number" min="1" placeholder="seconds" value="$format_int(class_.params.get('penalty_overtime', None))" onchange="mark_label(this)"/></td>
+            </tr>
+        </table>
+        <p></p>
+        <button type="submit" class="btn">Save</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('cls.addDialog').style.display='none'">Cancel</button>
+    </form>
+</div>
+ 

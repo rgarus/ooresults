@@ -1,0 +1,320 @@
+$def with (classes_table)
+ 
+<!-- Tab content -->
+<div id="Classes" class="tabcontent">
+  <div class="actions">
+    <!-- Trigger/Open The Modal -->
+    <button id="cls.myBtnReload" onclick="cls_myReload()">Reload</button>
+    <button id="cls.myBtnImport" onclick="cls_myImport()">Import ...</button>
+    <button id="cls.myBtnExport" onclick="cls_myExport()">Export ...</button>
+    <button id="cls.myBtnAdd" onclick="cls_myAdd()">Add class ...</button>
+    <button id="cls.myBtnEdit" disabled onclick="cls_myEdit()">Edit class ...</button>
+    <button id="cls.myBtnDelete" disabled onclick="cls_myDelete()">Delete class</button>
+  </div>
+
+  <div id=cls.data class="data">
+    $:classes_table
+  </div>
+
+  <div class="modal" id="cls.importDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('cls.importDialog').style.display='none'">&times;</span>
+      <form id="cls.import.form" class="form-container" onsubmit="cls_submitImport(); return false;">
+        <p>Format</p>
+        <div>
+          <input id="oo_1" name="cls_import" type="radio" value="cls.import.1"
+                 onchange="updateDisplayedParams('cls_import')" required checked/>
+          <label for="cls.import.1">IOF Interface Standard 3.0 Class List</label>
+        </div>
+        <p>Settings</p>
+        <div id="cls_import">
+          <div id="cls.import.1" class="params">
+            <table>
+              <tr>
+                <th class="input-header"><label for="file1">File</label></th>
+                <td><input id="file1" name="browse1" type="file" class="required" accept=".xml"/></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <p></p>
+        <p></p>
+        <button type="submit" class="btn">Import</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('cls.importDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="cls.exportDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('cls.exportDialog').style.display='none'">&times;</span>
+      <form id="cls.export.form" class="form-container" onsubmit="cls_submitExport(); return false;">
+        <p>Format</p>
+         <div>
+          <input id="oo_1" name="cls_export" type="radio" value="cls.export.1"
+                 onchange="updateDisplayedParams('cls_export')" required checked/>
+          <label for="cls.export.1">IOF Interface Standard 3.0 Class List</label>
+        </div>
+        <p>Settings</p>
+        <div id="cls_export">
+          <div id="cls.export.1" class="params">
+          </div>
+        </div>
+        <p></p>
+        <p></p>
+        <button type="submit" class="btn">Export</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('cls.exportDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="cls.addDialog">
+  </div> 
+
+  <!-- The Modal -->
+  <div class="modal" id="cls.deleteDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('cls.deleteDialog').style.display='none'">&times;</span>
+      <form id="cls.formDelete" class="form-container" onsubmit="cls_submitDelete(); return false;">
+        <input id="cls.deleteId" name="id" type="text" hidden/>
+        <p>Confirm: Delete the selected class?</p>
+        <button type="submit" class="btn">Delete</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('cls.deleteDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    var cls_selected = document.getElementById('cls.table').getElementsByClassName('selected')[0];
+
+    function cls_highlight(e) {
+        if (e.target.tagName == "TD") {
+            if (cls_selected) cls_selected.className = '';
+            cls_selected = e.target.parentNode;
+            cls_selected.className = 'selected';
+            document.getElementById('cls.myBtnEdit').disabled = false;
+            document.getElementById('cls.myBtnDelete').disabled = false;
+        }
+    }
+
+    function cls_myReload() {
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "class/update", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function cls_myImport() {
+        document.getElementById('cls.importDialog').style.display='block';
+        updateDisplayedParams("cls_import");
+    }
+
+    function cls_myExport() {
+        document.getElementById('cls.exportDialog').style.display='block';
+        updateDisplayedParams("cls_export");
+    }
+
+    function cls_myAdd() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById('cls.addDialog').innerHTML = this.responseText;
+                document.getElementById('cls.addDialog').style.display='block';
+                align_form_table('cls.addFormTable');
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "class/fill_edit_form", true);
+        //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.responseType = "html";
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        data.append('id', '');
+        xhr.send(data);
+    }
+
+    function cls_myDelete() {
+        var table = document.getElementById('cls.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") {
+                document.getElementById('cls.deleteId').value=table.rows[i].id
+                document.getElementById('cls.deleteDialog').style.display='block'
+            }
+        }
+    }
+
+    function cls_myEdit() {
+        var table = document.getElementById('cls.table');
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className == "selected") { 
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('cls.addDialog').innerHTML = this.responseText;
+                        document.getElementById('cls.addDialog').style.display='block';
+                        align_form_table('cls.addFormTable');
+                    }
+                    if (this.readyState == 4 && this.status == 409) {
+                        window.alert(this.responseText);
+                    }
+                    if (this.readyState == 4 && this.status == 500) {
+                        window.alert(this.responseText);
+                    }
+                };
+                xhr.open("POST", "class/fill_edit_form", true);
+                //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                xhr.responseType = "html";
+                var data = new FormData();
+                data.append('event_id', window.event_id);
+                data.append('id', table.rows[i].id);
+                xhr.send(data);
+            }
+        }
+    }
+
+    function cls_submitImport() {
+        var form = document.getElementById('cls.import.form');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                cls_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "class/import", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function cls_submitExport() {
+        var filename = '';
+        var form = document.getElementById('cls.export.form');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var selected = document.querySelector('input[name="cls_export"]:checked').value;
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                download(filename, this.response);
+                document.getElementById('cls.exportDialog').style.display = "none";
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "class/export", true);
+        xhr.responseType = "arraybuffer";
+        if (selected == "cls.export.1") {
+            filename = "ClassList.xml";
+        }
+        xhr.send(data);
+    }
+
+    function cls_submitAdd() {
+        var form = document.getElementById('cls.formAdd');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                cls_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "class/add", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function cls_submitDelete() {
+        var form = document.getElementById('cls.formDelete');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                cls_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "class/delete", true);
+        xhr.responseType = "html";
+        xhr.send(data);
+    }
+
+    function cls_update() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                cls_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.open("POST", "class/update", true);
+        xhr.responseType = "html";
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        xhr.send(data);
+    }
+
+    function cls_updateTable(content) {
+        // Get all elements with class="modal" and hide them
+        modal = document.getElementsByClassName("modal");
+        for (i = 0; i < modal.length; i++) {
+            modal[i].style.display = "none";
+        }
+        document.getElementById('cls.data').innerHTML = content;
+        document.getElementById('cls.myBtnEdit').disabled = true;
+        document.getElementById('cls.myBtnDelete').disabled = true;
+    }
+</script>

@@ -1,0 +1,67 @@
+table.dt, th.dt, td.dt {
+  border: 0.5px solid black;
+  border-collapse: collapse;
+  padding: 5px;
+}
+
+.selected {
+    background-color: brown;
+    color: #FFF;
+}
+
+/* Area including the "add entries ...", "edit entries ..." buttons */
+.actions {
+  position: sticky;
+  top: 0px;
+  width=100%;
+  background-color: #f1f1f1;
+  padding: 10px 12px 10px 12px;
+}
+
+/* Area including the data (event name, entries) */
+.data {
+  padding: 8px 12px 12px 12px;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% 5% 0%; /* top, left and right, bottom */
+  padding: 20px;
+  border: 1px solid #888;
+  max-height: 80%;
+  overflow: auto;
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.input-header {
+  text-align: left;
+  padding-right: 10px;
+}

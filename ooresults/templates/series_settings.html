@@ -1,0 +1,45 @@
+$def with (settings)
+
+<!-- Modal content -->
+<div class="modal-content">
+    <span class="close" onclick="document.getElementById('ser.settingsDialog').style.display='none'">&times;</span>
+    <form id="ser.formSettings" class="form-container" autocomplete="off" onsubmit="ser_submitSettings(); return false;">
+        <table id="ser.settingsFormTable">
+            <tr>
+                <th class="input-header"><label for="name">Name *</label></th>
+                <td><input id="name" name="name" type="text" value="$settings.name" onchange="mark_label(this)" required/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="nr_of_best_results">Nr of best results</label></th>
+                <td><input id="nr_of_best_results" name="nr_of_best_results" type="number" min="1" max="99"
+                           value="$(settings.nr_of_best_results if settings.nr_of_best_results is not None else '')"
+                           onchange="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="mode">Mode *</label></th>
+                <td>
+                    <select id="mode" name="mode" onchange="mark_label(this)">
+                    $for mode in ['Proportional']:
+                        $if str(mode) == str(settings.mode):
+                            <option value="$mode" selected>$mode</option>
+                        $else:
+                            <option value="$mode">$gender</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="maximum_points">Maximum points *</label></th>
+                <td><input id="maximum_points" name="maximum_points" type="number" min="1" max="9999"
+                           value="$settings.maximum_points" onchange="mark_label(this)" required/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="decimal_places">Decimal places *</label></th>
+                <td><input id="decimal_places" name="decimal_places" type="number" min="1" max="3"
+                           value="$settings.decimal_places" onchange="mark_label(this)" required/></td>
+            </tr>
+        </table>
+        <p></p>
+        <button type="submit" class="btn">Save</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('ser.settingsDialog').style.display='none'">Cancel</button>
+    </form>
+</div>

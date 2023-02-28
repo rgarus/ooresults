@@ -1,0 +1,29 @@
+$def with (events)
+
+<!-- Modal content -->
+<div class="modal-content">
+    <span class="close" onclick="document.getElementById('evnt.selectEventDialog').style.display='none'">&times;</span>
+    <p>Select event</p>
+    </p>
+    <table class="dt" id="selevent.table" onclick="selevent_highlight(event)">
+        <thead>
+            <tr class="dt">
+                <th class="dt">Name</th>
+                <th class="dt">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        $for e in events:
+            <tr class="dt" id="$e.id">
+                <td class="dt">$e.name</td>
+                <td class="dt">$e.date</td>
+            </tr> 
+        </tbody>
+    </table>
+    
+    <form id="evnt.formSelectEvent" class="form-container" autocomplete="off" onsubmit="evnt_submitSelectEvent(); return false;">
+        <p></p>
+        <button id="evnt.select.event" type="submit" class="btn" disabled>Ok</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('evnt.selectEventDialog').style.display='none'">Cancel</button>
+    </form>
+</div>
