@@ -11,6 +11,9 @@
     :target: https://ooresults.readthedocs.io/en/latest/?badge=latest
 
 
+ooresults
+---------
+
 ooresults (open orienteering results) is a software to compute the results of orienteering events.
 Here, "open" stands for "Open Source" (licensed under AGPL) on the one hand,
 and for "Open Architecture" (extendable by plugins) on the other.
@@ -53,5 +56,5 @@ Features
 Documentation
 -------------
 
-The documentation contains installation, a tutorial, a reference guide and configuration
+The `documentation <https://ooresults.readthedocs.io/en/latest/>`_ contains installation, a tutorial, a reference guide and configuration
 (currently only available in german language).
