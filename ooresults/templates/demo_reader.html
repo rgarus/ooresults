@@ -66,7 +66,7 @@
         </table>
         <p></p>
         <button id="clear" type="button" class="btn" onclick="myclear()">Clear</button>
-        <button id="submit" type="submit">Insert card</button>
+        <button id="submit" type="submit" disabled>Insert card</button>
 
     </form>
 
@@ -75,9 +75,12 @@
             document.getElementById('page').innerHTML = '<p>' + message +'</p>';
         };
 
-        function start(websocketServerLocation){
+        var ws = null;
 
+        function start(websocketServerLocation){
+            ws = new WebSocket(websocketServerLocation);
             ws.onopen = function(event) {
+                document.getElementById("submit").disabled = false;
                 connectMessage('Online');
                 tp = setTimeout(function() {ping()}, 10000);
             };
@@ -85,6 +88,7 @@
                 connectMessage('Error');
             };
             ws.onclose = function(event) {
+                document.getElementById("submit").disabled = true;
                 connectMessage('Offline');
                 // Try to reconnect in 5 seconds
                 ws = null;
@@ -128,7 +132,6 @@
         };
         ws_uri += "//" + window.location.hostname + ":8081" + window.location.pathname;
 
-        var ws = new WebSocket(ws_uri);
         start(ws_uri);
     </script>
 
@@ -141,23 +144,27 @@
         }
 
         function demo() {
-            var form = document.getElementById('demo');
-            var formData = new FormData(form);
+            try {
+                var form = document.getElementById('demo');
+                var formData = new FormData(form);
 
-            var object = {};
-            formData.forEach((value, key) => {
-                // Reflect.has in favor of: object.hasOwnProperty(key)
-                if(!Reflect.has(object, key)){
-                    object[key] = value;
-                    return;
-                }
-                if(!Array.isArray(object[key])){
-                    object[key] = [object[key]];
-                }
-                object[key].push(value);
-            });
+                var object = {};
+                formData.forEach((value, key) => {
+                    // Reflect.has in favor of: object.hasOwnProperty(key)
+                    if(!Reflect.has(object, key)){
+                        object[key] = value;
+                        return;
+                    }
+                    if(!Array.isArray(object[key])){
+                        object[key] = [object[key]];
+                    }
+                    object[key].push(value);
+                });
 
-            ws.send(JSON.stringify(object));
+                ws.send(JSON.stringify(object));
+            }
+            catch(err) {
+            }
         }
     </script>
 
