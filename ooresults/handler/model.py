@@ -592,6 +592,17 @@ def parse_cardreader_log(item: Dict) -> Dict:
 
 
 def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, Dict, Dict]:
+    def missing_controls(result: result_type.PersonRaceResult) -> List[str]:
+        if result.finish_time is None:
+            return ["FINISH"]
+        if result.start_time is None:
+            return ["START"]
+        controls = []
+        for sp in result.split_times:
+            if sp.status == "Missing":
+                controls.append(sp.control_code)
+        return controls
+
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         for e in db.get_events():
             if event_key != "" and e.key == event_key:
@@ -649,6 +660,7 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, Dict, Dict
                         "status": result["status"],
                         "time": result.extensions.get("running_time", result["time"]),
                         "error": None,
+                        "missingControls": missing_controls(result=result),
                     }
                 else:
                     # do not create a new entry if an entry with same result already exist
@@ -666,6 +678,7 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, Dict, Dict
                                 "running_time", result["time"]
                             ),
                             "error": None,
+                            "missingControls": missing_controls(result=result),
                         }
                     else:
                         result.status = ResultStatus.FINISHED
@@ -710,6 +723,7 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, Dict, Dict
                             "time": result.extensions.get(
                                 "running_time", result["time"]
                             ),
+                            "missingControls": missing_controls(result=result),
                         }
                         break
                 else:

@@ -242,6 +242,7 @@ def assert_entries_are_equal(entry_a: Dict, entry_b: Dict) -> None:
     assert entry_a["club"] == entry_b["club"]
     assert entry_a["class_id"] == entry_b["class_id"]
     assert entry_a["class_"] == entry_b["class_"]
+    assert entry_a.get("missingControls", None) == entry_b.get("missingControls", None)
 
 
 def test_store_cardreader_result_if_cardnumber_is_unique(
@@ -280,6 +281,7 @@ def test_store_cardreader_result_if_cardnumber_is_unique(
         "status": ResultStatus.OK,
         "time": t(s1, f1),
         "error": None,
+        "missingControls": [],
     }
 
     entries = db.get_entries(event_id=event_id)
@@ -296,6 +298,187 @@ def test_store_cardreader_result_if_cardnumber_is_unique(
             SplitTime(control_code="101", punch_time=c1, time=t(s1, c1), status="OK"),
             SplitTime(control_code="102", punch_time=c2, time=t(s1, c2), status="OK"),
             SplitTime(control_code="103", punch_time=c3, time=t(s1, c3), status="OK"),
+        ],
+    )
+
+    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1)
+    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_2)
+    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+
+
+def test_store_cardreader_result_if_cardnumber_is_unique_but_finish_time_is_missing(
+    db, event_id, entry_1, entry_2, entry_3
+):
+    result = PersonRaceResult(
+        status=ResultStatus.FINISHED,
+        punched_start_time=s1,
+        punched_finish_time=None,
+        time=None,
+        split_times=[
+            SplitTime(control_code="101", punch_time=c1, status="Additional"),
+            SplitTime(control_code="102", punch_time=c2, status="Additional"),
+            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+        ],
+    )
+    item = {
+        "entryType": "cardRead",
+        "entryTime": entry_time,
+        "controlCard": "7410",
+        "result": result,
+    }
+
+    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+
+    assert status == "cardRead"
+    assert event["id"] == event_id
+    assert res == {
+        "entryTime": entry_time,
+        "eventId": event_id,
+        "controlCard": "7410",
+        "firstName": "Yogi",
+        "lastName": "Löw",
+        "club": None,
+        "class": "Elite",
+        "status": ResultStatus.DID_NOT_FINISH,
+        "time": None,
+        "error": None,
+        "missingControls": ["FINISH"],
+    }
+
+    entries = db.get_entries(event_id=event_id)
+    assert len(entries) == 3
+
+    entry_2["result"] = PersonRaceResult(
+        status=ResultStatus.DID_NOT_FINISH,
+        start_time=s1,
+        finish_time=None,
+        punched_start_time=s1,
+        punched_finish_time=None,
+        time=None,
+        split_times=[
+            SplitTime(control_code="101", punch_time=c1, time=t(s1, c1), status="OK"),
+            SplitTime(control_code="102", punch_time=c2, time=t(s1, c2), status="OK"),
+            SplitTime(control_code="103", punch_time=c3, time=t(s1, c3), status="OK"),
+        ],
+    )
+
+    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1)
+    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_2)
+    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+
+
+def test_store_cardreader_result_if_cardnumber_is_unique_but_start_time_is_missing(
+    db, event_id, entry_1, entry_2, entry_3
+):
+    result = PersonRaceResult(
+        status=ResultStatus.FINISHED,
+        punched_start_time=None,
+        punched_finish_time=f1,
+        time=None,
+        split_times=[
+            SplitTime(control_code="101", punch_time=c1, status="Additional"),
+            SplitTime(control_code="102", punch_time=c2, status="Additional"),
+            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+        ],
+    )
+    item = {
+        "entryType": "cardRead",
+        "entryTime": entry_time,
+        "controlCard": "7410",
+        "result": result,
+    }
+
+    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+
+    assert status == "cardRead"
+    assert event["id"] == event_id
+    assert res == {
+        "entryTime": entry_time,
+        "eventId": event_id,
+        "controlCard": "7410",
+        "firstName": "Yogi",
+        "lastName": "Löw",
+        "club": None,
+        "class": "Elite",
+        "status": ResultStatus.MISSING_PUNCH,
+        "time": None,
+        "error": None,
+        "missingControls": ["START"],
+    }
+
+    entries = db.get_entries(event_id=event_id)
+    assert len(entries) == 3
+
+    entry_2["result"] = PersonRaceResult(
+        status=ResultStatus.MISSING_PUNCH,
+        start_time=None,
+        finish_time=f1,
+        punched_start_time=None,
+        punched_finish_time=f1,
+        time=None,
+        split_times=[
+            SplitTime(control_code="101", punch_time=c1, time=None, status="OK"),
+            SplitTime(control_code="102", punch_time=c2, time=None, status="OK"),
+            SplitTime(control_code="103", punch_time=c3, time=None, status="OK"),
+        ],
+    )
+
+    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1)
+    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_2)
+    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+
+
+def test_store_cardreader_result_if_cardnumber_is_unique_but_controls_are_missing(
+    db, event_id, entry_1, entry_2, entry_3
+):
+    result = PersonRaceResult(
+        status=ResultStatus.FINISHED,
+        punched_start_time=s1,
+        punched_finish_time=f1,
+        time=None,
+        split_times=[
+            SplitTime(control_code="101", punch_time=c1, status="Additional"),
+        ],
+    )
+    item = {
+        "entryType": "cardRead",
+        "entryTime": entry_time,
+        "controlCard": "7410",
+        "result": result,
+    }
+
+    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+
+    assert status == "cardRead"
+    assert event["id"] == event_id
+    assert res == {
+        "entryTime": entry_time,
+        "eventId": event_id,
+        "controlCard": "7410",
+        "firstName": "Yogi",
+        "lastName": "Löw",
+        "club": None,
+        "class": "Elite",
+        "status": ResultStatus.MISSING_PUNCH,
+        "time": t(s1, f1),
+        "error": None,
+        "missingControls": ["102", "103"],
+    }
+
+    entries = db.get_entries(event_id=event_id)
+    assert len(entries) == 3
+
+    entry_2["result"] = PersonRaceResult(
+        status=ResultStatus.MISSING_PUNCH,
+        start_time=s1,
+        finish_time=f1,
+        punched_start_time=s1,
+        punched_finish_time=f1,
+        time=t(s1, f1),
+        split_times=[
+            SplitTime(control_code="101", punch_time=c1, time=t(s1, c1), status="OK"),
+            SplitTime(control_code="102", punch_time=None, time=None, status="Missing"),
+            SplitTime(control_code="103", punch_time=None, time=None, status="Missing"),
         ],
     )
 
@@ -518,6 +701,7 @@ def test_store_cardreader_result_if_cardnumer_is_unique_with_same_result(
         "status": ResultStatus.OK,
         "time": t(s1, f1),
         "error": None,
+        "missingControls": [],
     }
 
     entries = db.get_entries(event_id=event_id)
@@ -653,6 +837,7 @@ def test_store_cardreader_result_use_empty_control_list_if_course_is_undefined(
         "status": ResultStatus.FINISHED,
         "time": t(s1, f1),
         "error": None,
+        "missingControls": [],
     }
 
     entries = db.get_entries(event_id=event_id)
