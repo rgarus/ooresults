@@ -210,11 +210,18 @@ def parse(content: bytes) -> List[Dict]:
                 raise RuntimeError("Class column not found")
 
             for i, v in enumerate(values):
-                if v in ["Club", "Ort", "City"]:
+                if v in ["City", "Ort"]:
                     column_nr["club"] = i
                     break
             else:
-                raise RuntimeError("Club column not found")
+                raise RuntimeError("City column not found")
+
+            for i, v in enumerate(values):
+                if v in ["Cl.name", "Abk"]:
+                    column_nr["club1"] = i
+                    break
+            else:
+                raise RuntimeError("Cl.name column not found")
 
             for i, v in enumerate(values):
                 if v in ["Start", "Start1"]:
@@ -349,6 +356,13 @@ def parse(content: bytes) -> List[Dict]:
                 and r["result"].status == ResultStatus.OK
             ):
                 r["result"].status = ResultStatus.INACTIVE
+
+            # SportSoftware use column "club", but OOnet use column "club1"
+            # In contrast to SportSoftware, OOnet does not write any gender information
+            if r["gender"] == "" and r["club1"] != "":
+                r["club"] = r["club1"]
+            # we remove club1 key, it is not needed outside this function
+            del r["club1"]
 
             # store start time as start punch time only if finish time is defined
             # or status is missing punch, did not finished or over time

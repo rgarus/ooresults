@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+
+- Importing club names from orienteeringonline.net via OE2003 csv files improved.
+
+
 [0.2.1] - 2023-03-23
 --------------------
 

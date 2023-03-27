@@ -38,13 +38,14 @@ header = [
     "AK",
     "Wertung",
     "Lang",
+    "Abk",
     "Ort",
 ]
 tz = datetime.now(timezone.utc).astimezone().tzinfo
 
 
 def test_separator_comma():
-    value = "c,v,n,,,,,,,,,"
+    value = "c,v,n,,,,,,,,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -65,7 +66,7 @@ def test_separator_comma():
 
 
 def test_separator_semicolon():
-    value = "c;v;n;;;;;;;;;"
+    value = "c;v;n;;;;;;;;;;"
     content = bytes(";".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -86,7 +87,7 @@ def test_separator_semicolon():
 
 
 def test_separator_tab():
-    value = "c\tv\tn\t\t\t\t\t\t\t\t\t"
+    value = "c\tv\tn\t\t\t\t\t\t\t\t\t\t"
     content = bytes("\t".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -107,7 +108,7 @@ def test_separator_tab():
 
 
 def test_quoted_data():
-    value = '"c","v","n","","","","","","","","",""'
+    value = '"c","v","n","","","","","","","","","",""'
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -128,7 +129,7 @@ def test_quoted_data():
 
 
 def test_quote_within_quotes():
-    value = 'c,v,"n1""2",,,,,,,,,'
+    value = 'c,v,"n1""2",,,,,,,,,,'
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -149,7 +150,7 @@ def test_quote_within_quotes():
 
 
 def test_separator_within_quotes():
-    value = 'c,v,"n1,2",,,,,,,,,'
+    value = 'c,v,"n1,2",,,,,,,,,,'
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -170,7 +171,7 @@ def test_separator_within_quotes():
 
 
 def test_newline_within_quotes():
-    value = 'c,v,"n1\n2",,,,,,,,,'
+    value = 'c,v,"n1\n2",,,,,,,,,,'
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -191,7 +192,7 @@ def test_newline_within_quotes():
 
 
 def test_status_ok_and_defined_time():
-    value = "c,v,n,,,0:10,,,,0,,"
+    value = "c,v,n,,,0:10,,,,0,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -210,7 +211,7 @@ def test_status_ok_and_defined_time():
 
 
 def test_status_ok_but_no_time():
-    value = "c,v,n,,,,,,,0,,"
+    value = "c,v,n,,,,,,,0,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -231,7 +232,7 @@ def test_status_ok_but_no_time():
 
 
 def test_status_dns():
-    value = "c,v,n,,,,,,,1,,"
+    value = "c,v,n,,,,,,,1,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -252,7 +253,7 @@ def test_status_dns():
 
 
 def test_status_dnf():
-    value = "c,v,n,,,,,,,2,,"
+    value = "c,v,n,,,,,,,2,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -273,7 +274,7 @@ def test_status_dnf():
 
 
 def test_status_mp():
-    value = "c,v,n,,,,,,,3,,"
+    value = "c,v,n,,,,,,,3,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -294,7 +295,7 @@ def test_status_mp():
 
 
 def test_status_disq():
-    value = "c,v,n,,,,,,,4,,"
+    value = "c,v,n,,,,,,,4,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -315,7 +316,7 @@ def test_status_disq():
 
 
 def test_status_over_time():
-    value = "c,v,n,,,,,,,5,,"
+    value = "c,v,n,,,,,,,5,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -336,7 +337,7 @@ def test_status_over_time():
 
 
 def test_gender_male():
-    value = "c,v,n,,,,M,,,4,,"
+    value = "c,v,n,,,,M,,,4,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -357,7 +358,7 @@ def test_gender_male():
 
 
 def test_gender_female():
-    value = "c,v,n,,,,F,,,4,,"
+    value = "c,v,n,,,,F,,,4,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -377,8 +378,52 @@ def test_gender_female():
     ]
 
 
+def test_club_name():
+    value = "c,v,n,,,,F,,,4,,OC Red,OC Green"
+    content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
+    assert parse(content) == [
+        {
+            "first_name": "v",
+            "last_name": "n",
+            "class_": "",
+            "club": "OC Green",
+            "chip": "c",
+            "gender": "F",
+            "year": None,
+            "not_competing": False,
+            "result": result_type.PersonRaceResult(
+                status=ResultStatus.DISQUALIFIED, time=None
+            ),
+            "start": start_type.PersonRaceStart(),
+        }
+    ]
+
+
+# orienteeringonline.net uses another column for the club name,
+# but in opposite to oe2003 is does not write gender data
+def test_club_name_if_no_gender_is_defined():
+    value = "c,v,n,,,,,,,4,,OC Red,OC Green"
+    content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
+    assert parse(content) == [
+        {
+            "first_name": "v",
+            "last_name": "n",
+            "class_": "",
+            "club": "OC Red",
+            "chip": "c",
+            "gender": "",
+            "year": None,
+            "not_competing": False,
+            "result": result_type.PersonRaceResult(
+                status=ResultStatus.DISQUALIFIED, time=None
+            ),
+            "start": start_type.PersonRaceStart(),
+        }
+    ]
+
+
 def test_year2():
-    value = "c,v,n,,,,,15,,4,,"
+    value = "c,v,n,,,,,15,,4,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -399,7 +444,7 @@ def test_year2():
 
 
 def test_year4():
-    value = "c,v,n,,,,,1915,,4,,"
+    value = "c,v,n,,,,,1915,,4,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -420,7 +465,7 @@ def test_year4():
 
 
 def test_not_competing_is_false():
-    value = "c,v,n,,,,,,0,4,,"
+    value = "c,v,n,,,,,,0,4,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -441,7 +486,7 @@ def test_not_competing_is_false():
 
 
 def test_not_competing_is_true():
-    value = "c,v,n,,,,,,X,4,,"
+    value = "c,v,n,,,,,,X,4,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -462,7 +507,7 @@ def test_not_competing_is_true():
 
 
 def test_start_time():
-    value = "c,v,n,14:05:00,,,,,,,,"
+    value = "c,v,n,14:05:00,,,,,,,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -485,7 +530,7 @@ def test_start_time():
 
 
 def test_relative_start_time_h_m_s():
-    value = "c,v,n,4:05:00,,,,,,,,"
+    value = "c,v,n,4:05:00,,,,,,,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -508,7 +553,7 @@ def test_relative_start_time_h_m_s():
 
 
 def test_relative_start_time_m_s():
-    value = "c,v,n,245:02,,,,,,,,"
+    value = "c,v,n,245:02,,,,,,,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -531,7 +576,7 @@ def test_relative_start_time_m_s():
 
 
 def test_finish_time():
-    value = "c,v,n,,18:59:12,,,,,,,"
+    value = "c,v,n,,18:59:12,,,,,,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -555,7 +600,7 @@ def test_finish_time():
 
 
 def test_relative_finish_time_h_m_s():
-    value = "c,v,n,,1:59:12,,,,,,,"
+    value = "c,v,n,,1:59:12,,,,,,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -579,7 +624,7 @@ def test_relative_finish_time_h_m_s():
 
 
 def test_relative_finish_time_m_s():
-    value = "c,v,n,,299:12,,,,,,,"
+    value = "c,v,n,,299:12,,,,,,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -603,7 +648,7 @@ def test_relative_finish_time_m_s():
 
 
 def test_start_and_finish_time():
-    value = "c,v,n,14:05:00,14:36:11,,,,,,,"
+    value = "c,v,n,14:05:00,14:36:11,,,,,,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -631,7 +676,7 @@ def test_start_and_finish_time():
 
 
 def test_start_time_and_status_mp():
-    value = "c,v,n,14:05:00,,,,,,3,,"
+    value = "c,v,n,14:05:00,,,,,,3,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -657,7 +702,7 @@ def test_start_time_and_status_mp():
 
 
 def test_start_time_and_status_dnf():
-    value = "c,v,n,14:05:00,,,,,,2,,"
+    value = "c,v,n,14:05:00,,,,,,2,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -683,7 +728,7 @@ def test_start_time_and_status_dnf():
 
 
 def test_start_time_and_status_over_time():
-    value = "c,v,n,14:05:00,,,,,,5,,"
+    value = "c,v,n,14:05:00,,,,,,5,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
         {
@@ -709,7 +754,7 @@ def test_start_time_and_status_over_time():
 
 
 def test_split_time():
-    value = "c,v,n,,,,,,,,,,123,4:16"
+    value = "c,v,n,,,,,,,,,,,123,4:16"
     content = bytes(
         ",".join(header + ["Posten1,Punch1"]) + "\n" + value, encoding="utf-8"
     )
@@ -735,7 +780,7 @@ def test_split_time():
 
 
 def test_split_time_without_punch():
-    value = "c,v,n,,,,,,,,,,123,-----"
+    value = "c,v,n,,,,,,,,,,,123,-----"
     content = bytes(
         ",".join(header + ["Posten1,Punch1"]) + "\n" + value, encoding="utf-8"
     )
@@ -763,7 +808,7 @@ def test_split_time_without_punch():
 
 
 def test_two_split_times():
-    value = "c,v,n,,,,,,,,,,123,4:16,99,12:01"
+    value = "c,v,n,,,,,,,,,,,123,4:16,99,12:01"
     content = bytes(
         ",".join(header + ["Posten1,Punch1"]) + "\n" + value, encoding="utf-8"
     )
@@ -790,7 +835,7 @@ def test_two_split_times():
 
 
 def test_split_times_with_closing_separator():
-    value = "c,v,n,,,,,,,,,,123,4:16,99,12:01,"
+    value = "c,v,n,,,,,,,,,,,123,4:16,99,12:01,"
     content = bytes(
         ",".join(header + ["Posten1,Punch1"]) + "\n" + value, encoding="utf-8"
     )
@@ -817,9 +862,9 @@ def test_split_times_with_closing_separator():
 
 
 def test_import_several_lines():
-    value_1 = "c1,v1,n1,,,0:11,,,,0,,"
-    value_2 = "c2,v2,n2,,,0:12,,,,0,,"
-    value_3 = "c3,v3,n3,,,0:13,,,,0,,"
+    value_1 = "c1,v1,n1,,,0:11,,,,0,,,"
+    value_2 = "c2,v2,n2,,,0:12,,,,0,,,"
+    value_3 = "c3,v3,n3,,,0:13,,,,0,,,"
     content = bytes(
         ",".join(header) + "\n" + value_1 + "\n" + value_2 + "\n" + value_3,
         encoding="utf-8",
@@ -865,9 +910,9 @@ def test_import_several_lines():
 
 
 def test_do_not_import_special_names():
-    value_1 = "c1,,Vacant,,,0:11,,,,0,,"
-    value_2 = "c2,v2,n2,,,0:12,,,,0,,"
-    value_3 = "c3,,Reserve,,,0:13,,,,0,,"
+    value_1 = "c1,,Vacant,,,0:11,,,,0,,,"
+    value_2 = "c2,v2,n2,,,0:12,,,,0,,,"
+    value_3 = "c3,,Reserve,,,0:13,,,,0,,,"
     content = bytes(
         ",".join(header) + "\n" + value_1 + "\n" + value_2 + "\n" + value_3,
         encoding="utf-8",
@@ -889,9 +934,9 @@ def test_do_not_import_special_names():
 
 
 def test_import_extra_fields():
-    value_1 = "c1,v1,n1,,,0:11,,,,0,,,A,B,C"
-    value_2 = "c2,v2,n2,,,0:12,,,,0,,,,X,"
-    value_3 = "c3,v3,n3,,,0:13,,,,0,,,,Y,Z"
+    value_1 = "c1,v1,n1,,,0:11,,,,0,,,,A,B,C"
+    value_2 = "c2,v2,n2,,,0:12,,,,0,,,,,X,"
+    value_3 = "c3,v3,n3,,,0:13,,,,0,,,,,Y,Z"
     content = bytes(
         ",".join(header + ["Text1", "Text2", "Text3"])
         + "\n"
