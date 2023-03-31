@@ -37,7 +37,7 @@ $def with (entries_table)
         <div>
           <input id="oo_3" name="entr_import" type="radio" value="entr.import.3"
                  onchange="updateDisplayedParams('entr_import')" required checked/>
-          <label for="entr.import.3">OE2003 csv</label>
+          <label for="entr.import.3">OE2003 csv, OE12 csv</label>
         </div>
         $if EXPERIMENTAL:
           <div>
@@ -110,6 +110,11 @@ $def with (entries_table)
                  onchange="updateDisplayedParams('entr_export')" required checked/>
           <label for="entr.export.3">OE2003 csv</label>
         </div>
+        <div>
+          <input id="oo_4" name="entr_export" type="radio" value="entr.export.4"
+                 onchange="updateDisplayedParams('entr_export')" required checked/>
+          <label for="entr.export.4">OE12 csv</label>
+        </div>
         <p>Settings</p>
         <div id="entr_export">
           <div id="entr.export.1" class="params">
@@ -117,6 +122,8 @@ $def with (entries_table)
           <div id="entr.export.2" class="params">
           </div>
           <div id="entr.export.3" class="params">
+          </div>
+          <div id="entr.export.4" class="params">
           </div>
         </div>
         <p></p>
@@ -384,6 +391,9 @@ $def with (entries_table)
             filename = "ResultList.xml";
         }
         if (selected == "entr.export.3") {
+            filename = "entries.csv";
+        }
+        if (selected == "entr.export.4") {
             filename = "entries.csv";
         }
         xhr.send(data);

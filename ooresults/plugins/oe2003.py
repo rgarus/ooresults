@@ -82,50 +82,80 @@ def create(entries: List[Dict], class_list: List[Dict]) -> bytes:
 
     # write entries
     for i, e in enumerate(entries):
-        class_no = None
-        class_short_name = None
+        class_no = ""
+        class_name = ""
+        class_short_name = ""
         for j, c in enumerate(class_list):
             if c.get("id") == e.get("class_id", None):
-                class_no = j + 1
-                class_short_name = c.get("short_name", None)
+                class_no = str(j + 1)
+                class_name = c.get("name", "")
+                if c.get("short_name", None):
+                    class_short_name = c.get("short_name", class_name)
+                else:
+                    class_short_name = class_name
                 break
 
         # export only items with defined name
-        if e.get("last_name", None) != None:
+        if e.get("last_name", None) is not None:
+            chip = e.get("chip", "")
+            last_name = e.get("last_name", "")
+            first_name = e.get("first_name", "")
+
+            year = ""
+            if e.get("year", None) is not None:
+                year = str(e.get("year", None))
+
+            gender = {"": "", "F": "W", "M": "M"}[e.get("gender", "")]
+            not_competing = "X" if e.get("not_competing", False) else "0"
+
+            start_time = ""
+            if e.result.start_time is not None:
+                start_time = e.result.start_time.strftime("%H:%M:%S")
+
+            finish_time = ""
+            if e.result.finish_time is not None:
+                finish_time = e.result.finish_time.strftime("%H:%M:%S")
+
+            result_time = ""
+            if e.result.time is not None:
+                result_time = "{:02d}:{:02d}:{:02d}".format(
+                    e.result.time // 3600,
+                    e.result.time % 3600 // 60,
+                    e.result.time % 60,
+                )
+
+            status = STATUS_MAP.get(e.result.status, "")
+
+            club_id = ""
+            if e.get("club_id", None) is not None:
+                club_id = str(e.get("club_id", None))
+
+            club_name = ""
+            if e.get("club_id", None) is not None:
+                club_name = e.get("club", "")
+
             writer.writerow(
                 [
-                    str(i + 1),
-                    e.get("chip", ""),
-                    "",
-                    cp1252(e.get("last_name", "")),
-                    cp1252(e.get("first_name", "")),
-                    str(e.get("year", None)) if e.get("year", None) is not None else "",
-                    {"": "", "F": "W", "M": "M"}[e.get("gender", "")],
-                    "",
-                    "X" if e.get("not_competing", False) else "0",
-                    e.result.start_time.strftime("%H:%M:%S")
-                    if e.result.start_time is not None
-                    else "",
-                    e.result.finish_time.strftime("%H:%M:%S")
-                    if e.result.finish_time is not None
-                    else "",
-                    "{:d}:{:02d}".format(e.result.time // 60, e.result.time % 60)
-                    if e.result.time is not None
-                    else "",
-                    STATUS_MAP.get(e.result.status, ""),
-                    str(e.get("club_id", None))
-                    if e.get("club_id", None) is not None
-                    else "",
-                    "",
-                    cp1252(e.get("club", ""))
-                    if e.get("club_id", None) is not None
-                    else "",
-                    "",
-                    str(class_no) if class_no is not None else "",
-                    class_short_name
-                    if class_short_name is not None
-                    else e.get("class_", ""),
-                    e.get("class_", ""),
+                    str(i + 1),  # Stnr
+                    chip,  # Chip
+                    "",  # Datenbank Id
+                    cp1252(last_name),  # Nachname
+                    cp1252(first_name),  # Vorname
+                    year,  # Jg
+                    gender,  # G
+                    "",  # Block
+                    not_competing,  # AK
+                    start_time,  # Start
+                    finish_time,  # Ziel
+                    result_time,  # Zeit
+                    status,  # Wertung
+                    club_id,  # Club-Nr.
+                    "",  # Abk
+                    cp1252(club_name),  # Ort
+                    "",  # Nat
+                    class_no,  # Katnr
+                    class_short_name,  # Kurz
+                    class_name,  # Lang
                 ]
             )
 
@@ -147,7 +177,7 @@ def parse(content: bytes) -> List[Dict]:
     for values in csv.reader(io.StringIO(content), dialect=dialect):
         if column_nr == {}:
             for i, v in enumerate(values):
-                if v in ["Chip", "SI card1"]:
+                if v in ["Chip", "Chipno", "Chipnr", "SI card1"]:
                     column_nr["chip"] = i
                     break
             else:

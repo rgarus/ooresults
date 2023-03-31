@@ -171,12 +171,15 @@ def test_class():
             Entry(first_name="a", last_name="b", class_id=1, class_="Class_1"),
             Entry(first_name="c", last_name="d", class_id=2, class_="Class_2"),
         ],
-        class_list=[],
+        class_list=[
+            {"id": 1, "name": "Class_1", "short_name": ""},
+            {"id": 2, "name": "Class_2", "short_name": ""},
+        ],
     )
     v1 = (
-        "1;;;b;a;;;;0;;;;;;;;;;Class_1;Class_1"
+        "1;;;b;a;;;;0;;;;;;;;;1;Class_1;Class_1"
         + "\r\n"
-        + "2;;;d;c;;;;0;;;;;;;;;;Class_2;Class_2"
+        + "2;;;d;c;;;;0;;;;;;;;;2;Class_2;Class_2"
         + "\r\n"
     )
 
@@ -269,9 +272,9 @@ def test_time():
         class_list=[],
     )
     v1 = (
-        "1;;;b;a;;;;0;;;5:01;;;;;;;;"
+        "1;;;b;a;;;;0;;;00:05:01;;;;;;;;"
         + "\r\n"
-        + "2;;;d;c;;;;0;;;133:20;;;;;;;;"
+        + "2;;;d;c;;;;0;;;02:13:20;;;;;;;;"
         + "\r\n"
     )
 

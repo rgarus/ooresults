@@ -30,6 +30,7 @@ from web.utils import Storage
 
 from ooresults.handler import model
 from ooresults.plugins.imports.entries import text
+from ooresults.plugins import oe12
 from ooresults.plugins import oe2003
 from ooresults.plugins import iof_entry_list
 from ooresults.plugins import iof_result_list
@@ -139,6 +140,10 @@ class Export:
                 class_list = model.get_classes(event_id=event_id)
                 entry_list = model.get_entries(event_id=event_id)
                 content = oe2003.create(entry_list, list(class_list))
+            elif data.entr_export == "entr.export.4":
+                class_list = model.get_classes(event_id=event_id)
+                entry_list = model.get_entries(event_id=event_id)
+                content = oe12.create(entry_list, list(class_list))
 
         except KeyError:
             raise web.conflict("Entry deleted")

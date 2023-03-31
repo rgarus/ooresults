@@ -5,6 +5,11 @@ Changelog
 [Unreleased]
 ------------
 
+Added
+^^^^^
+
+- Import and export of OE12 csv files added.
+
 Changed
 ^^^^^^^
 

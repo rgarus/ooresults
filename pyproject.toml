@@ -29,5 +29,5 @@ ooresults-reader = "ooresults._reader:main"
 
 [project.urls]
 Repository = "https://github.com/rgarus/ooresults"
-Documentation = "https://ooresults.readthedocs.io/en/latest"
+Documentation = "https://ooresults.readthedocs.io/en/stable"
 
