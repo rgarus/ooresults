@@ -1,11 +1,5 @@
 $def with (entry)
 
-$def format_time(time):
-    $if time is not None:
-        $return '{:d}:{:02d}'.format(time//60, time%60)
-    $else:
-        $return ''
-
 $def format_date(time):
     $if time is not None:
         $return time.strftime('%H:%M:%S')
@@ -15,7 +9,7 @@ $def format_date(time):
 $def format_diff_time(t):
     $if entry.result.start_time is not None:
         $ diff = t.replace(microsecond=0) - entry.result.start_time.replace(microsecond=0)
-        $return format_time(int(diff.total_seconds()))
+        $return minutes_seconds(int(diff.total_seconds()))
     $else:
         $return ''
 
@@ -60,7 +54,7 @@ $def format_diff_time(t):
             </tr>
             <tr>
                 <th class="input-header"><label>Time</label></th>
-                <td><label>$(format_time(entry.result.extensions.get('running_time', entry.result.time)))</label></td>
+                <td><label>$(minutes_seconds(entry.result.extensions.get('running_time', entry.result.time)))</label></td>
             </tr>
         </table>
             
@@ -133,7 +127,7 @@ $def format_diff_time(t):
                                 <td class="dt" style="text-align:right"></td>
                             <td class="dt" style="text-align:right">$punch.get('control_code', '')</td>
                             <td class="dt" style="text-align:right">$(format_date(punch.get('punch_time', None)))</td>
-                            <td class="dt" style="text-align:right">$(format_time(punch.get('time', None)))</td>
+                            <td class="dt" style="text-align:right">$(minutes_seconds(punch.get('time', None)))</td>
                             <td class="dt">$punch.get('status', '')</td>
                         </tr>
                 </tbody>

@@ -15,6 +15,12 @@ Changed
 
 - Importing club names from orienteeringonline.net via OE2003 csv files improved.
 
+Fixed
+^^^^^
+
+- Fixed error in formatting negative time differences.
+
+
 
 [0.2.1] - 2023-03-23
 --------------------

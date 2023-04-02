@@ -30,10 +30,11 @@ from ooresults.handler import model
 from ooresults.handler import results
 from ooresults.repo import series_type
 import ooresults.pdf.series
+from ooresults.utils.globals import t_globals
 
 
 templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals={"str": str})
+render = web.template.render(templates, globals=t_globals)
 
 
 def build_total_results(settings: series_type.Settings, list_of_results, organizers=[]):

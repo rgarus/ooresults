@@ -14,7 +14,7 @@ $def format_rank(rank, not_competing: bool) -> str:
 
 $def format_time(time: int, status: ResultStatus) -> str:
     $if status == ResultStatus.OK and time is not None:
-        $return '{:d}:{:02d}'.format(time // 60, time % 60)
+        $return minutes_seconds(time)
     $else:
         $return ''
 
@@ -28,7 +28,7 @@ $def format_points(points: float, status: ResultStatus) -> str:
 
 $def format_time_total(time: int, status: ResultStatus, start_time=None) -> str:
     $if status == ResultStatus.OK:
-        $return '{:d}:{:02d}'.format(time // 60, time % 60)
+        $return minutes_seconds(time)
     $elif status == ResultStatus.INACTIVE and start_time is not None:
         $return 'Start at ' + start_time.strftime('%H:%M:%S')
     $else:

@@ -4,7 +4,7 @@ $ date = event.get('date', '')
 
 $def format_time(time):
     $if time is not None:
-        $return '{:d}:{:02d}'.format(time//60, time%60)
+        $return minutes_seconds(time)
     $else:
         $return ''
 

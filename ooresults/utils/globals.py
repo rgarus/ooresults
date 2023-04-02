@@ -17,6 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import Optional
+
 from ooresults.repo.result_type import ResultStatus
 
 
@@ -35,9 +37,20 @@ MAP_STATUS = {
 EXPERIMENTAL = False
 
 
+def minutes_seconds(time: Optional[int]) -> str:
+    if time is None:
+        return ""
+    elif time >= 0:
+        return "{:d}:{:02d}".format(abs(time) // 60, abs(time) % 60)
+    else:
+        return "-{:d}:{:02d}".format(abs(time) // 60, abs(time) % 60)
+
+
 t_globals = {
     "str": str,
+    "round": round,
     "ResultStatus": ResultStatus,
     "MAP_STATUS": MAP_STATUS,
     "EXPERIMENTAL": EXPERIMENTAL,
+    "minutes_seconds": minutes_seconds,
 }

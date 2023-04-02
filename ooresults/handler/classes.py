@@ -32,10 +32,11 @@ from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.class_params import ClassParams
 from ooresults.plugins import iof_class_list
+from ooresults.utils.globals import t_globals
 
 
 templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals={"str": str})
+render = web.template.render(templates, globals=t_globals)
 
 
 def update(event_id: int):

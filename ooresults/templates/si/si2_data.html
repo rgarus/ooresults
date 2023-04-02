@@ -5,7 +5,7 @@ $ date = event.get('date', '') if event is not None else ''
 $code
     def format(time: int) -> str:
         if time is not None and time > 0:
-            return '{:d}:{:02d} min'.format(time // 60, time % 60)
+            return minutes_seconds(time) + ' min'
         else:
             return ''
     

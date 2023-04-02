@@ -25,6 +25,7 @@ from typing import Optional
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 from ooresults.pdf.pdf import PDF
+from ooresults.utils import globals
 
 
 def create_pdf(event: Dict, results: Dict, landscape: bool = False) -> bytes:
@@ -42,13 +43,13 @@ def create_pdf(event: Dict, results: Dict, landscape: bool = False) -> bytes:
 
     def format_time(time: int, status: ResultStatus) -> str:
         if status == ResultStatus.OK:
-            return "{:d}:{:02d}".format(time // 60, time % 60)
+            return globals.minutes_seconds(time=time)
         else:
             return pdf.MAP_STATUS[status]
 
     def format_splittime(time: Optional[int]) -> str:
         if time is not None:
-            return "{:d}:{:02d}".format(time // 60, time % 60)
+            return globals.minutes_seconds(time=time)
         else:
             return "-----"
 

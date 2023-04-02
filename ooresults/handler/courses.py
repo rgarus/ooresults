@@ -28,10 +28,11 @@ from ooresults.repo.repo import CourseUsedError
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import ConstraintError
 from ooresults.plugins import iof_course_data
+from ooresults.utils.globals import t_globals
 
 
 templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals={"str": str, "round": round})
+render = web.template.render(templates, globals=t_globals)
 
 
 def update(event_id: int):

@@ -3,7 +3,7 @@ $def with (message)
 $code
     def format(status: str, time: int) -> str:
         if status == ResultStatus.OK:
-            return MAP_STATUS[status] + ', {:d}:{:02d} min'.format(time // 60, time % 60)
+            return MAP_STATUS[status] + ', ' + minutes_seconds(time) + ' min'
         else:
             return MAP_STATUS[status]
     

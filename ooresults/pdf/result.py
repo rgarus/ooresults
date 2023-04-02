@@ -23,6 +23,7 @@ from typing import Any
 
 from ooresults.repo.result_type import ResultStatus
 from ooresults.pdf.pdf import PDF
+from ooresults.utils import globals
 
 
 def create_pdf(
@@ -56,13 +57,13 @@ def create_pdf(
     def print_time(width: int, time: int, status: ResultStatus) -> None:
         txt = ""
         if status == ResultStatus.OK:
-            txt = "{:d}:{:02d}".format(time // 60, time % 60)
+            txt = globals.minutes_seconds(time)
         cell(w=width, h=None, txt=txt, align="R")
 
     def print_time_or_status(width: int, time: int, status: ResultStatus) -> None:
         txt = pdf.MAP_STATUS[status]
         if status == ResultStatus.OK:
-            txt = "{:d}:{:02d}".format(time // 60, time % 60)
+            txt = globals.minutes_seconds(time)
         cell(w=width, h=None, txt=txt, align="R")
 
     def print_points(width: int, points: Optional[float], status: ResultStatus) -> None:

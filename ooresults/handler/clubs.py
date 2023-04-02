@@ -26,10 +26,11 @@ from web.utils import Storage
 from ooresults.handler import model
 from ooresults.repo.repo import ClubUsedError
 from ooresults.repo.repo import ConstraintError
+from ooresults.utils.globals import t_globals
 
 
 templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals={"str": str})
+render = web.template.render(templates, globals=t_globals)
 
 
 class Update:
