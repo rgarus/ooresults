@@ -64,7 +64,10 @@ def create_result_list(event: Dict, results: List[Dict]) -> bytes:
     SPLITTIME = E.SplitTime
     CONTROLCODE = E.ControlCode
 
-    root = RESULTLIST(iofVersion="3.0")
+    root = RESULTLIST(
+        iofVersion="3.0",
+        creator="ooresults (https://pypi.org/project/ooresults)",
+    )
 
     e_event = EVENT()
     e_event.append(NAME(event.get("name", "")))

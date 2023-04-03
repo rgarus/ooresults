@@ -42,7 +42,10 @@ def create_class_list(classes: List[Dict]) -> bytes:
     NAME = E.Name
     SHORTNAME = E.ShortName
 
-    root = CLASSLIST(iofVersion="3.0")
+    root = CLASSLIST(
+        iofVersion="3.0",
+        creator="ooresults (https://pypi.org/project/ooresults)",
+    )
 
     for c in classes:
         class_ = CLASS()

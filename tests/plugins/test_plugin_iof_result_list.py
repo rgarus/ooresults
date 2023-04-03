@@ -198,7 +198,7 @@ def test_import_result_list_not_competing():
 def test_export_result_list():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
-<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
   <Event>
     <Name>1. O-Cup 2020</Name>
     <StartTime>
@@ -296,7 +296,7 @@ def test_export_result_list():
 def test_export_result_list_not_competing():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
-<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
   <Event>
     <Name>1. O-Cup 2020</Name>
     <StartTime>
@@ -363,7 +363,7 @@ def test_export_result_list_not_competing():
 def test_export_result_list_not_competing():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
-<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
   <Event>
     <Name>1. O-Cup 2020</Name>
     <StartTime>
@@ -452,7 +452,7 @@ def test_import_result_list_without_class_result():
 def test_export_result_list_without_class_result():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
-<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
   <Event>
     <Name>1. O-Cup 2020</Name>
     <StartTime>
@@ -675,7 +675,7 @@ def test_import_result_list_classes():
 def test_export_result_list_classes():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
-<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
   <Event>
     <Name>1. O-Cup 2020</Name>
     <StartTime>

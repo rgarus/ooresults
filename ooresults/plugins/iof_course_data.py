@@ -53,7 +53,10 @@ def create_course_data(event: Dict, courses: List[Dict], classes: List[Dict]) ->
     CLASSNAME = E.ClassName
     COURSENAME = E.CourseName
 
-    root = COURSEDATA(iofVersion="3.0")
+    root = COURSEDATA(
+        iofVersion="3.0",
+        creator="ooresults (https://pypi.org/project/ooresults)",
+    )
 
     e_event = EVENT()
     e_event.append(NAME(event.get("name", "")))

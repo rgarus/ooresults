@@ -64,7 +64,7 @@ def test_import_class_list():
 def test_export_class_list():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
-<ClassList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+<ClassList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
   <Class>
     <Name>D 14-15</Name>
   </Class>

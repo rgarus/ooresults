@@ -198,7 +198,7 @@ def test_import_course_data_with_class_assignment():
 def test_export_course_data():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
-<CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+<CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
   <Event>
     <Name>1. O-Cup 2020</Name>
     <StartTime>
@@ -280,7 +280,7 @@ def test_export_course_data():
 def test_export_course_data_with_class_assignment():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
-<CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+<CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
   <Event>
     <Name>1. O-Cup 2020</Name>
     <StartTime>

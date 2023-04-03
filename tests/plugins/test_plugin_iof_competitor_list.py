@@ -52,7 +52,7 @@ def test_import_name():
 def test_export_name():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
-<CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+<CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
   <Competitor>
     <Person>
       <Name>
@@ -110,7 +110,7 @@ def test_import_full():
 def test_export_full():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
-<CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+<CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
   <Competitor>
     <Person sex="F">
       <Name>

@@ -54,7 +54,10 @@ def create_entry_list(event: Dict, entries: List[Dict]) -> bytes:
     CONTROLCARD = E.ControlCard
     CLASS = E.Class
 
-    root = ENTRYLIST(iofVersion="3.0")
+    root = ENTRYLIST(
+        iofVersion="3.0",
+        creator="ooresults (https://pypi.org/project/ooresults)",
+    )
 
     e_event = EVENT()
     e_event.append(NAME(event.get("name", "")))

@@ -46,7 +46,10 @@ def create_competitor_list(competitors: List[Dict]) -> bytes:
     ORGANISATION = E.Organisation
     CONTROLCARD = E.ControlCard
 
-    root = COMPETITORLIST(iofVersion="3.0")
+    root = COMPETITORLIST(
+        iofVersion="3.0",
+        creator="ooresults (https://pypi.org/project/ooresults)",
+    )
 
     for c in competitors:
         competitor = COMPETITOR()
