@@ -70,9 +70,9 @@ def create_course_data(event: Dict, courses: List[Dict], classes: List[Dict]) ->
         course.append(NAME(c["name"]))
 
         if c.get("length", None) is not None:
-            course.append(LENGTH(str(c["length"])))
+            course.append(LENGTH(str(round(c["length"]))))
         if c.get("climb", None) is not None:
-            course.append(CLIMB(str(c["climb"])))
+            course.append(CLIMB(str(round(c["climb"]))))
 
         cc = COURSECONTROL(CONTROL("S1"))
         cc.set("type", "Start")
