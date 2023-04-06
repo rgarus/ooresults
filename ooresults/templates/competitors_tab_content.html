@@ -4,7 +4,7 @@ $def with (competitors_table)
 <div id="Competitors" class="tabcontent">
   <div class="actions">
     <!-- Trigger/Open The Modal -->
-    <button id="comp.myBtnReload" onclick="comp_myReload()">Reload</button>
+    <button id="comp.myBtnReload" onclick="comp_update()">Reload</button>
     <button id="comp.myBtnImport" onclick="comp_myImport()">Import ...</button>
     <button id="comp.myBtnExport" onclick="comp_myExport()">Export ...</button>
     <button id="comp.myBtnAdd" onclick="comp_myAdd()">Add competitor ...</button>
@@ -103,26 +103,6 @@ $def with (competitors_table)
             document.getElementById('comp.myBtnEdit').disabled = false;
             document.getElementById('comp.myBtnDelete').disabled = false;
         }
-    }
-
-    function comp_myReload() {
-        var data = new FormData();
-        data.append('event_id', window.event_id);
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                entr_updateTable(this.responseText)
-            }
-            if (this.readyState == 4 && this.status == 409) {
-                window.alert(this.responseText);
-            }
-            if (this.readyState == 4 && this.status == 500) {
-                window.alert(this.responseText);
-            }
-        };
-        xhr.open("POST", "competitor/update", true);
-        xhr.responseType = "html";
-        xhr.send(data);
     }
 
     function comp_myAdd() {

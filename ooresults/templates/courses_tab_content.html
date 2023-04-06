@@ -4,7 +4,7 @@ $def with (courses_table)
 <div id="Courses" class="tabcontent">
   <div class="actions">
     <!-- Trigger/Open The Modal -->
-    <button id="cou.myBtnReload" onclick="cou_myReload()">Reload</button>
+    <button id="cou.myBtnReload" onclick="cou_update()">Reload</button>
     <button id="cou.myBtnImport" onclick="cou_myImport()">Import ...</button>
     <button id="cou.myBtnExport" onclick="cou_myExport()">Export ...</button>
     <button id="cou.myBtnAdd" onclick="cou_myAdd()">Add course ...</button>
@@ -102,26 +102,6 @@ $def with (courses_table)
             document.getElementById('cou.myBtnEdit').disabled = false;
             document.getElementById('cou.myBtnDelete').disabled = false;
         }
-    }
-
-    function cou_myReload() {
-        var data = new FormData();
-        data.append('event_id', window.event_id);
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                entr_updateTable(this.responseText)
-            }
-            if (this.readyState == 4 && this.status == 409) {
-                window.alert(this.responseText);
-            }
-            if (this.readyState == 4 && this.status == 500) {
-                window.alert(this.responseText);
-            }
-        };
-        xhr.open("POST", "course/update", true);
-        xhr.responseType = "html";
-        xhr.send(data);
     }
 
     function cou_myImport() {
