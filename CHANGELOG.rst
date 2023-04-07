@@ -2,8 +2,8 @@ Changelog
 =========
 
 
-[Unreleased]
-------------
+[0.2.2] - 2023-04-07
+--------------------
 
 Added
 ^^^^^
@@ -19,6 +19,7 @@ Fixed
 ^^^^^
 
 - Fixed error in formatting negative time differences.
+- Reload button of Results tab not working.
 
 
 [0.2.1] - 2023-03-23

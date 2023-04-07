@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ooresults"
-version = "0.2.1"
+version = "0.2.2"
 authors = [
   {name="Rainer Garus"},
 ]
@@ -29,5 +29,5 @@ ooresults-reader = "ooresults._reader:main"
 
 [project.urls]
 Repository = "https://github.com/rgarus/ooresults"
-Documentation = "https://ooresults.readthedocs.io/en/stable"
+Documentation = "https://ooresults.readthedocs.io/en/latest"
 
