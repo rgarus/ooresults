@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from ooresults.handler import results
+from ooresults.handler import build_results
 from ooresults.repo import result_type
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.class_params import ClassParams
@@ -31,7 +31,7 @@ class Class_:
 
 def test_ranking_with_one_class():
     class_a = Class_(name="Bahn A - Lang", params=ClassParams())
-    data = results.build_results(
+    data = build_results.build_results(
         classes=[
             class_a,
         ],
@@ -97,6 +97,7 @@ def test_ranking_with_one_class():
                         status=ResultStatus.OK, time=2001
                     ),
                     "rank": 1,
+                    "time_behind": 0,
                     "points": 1.0,
                 },
                 {
@@ -110,6 +111,7 @@ def test_ranking_with_one_class():
                         status=ResultStatus.OK, time=9876
                     ),
                     "rank": 2,
+                    "time_behind": 9876 - 2001,
                     "points": 2001 / 9876,
                 },
                 {
@@ -142,9 +144,134 @@ def test_ranking_with_one_class():
     ]
 
 
+def test_ranking_with_two_classes():
+    class_a = Class_(name="Bahn A - Lang", params=ClassParams())
+    class_b = Class_(name="Bahn B - Mittel", params=ClassParams())
+    data = build_results.build_results(
+        classes=[
+            class_a,
+            class_b,
+        ],
+        results=[
+            {
+                "first_name": "Angela",
+                "last_name": "Merkel",
+                "gender": "",
+                "year": "",
+                "not_competing": False,
+                "class_": "Bahn A - Lang",
+                "result": result_type.PersonRaceResult(
+                    status=ResultStatus.OK, time=9876
+                ),
+            },
+            {
+                "first_name": "Claudia",
+                "last_name": "Merkel",
+                "gender": "",
+                "year": "",
+                "not_competing": False,
+                "class_": "Bahn B - Mittel",
+                "result": result_type.PersonRaceResult(
+                    status=ResultStatus.OK, time=2001
+                ),
+            },
+            {
+                "first_name": "Birgit",
+                "last_name": "Merkel",
+                "gender": "",
+                "year": "",
+                "not_competing": False,
+                "class_": "Bahn B - Mittel",
+                "result": result_type.PersonRaceResult(
+                    status=ResultStatus.OK, time=2113
+                ),
+            },
+            {
+                "first_name": "Birgit",
+                "last_name": "Derkel",
+                "gender": "",
+                "year": "",
+                "not_competing": False,
+                "class_": "Bahn A - Lang",
+                "result": result_type.PersonRaceResult(
+                    status=ResultStatus.OK, time=3333
+                ),
+            },
+        ],
+    )
+    assert data == [
+        (
+            class_a,
+            [
+                {
+                    "first_name": "Birgit",
+                    "last_name": "Derkel",
+                    "class_": "Bahn A - Lang",
+                    "gender": "",
+                    "year": "",
+                    "not_competing": False,
+                    "result": result_type.PersonRaceResult(
+                        status=ResultStatus.OK, time=3333
+                    ),
+                    "rank": 1,
+                    "time_behind": 0,
+                    "points": 1.0,
+                },
+                {
+                    "first_name": "Angela",
+                    "last_name": "Merkel",
+                    "class_": "Bahn A - Lang",
+                    "gender": "",
+                    "year": "",
+                    "not_competing": False,
+                    "result": result_type.PersonRaceResult(
+                        status=ResultStatus.OK, time=9876
+                    ),
+                    "rank": 2,
+                    "time_behind": 9876 - 3333,
+                    "points": 3333 / 9876,
+                },
+            ],
+        ),
+        (
+            class_b,
+            [
+                {
+                    "first_name": "Claudia",
+                    "last_name": "Merkel",
+                    "class_": "Bahn B - Mittel",
+                    "gender": "",
+                    "year": "",
+                    "not_competing": False,
+                    "result": result_type.PersonRaceResult(
+                        status=ResultStatus.OK, time=2001
+                    ),
+                    "rank": 1,
+                    "time_behind": 0,
+                    "points": 1.0,
+                },
+                {
+                    "first_name": "Birgit",
+                    "last_name": "Merkel",
+                    "class_": "Bahn B - Mittel",
+                    "gender": "",
+                    "year": "",
+                    "not_competing": False,
+                    "result": result_type.PersonRaceResult(
+                        status=ResultStatus.OK, time=2113
+                    ),
+                    "rank": 2,
+                    "time_behind": 2113 - 2001,
+                    "points": 2001 / 2113,
+                },
+            ],
+        ),
+    ]
+
+
 def test_ranking_with_two_winners():
     class_a = Class_(name="Bahn A - Lang", params=ClassParams())
-    data = results.build_results(
+    data = build_results.build_results(
         classes=[
             class_a,
         ],
@@ -199,6 +326,7 @@ def test_ranking_with_two_winners():
                         status=ResultStatus.OK, time=2001
                     ),
                     "rank": 1,
+                    "time_behind": 0,
                     "points": 1.0,
                 },
                 {
@@ -212,6 +340,7 @@ def test_ranking_with_two_winners():
                         status=ResultStatus.OK, time=2001
                     ),
                     "rank": 1,
+                    "time_behind": 0,
                     "points": 1.0,
                 },
                 {
@@ -234,7 +363,7 @@ def test_ranking_with_two_winners():
 
 def test_ranking_entries_with_same_time_are_orderd_by_name():
     class_a = Class_(name="Bahn A - Lang", params=ClassParams())
-    data = results.build_results(
+    data = build_results.build_results(
         classes=[
             class_a,
         ],
@@ -285,7 +414,6 @@ def test_ranking_entries_with_same_time_are_orderd_by_name():
             },
         ],
     )
-    print(data)
     assert data == [
         (
             class_a,
@@ -301,6 +429,7 @@ def test_ranking_entries_with_same_time_are_orderd_by_name():
                         status=ResultStatus.OK, time=2001
                     ),
                     "rank": 1,
+                    "time_behind": 0,
                     "points": 1.0,
                 },
                 {
@@ -314,6 +443,7 @@ def test_ranking_entries_with_same_time_are_orderd_by_name():
                         status=ResultStatus.OK, time=2001
                     ),
                     "rank": 1,
+                    "time_behind": 0,
                     "points": 1.0,
                 },
                 {
@@ -327,6 +457,7 @@ def test_ranking_entries_with_same_time_are_orderd_by_name():
                         status=ResultStatus.OK, time=2001
                     ),
                     "rank": 1,
+                    "time_behind": 0,
                     "points": 1.0,
                 },
                 {
@@ -340,6 +471,7 @@ def test_ranking_entries_with_same_time_are_orderd_by_name():
                         status=ResultStatus.OK, time=2001
                     ),
                     "rank": 1,
+                    "time_behind": 0,
                     "points": 1.0,
                 },
             ],
@@ -349,7 +481,7 @@ def test_ranking_entries_with_same_time_are_orderd_by_name():
 
 def test_ranking_entries_with_same_time_are_orderd_by_name_2():
     class_a = Class_(name="Bahn A - Lang", params=ClassParams(otype="score"))
-    data = results.build_results(
+    data = build_results.build_results(
         classes=[
             class_a,
         ],
@@ -459,7 +591,7 @@ def test_ranking_entries_with_same_time_are_orderd_by_name_2():
 
 def test_ranking_with_not_competing_runners():
     class_a = Class_(name="Bahn A - Lang", params=ClassParams())
-    data = results.build_results(
+    data = build_results.build_results(
         classes=[
             class_a,
         ],
@@ -510,7 +642,6 @@ def test_ranking_with_not_competing_runners():
             },
         ],
     )
-    print(data[0])
     assert data == [
         (
             class_a,
@@ -526,6 +657,7 @@ def test_ranking_with_not_competing_runners():
                         status=ResultStatus.OK, time=9876
                     ),
                     "rank": 1,
+                    "time_behind": 0,
                     "points": 2001 / 2001,
                 },
                 {

@@ -38,7 +38,9 @@ iof_namespace = "http://www.orienteering.org/datastandard/3.0"
 namespaces = {None: iof_namespace}
 
 
-def create_result_list(event: Dict, results: List[Dict]) -> bytes:
+def create_result_list(
+    event: Dict, class_results: List[Tuple[Dict, List[Dict]]]
+) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
     RESULTLIST = E.ResultList
@@ -61,6 +63,7 @@ def create_result_list(event: Dict, results: List[Dict]) -> bytes:
     STARTTIME = E.StartTime
     FINISHTIME = E.FinishTime
     TIME = E.Time
+    TIMEBEHIND = E.TimeBehind
     SPLITTIME = E.SplitTime
     CONTROLCODE = E.ControlCode
 
@@ -75,17 +78,10 @@ def create_result_list(event: Dict, results: List[Dict]) -> bytes:
         e_event.append(STARTTIME(DATE(event["date"].isoformat())))
     root.append(e_event)
 
-    classes: Dict[str, List[Dict]] = {}
-    for result in results:
-        if result["class_"] is not None:
-            if result["class_"] not in classes:
-                classes[result["class_"]] = []
-            classes[result["class_"]].append(result)
-
-    for c in classes:
+    for class_, ranked_results in class_results:
         cr = CLASSRESULT()
-        cr.append(CLASS(NAME(c)))
-        for r in classes[c]:
+        cr.append(CLASS(NAME(class_["name"])))
+        for r in ranked_results:
             pr = PERSONRESULT()
             person = PERSON(
                 NAME(
@@ -122,7 +118,10 @@ def create_result_list(event: Dict, results: List[Dict]) -> bytes:
                 if r["not_competing"]:
                     result.append(STATUS("NotCompeting"))
                 else:
-                    if "rank" in r:
+                    if "time_behind" in r and r["time_behind"] is not None:
+                        result.append(TIMEBEHIND(str(r["time_behind"])))
+
+                    if "rank" in r and r["rank"] is not None:
                         result.append(POSITION(str(r["rank"])))
                     result.append(STATUS("OK"))
             else:

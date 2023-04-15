@@ -19,7 +19,6 @@
 
 import logging
 import argparse
-import copy
 import re
 import base64
 import pathlib
@@ -64,11 +63,7 @@ class Root:
         events = list(model.get_events())
         for event in events:
             if event.publish:
-                classes = list(model.get_classes(event_id=event.id))
-                entry_list = list(model.get_entries(event_id=event.id))
-                class_results = results.build_results(
-                    classes, copy.deepcopy(entry_list)
-                )
+                event, class_results = model.event_class_results(event_id=event.id)
                 columns = results.build_columns(class_results)
                 results_table = render.results_table(event, class_results, columns)
                 return render.root(results_table)
@@ -97,9 +92,7 @@ class Admin:
         classes_tab_content = render.classes_tab_content(classes_table)
         courses_table = render.courses_table(event, [])
         courses_tab_content = render.courses_tab_content(courses_table)
-        results_table = render.results_table(
-            event, ooresults.handler.results.build_results([], []), set()
-        )
+        results_table = render.results_table(event, [], set())
         results_tab_content = render.results_tab_content(results_table)
         series_table = render.series_table(0, [])
         series_tab_content = render.series_tab_content(series_table)

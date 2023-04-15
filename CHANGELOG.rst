@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+
+Calculation of results refactored.
+
+
 [0.2.2] - 2023-04-07
 --------------------
 

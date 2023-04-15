@@ -55,6 +55,8 @@ def test_import_result_list():
         <StartTime>2020-02-09T10:00:00+01:00</StartTime>
         <FinishTime>2020-02-09T10:33:21+01:00</FinishTime>
         <Time>2001</Time>
+        <TimeBehind>0</TimeBehind>
+        <Position>1</Position>
         <Status>OK</Status>
         <SplitTime>
           <ControlCode>31</ControlCode>
@@ -224,6 +226,8 @@ def test_export_result_list():
         <StartTime>2020-02-09T10:00:00+01:00</StartTime>
         <FinishTime>2020-02-09T10:33:21+01:00</FinishTime>
         <Time>2001</Time>
+        <TimeBehind>0</TimeBehind>
+        <Position>1</Position>
         <Status>OK</Status>
         <SplitTime>
           <ControlCode>31</ControlCode>
@@ -257,37 +261,64 @@ def test_export_result_list():
             "date": datetime.date(year=2020, month=2, day=9),
         },
         [
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "class_": "Bahn A - Lang",
-                "club": "OC Kanzleramt",
-                "chip": "1234567",
-                "gender": "F",
-                "year": 1972,
-                "not_competing": False,
-                "result": result_type.PersonRaceResult(
-                    start_time=datetime.datetime(
-                        2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
-                    ),
-                    finish_time=datetime.datetime(
-                        2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1))
-                    ),
-                    status=ResultStatus.OK,
-                    time=2001,
-                    split_times=[
-                        result_type.SplitTime(control_code="31", status="OK", time=501),
-                        result_type.SplitTime(control_code="32", status="OK", time=720),
-                        result_type.SplitTime(control_code="31", status="OK", time=818),
-                        result_type.SplitTime(
-                            control_code="33", status="OK", time=1136
+            (
+                {
+                    "name": "Bahn A - Lang",
+                },
+                [
+                    {
+                        "first_name": "Angela",
+                        "last_name": "Merkel",
+                        "class_": "Bahn A - Lang",
+                        "club": "OC Kanzleramt",
+                        "chip": "1234567",
+                        "gender": "F",
+                        "year": 1972,
+                        "not_competing": False,
+                        "result": result_type.PersonRaceResult(
+                            start_time=datetime.datetime(
+                                2020,
+                                2,
+                                9,
+                                10,
+                                0,
+                                0,
+                                tzinfo=timezone(timedelta(hours=1)),
+                            ),
+                            finish_time=datetime.datetime(
+                                2020,
+                                2,
+                                9,
+                                10,
+                                33,
+                                21,
+                                tzinfo=timezone(timedelta(hours=1)),
+                            ),
+                            status=ResultStatus.OK,
+                            time=2001,
+                            split_times=[
+                                result_type.SplitTime(
+                                    control_code="31", status="OK", time=501
+                                ),
+                                result_type.SplitTime(
+                                    control_code="32", status="OK", time=720
+                                ),
+                                result_type.SplitTime(
+                                    control_code="31", status="OK", time=818
+                                ),
+                                result_type.SplitTime(
+                                    control_code="33", status="OK", time=1136
+                                ),
+                                result_type.SplitTime(
+                                    control_code="31", status="OK", time=1593
+                                ),
+                            ],
                         ),
-                        result_type.SplitTime(
-                            control_code="31", status="OK", time=1593
-                        ),
-                    ],
-                ),
-            },
+                        "time_behind": 0,
+                        "rank": 1,
+                    },
+                ],
+            ),
         ],
     )
     assert document == bytes(content, encoding="utf-8")
@@ -335,95 +366,46 @@ def test_export_result_list_not_competing():
             "date": datetime.date(year=2020, month=2, day=9),
         },
         [
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "class_": "Bahn A - Lang",
-                "club": "OC Kanzleramt",
-                "chip": "1234567",
-                "gender": "F",
-                "year": 1972,
-                "not_competing": True,
-                "result": result_type.PersonRaceResult(
-                    start_time=datetime.datetime(
-                        2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
-                    ),
-                    finish_time=datetime.datetime(
-                        2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1))
-                    ),
-                    status=ResultStatus.OK,
-                    time=2001,
-                ),
-            },
-        ],
-    )
-    assert document == bytes(content, encoding="utf-8")
-
-
-def test_export_result_list_not_competing():
-    content = """\
-<?xml version='1.0' encoding='UTF-8'?>
-<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
-  <Event>
-    <Name>1. O-Cup 2020</Name>
-    <StartTime>
-      <Date>2020-02-09</Date>
-    </StartTime>
-  </Event>
-  <ClassResult>
-    <Class>
-      <Name>Bahn A - Lang</Name>
-    </Class>
-    <PersonResult>
-      <Person sex="F">
-        <Name>
-          <Family>Merkel</Family>
-          <Given>Angela</Given>
-        </Name>
-        <BirthDate>1972-01-01</BirthDate>
-      </Person>
-      <Organisation>
-        <Name>OC Kanzleramt</Name>
-      </Organisation>
-      <Result>
-        <StartTime>2020-02-09T10:00:00+01:00</StartTime>
-        <FinishTime>2020-02-09T10:33:21+01:00</FinishTime>
-        <Time>2001</Time>
-        <Position>1</Position>
-        <Status>OK</Status>
-        <ControlCard punchingSystem="SI">1234567</ControlCard>
-      </Result>
-    </PersonResult>
-  </ClassResult>
-</ResultList>
-"""
-    document = iof_result_list.create_result_list(
-        {
-            "name": "1. O-Cup 2020",
-            "date": datetime.date(year=2020, month=2, day=9),
-        },
-        [
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "class_": "Bahn A - Lang",
-                "club": "OC Kanzleramt",
-                "chip": "1234567",
-                "gender": "F",
-                "year": 1972,
-                "not_competing": False,
-                "rank": 1,
-                "result": result_type.PersonRaceResult(
-                    start_time=datetime.datetime(
-                        2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
-                    ),
-                    finish_time=datetime.datetime(
-                        2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1))
-                    ),
-                    status=ResultStatus.OK,
-                    time=2001,
-                ),
-            },
+            (
+                {
+                    "name": "Bahn A - Lang",
+                },
+                [
+                    {
+                        "first_name": "Angela",
+                        "last_name": "Merkel",
+                        "class_": "Bahn A - Lang",
+                        "club": "OC Kanzleramt",
+                        "chip": "1234567",
+                        "gender": "F",
+                        "year": 1972,
+                        "not_competing": True,
+                        "result": result_type.PersonRaceResult(
+                            start_time=datetime.datetime(
+                                2020,
+                                2,
+                                9,
+                                10,
+                                0,
+                                0,
+                                tzinfo=timezone(timedelta(hours=1)),
+                            ),
+                            finish_time=datetime.datetime(
+                                2020,
+                                2,
+                                9,
+                                10,
+                                33,
+                                21,
+                                tzinfo=timezone(timedelta(hours=1)),
+                            ),
+                            status=ResultStatus.OK,
+                            time=2001,
+                        ),
+                        "rank": None,
+                    },
+                ],
+            ),
         ],
     )
     assert document == bytes(content, encoding="utf-8")
@@ -496,6 +478,8 @@ def test_import_result_list_classes():
         <StartTime>2020-02-09T10:05:00Z</StartTime>
         <FinishTime>2020-02-09T10:25:21Z</FinishTime>
         <Time>1221</Time>
+        <TimeBehind>0</TimeBehind>
+        <Position>1</Position>
         <Status>OK</Status>
         <SplitTime>
           <ControlCode>41</ControlCode>
@@ -697,6 +681,8 @@ def test_export_result_list_classes():
         <StartTime>2020-02-09T10:05:00+00:00</StartTime>
         <FinishTime>2020-02-09T10:25:21+00:00</FinishTime>
         <Time>1221</Time>
+        <TimeBehind>0</TimeBehind>
+        <Position>1</Position>
         <Status>OK</Status>
         <SplitTime>
           <ControlCode>41</ControlCode>
@@ -785,73 +771,111 @@ def test_export_result_list_classes():
             "date": datetime.date(year=2020, month=2, day=9),
         },
         [
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "class_": "Bahn A - Lang",
-                "not_competing": False,
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK,
-                    start_time=datetime.datetime(
-                        2020, 2, 9, 10, 5, 0, tzinfo=timezone.utc
-                    ),
-                    finish_time=datetime.datetime(
-                        2020, 2, 9, 10, 25, 21, tzinfo=timezone.utc
-                    ),
-                    time=1221,
-                    split_times=[
-                        result_type.SplitTime(control_code="41", status="OK", time=301),
-                        result_type.SplitTime(control_code="42", status="OK", time=526),
-                        result_type.SplitTime(control_code="41", status="OK", time=914),
-                        result_type.SplitTime(
-                            control_code="43", status="OK", time=1100
+            (
+                {
+                    "name": "Bahn A - Lang",
+                },
+                [
+                    {
+                        "first_name": "Angela",
+                        "last_name": "Merkel",
+                        "class_": "Bahn A - Lang",
+                        "not_competing": False,
+                        "result": result_type.PersonRaceResult(
+                            status=ResultStatus.OK,
+                            start_time=datetime.datetime(
+                                2020, 2, 9, 10, 5, 0, tzinfo=timezone.utc
+                            ),
+                            finish_time=datetime.datetime(
+                                2020, 2, 9, 10, 25, 21, tzinfo=timezone.utc
+                            ),
+                            time=1221,
+                            split_times=[
+                                result_type.SplitTime(
+                                    control_code="41", status="OK", time=301
+                                ),
+                                result_type.SplitTime(
+                                    control_code="42", status="OK", time=526
+                                ),
+                                result_type.SplitTime(
+                                    control_code="41", status="OK", time=914
+                                ),
+                                result_type.SplitTime(
+                                    control_code="43", status="OK", time=1100
+                                ),
+                            ],
                         ),
-                    ],
-                ),
-            },
-            {
-                "first_name": "Claudia",
-                "last_name": "Merkel",
-                "class_": "Bahn B - Mittel",
-                "chip": "1234567",
-                "not_competing": False,
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.MISSING_PUNCH,
-                    start_time=datetime.datetime(
-                        2020, 2, 9, 10, 0, 0, tzinfo=timezone.utc
-                    ),
-                    finish_time=datetime.datetime(
-                        2020, 2, 9, 10, 33, 21, tzinfo=timezone.utc
-                    ),
-                    time=2001,
-                    split_times=[
-                        result_type.SplitTime(control_code="31", status="OK", time=501),
-                        result_type.SplitTime(control_code="32", status="Missing"),
-                        result_type.SplitTime(control_code="31", status="Missing"),
-                        result_type.SplitTime(
-                            control_code="33", status="Additional", time=1136
+                        "time_behind": 0,
+                        "rank": 1,
+                    },
+                    {
+                        "first_name": "Birgit",
+                        "last_name": "Merkel",
+                        "class_": "Bahn A - Lang",
+                        "not_competing": False,
+                        "result": result_type.PersonRaceResult(
+                            status=ResultStatus.DID_NOT_FINISH,
+                            start_time=datetime.datetime(
+                                2020, 2, 9, 10, 6, 0, tzinfo=timezone.utc
+                            ),
+                            split_times=[
+                                result_type.SplitTime(
+                                    control_code="41", status="OK", time=501
+                                ),
+                                result_type.SplitTime(
+                                    control_code="42", status="OK", time=720
+                                ),
+                                result_type.SplitTime(
+                                    control_code="41", status="Missing"
+                                ),
+                                result_type.SplitTime(
+                                    control_code="43", status="Missing"
+                                ),
+                            ],
                         ),
-                    ],
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Merkel",
-                "class_": "Bahn A - Lang",
-                "not_competing": False,
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.DID_NOT_FINISH,
-                    start_time=datetime.datetime(
-                        2020, 2, 9, 10, 6, 0, tzinfo=timezone.utc
-                    ),
-                    split_times=[
-                        result_type.SplitTime(control_code="41", status="OK", time=501),
-                        result_type.SplitTime(control_code="42", status="OK", time=720),
-                        result_type.SplitTime(control_code="41", status="Missing"),
-                        result_type.SplitTime(control_code="43", status="Missing"),
-                    ],
-                ),
-            },
+                        "rank": None,
+                    },
+                ],
+            ),
+            (
+                {
+                    "name": "Bahn B - Mittel",
+                },
+                [
+                    {
+                        "first_name": "Claudia",
+                        "last_name": "Merkel",
+                        "class_": "Bahn B - Mittel",
+                        "chip": "1234567",
+                        "not_competing": False,
+                        "result": result_type.PersonRaceResult(
+                            status=ResultStatus.MISSING_PUNCH,
+                            start_time=datetime.datetime(
+                                2020, 2, 9, 10, 0, 0, tzinfo=timezone.utc
+                            ),
+                            finish_time=datetime.datetime(
+                                2020, 2, 9, 10, 33, 21, tzinfo=timezone.utc
+                            ),
+                            time=2001,
+                            split_times=[
+                                result_type.SplitTime(
+                                    control_code="31", status="OK", time=501
+                                ),
+                                result_type.SplitTime(
+                                    control_code="32", status="Missing"
+                                ),
+                                result_type.SplitTime(
+                                    control_code="31", status="Missing"
+                                ),
+                                result_type.SplitTime(
+                                    control_code="33", status="Additional", time=1136
+                                ),
+                            ],
+                        ),
+                        "rank": None,
+                    },
+                ],
+            ),
         ],
     )
     assert document == bytes(content, encoding="utf-8")

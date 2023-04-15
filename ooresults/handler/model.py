@@ -20,6 +20,7 @@
 import asyncio
 import datetime
 import pathlib
+import copy
 import json
 from typing import Optional
 from typing import List
@@ -29,6 +30,7 @@ from typing import Tuple
 import iso8601
 import jsonschema
 
+from ooresults.handler import build_results
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import TransactionMode
@@ -910,3 +912,58 @@ def get_series_settings() -> Settings:
 def update_series_settings(settings: Settings) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.update_series_settings(settings=settings)
+
+
+def event_class_results(event_id: int) -> Tuple[Dict, List[Tuple[Dict, List[Dict]]]]:
+    with db.transaction():
+        event = list(db.get_event(id=event_id))
+        event = event[0] if event != [] else {}
+
+        classes = list(db.get_classes(event_id=event_id))
+        entry_list = list(db.get_entries(event_id=event_id))
+
+    class_results = build_results.build_results(
+        classes=classes,
+        results=copy.deepcopy(entry_list),
+    )
+    return event, class_results
+
+
+def create_event_list(events):
+    # filter list
+    e_list = [e for e in events if e.series is not None]
+    # sort list
+    e_list.sort(key=lambda e: e.series)
+    e_list.sort(key=lambda e: e.date)
+    return e_list
+
+
+def build_series_result():
+    with db.transaction():
+        settings = db.get_series_settings()
+        # build event list
+        events = list(db.get_events())
+        events = create_event_list(events=events)
+
+        list_of_results = []
+        organizers = []
+        for i, event in enumerate(events):
+            classes = list(db.get_classes(event_id=event.id))
+            entry_list = list(db.get_entries(event_id=event.id))
+            class_results = build_results.build_results(
+                classes=classes,
+                results=copy.deepcopy(entry_list),
+            )
+            list_of_results.append(class_results)
+            organizers.append([e for e in entry_list if e.class_ == "Organizer"])
+
+    ranked_classes = build_results.build_total_results(
+        settings=settings,
+        list_of_results=list_of_results,
+        organizers=organizers,
+    )
+    return (
+        settings,
+        events,
+        ranked_classes,
+    )

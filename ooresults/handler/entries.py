@@ -117,7 +117,7 @@ class Import:
             raise web.conflict("No event selected or event deleted")
 
         except Exception as e:
-            raise web.Conflict(str(e))
+            raise web.conflict(str(e))
 
         return update(event_id)
 
@@ -133,9 +133,8 @@ class Export:
                 entry_list = model.get_entries(event_id=event_id)
                 content = iof_entry_list.create_entry_list(event[0], entry_list)
             elif data.entr_export == "entr.export.2":
-                event = model.get_event(id=event_id)
-                entry_list = model.get_entries(event_id=event_id)
-                content = iof_result_list.create_result_list(event[0], entry_list)
+                event, class_results = model.event_class_results(event_id=event_id)
+                content = iof_result_list.create_result_list(event, class_results)
             elif data.entr_export == "entr.export.3":
                 class_list = model.get_classes(event_id=event_id)
                 entry_list = model.get_entries(event_id=event_id)
@@ -147,9 +146,9 @@ class Export:
 
         except KeyError:
             raise web.conflict("Entry deleted")
-        except:
-            logging.exception("Internal server error")
-            raise
+        except Exception as e:
+            logging.exception(e)
+            raise web.conflict("Internal server error")
 
         return content
 

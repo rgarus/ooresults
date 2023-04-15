@@ -21,7 +21,8 @@ from decimal import Decimal
 
 import pytest
 
-from ooresults.handler import series
+from ooresults.handler import build_results
+from ooresults.handler import model
 from ooresults.repo import result_type
 from ooresults.repo import series_type
 
@@ -65,33 +66,33 @@ def event_5():
 
 def test_use_only_events_in_series(event_1, event_2, event_3):
     events = [event_1, event_2, event_3]
-    data = series.create_event_list(events=events)
+    data = model.create_event_list(events=events)
     assert data == [event_3, event_1]
 
 
 def test_sort_events_by_date(event_1, event_3, event_5):
     events = [event_1, event_3, event_5]
-    data = series.create_event_list(events=events)
+    data = model.create_event_list(events=events)
     assert data == [event_5, event_3, event_1]
 
     events = [event_1, event_3, event_5]
-    data = series.create_event_list(events=events)
+    data = model.create_event_list(events=events)
     assert data == [event_5, event_3, event_1]
 
 
 def test_sort_events_by_name_if_dates_are_equal(event_3, event_4):
     events = [event_3, event_4]
-    data = series.create_event_list(events=events)
+    data = model.create_event_list(events=events)
     assert data == [event_3, event_4]
 
     events = [event_4, event_3]
-    data = series.create_event_list(events=events)
+    data = model.create_event_list(events=events)
     assert data == [event_3, event_4]
 
 
 def test_no_results():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
@@ -132,7 +133,7 @@ def test_no_results():
 
 def test_best_3_of_1_race():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(
             nr_of_best_results=3,
         ),
@@ -177,7 +178,7 @@ def test_best_3_of_1_race():
 
 def test_best_3_of_2_races():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(
             nr_of_best_results=3,
         ),
@@ -238,7 +239,7 @@ def test_best_3_of_2_races():
 
 def test_best_3_of_4_races():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(
             nr_of_best_results=3,
         ),
@@ -336,7 +337,7 @@ def test_best_3_of_4_races():
 
 def test_bonus_1_race():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
@@ -386,7 +387,7 @@ def test_bonus_1_race():
 
 def test_bonus_2_races():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
@@ -453,7 +454,7 @@ def test_bonus_2_races():
 
 def test_bonus_4_races():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(
             nr_of_best_results=3,
         ),
@@ -561,7 +562,7 @@ def test_bonus_4_races():
 
 def test_ranking_1():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
@@ -623,7 +624,7 @@ def test_ranking_1():
 
 def test_ranking_2():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
@@ -692,7 +693,7 @@ def test_ranking_2():
 
 def test_ranking_3():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
@@ -770,7 +771,7 @@ def test_ranking_3():
 
 def test_if_sum_is_0_then_rank_is_None():
     class_a = Class_(name="Bahn A - Lang")
-    data = series.build_total_results(
+    data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
