@@ -264,6 +264,9 @@ def test_export_result_list():
             (
                 {
                     "name": "Bahn A - Lang",
+                    "course_length": None,
+                    "course_climb": None,
+                    "number_of_controls": None,
                 },
                 [
                     {
@@ -369,6 +372,9 @@ def test_export_result_list_not_competing():
             (
                 {
                     "name": "Bahn A - Lang",
+                    "course_length": None,
+                    "course_climb": None,
+                    "number_of_controls": None,
                 },
                 [
                     {
@@ -670,6 +676,11 @@ def test_export_result_list_classes():
     <Class>
       <Name>Bahn A - Lang</Name>
     </Class>
+    <Course>
+      <Length>5100</Length>
+      <Climb>110</Climb>
+      <NumberOfControls>10</NumberOfControls>
+    </Course>
     <PersonResult>
       <Person>
         <Name>
@@ -733,6 +744,9 @@ def test_export_result_list_classes():
     <Class>
       <Name>Bahn B - Mittel</Name>
     </Class>
+    <Course>
+      <Length>2800</Length>
+    </Course>
     <PersonResult>
       <Person>
         <Name>
@@ -774,6 +788,9 @@ def test_export_result_list_classes():
             (
                 {
                     "name": "Bahn A - Lang",
+                    "course_length": 5100.0,
+                    "course_climb": 110.0,
+                    "number_of_controls": 10,
                 },
                 [
                     {
@@ -840,6 +857,9 @@ def test_export_result_list_classes():
             (
                 {
                     "name": "Bahn B - Mittel",
+                    "course_length": 2800.0,
+                    "course_climb": None,
+                    "number_of_controls": 0,
                 },
                 [
                     {

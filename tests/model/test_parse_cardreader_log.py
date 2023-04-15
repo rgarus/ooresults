@@ -54,11 +54,11 @@ def test_parse_with_start_time_and_with_finish_time():
     assert d["controlCard"] == "123"
     assert d["result"].start_time == s1
     assert d["result"].finish_time == f1
-    assert d["result"].punched_clear_time == None
-    assert d["result"].punched_check_time == None
+    assert d["result"].punched_clear_time is None
+    assert d["result"].punched_check_time is None
     assert d["result"].punched_start_time == s1
     assert d["result"].punched_finish_time == f1
-    assert d["result"].time == None
+    assert d["result"].time is None
     assert d["result"].status == ResultStatus.FINISHED
     assert len(d["result"].split_times) == 2
     assert d["result"].split_times[0] == SplitTime(
@@ -90,13 +90,13 @@ def test_parse_without_start_time_and_with_finish_time():
     assert d["entryType"] == "cardRead"
     assert d["entryTime"] == e1
     assert d["controlCard"] == "123"
-    assert d["result"].start_time == None
+    assert d["result"].start_time is None
     assert d["result"].finish_time == f1
-    assert d["result"].punched_clear_time == None
-    assert d["result"].punched_check_time == None
-    assert d["result"].punched_start_time == None
+    assert d["result"].punched_clear_time is None
+    assert d["result"].punched_check_time is None
+    assert d["result"].punched_start_time is None
     assert d["result"].punched_finish_time == f1
-    assert d["result"].time == None
+    assert d["result"].time is None
     assert d["result"].status == ResultStatus.FINISHED
     assert len(d["result"].split_times) == 2
     assert d["result"].split_times[0] == SplitTime(
@@ -129,12 +129,12 @@ def test_parse_with_start_time_and_without_finish_time():
     assert d["entryTime"] == e1
     assert d["controlCard"] == "123"
     assert d["result"].start_time == s1
-    assert d["result"].finish_time == None
-    assert d["result"].punched_clear_time == None
-    assert d["result"].punched_check_time == None
+    assert d["result"].finish_time is None
+    assert d["result"].punched_clear_time is None
+    assert d["result"].punched_check_time is None
     assert d["result"].punched_start_time == s1
-    assert d["result"].punched_finish_time == None
-    assert d["result"].time == None
+    assert d["result"].punched_finish_time is None
+    assert d["result"].time is None
     assert d["result"].status == ResultStatus.FINISHED
     assert len(d["result"].split_times) == 2
     assert d["result"].split_times[0] == SplitTime(
@@ -164,13 +164,13 @@ def test_parse_without_start_time_and_without_finish_time():
     assert d["entryType"] == "cardRead"
     assert d["entryTime"] == e1
     assert d["controlCard"] == "123"
-    assert d["result"].start_time == None
-    assert d["result"].finish_time == None
-    assert d["result"].punched_clear_time == None
-    assert d["result"].punched_check_time == None
-    assert d["result"].punched_start_time == None
-    assert d["result"].punched_finish_time == None
-    assert d["result"].time == None
+    assert d["result"].start_time is None
+    assert d["result"].finish_time is None
+    assert d["result"].punched_clear_time is None
+    assert d["result"].punched_check_time is None
+    assert d["result"].punched_start_time is None
+    assert d["result"].punched_finish_time is None
+    assert d["result"].time is None
     assert d["result"].status == ResultStatus.FINISHED
     assert len(d["result"].split_times) == 2
     assert d["result"].split_times[0] == SplitTime(
@@ -202,13 +202,13 @@ def test_parse_with_clear_time():
     assert d["entryType"] == "cardRead"
     assert d["entryTime"] == e1
     assert d["controlCard"] == "123"
-    assert d["result"].start_time == None
-    assert d["result"].finish_time == None
+    assert d["result"].start_time is None
+    assert d["result"].finish_time is None
     assert d["result"].punched_clear_time == cl
-    assert d["result"].punched_check_time == None
-    assert d["result"].punched_start_time == None
-    assert d["result"].punched_finish_time == None
-    assert d["result"].time == None
+    assert d["result"].punched_check_time is None
+    assert d["result"].punched_start_time is None
+    assert d["result"].punched_finish_time is None
+    assert d["result"].time is None
     assert d["result"].status == ResultStatus.FINISHED
     assert len(d["result"].split_times) == 2
     assert d["result"].split_times[0] == SplitTime(
@@ -240,13 +240,13 @@ def test_parse_with_check_time():
     assert d["entryType"] == "cardRead"
     assert d["entryTime"] == e1
     assert d["controlCard"] == "123"
-    assert d["result"].start_time == None
-    assert d["result"].finish_time == None
-    assert d["result"].punched_clear_time == None
+    assert d["result"].start_time is None
+    assert d["result"].finish_time is None
+    assert d["result"].punched_clear_time is None
     assert d["result"].punched_check_time == ch
-    assert d["result"].punched_start_time == None
-    assert d["result"].punched_finish_time == None
-    assert d["result"].time == None
+    assert d["result"].punched_start_time is None
+    assert d["result"].punched_finish_time is None
+    assert d["result"].time is None
     assert d["result"].status == ResultStatus.FINISHED
     assert len(d["result"].split_times) == 2
     assert d["result"].split_times[0] == SplitTime(
@@ -277,11 +277,11 @@ def test_parse_without_controls():
     assert d["controlCard"] == "123"
     assert d["result"].start_time == s1
     assert d["result"].finish_time == f1
-    assert d["result"].punched_clear_time == None
-    assert d["result"].punched_check_time == None
+    assert d["result"].punched_clear_time is None
+    assert d["result"].punched_check_time is None
     assert d["result"].punched_start_time == s1
     assert d["result"].punched_finish_time == f1
-    assert d["result"].time == None
+    assert d["result"].time is None
     assert d["result"].status == ResultStatus.FINISHED
     assert len(d["result"].split_times) == 0
     assert d["result"].split_times == []
@@ -323,11 +323,11 @@ def test_parse_with_many_controls():
     assert d["controlCard"] == "123"
     assert d["result"].start_time == s1
     assert d["result"].finish_time == f1
-    assert d["result"].punched_clear_time == None
-    assert d["result"].punched_check_time == None
+    assert d["result"].punched_clear_time is None
+    assert d["result"].punched_check_time is None
     assert d["result"].punched_start_time == s1
     assert d["result"].punched_finish_time == f1
-    assert d["result"].time == None
+    assert d["result"].time is None
     assert d["result"].status == ResultStatus.FINISHED
     assert len(d["result"].split_times) == 7
     assert d["result"].split_times[0] == SplitTime(

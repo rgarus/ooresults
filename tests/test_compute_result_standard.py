@@ -432,11 +432,11 @@ def test_given_result_status_is_disqualified_when_compute_result_then_result_sta
     )
 
     result.compute_result(controls=controls, class_params=class_params)
-    assert result.start_time == None
-    assert result.punched_start_time == None
+    assert result.start_time is None
+    assert result.punched_start_time is None
     assert result.finish_time == f1
     assert result.punched_finish_time == f1
-    assert result.time == None
+    assert result.time is None
     assert result.status == ResultStatus.DISQUALIFIED
     assert len(result.split_times) == 3
     assert result.split_times[0] == SplitTime(
@@ -451,8 +451,8 @@ def test_given_result_status_is_disqualified_when_compute_result_then_result_sta
     if otype == "score":
         assert len(result.extensions) == 3
         assert result.extensions["score_controls"] == 3
-        assert result.extensions["score_overtime"] == None
-        assert result.extensions["score"] == None
+        assert result.extensions["score_overtime"] is None
+        assert result.extensions["score"] is None
 
 
 @pytest.mark.parametrize("otype", ["standard", "net", "score"])
@@ -545,11 +545,11 @@ def test_compute_result_status_no_start_time(otype):
     )
 
     result.compute_result(controls=controls, class_params=class_params)
-    assert result.start_time == None
-    assert result.punched_start_time == None
+    assert result.start_time is None
+    assert result.punched_start_time is None
     assert result.finish_time == f1
     assert result.punched_finish_time == f1
-    assert result.time == None
+    assert result.time is None
     assert result.status == ResultStatus.MISSING_PUNCH
     assert len(result.split_times) == 3
     assert result.split_times[0] == SplitTime(
@@ -564,8 +564,8 @@ def test_compute_result_status_no_start_time(otype):
     if otype == "score":
         assert len(result.extensions) == 3
         assert result.extensions["score_controls"] == 3
-        assert result.extensions["score_overtime"] == None
-        assert result.extensions["score"] == None
+        assert result.extensions["score_overtime"] is None
+        assert result.extensions["score"] is None
 
 
 @pytest.mark.parametrize("otype", ["standard", "net", "score"])
@@ -596,9 +596,9 @@ def test_compute_result_status_no_finish_time(otype):
     result.compute_result(controls=controls, class_params=class_params)
     assert result.start_time == s1
     assert result.punched_start_time == s1
-    assert result.finish_time == None
-    assert result.punched_finish_time == None
-    assert result.time == None
+    assert result.finish_time is None
+    assert result.punched_finish_time is None
+    assert result.time is None
     assert result.status == ResultStatus.DID_NOT_FINISH
     assert len(result.split_times) == 3
     assert result.split_times[0] == SplitTime(
@@ -632,11 +632,11 @@ def test_given_no_punches_and_old_status_is_dns_when_compute_result_then_new_sta
     )
 
     result.compute_result(controls=controls, class_params=class_params)
-    assert result.start_time == None
-    assert result.punched_start_time == None
-    assert result.finish_time == None
-    assert result.punched_finish_time == None
-    assert result.time == None
+    assert result.start_time is None
+    assert result.punched_start_time is None
+    assert result.finish_time is None
+    assert result.punched_finish_time is None
+    assert result.time is None
     assert result.status == ResultStatus.DID_NOT_START
     assert len(result.split_times) == 2
     assert result.split_times[0] == SplitTime(
@@ -672,11 +672,11 @@ def test_given_no_punches_and_old_status_is_inactive_when_compute_result_then_ne
     )
 
     result.compute_result(controls=controls, class_params=class_params)
-    assert result.start_time == None
-    assert result.punched_start_time == None
-    assert result.finish_time == None
-    assert result.punched_finish_time == None
-    assert result.time == None
+    assert result.start_time is None
+    assert result.punched_start_time is None
+    assert result.finish_time is None
+    assert result.punched_finish_time is None
+    assert result.time is None
     assert result.status == ResultStatus.INACTIVE
     assert len(result.split_times) == 0
     if otype == "score":
@@ -974,7 +974,7 @@ def test_compute_result_use_personal_start_time_if_using_start_control_is_if_pun
 
     result.compute_result(controls=controls, class_params=class_params, start_time=p1)
     assert result.start_time == p1
-    assert result.punched_start_time == None
+    assert result.punched_start_time is None
     assert result.finish_time == f1
     assert result.punched_finish_time == f1
     assert result.time == int((f1 - p1).total_seconds())

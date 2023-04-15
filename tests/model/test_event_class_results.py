@@ -53,9 +53,9 @@ def course_a(db, event):
     id = db.add_course(
         event_id=event["id"],
         name="Bahn A",
-        length=4500,
-        climb=90,
-        controls=["101", "102", "103"],
+        length=3700,
+        climb=110,
+        controls=["101", "102", "103", "104"],
     )
     item = db.get_course(id=id)[0]
     return copy.deepcopy(item)
@@ -68,7 +68,7 @@ def course_b(db, event):
         name="Bahn B",
         length=4500,
         climb=90,
-        controls=["101", "102", "103"],
+        controls=["101", "103"],
     )
     item = db.get_course(id=id)[0]
     return copy.deepcopy(item)
@@ -227,8 +227,14 @@ def test_event_class_results(
 
     del class_a["event_id"]
     class_a["course"] = "Bahn A"
+    class_a["course_length"] = 3700
+    class_a["course_climb"] = 110
+    class_a["number_of_controls"] = 4
     del class_b["event_id"]
     class_b["course"] = "Bahn B"
+    class_b["course_length"] = 4500
+    class_b["course_climb"] = 90
+    class_b["number_of_controls"] = 2
 
     entry_1["rank"] = 2
     entry_1["time_behind"] = 9876 - 3333

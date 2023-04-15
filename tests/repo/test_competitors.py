@@ -110,8 +110,8 @@ def test_get_competitors_after_adding_one_competitor(db, competitor_1_id, club_i
     assert c[0].id == competitor_1_id
     assert c[0].first_name == "Jogi"
     assert c[0].last_name == "Löw"
-    assert c[0].club_id == None
-    assert c[0].club_name == None
+    assert c[0].club_id is None
+    assert c[0].club_name is None
     assert c[0].gender == "M"
     assert c[0].year is None
     assert c[0].chip == ""
@@ -127,8 +127,8 @@ def test_get_competitors_after_adding_two_competitors(
     assert c[0].id == competitor_1_id
     assert c[0].first_name == "Jogi"
     assert c[0].last_name == "Löw"
-    assert c[0].club_id == None
-    assert c[0].club_name == None
+    assert c[0].club_id is None
+    assert c[0].club_name is None
     assert c[0].gender == "M"
     assert c[0].year is None
     assert c[0].chip == ""
@@ -148,7 +148,7 @@ def test_get_first_added_competitor(db, competitor_1_id, competitor_2_id, club_i
     assert c[0].id == competitor_1_id
     assert c[0].first_name == "Jogi"
     assert c[0].last_name == "Löw"
-    assert c[0].club_id == None
+    assert c[0].club_id is None
     assert c[0].gender == "M"
     assert c[0].year is None
     assert c[0].chip == ""
@@ -215,16 +215,16 @@ def test_update_last_added_competitor(db, competitor_1_id, competitor_2_id, club
     assert c[0].id == competitor_2_id
     assert c[0].first_name == "Anton"
     assert c[0].last_name == "Berkel"
-    assert c[0].club_id == None
-    assert c[0].club_name == None
+    assert c[0].club_id is None
+    assert c[0].club_name is None
     assert c[0].gender == "M"
     assert c[0].year == 1958
     assert c[0].chip == ""
     assert c[1].id == competitor_1_id
     assert c[1].first_name == "Jogi"
     assert c[1].last_name == "Löw"
-    assert c[1].club_id == None
-    assert c[1].club_name == None
+    assert c[1].club_id is None
+    assert c[1].club_name is None
     assert c[1].gender == "M"
     assert c[1].year is None
     assert c[1].chip == ""
@@ -246,16 +246,16 @@ def test_add_competitor_with_same_first_name(db, competitor_1_id, club_id):
     assert c[0].id == competitor_2_id
     assert c[0].first_name == "Jogi"
     assert c[0].last_name == "Berkel"
-    assert c[0].club_id == None
-    assert c[0].club_name == None
+    assert c[0].club_id is None
+    assert c[0].club_name is None
     assert c[0].gender == "M"
     assert c[0].year == 1958
     assert c[0].chip == ""
     assert c[1].id == competitor_1_id
     assert c[1].first_name == "Jogi"
     assert c[1].last_name == "Löw"
-    assert c[1].club_id == None
-    assert c[1].club_name == None
+    assert c[1].club_id is None
+    assert c[1].club_name is None
     assert c[1].gender == "M"
     assert c[1].year is None
     assert c[1].chip == ""
@@ -277,16 +277,16 @@ def test_add_competitor_with_same_last_name(db, competitor_1_id, club_id):
     assert c[0].id == competitor_1_id
     assert c[0].first_name == "Jogi"
     assert c[0].last_name == "Löw"
-    assert c[0].club_id == None
-    assert c[0].club_name == None
+    assert c[0].club_id is None
+    assert c[0].club_name is None
     assert c[0].gender == "M"
     assert c[0].year is None
     assert c[0].chip == ""
     assert c[1].id == competitor_2_id
     assert c[1].first_name == "Norbert"
     assert c[1].last_name == "Löw"
-    assert c[1].club_id == None
-    assert c[1].club_name == None
+    assert c[1].club_id is None
+    assert c[1].club_name is None
     assert c[1].gender == "M"
     assert c[1].year == 1958
     assert c[1].chip == ""
@@ -313,8 +313,8 @@ def test_delete_last_added_competitor(db, competitor_1_id, competitor_2_id, club
     assert c[0].id == competitor_1_id
     assert c[0].first_name == "Jogi"
     assert c[0].last_name == "Löw"
-    assert c[0].club_id == None
-    assert c[0].club_name == None
+    assert c[0].club_id is None
+    assert c[0].club_name is None
     assert c[0].gender == "M"
     assert c[0].year is None
     assert c[0].chip == ""
@@ -365,8 +365,8 @@ def test_delete_competitor_with_unknown_id_do_not_change_anything(db, competitor
     assert c[0].id == competitor_1_id
     assert c[0].first_name == "Jogi"
     assert c[0].last_name == "Löw"
-    assert c[0].club_id == None
-    assert c[0].club_name == None
+    assert c[0].club_id is None
+    assert c[0].club_name is None
     assert c[0].gender == "M"
     assert c[0].year is None
     assert c[0].chip == ""

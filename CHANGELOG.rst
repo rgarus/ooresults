@@ -8,7 +8,7 @@ Changelog
 Changed
 ^^^^^^^
 
-Calculation of results refactored.
+Course data, Position and TimeBehind added to IOF ResultList export.
 
 
 [0.2.2] - 2023-04-07

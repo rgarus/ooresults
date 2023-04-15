@@ -182,6 +182,9 @@ class SqliteRepo(Repo):
             "classes.short_name,"
             "courses.id,"
             "courses.name,"
+            "courses.length,"
+            "courses.climb,"
+            "courses.controls,"
             "classes.params "
             "FROM classes "
             "LEFT JOIN courses ON classes.course_id = courses.id "
@@ -190,9 +193,15 @@ class SqliteRepo(Repo):
         )
         values.names[values.names.index("id", 1)] = "course_id"
         values.names[values.names.index("name", 2)] = "course"
+        values.names[values.names.index("length", 1)] = "course_length"
+        values.names[values.names.index("climb", 1)] = "course_climb"
+        values.names[values.names.index("controls", 1)] = "number_of_controls"
         values = list(values)
         for c in values:
             c.params = UnpicklerZoneInfo(io.BytesIO(c.params)).load()
+            if c.number_of_controls is not None:
+                controls = UnpicklerZoneInfo(io.BytesIO(c.number_of_controls)).load()
+                c.number_of_controls = len(controls)
         return values
 
     def get_class(self, id: int):

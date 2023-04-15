@@ -50,6 +50,10 @@ def create_result_list(
     DATE = E.Date
     CLASSRESULT = E.ClassResult
     CLASS = E.Class
+    COURSE = E.Course
+    LENGTH = E.Length
+    CLIMB = E.Climb
+    NUMBEROFCONTROLS = E.NumberOfControls
     PERSONRESULT = E.PersonResult
     PERSON = E.Person
     FAMILY = E.Family
@@ -81,6 +85,20 @@ def create_result_list(
     for class_, ranked_results in class_results:
         cr = CLASSRESULT()
         cr.append(CLASS(NAME(class_["name"])))
+
+        co = COURSE()
+        if class_["course_length"] is not None:
+            co.append(LENGTH(str(round(class_["course_length"]))))
+        if class_["course_climb"] is not None:
+            co.append(CLIMB(str(round(class_["course_climb"]))))
+        if (
+            class_["number_of_controls"] is not None
+            and class_["number_of_controls"] > 0
+        ):
+            co.append(NUMBEROFCONTROLS(str(class_["number_of_controls"])))
+        if len(co):
+            cr.append(co)
+
         for r in ranked_results:
             pr = PERSONRESULT()
             person = PERSON(

@@ -209,15 +209,21 @@ def test_import_course_data_add_not_existing_class(
     assert len(cl) == 2
     assert cl[0].id != cl[1].id
     assert cl[0].name == "Beginners"
-    assert cl[0].short_name == None
-    assert cl[0].course_id == None
-    assert cl[0].course == None
+    assert cl[0].short_name is None
+    assert cl[0].course_id is None
+    assert cl[0].course is None
+    assert cl[0].course_length is None
+    assert cl[0].course_climb is None
+    assert cl[0].number_of_controls is None
     assert cl[0].params == ClassParams()
     assert cl[1].id == class_1_id
     assert cl[1].name == "Elite Men"
     assert cl[1].short_name == "E Men"
     assert cl[1].course_id == course_1_id
     assert cl[1].course == "Bahn A"
+    assert cl[1].course_length == 4500
+    assert cl[1].course_climb == 90
+    assert cl[1].number_of_controls == 3
     assert cl[1].params == ClassParams()
 
 
@@ -259,12 +265,18 @@ def test_import_course_data_update_class_course_assignment(
     assert cl[0].short_name == "E Men"
     assert cl[0].course_id == co[1].id
     assert cl[0].course == "Bahn B"
+    assert cl[0].course_length == 3900
+    assert cl[0].course_climb == 120
+    assert cl[0].number_of_controls == 2
     assert cl[0].params == ClassParams()
     assert cl[1].id == class_2_id
     assert cl[1].name == "Elite Women"
     assert cl[1].short_name == "E Women"
     assert cl[1].course_id is None
     assert cl[1].course is None
+    assert cl[1].course_length is None
+    assert cl[1].course_climb is None
+    assert cl[1].number_of_controls is None
     assert cl[1].params == ClassParams()
 
 
@@ -293,6 +305,9 @@ def test_import_course_data_remove_class_course_assigment(
     assert cl[0].short_name == "E Men"
     assert cl[0].course_id is None
     assert cl[0].course is None
+    assert cl[0].course_length is None
+    assert cl[0].course_climb is None
+    assert cl[0].number_of_controls is None
     assert cl[0].params == ClassParams()
 
 
@@ -342,32 +357,44 @@ def test_import_course_data_update_or_add_class_course_assigments(
     assert co[0].controls == ["101", "102"]
     assert co[1].id != co[0].id
     assert co[1].name == "Bahn B"
-    assert co[1].length == None
-    assert co[1].climb == None
+    assert co[1].length is None
+    assert co[1].climb is None
     assert co[1].controls == ["104"]
 
     cl = list(model.get_classes(event_id=event_id))
     assert len(cl) == 4
     assert cl[0].id not in (cl[2], cl[3])
     assert cl[0].name == "Beginners"
-    assert cl[0].course_id == None
-    assert cl[0].course == None
+    assert cl[0].course_id is None
+    assert cl[0].course is None
+    assert cl[0].course_length is None
+    assert cl[0].course_climb is None
+    assert cl[0].number_of_controls is None
     assert cl[0].params == ClassParams()
     assert cl[1].id not in (cl[2], cl[3])
     assert cl[1].name == "Elite"
-    assert cl[1].short_name == None
+    assert cl[1].short_name is None
     assert cl[1].course_id == co[1].id
     assert cl[1].course == "Bahn B"
+    assert cl[1].course_length is None
+    assert cl[1].course_climb is None
+    assert cl[1].number_of_controls == 1
     assert cl[1].params == ClassParams()
     assert cl[2].id == class_1_id
     assert cl[2].name == "Elite Men"
     assert cl[2].short_name == "E Men"
     assert cl[2].course_id == co[1].id
     assert cl[2].course == "Bahn B"
+    assert cl[2].course_length is None
+    assert cl[2].course_climb is None
+    assert cl[2].number_of_controls == 1
     assert cl[2].params == ClassParams()
     assert cl[3].id == class_2_id
     assert cl[3].name == "Elite Women"
     assert cl[3].short_name == "E Women"
     assert cl[3].course_id == course_1_id
     assert cl[3].course == "Bahn A"
+    assert cl[3].course_length == 4800
+    assert cl[3].course_climb == 120
+    assert cl[3].number_of_controls == 2
     assert cl[3].params == ClassParams()

@@ -722,12 +722,18 @@ def test_import_entries_empty_db(db, event_2_id):
     assert classes[0].short_name is None
     assert classes[0].course_id is None
     assert classes[0].course is None
+    assert classes[0].course_length is None
+    assert classes[0].course_climb is None
+    assert classes[0].number_of_controls is None
     assert classes[0].params == ClassParams()
 
     assert classes[1].name == "Class 2"
     assert classes[1].short_name is None
     assert classes[1].course_id is None
     assert classes[1].course is None
+    assert classes[1].course_length is None
+    assert classes[1].course_climb is None
+    assert classes[1].number_of_controls is None
     assert classes[1].params == ClassParams()
 
     clubs = list(db.get_clubs())
