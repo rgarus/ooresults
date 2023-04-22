@@ -8,7 +8,8 @@ Changelog
 Changed
 ^^^^^^^
 
-Course data, Position and TimeBehind added to IOF ResultList export.
+- Course data, Position and TimeBehind added to IOF ResultList export.
+- Documentation improved.
 
 
 [0.2.2] - 2023-04-07
