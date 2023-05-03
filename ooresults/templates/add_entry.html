@@ -42,8 +42,9 @@ $def format_date(time):
                            value="$(str(entry.year) if entry.year is not None else '')" onchange="mark_label(this)"/></td>
             </tr>
             <tr>
+                $ readonly = "readonly" if [r for r in results if r['key'] == -1] else ""
                 <th class="input-header"><label for="chip">Chip</label></th>
-                <td><input id="chip" name="chip" type="text" value="$entry.chip" onchange="mark_label(this)"/></td>
+                <td><input id="chip" name="chip" type="text" value="$entry.chip" onchange="mark_label(this)" $readonly/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="club">Club</label></th>

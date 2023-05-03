@@ -68,6 +68,9 @@ Year
 Chip
 
    Nummer der SPORTident Card, die der Teilnehmer beim Lauf verwenden will / verwendet hat.
+   
+   Eine Änderung der Nummer ist nicht möglich, wenn dem Teilnehmer das ausgelesene Ergebnis
+   einer Sportident Card zugeordnet ist.
 
 
 Club
