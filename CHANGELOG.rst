@@ -8,7 +8,7 @@ Changelog
 Fixed
 ^^^^^
 
-- Changing a chip number is no longer possible if the entry is assigned a readout result of a SPORTident card.
+- Changing a chip number or setting the status DNS is no longer possible if the entry is assigned a readout result of a SPORTident card.
 
 
 [0.2.3] - 2023-04-23

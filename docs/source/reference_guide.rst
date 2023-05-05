@@ -115,6 +115,9 @@ Status
    - **DNS (did not started)**:
    
      Der Läufer ist nicht gestartet.
+     
+     Dieser Zustand kann nicht gesetzt werden, wenn dem Teilnehmer das ausgelesene Ergebnis
+     einer Sportident Card zugeordnet ist.
 
    - **DNF (did not finished)**:
    

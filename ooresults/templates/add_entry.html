@@ -91,11 +91,12 @@ $def format_date(time):
             <tr>
                 <th class="input-header"><label for="status">Status</label></th>
                 <td>
+                    $ has_no_result = [r for r in results if r['key'] == -1] == []
                     <select id="status" name="status" onchange="mark_label(this)">
                     $for status in list(ResultStatus):
                         $if status == entry.result.status:
                             <option value="$status.value" selected>$MAP_STATUS[status]</option>
-                        $else:
+                        $elif has_no_result or status not in (ResultStatus.INACTIVE, ResultStatus.DID_NOT_START):
                             <option value="$status.value">$MAP_STATUS[status]</option>
                     </select>
                 </td>
