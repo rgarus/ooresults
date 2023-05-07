@@ -614,37 +614,70 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, Dict, Dict
             raise EventNotFoundError(f'Event for key "{event_key}" not found')
 
         if item["entryType"] == "cardRead":
-            entries = db.get_entries(event_id=event.id)
-            entries_controlcard = [
-                e
-                for e in entries
-                if e.class_id is not None and e.chip == item["controlCard"]
-            ]
             result = item["result"]
 
-            if len(entries_controlcard) == 1:
-                entry = entries_controlcard[0]
-                try:
-                    class_ = db.get_class(id=entry["class_id"])[0]
-                    course_id = class_["course_id"]
-                    class_params = class_["params"]
-                    controls = db.get_course(id=course_id)[0]["controls"]
-                except:
-                    class_params = ClassParams()
-                    controls = []
+            entries = db.get_entries(event_id=event.id)
+            entries_controlcard = [e for e in entries if e.chip == item["controlCard"]]
+            assigned_entries = [e for e in entries_controlcard if e.class_ is not None]
+            unassigned_entries = [e for e in entries_controlcard if e.class_ is None]
 
-                result.compute_result(
-                    controls=controls,
-                    class_params=class_params,
-                    start_time=entry.start.start_time,
-                    year=int(entry.get("year", None))
-                    if entry.get("year", None) is not None
-                    else None,
-                    gender=entry.get("gender", None),
-                )
+            for entry in assigned_entries:
+                r = entry["result"]
+                if r is not None and r.same_punches(other=result):
+                    # result exists and is assigned to a competitor => nothing to do
+                    res = {
+                        "entryTime": item["entryTime"],
+                        "eventId": event.id,
+                        "controlCard": entry["chip"],
+                        "firstName": entry["first_name"],
+                        "lastName": entry["last_name"],
+                        "club": entry["club"],
+                        "class": entry["class_"],
+                        "status": r["status"],
+                        "time": r.extensions.get("running_time", r["time"]),
+                        "error": None,
+                        "missingControls": missing_controls(result=r),
+                    }
+                    break
+            else:
+                # check if result is already read out
+                unassigned_entry = None
+                for entry in unassigned_entries:
+                    if entry["result"].same_punches(other=result):
+                        unassigned_entry = entry
+                        break
 
-                # do not update another existing result
-                if not entry.result.has_punches():
+                # result can be assigned to an entry if
+                #   (1) there is exactly one entry without result
+                #   (2) there is no unassigned entry or one unassigned entry with same result
+                if (
+                    len(assigned_entries) == 1
+                    and not assigned_entries[0]["result"].has_punches()
+                    and (
+                        len(unassigned_entries) == 0
+                        or len(unassigned_entries) == 1
+                        and unassigned_entries[0]["result"].same_punches(other=result)
+                    )
+                ):
+                    entry = assigned_entries[0]
+                    try:
+                        class_ = db.get_class(id=entry["class_id"])[0]
+                        course_id = class_["course_id"]
+                        class_params = class_["params"]
+                        controls = db.get_course(id=course_id)[0]["controls"]
+                    except:
+                        class_params = ClassParams()
+                        controls = []
+
+                    result.compute_result(
+                        controls=controls,
+                        class_params=class_params,
+                        start_time=entry.start.start_time,
+                        year=int(entry.get("year", None))
+                        if entry.get("year", None) is not None
+                        else None,
+                        gender=entry.get("gender", None),
+                    )
                     db.update_entry_result(
                         id=entry["id"],
                         chip=entry["chip"],
@@ -664,77 +697,21 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, Dict, Dict
                         "error": None,
                         "missingControls": missing_controls(result=result),
                     }
+
+                    # if there is an unassigned entry with the same result, delete it
+                    if unassigned_entries == [unassigned_entry]:
+                        db.delete_entry(id=unassigned_entry.id)
+
                 else:
-                    # do not create a new entry if an entry with same result already exist
-                    if entry.result == result:
-                        res = {
-                            "entryTime": item["entryTime"],
-                            "eventId": event.id,
-                            "controlCard": entry["chip"],
-                            "firstName": entry["first_name"],
-                            "lastName": entry["last_name"],
-                            "club": entry["club"],
-                            "class": entry["class_"],
-                            "status": result["status"],
-                            "time": result.extensions.get(
-                                "running_time", result["time"]
-                            ),
-                            "error": None,
-                            "missingControls": missing_controls(result=result),
-                        }
-                    else:
-                        result.status = ResultStatus.FINISHED
-                        result.compute_result(controls=[], class_params=ClassParams())
+                    # create a new unassigned entry
+                    result.compute_result(controls=[], class_params=ClassParams())
+                    if unassigned_entry is None:
                         db.add_entry_result(
                             event_id=event.id,
                             chip=item["controlCard"],
                             result=result,
                             start_time=None,
                         )
-                        res = {
-                            "entryTime": item["entryTime"],
-                            "eventId": event.id,
-                            "controlCard": item["controlCard"],
-                            "firstName": None,
-                            "lastName": None,
-                            "club": None,
-                            "class": None,
-                            "status": result["status"],
-                            "time": None,
-                            "error": "There is already a result",
-                        }
-
-            else:
-                result.compute_result(controls=[], class_params=ClassParams())
-                # do not create a new entry if an entry with same results already exist
-                for entry in [
-                    e
-                    for e in entries
-                    if e.class_id is None and e.chip == item["controlCard"]
-                ]:
-                    if entry.result == result:
-                        res = {
-                            "entryTime": item["entryTime"],
-                            "eventId": event.id,
-                            "controlCard": entry["chip"],
-                            "firstName": entry["first_name"],
-                            "lastName": entry["last_name"],
-                            "club": entry["club"],
-                            "class": entry["class_"],
-                            "status": result["status"],
-                            "time": result.extensions.get(
-                                "running_time", result["time"]
-                            ),
-                            "missingControls": missing_controls(result=result),
-                        }
-                        break
-                else:
-                    db.add_entry_result(
-                        event_id=event.id,
-                        chip=item["controlCard"],
-                        result=result,
-                        start_time=None,
-                    )
                     res = {
                         "entryTime": item["entryTime"],
                         "eventId": event.id,
@@ -746,10 +723,12 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, Dict, Dict
                         "status": result["status"],
                         "time": None,
                     }
-                if entries_controlcard == []:
-                    res["error"] = "Control card unknown"
-                else:
-                    res["error"] = "Control card assigned several times"
+                    if len(assigned_entries) == 0:
+                        res["error"] = "Control card unknown"
+                    elif len(assigned_entries) >= 2:
+                        res["error"] = "There are several entries for this card"
+                    else:
+                        res["error"] = "There are other results for this card"
 
         elif item["entryType"] == "cardInserted":
             res = {"eventId": event.id, "controlCard": item["controlCard"]}

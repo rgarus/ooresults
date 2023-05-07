@@ -9,6 +9,7 @@ Fixed
 ^^^^^
 
 - Changing a chip number or setting the status DNS is no longer possible if the entry is assigned a readout result of a SPORTident card.
+- The readout result of a SPORTident card should only automatically assigned to an entry if no other result is available for this card.
 
 
 [0.2.3] - 2023-04-23

@@ -17,6 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from __future__ import annotations
+
 import dataclasses
 from datetime import datetime
 import enum
@@ -112,6 +114,22 @@ class PersonRaceResult:
             self.punched_start_time is not None
             or self.punched_finish_time is not None
             or [p for p in self.split_times if p.status != "Missing"] != []
+        )
+
+    def same_punches(self, other: PersonRaceResult) -> bool:
+        return (
+            self.punched_start_time == other.punched_start_time
+            and self.punched_finish_time == other.punched_finish_time
+            and [
+                (p.control_code, p.punch_time)
+                for p in self.split_times
+                if p.status != "Missing"
+            ]
+            == [
+                (p.control_code, p.punch_time)
+                for p in other.split_times
+                if p.status != "Missing"
+            ]
         )
 
     def voided_legs(self) -> List[str]:
