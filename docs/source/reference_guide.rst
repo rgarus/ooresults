@@ -70,7 +70,7 @@ Chip
    Nummer der SPORTident Card, die der Teilnehmer beim Lauf verwenden will / verwendet hat.
    
    Eine Änderung der Nummer ist nicht möglich, wenn dem Teilnehmer das ausgelesene Ergebnis
-   einer Sportident Card zugeordnet ist.
+   einer SPORTident Card zugeordnet ist.
 
 
 Club
@@ -117,7 +117,7 @@ Status
      Der Läufer ist nicht gestartet.
      
      Dieser Zustand kann nicht gesetzt werden, wenn dem Teilnehmer das ausgelesene Ergebnis
-     einer Sportident Card zugeordnet ist.
+     einer SPORTident Card zugeordnet ist.
 
    - **DNF (did not finished)**:
    
