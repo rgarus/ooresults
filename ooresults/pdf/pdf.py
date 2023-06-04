@@ -19,6 +19,7 @@
 
 import pathlib
 from datetime import datetime
+from typing import Dict
 
 from fpdf import FPDF
 
@@ -42,6 +43,8 @@ class PDF(FPDF):
         super().__init__(font_cache_dir=None, orientation=orientation)
         self.name = name
         self.creation_time = datetime.now()
+        self.set_creator(creator="https://pypi.org/project/ooresults")
+        self.set_producer(producer="https://pypi.org/project/ooresults")
 
         self.fonts_dir = pathlib.Path(__file__).parent / "fonts"
         self.add_font(
@@ -82,3 +85,24 @@ class PDF(FPDF):
             w=0, h=10, txt=self.creation_time.strftime("%Y-%m-%d %H:%M:%S"), align="L"
         )
         self.cell(w=0, h=10, txt=f"Page {self.page_no()}/{{nb}}", align="R")
+
+    def course_data(self, class_: Dict) -> str:
+        #
+        # compute course data string:
+        # course length - course climb - number of controls
+        #
+        s = ""
+        for attr in ("course_length", "course_climb"):
+            if attr in class_ and class_[attr] is not None:
+                if s != "":
+                    s += " - "
+                s += str(round(class_[attr])) + " m"
+        if (
+            "number_of_controls" in class_
+            and class_["number_of_controls"] is not None
+            and class_["number_of_controls"] > 0
+        ):
+            if s != "":
+                s += " - "
+            s += str(class_["number_of_controls"]) + " Posten"
+        return s

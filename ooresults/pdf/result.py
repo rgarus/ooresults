@@ -132,6 +132,12 @@ def create_pdf(
             if voided_legs:
                 pdf.cell(txt=f'(Voided legs: {", ".join(voided_legs)})')
 
+        # course data
+        course_data = pdf.course_data(class_)
+        if course_data:
+            pdf.set_x(x=max(pdf.get_x() + 15, 100))
+            pdf.cell(txt=course_data)
+
         pdf.ln()
         pdf.ln()
         pdf.set_font(family="Carlito", style="I", size=10)

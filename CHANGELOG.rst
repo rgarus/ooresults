@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+
+- Printing of results and split times improved (e.g. course data added)
+
+
 [0.2.4] - 2023-05-07
 --------------------
 
