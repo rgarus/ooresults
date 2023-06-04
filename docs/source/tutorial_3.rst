@@ -12,10 +12,15 @@ Anzeige der Ergebnisse
 
 1. Anklicken des Registerblatts "Results"
 
-Mit den Funktionen "Print results ..." bzw. "Print Splittimes ... " können PDF-Dateien
+Mit den Funktionen "Print results ..." bzw. "Print split times ... " können PDF-Dateien
 mit den Ergebnissen bzw. Zwischenzeiten erstellt werden.
 
 .. image:: images/results_1_edited.png
+
+.. note::
+
+   Ein Exportieren der Ergebnisse in verschiedene Formate (einschliesslich IOF XML 3.0 ResultList)
+   ist über die Funktion "Export ..." im Registerblatt "Entries" möglich.
 
 
 Berechnung und Anzeige des Gesamtergebnis

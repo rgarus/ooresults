@@ -146,6 +146,11 @@ Für die Tutorial-Wettkämpfe wird eine Bahn mit den Kontrollstationen "121-124-
 
 .. image:: images/course_2.png
 
+.. note::
+
+   Anstatt die Bahndaten manuell einzugeben können die Bahndaten auch mit der Funktion "Import ..." importiert werden.
+   Die Bahndaten müssen dazu im Format IOF XML 3.0 CourseData vorliegen.
+
 
 Anlegen der Kategorien
 ----------------------
