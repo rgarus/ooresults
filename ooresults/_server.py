@@ -44,6 +44,7 @@ from ooresults.handler import model
 from ooresults.handler import results
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.user import Users
+from ooresults.utils import rental_cards
 from ooresults.utils.globals import t_globals
 from ooresults.websocket_server.websocket_handler import WebSocketHandler
 from ooresults.websocket_server.websocket_server import WebSocketServer
@@ -285,6 +286,8 @@ def main() -> Optional[int]:
         print(f'Error in file {str(main_path / "config.ini")}:')
         print(f"  {str(e)}")
         return 2
+
+    rental_cards.read_rental_cards(path=main_path / "rental_cards.txt")
 
     try:
         model.db = SqliteRepo(

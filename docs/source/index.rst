@@ -24,6 +24,7 @@ Die Bedienung erfolgt mit Hilfe eines aktuellen Webbrowser (Chrome, Firefox, Edg
    tutorial_silva
    reference_guide
    configuration
+   additional_functions
    faq
    
 

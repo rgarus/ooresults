@@ -2,13 +2,22 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Added
+^^^^^
+
+- Control cards can be marked as rental cards in the table data of the "Entries" and "SI reader" tabs.
+
+
 [0.2.5] - 2023-06-05 
 --------------------
 
 Changed
 ^^^^^^^
 
-- Printing of results and split times improved (e.g. course data added)
+- Printing of results and split times improved (e.g. course data added).
 
 
 [0.2.4] - 2023-05-07

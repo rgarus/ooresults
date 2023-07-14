@@ -20,6 +20,7 @@
 from typing import Optional
 
 from ooresults.repo.result_type import ResultStatus
+from ooresults.utils.rental_cards import format_card
 
 
 MAP_STATUS = {
@@ -53,4 +54,5 @@ t_globals = {
     "MAP_STATUS": MAP_STATUS,
     "EXPERIMENTAL": EXPERIMENTAL,
     "minutes_seconds": minutes_seconds,
+    "format_card": format_card,
 }

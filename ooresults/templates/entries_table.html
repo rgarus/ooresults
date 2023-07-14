@@ -67,7 +67,7 @@ $def format_date(time):
                 <td class="dt" id="entr_table_lastname">$competitor.get('last_name', '')</td>
                 <td class="dt">$competitor.get('gender', '')</td>
                 <td class="dt">$format_year(competitor.get('year', None))</td>
-                <td class="dt" style="text-align:right">$competitor.get('chip', '')</td>
+                <td class="dt" style="text-align:right">$format_card(competitor.get('chip', ''))</td>
                 <td class="dt">$competitor.get('club', '')</td>
                 <td class="dt">$competitor.get('class_', '')</td>
                 <td class="dt" style="text-align: center;">$('X' if competitor.get('not_competing', False) else '')</td>
