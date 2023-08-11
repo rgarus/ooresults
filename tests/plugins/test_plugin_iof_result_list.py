@@ -23,6 +23,7 @@ from datetime import timedelta
 
 from ooresults.plugins import iof_result_list
 from ooresults.repo import result_type
+from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
 
 
@@ -256,10 +257,15 @@ def test_export_result_list():
 </ResultList>
 """
     document = iof_result_list.create_result_list(
-        {
-            "name": "1. O-Cup 2020",
-            "date": datetime.date(year=2020, month=2, day=9),
-        },
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=datetime.date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
         [
             (
                 {
@@ -364,10 +370,15 @@ def test_export_result_list_not_competing():
 </ResultList>
 """
     document = iof_result_list.create_result_list(
-        {
-            "name": "1. O-Cup 2020",
-            "date": datetime.date(year=2020, month=2, day=9),
-        },
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=datetime.date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
         [
             (
                 {
@@ -450,10 +461,15 @@ def test_export_result_list_without_class_result():
 </ResultList>
 """
     document = iof_result_list.create_result_list(
-        {
-            "name": "1. O-Cup 2020",
-            "date": datetime.date(year=2020, month=2, day=9),
-        },
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=datetime.date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
         [],
     )
     assert document == bytes(content, encoding="utf-8")
@@ -780,10 +796,15 @@ def test_export_result_list_classes():
 </ResultList>
 """
     document = iof_result_list.create_result_list(
-        {
-            "name": "1. O-Cup 2020",
-            "date": datetime.date(year=2020, month=2, day=9),
-        },
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=datetime.date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
         [
             (
                 {

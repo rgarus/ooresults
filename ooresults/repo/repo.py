@@ -24,6 +24,7 @@ from typing import Dict
 from typing import List
 
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.event_type import EventType
 from ooresults.repo import result_type
 from ooresults.repo import series_type
 
@@ -268,10 +269,10 @@ class Repo:
     ) -> None:
         raise NotImplementedError
 
-    def get_events(self) -> List:
+    def get_events(self) -> List[EventType]:
         raise NotImplementedError
 
-    def get_event(self, id: int) -> List:
+    def get_event(self, id: int) -> EventType:
         raise NotImplementedError
 
     def add_event(
@@ -281,7 +282,7 @@ class Repo:
         key: Optional[str],
         publish: bool,
         series: Optional[str],
-        fields: List[str] = [],
+        fields: List[str],
     ) -> int:
         raise NotImplementedError
 
@@ -293,7 +294,7 @@ class Repo:
         key: Optional[str],
         publish: bool,
         series: Optional[str],
-        fields: List[str] = [],
+        fields: List[str],
     ) -> None:
         raise NotImplementedError
 

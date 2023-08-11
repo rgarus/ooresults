@@ -1,7 +1,5 @@
 $def with (status, event, messages)
 
-$ date = event.get('date', '') if event is not None else ''
-
 $code
     def format(time: int) -> str:
         if time is not None and time > 0:
@@ -54,11 +52,11 @@ $code
     <table style="text-align: left">
         <tr>
             <th style="padding-right: 10px">Event name:</th>
-            <td>$(event.get('name', '') if event is not None else '')</td>
+            <td>$(event.name if event else '')</td>
         </tr>
         <tr>
             <th style="padding-right: 10px">Event date:</th>
-            <td>$(date.isoformat() if date != '' else '')</td>
+            <td>$(event.date.isoformat() if event and event.date else '')</td>
         </tr>
     </table>
 </div>
@@ -80,7 +78,7 @@ $code
         </thead>
         <tbody>
         $for result in messages:
-            $if event.get('id', -1) == result.get('eventId', '-2'):
+            $if event and event.id == result.get('eventId', '-2'):
                 <tr class="dt" style="background-color: $color(result.get('status'))">
                     <td class="dt">$result.get('entryTime', '')</td>
                     <td class="dt" style="text-align:right">$format_card(result.get('controlCard'))</td>

@@ -21,6 +21,7 @@ import datetime
 
 from ooresults.plugins import iof_entry_list
 from ooresults.repo import result_type
+from ooresults.repo.event_type import EventType
 
 
 def test_import_entry_list_with_one_entry():
@@ -99,10 +100,15 @@ def test_export_entry_list_with_one_entry():
 </EntryList>
 """
     document = iof_entry_list.create_entry_list(
-        {
-            "name": "1. O-Cup 2020",
-            "date": datetime.date(year=2020, month=2, day=9),
-        },
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=datetime.date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
         [
             {
                 "first_name": "Angela",
@@ -152,10 +158,15 @@ def test_export_entry_list_without_person_entries():
 </EntryList>
 """
     document = iof_entry_list.create_entry_list(
-        {
-            "name": "1. O-Cup 2020",
-            "date": datetime.date(year=2020, month=2, day=9),
-        },
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=datetime.date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
         [],
     )
     assert document == bytes(content, encoding="utf-8")
@@ -293,10 +304,15 @@ def test_export_entry_list_with_several_entries():
 </EntryList>
 """
     document = iof_entry_list.create_entry_list(
-        {
-            "name": "1. O-Cup 2020",
-            "date": datetime.date(year=2020, month=2, day=9),
-        },
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=datetime.date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
         [
             {
                 "first_name": "Angela",

@@ -37,11 +37,14 @@ render = web.template.render(templates, globals=t_globals)
 
 def update(event_id: int):
     courses_list = model.get_courses(event_id=event_id)
-    event = list(model.get_event(event_id))
-    if event == []:
-        return render.courses_table({}, courses_list)
-    else:
-        return render.courses_table(event[0], courses_list)
+    try:
+        event = model.get_event(id=event_id)
+        return render.courses_table(event, courses_list)
+    except EventNotFoundError:
+        raise web.conflict("Event deleted")
+    except:
+        logging.exception("Internal server error")
+        raise
 
 
 class Update:
@@ -49,7 +52,7 @@ class Update:
         """Update data"""
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
-        return update(event_id)
+        return update(event_id=event_id)
 
 
 class Import:
@@ -68,7 +71,7 @@ class Import:
                 )
 
         except EventNotFoundError:
-            raise web.conflict("No event selected or event deleted")
+            raise web.conflict("Event deleted")
         except Exception as e:
             raise web.Conflict(str(e))
 
@@ -85,10 +88,10 @@ class Export:
                 event = model.get_event(id=event_id)
                 courses = model.get_courses(event_id=event_id)
                 classes = model.get_classes(event_id=event_id)
-                content = iof_course_data.create_course_data(event[0], courses, classes)
+                content = iof_course_data.create_course_data(event, courses, classes)
 
-        except KeyError:
-            raise web.conflict("Entry deleted")
+        except EventNotFoundError:
+            raise web.conflict("Event deleted")
         except:
             logging.exception("Internal server error")
             raise
@@ -126,7 +129,7 @@ class Add:
                 )
 
         except EventNotFoundError:
-            raise web.conflict("No event selected or event deleted")
+            raise web.conflict("Event deleted")
         except ConstraintError as e:
             raise web.conflict(str(e))
         except KeyError:
@@ -172,7 +175,7 @@ class FillEditForm:
             else:
                 course = model.get_course(id=int(data.id))[0]
         except EventNotFoundError:
-            raise web.conflict("No event selected or event deleted")
+            raise web.conflict("Event deleted")
         except KeyError:
             raise web.conflict("Course deleted")
         except:

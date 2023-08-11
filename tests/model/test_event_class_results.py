@@ -43,15 +43,16 @@ def event(db):
         key="4711",
         publish=False,
         series=None,
+        fields=[],
     )
-    item = db.get_event(id=id)[0]
+    item = db.get_event(id=id)
     return copy.deepcopy(item)
 
 
 @pytest.fixture
 def course_a(db, event):
     id = db.add_course(
-        event_id=event["id"],
+        event_id=event.id,
         name="Bahn A",
         length=3700,
         climb=110,
@@ -64,7 +65,7 @@ def course_a(db, event):
 @pytest.fixture
 def course_b(db, event):
     id = db.add_course(
-        event_id=event["id"],
+        event_id=event.id,
         name="Bahn B",
         length=4500,
         climb=90,
@@ -77,7 +78,7 @@ def course_b(db, event):
 @pytest.fixture
 def class_a(db, event, course_a):
     id = db.add_class(
-        event_id=event["id"],
+        event_id=event.id,
         name="Bahn A - Lang",
         short_name="Bahn A - Lang",
         course_id=course_a["id"],
@@ -90,7 +91,7 @@ def class_a(db, event, course_a):
 @pytest.fixture
 def class_b(db, event, course_b):
     id = db.add_class(
-        event_id=event["id"],
+        event_id=event.id,
         name="Bahn B - Mittel",
         short_name="Bahn B - Mittel",
         course_id=course_b["id"],
@@ -103,7 +104,7 @@ def class_b(db, event, course_b):
 @pytest.fixture
 def entry_1(db, event, class_a):
     id = db.add_entry(
-        event_id=event["id"],
+        event_id=event.id,
         competitor_id=None,
         first_name="Angela",
         last_name="Merkel",
@@ -133,7 +134,7 @@ def entry_1(db, event, class_a):
 @pytest.fixture
 def entry_2(db, event, class_b):
     id = db.add_entry(
-        event_id=event["id"],
+        event_id=event.id,
         competitor_id=None,
         first_name="Claudia",
         last_name="Merkel",
@@ -163,7 +164,7 @@ def entry_2(db, event, class_b):
 @pytest.fixture
 def entry_3(db, event, class_b):
     id = db.add_entry(
-        event_id=event["id"],
+        event_id=event.id,
         competitor_id=None,
         first_name="Birgit",
         last_name="Merkel",
@@ -193,7 +194,7 @@ def entry_3(db, event, class_b):
 @pytest.fixture
 def entry_4(db, event, class_a):
     id = db.add_entry(
-        event_id=event["id"],
+        event_id=event.id,
         competitor_id=None,
         first_name="Birgit",
         last_name="Derkel",
@@ -223,7 +224,7 @@ def entry_4(db, event, class_a):
 def test_event_class_results(
     db, event, class_a, class_b, course_a, course_b, entry_1, entry_2, entry_3, entry_4
 ):
-    m_event, m_class_results = model.event_class_results(event_id=event["id"])
+    m_event, m_class_results = model.event_class_results(event_id=event.id)
 
     del class_a["event_id"]
     class_a["course"] = "Bahn A"

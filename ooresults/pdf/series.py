@@ -23,11 +23,12 @@ from typing import Any
 from typing import Optional
 
 from ooresults.pdf.pdf import PDF
+from ooresults.repo.event_type import EventType
 from ooresults.repo.series_type import Settings
 
 
 def create_pdf(
-    settings: Settings, events: List, results: List, landscape: bool = False
+    settings: Settings, events: List[EventType], results: List, landscape: bool = False
 ) -> bytes:
     W_SPACE = 3
     W_RANK = 9

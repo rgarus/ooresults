@@ -47,12 +47,15 @@ render = web.template.render(templates, globals=t_globals)
 
 
 def update(event_id: int):
-    entry_list = model.get_entries(event_id)
-    event = list(model.get_event(event_id))
-    if event == []:
-        return render.entries_table({}, entry_list)
-    else:
-        return render.entries_table(event[0], entry_list)
+    entry_list = model.get_entries(event_id=event_id)
+    try:
+        event = model.get_event(id=event_id)
+        return render.entries_table(event, entry_list)
+    except EventNotFoundError:
+        raise web.conflict("Event deleted")
+    except:
+        logging.exception("Internal server error")
+        raise
 
 
 class Update:
@@ -60,7 +63,7 @@ class Update:
         """Update data"""
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
-        return update(event_id)
+        return update(event_id=event_id)
 
 
 class Import:
@@ -69,15 +72,14 @@ class Import:
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
         try:
-            event = {}
             if data.entr_import == "entr.import.1":
-                event, entries = iof_entry_list.parse_entry_list(data.browse1)
+                _, entries = iof_entry_list.parse_entry_list(data.browse1)
                 model.import_entries(event_id=event_id, entries=entries)
             elif data.entr_import == "entr.import.2":
-                event, entries = iof_result_list.parse_result_list(data.browse2)
+                _, entries = iof_result_list.parse_result_list(data.browse2)
                 model.import_entries(event_id=event_id, entries=entries)
             elif data.entr_import == "entr.import.3":
-                event = model.get_event(id=event_id)[0]
+                event = model.get_event(id=event_id)
                 entries = oe2003.parse(content=data.browse3)
 
                 tz = tzlocal.get_localzone()
@@ -114,10 +116,12 @@ class Import:
                 model.import_entries(event_id=event_id, entries=entries)
 
         except EventNotFoundError:
-            raise web.conflict("No event selected or event deleted")
-
+            raise web.conflict("Event deleted")
         except Exception as e:
             raise web.conflict(str(e))
+        except:
+            logging.exception("Internal server error")
+            raise
 
         return update(event_id)
 
@@ -131,7 +135,7 @@ class Export:
             if data.entr_export == "entr.export.1":
                 event = model.get_event(id=event_id)
                 entry_list = model.get_entries(event_id=event_id)
-                content = iof_entry_list.create_entry_list(event[0], entry_list)
+                content = iof_entry_list.create_entry_list(event, entry_list)
             elif data.entr_export == "entr.export.2":
                 event, class_results = model.event_class_results(event_id=event_id)
                 content = iof_result_list.create_result_list(event, class_results)
@@ -144,10 +148,10 @@ class Export:
                 entry_list = model.get_entries(event_id=event_id)
                 content = oe12.create(entry_list, list(class_list))
 
-        except KeyError:
-            raise web.conflict("Entry deleted")
-        except Exception as e:
-            logging.exception(e)
+        except EventNotFoundError:
+            raise web.conflict("Event deleted")
+        except:
+            logging.exception()
             raise web.conflict("Internal server error")
 
         return content
@@ -172,12 +176,12 @@ class Add:
 
     def POST(self):
         """Add or edit entry"""
-        data = web.input()
-        print(data)
-        event_id = int(data.event_id) if data.event_id != "" else -1
-        event = model.get_event(id=event_id)[0]
-
         try:
+            data = web.input()
+            print(data)
+            event_id = int(data.event_id) if data.event_id != "" else -1
+            event = model.get_event(id=event_id)
+
             entered_start_time = self.parse_start_time(data.start_time, event.date)
 
             fields = {}
@@ -209,7 +213,7 @@ class Add:
             )
 
         except EventNotFoundError:
-            raise web.conflict("No event selected or event deleted")
+            raise web.conflict("Event deleted")
         except ConstraintError as e:
             raise web.conflict(str(e))
         except KeyError:
@@ -246,10 +250,11 @@ class FillEditForm:
 
     def POST(self):
         """Query data to fill add or edit form"""
-        data = web.input()
-        event_id = int(data.event_id) if data.event_id != "" else -1
-        event = model.get_event(id=event_id)[0]
         try:
+            data = web.input()
+            event_id = int(data.event_id) if data.event_id != "" else -1
+            event = model.get_event(id=event_id)
+
             results = []
             if data.id == "":
                 entry = Storage(
@@ -282,7 +287,7 @@ class FillEditForm:
             classes = model.get_classes(event_id=event_id)
             clubs = model.get_clubs()
         except EventNotFoundError:
-            raise web.conflict("No event selected or event deleted")
+            raise web.conflict("Event deleted")
         except KeyError:
             raise web.conflict("Entry deleted")
         except:
@@ -309,7 +314,7 @@ class FillResultForm:
         try:
             entry = model.get_entry(int(data.id))[0]
         except EventNotFoundError:
-            raise web.conflict("No event selected or event deleted")
+            raise web.conflict("Event deleted")
         except KeyError:
             raise web.conflict("Entry deleted")
         except:

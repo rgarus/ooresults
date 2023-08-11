@@ -1,16 +1,15 @@
 $def with (event, courses)
 
-$ date = event.get('date', '')
 
 <div id="cou.event">
     <table style="text-align: left">
         <tr>
             <th style="padding-right: 10px">Event name:</th>
-            <td>$event.get('name', '')</td>
+            <td>$(event.name if event is not None else '')</td>
         </tr>
         <tr>
             <th style="padding-right: 10px">Event date:</th>
-            <td>$(date.isoformat() if date != '' else '')</td>
+            <td>$(event.date.isoformat() if event is not None else '')</td>
         </tr>
     </table>
 </div>

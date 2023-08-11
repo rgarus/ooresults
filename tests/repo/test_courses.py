@@ -39,6 +39,7 @@ def event_id(db):
         key=None,
         publish=False,
         series=True,
+        fields=[],
     )
 
 

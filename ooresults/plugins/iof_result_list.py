@@ -27,6 +27,7 @@ from lxml.builder import ElementMaker
 import iso8601
 
 from ooresults.repo import result_type
+from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
 
 
@@ -39,7 +40,7 @@ namespaces = {None: iof_namespace}
 
 
 def create_result_list(
-    event: Dict, class_results: List[Tuple[Dict, List[Dict]]]
+    event: EventType, class_results: List[Tuple[Dict, List[Dict]]]
 ) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
@@ -77,9 +78,8 @@ def create_result_list(
     )
 
     e_event = EVENT()
-    e_event.append(NAME(event.get("name", "")))
-    if event.get("date", None) is not None:
-        e_event.append(STARTTIME(DATE(event["date"].isoformat())))
+    e_event.append(NAME(event.name))
+    e_event.append(STARTTIME(DATE(event.date.isoformat())))
     root.append(e_event)
 
     for class_, ranked_results in class_results:

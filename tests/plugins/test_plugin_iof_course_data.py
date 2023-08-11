@@ -20,6 +20,7 @@
 import datetime
 
 from ooresults.plugins import iof_course_data
+from ooresults.repo.event_type import EventType
 
 
 def test_import_course_data():
@@ -254,10 +255,15 @@ def test_export_course_data():
 </CourseData>
 """
     document = iof_course_data.create_course_data(
-        {
-            "name": "1. O-Cup 2020",
-            "date": datetime.date(year=2020, month=2, day=9),
-        },
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=datetime.date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
         [
             {
                 "name": "Bahn A",
@@ -332,10 +338,15 @@ def test_export_course_data_with_class_assignment():
 </CourseData>
 """
     document = iof_course_data.create_course_data(
-        {
-            "name": "1. O-Cup 2020",
-            "date": datetime.date(year=2020, month=2, day=9),
-        },
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=datetime.date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
         [
             {
                 "name": "Bahn A",

@@ -22,9 +22,9 @@ import logging
 import pathlib
 
 import web
-from web.utils import Storage
 
 from ooresults.handler import model
+from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import ConstraintError
 from ooresults.utils.globals import t_globals
 
@@ -70,6 +70,8 @@ class Add:
                     series=data.series if data.series != "" else None,
                     fields=fields,
                 )
+        except KeyError:
+            raise web.conflict("Event deleted")
         except ConstraintError as e:
             raise web.conflict(str(e))
         except:
@@ -91,20 +93,13 @@ class FillEditForm:
     def POST(self):
         """Query data to fill add or edit form"""
         data = web.input()
-        print(data)
-        if data.id == "":
-            event = Storage(
-                {
-                    "id": "",
-                    "name": "",
-                    "date": "",
-                    "key": "",
-                    "publish": False,
-                    "series": "",
-                    "fields": "",
-                }
-            )
-        else:
-            event = model.get_event(int(data.id))[0]
+        try:
+            if data.id == "":
+                event = None
+            else:
+                event = model.get_event(id=int(data.id))
+
+        except EventNotFoundError:
+            raise web.conflict("Event deleted")
 
         return render.add_event(event)

@@ -22,13 +22,14 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 from ooresults.pdf.pdf import PDF
 from ooresults.utils import globals
 
 
-def create_pdf(event: Dict, results: Dict, landscape: bool = False) -> bytes:
+def create_pdf(event: EventType, results: Dict, landscape: bool = False) -> bytes:
     # Instantiation of inherited class
     pdf = PDF(name=event.name, landscape=landscape)
     pdf.set_margin(margin=10)

@@ -40,6 +40,7 @@ def event_1_id(db):
         key=None,
         publish=False,
         series=None,
+        fields=[],
     )
 
 
@@ -51,6 +52,7 @@ def event_2_id(db):
         key=None,
         publish=False,
         series=None,
+        fields=[],
     )
 
 

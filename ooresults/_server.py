@@ -61,7 +61,7 @@ render = web.template.render(templates, globals=t_globals)
 
 class Root:
     def GET(self):
-        events = list(model.get_events())
+        events = model.get_events()
         for event in events:
             if event.publish:
                 event, class_results = model.event_class_results(event_id=event.id)
@@ -83,17 +83,15 @@ class Login:
 
 class Admin:
     def GET(self):
-        event = {}
-
         events_table = render.events_table(model.get_events())
         events_tab_content = render.events_tab_content(events_table)
-        entries_table = render.entries_table(event, [])
+        entries_table = render.entries_table(None, [])
         entries_tab_content = render.entries_tab_content(entries_table)
-        classes_table = render.classes_table(event, [])
+        classes_table = render.classes_table(None, [])
         classes_tab_content = render.classes_tab_content(classes_table)
-        courses_table = render.courses_table(event, [])
+        courses_table = render.courses_table(None, [])
         courses_tab_content = render.courses_tab_content(courses_table)
-        results_table = render.results_table(event, [], set())
+        results_table = render.results_table(None, [], set())
         results_tab_content = render.results_tab_content(results_table)
         series_table = render.series_table(0, [])
         series_tab_content = render.series_tab_content(series_table)

@@ -22,12 +22,13 @@ from typing import Optional
 from typing import Any
 
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.event_type import EventType
 from ooresults.pdf.pdf import PDF
 from ooresults.utils import globals
 
 
 def create_pdf(
-    event: Dict, results: Dict, include_dns: bool = False, landscape: bool = True
+    event: EventType, results: Dict, include_dns: bool = False, landscape: bool = True
 ) -> bytes:
     W_SPACE = 4
     W_RANK = 9

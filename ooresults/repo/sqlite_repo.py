@@ -42,6 +42,7 @@ from ooresults.repo.repo import OperationalError
 from ooresults.repo.repo import TransactionMode
 from ooresults.repo.update import update_tables
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.event_type import EventType
 from ooresults.repo import result_type
 from ooresults.repo import series_type
 from ooresults.repo import start_type
@@ -218,8 +219,9 @@ class SqliteRepo(Repo):
         course_id: Optional[int],
         params: ClassParams,
     ) -> int:
-        if self.get_event(id=event_id) == []:
-            raise EventNotFoundError
+        # check if the event still exists
+        self.get_event(id=event_id)
+
         try:
             return self.db.insert(
                 "classes",
@@ -292,8 +294,9 @@ class SqliteRepo(Repo):
         climb: Optional[float],
         controls: List[str],
     ) -> int:
-        if self.get_event(id=event_id) == []:
-            raise EventNotFoundError
+        # check if the event still exists
+        self.get_event(id=event_id)
+
         try:
             return self.db.insert(
                 "courses",
@@ -640,8 +643,8 @@ class SqliteRepo(Repo):
         status: result_type.ResultStatus,
         start_time: Optional[datetime.datetime],
     ) -> int:
-        if self.get_event(id=event_id) == []:
-            raise EventNotFoundError
+        # check if the event still exists
+        self.get_event(id=event_id)
 
         if competitor_id is None:
             for com in self.get_competitors():
@@ -700,8 +703,8 @@ class SqliteRepo(Repo):
         start_time: Optional[datetime.datetime],
         result: result_type.PersonRaceResult,
     ) -> int:
-        if self.get_event(id=event_id) == []:
-            raise EventNotFoundError
+        # check if the event still exists
+        self.get_event(id=event_id)
 
         try:
             return self.db.insert(
@@ -793,8 +796,8 @@ class SqliteRepo(Repo):
         self.db.delete("entries", where="id=" + web.db.sqlquote(id))
 
     def import_entries(self, event_id: int, entries):
-        if self.get_event(id=event_id) == []:
-            raise EventNotFoundError
+        # check if the event still exists
+        self.get_event(id=event_id)
 
         list_of_entries = []
         for c in entries:
@@ -927,7 +930,7 @@ class SqliteRepo(Repo):
                 "entries", list_of_entries[i : min(i + 25, len(entries))]
             )
 
-    def get_events(self) -> List:
+    def get_events(self) -> List[EventType]:
         values = self.db.query(
             "SELECT "
             "events.id,"
@@ -940,21 +943,36 @@ class SqliteRepo(Repo):
             "FROM events "
             "ORDER BY events.name ASC;"
         )
-        values = list(values)
+        events = []
         for e in values:
-            e.date = datetime.datetime.strptime(e.date, "%Y-%m-%d").date()
-            e.fields = UnpicklerZoneInfo(io.BytesIO(e.fields)).load()
-            e.publish = bool(e.publish)
-        return values
+            events.append(
+                EventType(
+                    id=e.id,
+                    name=e.name,
+                    date=datetime.datetime.strptime(e.date, "%Y-%m-%d").date(),
+                    key=e.key,
+                    publish=bool(e.publish),
+                    series=e.series,
+                    fields=UnpicklerZoneInfo(io.BytesIO(e.fields)).load(),
+                )
+            )
+        return events
 
-    def get_event(self, id: int) -> List:
+    def get_event(self, id: int) -> EventType:
         values = self.db.where("events", id=id)
-        values = list(values)
-        for e in values:
-            e.date = datetime.datetime.strptime(e.date, "%Y-%m-%d").date()
-            e.fields = UnpicklerZoneInfo(io.BytesIO(e.fields)).load()
-            e.publish = bool(e.publish)
-        return values
+        if values:
+            e = values[0]
+            return EventType(
+                id=e.id,
+                name=e.name,
+                date=datetime.datetime.strptime(e.date, "%Y-%m-%d").date(),
+                key=e.key,
+                publish=bool(e.publish),
+                series=e.series,
+                fields=UnpicklerZoneInfo(io.BytesIO(e.fields)).load(),
+            )
+        else:
+            raise EventNotFoundError
 
     def add_event(
         self,
@@ -963,7 +981,7 @@ class SqliteRepo(Repo):
         key: Optional[str],
         publish: bool,
         series: Optional[str],
-        fields: List[str] = [],
+        fields: List[str],
     ) -> int:
         try:
             return self.db.insert(
@@ -987,7 +1005,7 @@ class SqliteRepo(Repo):
         key: Optional[str],
         publish: bool,
         series: Optional[str],
-        fields: List[str] = [],
+        fields: List[str],
     ) -> None:
         try:
             nr_of_rows = self.db.update(

@@ -37,6 +37,7 @@ from ooresults.repo.repo import TransactionMode
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo import result_type
 from ooresults.repo import start_type
+from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.series_type import Settings
 from ooresults.websocket_server.websocket_server import WebSocketServer
@@ -500,12 +501,12 @@ def delete_entry(id: int):
         db.delete_entry(id=id)
 
 
-def get_events():
+def get_events() -> List[EventType]:
     with db.transaction():
         return db.get_events()
 
 
-def get_event(id: int):
+def get_event(id: int) -> EventType:
     with db.transaction():
         return db.get_event(id=id)
 
@@ -516,10 +517,17 @@ def add_event(
     key: Optional[str],
     publish: bool,
     series: Optional[str],
-    fields: List[str] = [],
+    fields: List[str],
 ) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
-        db.add_event(name, date, key, publish, series, fields)
+        db.add_event(
+            name=name,
+            date=date,
+            key=key,
+            publish=publish,
+            series=series,
+            fields=fields,
+        )
 
 
 def update_event(
@@ -529,21 +537,37 @@ def update_event(
     key: Optional[str],
     publish: bool,
     series: Optional[str],
-    fields: List[str] = [],
+    fields: List[str],
 ) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
-        db.update_event(id, name, date, key, publish, series, fields)
+        db.update_event(
+            id=id,
+            name=name,
+            date=date,
+            key=key,
+            publish=publish,
+            series=series,
+            fields=fields,
+        )
 
     future = asyncio.run_coroutine_threadsafe(
         coro=websocket_server.handler.update_event(
-            {"id": id, "name": name, "date": date}
+            event=EventType(
+                id=id,
+                name=name,
+                date=date,
+                key=key,
+                publish=publish,
+                series=series,
+                fields=fields,
+            )
         ),
         loop=websocket_server.loop,
     )
     future.result()
 
 
-def delete_event(id):
+def delete_event(id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_entries(event_id=id)
         db.delete_classes(event_id=id)
@@ -593,7 +617,7 @@ def parse_cardreader_log(item: Dict) -> Dict:
     return d
 
 
-def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, Dict, Dict]:
+def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, EventType, Dict]:
     def missing_controls(result: result_type.PersonRaceResult) -> List[str]:
         if result.finish_time is None:
             return ["FINISH"]
@@ -893,11 +917,11 @@ def update_series_settings(settings: Settings) -> None:
         db.update_series_settings(settings=settings)
 
 
-def event_class_results(event_id: int) -> Tuple[Dict, List[Tuple[Dict, List[Dict]]]]:
+def event_class_results(
+    event_id: int,
+) -> Tuple[EventType, List[Tuple[Dict, List[Dict]]]]:
     with db.transaction():
-        event = list(db.get_event(id=event_id))
-        event = event[0] if event != [] else {}
-
+        event = db.get_event(id=event_id)
         classes = list(db.get_classes(event_id=event_id))
         entry_list = list(db.get_entries(event_id=event_id))
 
@@ -908,7 +932,7 @@ def event_class_results(event_id: int) -> Tuple[Dict, List[Tuple[Dict, List[Dict
     return event, class_results
 
 
-def create_event_list(events):
+def create_event_list(events: List[EventType]) -> List[EventType]:
     # filter list
     e_list = [e for e in events if e.series is not None]
     # sort list
@@ -921,7 +945,7 @@ def build_series_result():
     with db.transaction():
         settings = db.get_series_settings()
         # build event list
-        events = list(db.get_events())
+        events = db.get_events()
         events = create_event_list(events=events)
 
         list_of_results = []

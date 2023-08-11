@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+
+- Internally used data structures and interfaces changed.
+
+
 [0.2.6] - 2023-07-17
 --------------------
 

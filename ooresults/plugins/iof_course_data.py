@@ -26,6 +26,8 @@ import iso8601
 from lxml import etree
 from lxml.builder import ElementMaker
 
+from ooresults.repo.event_type import EventType
+
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
 xml_schema = etree.XMLSchema(etree.parse(str(schema_file)))
@@ -35,7 +37,9 @@ iof_namespace = "http://www.orienteering.org/datastandard/3.0"
 namespaces = {None: iof_namespace}
 
 
-def create_course_data(event: Dict, courses: List[Dict], classes: List[Dict]) -> bytes:
+def create_course_data(
+    event: EventType, courses: List[Dict], classes: List[Dict]
+) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
     COURSEDATA = E.CourseData
@@ -59,9 +63,8 @@ def create_course_data(event: Dict, courses: List[Dict], classes: List[Dict]) ->
     )
 
     e_event = EVENT()
-    e_event.append(NAME(event.get("name", "")))
-    if event.get("date", None) is not None:
-        e_event.append(STARTTIME(DATE(event["date"].isoformat())))
+    e_event.append(NAME(event.name))
+    e_event.append(STARTTIME(DATE(event.date.isoformat())))
     root.append(e_event)
 
     race_course_data = RACECOURSEDATA()

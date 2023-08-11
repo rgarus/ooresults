@@ -27,6 +27,7 @@ from lxml import etree
 from lxml.builder import ElementMaker
 
 from ooresults.repo import result_type
+from ooresults.repo.event_type import EventType
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
@@ -37,7 +38,7 @@ iof_namespace = "http://www.orienteering.org/datastandard/3.0"
 namespaces = {None: iof_namespace}
 
 
-def create_entry_list(event: Dict, entries: List[Dict]) -> bytes:
+def create_entry_list(event: EventType, entries: List[Dict]) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
     ENTRYLIST = E.EntryList
@@ -60,9 +61,8 @@ def create_entry_list(event: Dict, entries: List[Dict]) -> bytes:
     )
 
     e_event = EVENT()
-    e_event.append(NAME(event.get("name", "")))
-    if event.get("date", None) is not None:
-        e_event.append(STARTTIME(DATE(event["date"].isoformat())))
+    e_event.append(NAME(event.name))
+    e_event.append(STARTTIME(DATE(event.date.isoformat())))
     root.append(e_event)
 
     for e in entries:

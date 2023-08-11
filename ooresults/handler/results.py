@@ -26,6 +26,7 @@ from typing import Tuple
 import web
 
 from ooresults.handler import model
+from ooresults.repo.repo import EventNotFoundError
 import ooresults.pdf.result
 import ooresults.pdf.splittimes
 from ooresults.utils.globals import t_globals
@@ -55,13 +56,19 @@ class Update:
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
 
-        event, class_results = model.event_class_results(event_id=event_id)
-        columns = build_columns(class_results)
-        return render.results_table(event, class_results, columns)
+        try:
+            event, class_results = model.event_class_results(event_id=event_id)
+            columns = build_columns(class_results)
+            return render.results_table(event, class_results, columns)
+        except EventNotFoundError:
+            raise web.conflict("Event deleted")
+        except:
+            logging.exception("Internal server error")
+            raise
 
 
 class PdfResult:
-    def POST(self):
+    def POST(self) -> bytes:
         """Print results"""
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
@@ -78,17 +85,15 @@ class PdfResult:
             )
             return content
 
-        except KeyError:
-            raise web.conflict("Entry deleted")
+        except EventNotFoundError:
+            raise web.conflict("Event deleted")
         except:
             logging.exception("Internal server error")
             raise
 
-        return content
-
 
 class PdfSplittimes:
-    def POST(self):
+    def POST(self) -> bytes:
         """Print results"""
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
@@ -103,10 +108,8 @@ class PdfSplittimes:
             )
             return content
 
-        except KeyError:
-            raise web.conflict("Entry deleted")
+        except EventNotFoundError:
+            raise web.conflict("Event deleted")
         except:
             logging.exception("Internal server error")
             raise
-
-        return content

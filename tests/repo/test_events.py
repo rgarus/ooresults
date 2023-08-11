@@ -61,7 +61,7 @@ def event_2_id(db):
 
 
 def test_get_events_after_adding_one_event(db, event_1_id):
-    c = list(db.get_events())
+    c = db.get_events()
     assert len(c) == 1
     assert c[0].id == event_1_id
     assert c[0].name == "XX"
@@ -73,7 +73,7 @@ def test_get_events_after_adding_one_event(db, event_1_id):
 
 
 def test_get_events_after_adding_two_events(db, event_1_id, event_2_id):
-    c = list(db.get_events())
+    c = db.get_events()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -94,27 +94,27 @@ def test_get_events_after_adding_two_events(db, event_1_id, event_2_id):
 
 
 def test_get_first_added_event(db, event_1_id, event_2_id):
-    c = list(db.get_event(id=event_1_id))
-    assert len(c) == 1
-    assert c[0].id == event_1_id
-    assert c[0].name == "XX"
-    assert c[0].date == D_2021_03_02
-    assert c[0].key == "4711"
-    assert c[0].publish is False
-    assert c[0].series == "Run 1"
-    assert c[0].fields == []
+    c = db.get_event(id=event_1_id)
+    assert c is not None
+    assert c.id == event_1_id
+    assert c.name == "XX"
+    assert c.date == D_2021_03_02
+    assert c.key == "4711"
+    assert c.publish is False
+    assert c.series == "Run 1"
+    assert c.fields == []
 
 
 def test_get_last_added_event(db, event_1_id, event_2_id):
-    c = list(db.get_event(id=event_2_id))
-    assert len(c) == 1
-    assert c[0].id == event_2_id
-    assert c[0].name == "YY"
-    assert c[0].date == D_2021_03_18
-    assert c[0].key is None
-    assert c[0].publish is True
-    assert c[0].series is None
-    assert c[0].fields == ["f1", "f2"]
+    c = db.get_event(id=event_2_id)
+    assert c is not None
+    assert c.id == event_2_id
+    assert c.name == "YY"
+    assert c.date == D_2021_03_18
+    assert c.key is None
+    assert c.publish is True
+    assert c.series is None
+    assert c.fields == ["f1", "f2"]
 
 
 def test_update_first_added_event(db, event_1_id, event_2_id):
@@ -127,7 +127,7 @@ def test_update_first_added_event(db, event_1_id, event_2_id):
         series=None,
         fields=["x"],
     )
-    c = list(db.get_events())
+    c = db.get_events()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -157,7 +157,7 @@ def test_update_last_added_event(db, event_1_id, event_2_id):
         series="Run 1",
         fields=["x"],
     )
-    c = list(db.get_events())
+    c = db.get_events()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -179,7 +179,7 @@ def test_update_last_added_event(db, event_1_id, event_2_id):
 
 def test_delete_first_added_event(db, event_1_id, event_2_id):
     db.delete_event(id=event_1_id)
-    c = list(db.get_events())
+    c = db.get_events()
     assert len(c) == 1
     assert c[0].id == event_2_id
     assert c[0].name == "YY"
@@ -192,7 +192,7 @@ def test_delete_first_added_event(db, event_1_id, event_2_id):
 
 def test_delete_last_added_event(db, event_1_id, event_2_id):
     db.delete_event(id=event_2_id)
-    c = list(db.get_events())
+    c = db.get_events()
     assert len(c) == 1
     assert c[0].id == event_1_id
     assert c[0].name == "XX"
@@ -206,14 +206,24 @@ def test_delete_last_added_event(db, event_1_id, event_2_id):
 def test_add_existing_name_raises_exception(db, event_1_id):
     with pytest.raises(repo.ConstraintError, match="Event or event key already exist"):
         db.add_event(
-            name="XX", date=D_2020_02_03, key=None, publish=False, series=False
+            name="XX",
+            date=D_2020_02_03,
+            key=None,
+            publish=False,
+            series=False,
+            fields=[],
         )
 
 
 def test_add_existing_key_raises_exception(db, event_1_id):
     with pytest.raises(repo.ConstraintError, match="Event or event key already exist"):
         db.add_event(
-            name="ZZ", date=D_2020_02_03, key="4711", publish=True, series=False
+            name="ZZ",
+            date=D_2020_02_03,
+            key="4711",
+            publish=True,
+            series=False,
+            fields=[],
         )
 
 
@@ -226,6 +236,7 @@ def test_change_to_existing_name_raises_exception(db, event_1_id, event_2_id):
             key=None,
             publish=False,
             series=True,
+            fields=[],
         )
 
 
@@ -238,6 +249,7 @@ def test_change_to_existing_key_raises_exception(db, event_1_id, event_2_id):
             key="4711",
             publish=True,
             series=True,
+            fields=[],
         )
 
 
@@ -250,12 +262,18 @@ def test_update_with_unknown_id_raises_exception(db, event_1_id):
             key=None,
             publish=False,
             series=False,
+            fields=[],
         )
+
+
+def test_get_event_with_unknown_id_raises_exception(db, event_1_id):
+    with pytest.raises(repo.EventNotFoundError):
+        db.get_event(id=event_1_id + 1)
 
 
 def test_delete_event_with_unknown_id_do_not_change_anything(db, event_1_id):
     db.delete_event(id=event_1_id + 1)
-    c = list(db.get_events())
+    c = db.get_events()
     assert len(c) == 1
     assert c[0].id == event_1_id
     assert c[0].name == "XX"

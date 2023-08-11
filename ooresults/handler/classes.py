@@ -41,11 +41,14 @@ render = web.template.render(templates, globals=t_globals)
 
 def update(event_id: int):
     classes_list = model.get_classes(event_id=event_id)
-    event = list(model.get_event(event_id))
-    if event == []:
-        return render.classes_table({}, classes_list)
-    else:
-        return render.classes_table(event[0], classes_list)
+    try:
+        event = model.get_event(id=event_id)
+        return render.classes_table(event, classes_list)
+    except EventNotFoundError:
+        raise web.conflict("Event deleted")
+    except:
+        logging.exception("Internal server error")
+        raise
 
 
 class Update:
@@ -53,7 +56,7 @@ class Update:
         """Update data"""
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
-        return update(event_id)
+        return update(event_id=event_id)
 
 
 class Import:
@@ -67,7 +70,7 @@ class Import:
                 model.import_classes(event_id=event_id, classes=classes)
 
         except EventNotFoundError:
-            raise web.conflict("No event selected or event deleted")
+            raise web.conflict("Event deleted")
         except Exception as e:
             raise web.Conflict(str(e))
 
@@ -84,8 +87,8 @@ class Export:
                 classes = model.get_classes(event_id=event_id)
                 content = iof_class_list.create_class_list(classes)
 
-        except KeyError:
-            raise web.conflict("Entry deleted")
+        except EventNotFoundError:
+            raise web.conflict("Event deleted")
         except:
             logging.exception("Internal server error")
             raise
@@ -115,12 +118,10 @@ class Add:
         data = web.input()
         print(data)
         event_id = int(data.event_id) if data.event_id != "" else -1
-        event = model.get_event(id=event_id)[0]
 
         params = ClassParams()
         params.otype = data.get("type", "standard")
         params.using_start_control = data.get("startControl", "if_punched")
-        params.mass_start = self.parse_start_time(data.massStart, event.date)
         params.apply_handicap_rule = data.get("handicap", "0") == "1"
         if data.get("timeLimit", "") != "":
             m, _, s = data["timeLimit"].partition(":")
@@ -157,6 +158,9 @@ class Add:
                 )
 
         try:
+            event = model.get_event(id=event_id)
+
+            params.mass_start = self.parse_start_time(data.massStart, event.date)
             course_id = int(data.course) if data.course != "" else None
             if data.id == "":
                 model.add_class(
@@ -178,7 +182,7 @@ class Add:
                 )
 
         except EventNotFoundError:
-            raise web.conflict("No event selected or event deleted")
+            raise web.conflict("Event deleted")
         except ConstraintError as e:
             raise web.conflict(str(e))
         except KeyError:
@@ -227,7 +231,7 @@ class FillEditForm:
                 class_ = model.get_class(id=int(data.id))[0]
 
         except EventNotFoundError:
-            raise web.conflict("No event selected or event deleted")
+            raise web.conflict("Event deleted")
         except KeyError:
             raise web.conflict("Class deleted")
         except:

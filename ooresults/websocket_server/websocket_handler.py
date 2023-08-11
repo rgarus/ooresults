@@ -37,6 +37,7 @@ from ooresults.utils.globals import t_globals
 from ooresults.handler import model
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo import result_type
+from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
 
 templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
@@ -63,12 +64,12 @@ class WebSocketHandler:
         # cardRead
         #
 
-    async def update_event(self, event: Dict) -> None:
+    async def update_event(self, event: EventType) -> None:
         if event:
             connections = {
                 k: v
                 for k, v in self.connections.items()
-                if v[0] == "/si2" and str(event["id"]) == v[1]
+                if v[0] == "/si2" and str(event.id) == v[1]
             }
             if connections:
                 await asyncio.wait(
@@ -78,10 +79,10 @@ class WebSocketHandler:
                     ]
                 )
 
-    async def send_to_all(self, event: Dict, message: Dict = {}) -> None:
+    async def send_to_all(self, event: EventType, message: Dict = {}) -> None:
         if event:
             connections = {
-                k: v for k, v in self.connections.items() if str(event["id"]) == v[1]
+                k: v for k, v in self.connections.items() if str(event.id) == v[1]
             }
             if connections:
                 await asyncio.wait(
@@ -94,11 +95,11 @@ class WebSocketHandler:
                 )
 
     async def send(
-        self, conn: WebSocketServerProtocol, event: Dict, message: Dict = {}
+        self, conn: WebSocketServerProtocol, event: EventType, message: Dict = {}
     ) -> None:
         status = (
-            self.cardreader_status[event["id"]]
-            if event and event["id"] in self.cardreader_status
+            self.cardreader_status[event.id]
+            if event and event.id in self.cardreader_status
             else "offline"
         )
         path, event_id, event_key = self.connections[conn]
@@ -215,7 +216,7 @@ class WebSocketHandler:
                                 traceback.print_exc()
                                 raise RuntimeError(str(e))
 
-                            self.cardreader_status[event["id"]] = status
+                            self.cardreader_status[event.id] = status
 
                             if "entryTime" in res:
                                 res["entryTime"] = res["entryTime"].strftime("%H:%M:%S")
@@ -223,11 +224,11 @@ class WebSocketHandler:
                             if status == "cardRead":
                                 self.messages.append(res.copy())
                             await self.send_to_all(
-                                event=event.copy(), message=res.copy()
+                                event=copy.deepcopy(event), message=res.copy()
                             )
 
                             res["readerStatus"] = status
-                            res["event"] = event["name"]
+                            res["event"] = event.name
                             if "status" in res:
                                 res["status"] = res["status"].name
                             print(res)
@@ -237,9 +238,9 @@ class WebSocketHandler:
             finally:
                 print("WEBSOCKET CONNECTION CLOSED", websocket)
                 if event:
-                    if event["id"] in self.cardreader_status:
-                        del self.cardreader_status[event["id"]]
-                    await self.send_to_all(event=event.copy(), message={})
+                    if event.id in self.cardreader_status:
+                        del self.cardreader_status[event.id]
+                    await self.send_to_all(event=copy.deepcopy(event), message={})
 
         elif path == "/cardreader":
             event = None
@@ -281,17 +282,19 @@ class WebSocketHandler:
                         traceback.print_exc()
                         raise RuntimeError(str(e))
 
-                    self.cardreader_status[event["id"]] = status
+                    self.cardreader_status[event.id] = status
 
                     if "entryTime" in res:
                         res["entryTime"] = res["entryTime"].strftime("%H:%M:%S")
 
                     if status == "cardRead":
                         self.messages.append(res.copy())
-                    await self.send_to_all(event=event.copy(), message=res.copy())
+                    await self.send_to_all(
+                        event=copy.deepcopy(event), message=res.copy()
+                    )
 
                     res["readerStatus"] = status
-                    res["event"] = event["name"]
+                    res["event"] = event.name
                     if "status" in res:
                         res["status"] = res["status"].name
                     print(res)
@@ -305,9 +308,9 @@ class WebSocketHandler:
             finally:
                 print("CARDREADER CONNECTION CLOSED", websocket)
                 if event:
-                    if event["id"] in self.cardreader_status:
-                        del self.cardreader_status[event["id"]]
-                    await self.send_to_all(event=event.copy(), message={})
+                    if event.id in self.cardreader_status:
+                        del self.cardreader_status[event.id]
+                    await self.send_to_all(event=copy.deepcopy(event), message={})
 
         else:
             try:
