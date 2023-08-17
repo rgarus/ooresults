@@ -130,8 +130,6 @@ $def with (courses_table)
             }
         };
         xhr.open("POST", "course/fill_edit_form", true);
-        //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        xhr.responseType = "html";
         var data = new FormData();
         data.append('event_id', window.event_id);
         data.append('id', '');
@@ -167,8 +165,6 @@ $def with (courses_table)
                     }
                 };
                 xhr.open("POST", "course/fill_edit_form", true);
-                //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-                xhr.responseType = "html";
                 var data = new FormData();
                 data.append('event_id', window.event_id);
                 data.append('id', table.rows[i].id);
@@ -194,7 +190,6 @@ $def with (courses_table)
             }
         };
         xhr.open("POST", "course/import", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -207,14 +202,14 @@ $def with (courses_table)
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                download(filename, this.response);
+                download(filename, this.response, 'application/xml');
                 document.getElementById('cou.exportDialog').style.display = "none";
             }
             if (this.readyState == 4 && this.status == 409) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
             if (this.readyState == 4 && this.status == 500) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
         };
         xhr.open("POST", "course/export", true);
@@ -242,7 +237,6 @@ $def with (courses_table)
             }
         };
         xhr.open("POST", "course/add", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -263,7 +257,6 @@ $def with (courses_table)
             }
         };
         xhr.open("POST", "course/delete", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -283,7 +276,6 @@ $def with (courses_table)
             }
         };
         xhr.open("POST", "course/update", true);
-        xhr.responseType = "html";
         var data = new FormData();
         data.append('event_id', window.event_id);
         xhr.send(data);

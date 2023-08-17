@@ -147,8 +147,8 @@ $:clubs_tab_content
 </script>
 
 <script>
-    function download(fileName, text) {
-        var textFileAsBlob = new Blob([text], {type: 'text/plain'});
+    function download(fileName, data, mimetype) {
+        var textFileAsBlob = new Blob([data], {type: mimetype});
         var downloadLink = document.createElement("a");
         downloadLink.download = fileName;
         if (window.webkitURL != null) {

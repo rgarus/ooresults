@@ -122,7 +122,6 @@ $def with (competitors_table)
         };
         xhr.open("POST", "competitor/fill_edit_form", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        xhr.responseType = "html";
         xhr.send("id=");
     }
 
@@ -166,7 +165,6 @@ $def with (competitors_table)
                 };
                 xhr.open("POST", "competitor/fill_edit_form", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-                xhr.responseType = "html";
                 xhr.send("id=".concat(table.rows[i].id));
             }
         }
@@ -188,7 +186,6 @@ $def with (competitors_table)
             }
         };
         xhr.open("POST", "competitor/add", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -208,7 +205,6 @@ $def with (competitors_table)
             }
         };
         xhr.open("POST", "competitor/import", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -220,14 +216,14 @@ $def with (competitors_table)
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                download(filename, this.response);
+                download(filename, this.response, 'application/xml');
                 document.getElementById('comp.exportDialog').style.display = "none";
             }
             if (this.readyState == 4 && this.status == 409) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
             if (this.readyState == 4 && this.status == 500) {
-                window.alert('Internal error');
+                window.alert(new TextDecoder().decode(this.response));
             }
         };
         xhr.open("POST", "competitor/export", true);
@@ -257,7 +253,6 @@ $def with (competitors_table)
             }
         };
         xhr.open("POST", "competitor/delete", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -275,7 +270,6 @@ $def with (competitors_table)
             }
         };
         xhr.open("POST", "competitor/update", true);
-        xhr.responseType = "html";
         xhr.send();
     }
 

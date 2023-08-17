@@ -78,7 +78,6 @@ $def with (events_table)
         };
         xhr.open("POST", "event/fill_edit_form", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        xhr.responseType = "html";
         xhr.send("id=");
     }
 
@@ -112,7 +111,6 @@ $def with (events_table)
                 };
                 xhr.open("POST", "event/fill_edit_form", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-                xhr.responseType = "html";
                 xhr.send("id=".concat(table.rows[i].id));
             }
         }
@@ -134,7 +132,6 @@ $def with (events_table)
             }
         };
         xhr.open("POST", "event/add", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -154,7 +151,6 @@ $def with (events_table)
             }
         };
         xhr.open("POST", "event/delete", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -172,7 +168,6 @@ $def with (events_table)
             }
         };
         xhr.open("POST", "event/update", true);
-        xhr.responseType = "html";
         xhr.send();
     }
 

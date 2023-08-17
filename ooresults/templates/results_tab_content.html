@@ -66,18 +66,18 @@ $def with (results)
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                downloadpdf(filename, this.response);
+                download(filename, this.response, 'application/pdf');
                 document.getElementById('res.pdfResultDialog').style.display = "none";
             }
             if (this.readyState == 4 && this.status == 409) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
             if (this.readyState == 4 && this.status == 500) {
-                window.alert('Internal error');
+                window.alert(new TextDecoder().decode(this.response));
             }
         };
         xhr.open("POST", "result/pdfResult", true);
-        xhr.responseType = "blob";
+        xhr.responseType = "arraybuffer";
         xhr.send(data);
     }
 
@@ -89,34 +89,19 @@ $def with (results)
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                downloadpdf(filename, this.response);
+                download(filename, this.response, 'application/pdf');
                 document.getElementById('res.pdfSplittimesDialog').style.display = "none";
             }
             if (this.readyState == 4 && this.status == 409) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
             if (this.readyState == 4 && this.status == 500) {
-                window.alert('Internal error');
+                window.alert(new TextDecoder().decode(this.response));
             }
         };
         xhr.open("POST", "result/pdfSplittimes", true);
-        xhr.responseType = "blob";
+        xhr.responseType = "arraybuffer";
         xhr.send(data);
-    }
-
-    function downloadpdf(fileName, data) {
-        var textFileAsBlob = new Blob([data], {type: 'application/pdf'});
-        var downloadLink = document.createElement("a");
-        downloadLink.download = fileName;
-        if (window.webkitURL != null) {
-            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-        } else {
-            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-            downloadLink.onclick = document.body.removeChild(event.target);
-            downloadLink.style.display = "none";
-            document.body.appendChild(downloadLink);
-        }
-        downloadLink.click();
     }
 
     function res_update() {
@@ -135,7 +120,6 @@ $def with (results)
             }
         };
         xhr.open("POST", "result/update", true);
-        xhr.responseType = "html";
         var data = new FormData();
         data.append('event_id', window.event_id);
         xhr.send(data);

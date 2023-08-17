@@ -226,8 +226,6 @@ $def with (entries_table)
             }
         };
         xhr.open("POST", "entry/fill_edit_form", true);
-        //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        xhr.responseType = "html";
         var data = new FormData();
         data.append('event_id', window.event_id);
         data.append('id', '');
@@ -249,8 +247,6 @@ $def with (entries_table)
             }
         };
         xhr.open("POST", "entry/fill_competitors_form", true);
-        //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        xhr.responseType = "html";
         var data = {'event_id': window.event_id};
         xhr.send(data);
     }
@@ -274,8 +270,6 @@ $def with (entries_table)
                     }
                 };
                 xhr.open("POST", "entry/fill_edit_form", true);
-                //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-                xhr.responseType = "html";
                 var data = new FormData();
                 data.append('event_id', window.event_id);
                 data.append('id', table.rows[i].id);
@@ -313,7 +307,6 @@ $def with (entries_table)
                 };
                 xhr.open("POST", "entry/fill_result_form", true);
                 //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-                xhr.responseType = "html";
                 var data = new FormData();
                 data.append('event_id', window.event_id);
                 data.append('id', table.rows[i].id);
@@ -339,12 +332,12 @@ $def with (entries_table)
             }
         };
         xhr.open("POST", "entry/import", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
     function entr_submitExport() {
         var filename = '';
+        var mimetype = 'application/xml';
         var form = document.getElementById('entr.export.form');
         var data = new FormData(form);
         data.append('event_id', window.event_id);
@@ -352,14 +345,14 @@ $def with (entries_table)
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                download(filename, this.response);
+                download(filename, this.response, mimetype);
                 document.getElementById('entr.exportDialog').style.display = "none";
             }
             if (this.readyState == 4 && this.status == 409) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
             if (this.readyState == 4 && this.status == 500) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
         };
         xhr.open("POST", "entry/export", true);
@@ -372,9 +365,11 @@ $def with (entries_table)
         }
         if (selected == "entr.export.3") {
             filename = "entries.csv";
+            mimetype = "text/csv";
         }
         if (selected == "entr.export.4") {
             filename = "entries.csv";
+            mimetype = "text/csv";
         }
         xhr.send(data);
     }
@@ -396,7 +391,6 @@ $def with (entries_table)
             }
         };
         xhr.open("POST", "entry/add", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -417,7 +411,6 @@ $def with (entries_table)
             }
         };
         xhr.open("POST", "entry/delete", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -438,7 +431,6 @@ $def with (entries_table)
         };
         xhr.open("POST", "entry/update", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        xhr.responseType = "html";
         xhr.send("event_id=".concat(window.event_id));
     }
 

@@ -71,7 +71,6 @@ $def with (results)
         };
         xhr.open("POST", "series/fill_settings_form", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        xhr.responseType = "html";
         xhr.send();
     }
 
@@ -100,7 +99,6 @@ $def with (results)
             }
         };
         xhr.open("POST", "series/settings", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -112,34 +110,19 @@ $def with (results)
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                downloadpdf(filename, this.response);
+                download(filename, this.response, 'application/pdf');
                 document.getElementById('ser.pdfResultDialog').style.display = "none";
             }
             if (this.readyState == 4 && this.status == 409) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
             if (this.readyState == 4 && this.status == 500) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
         };
         xhr.open("POST", "series/pdfResult", true);
-        xhr.responseType = "blob";
+        xhr.responseType = "arraybuffer";
         xhr.send(data);
-    }
-
-    function downloadpdf(fileName, data) {
-        var textFileAsBlob = new Blob([data], {type: 'application/pdf'});
-        var downloadLink = document.createElement("a");
-        downloadLink.download = fileName;
-        if (window.webkitURL != null) {
-            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-        } else {
-            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-            downloadLink.onclick = document.body.removeChild(event.target);
-            downloadLink.style.display = "none";
-            document.body.appendChild(downloadLink);
-        }
-        downloadLink.click();
     }
 
     function ser_submitCsvResult() {
@@ -150,34 +133,19 @@ $def with (results)
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                downloadcsv(filename, this.response);
+                download(filename, this.response, 'text/csv');
                 document.getElementById('ser.csvResultDialog').style.display = "none";
             }
             if (this.readyState == 4 && this.status == 409) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
             if (this.readyState == 4 && this.status == 500) {
-                window.alert(this.responseText);
+                window.alert(new TextDecoder().decode(this.response));
             }
         };
         xhr.open("POST", "series/csvResult", true);
-        xhr.responseType = "blob";
+        xhr.responseType = "arraybuffer";
         xhr.send(data);
-    }
-
-    function downloadcsv(fileName, data) {
-        var textFileAsBlob = new Blob([data], {type: 'application/text'});
-        var downloadLink = document.createElement("a");
-        downloadLink.download = fileName;
-        if (window.webkitURL != null) {
-            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-        } else {
-            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-            downloadLink.onclick = document.body.removeChild(event.target);
-            downloadLink.style.display = "none";
-            document.body.appendChild(downloadLink);
-        }
-        downloadLink.click();
     }
 
     function ser_update() {
@@ -194,7 +162,6 @@ $def with (results)
             }
         };
         xhr.open("POST", "series/update", true);
-        xhr.responseType = "html";
         var data = new FormData();
         data.append('event_id', window.event_id);
         xhr.send(data);

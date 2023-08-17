@@ -64,7 +64,6 @@ $def with (clubs_table)
         };
         xhr.open("POST", "club/fill_edit_form", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        xhr.responseType = "html";
         xhr.send("id=");
     }
 
@@ -98,7 +97,6 @@ $def with (clubs_table)
                 };
                 xhr.open("POST", "club/fill_edit_form", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-                xhr.responseType = "html";
                 xhr.send("id=".concat(table.rows[i].id));
             }
         }
@@ -120,7 +118,6 @@ $def with (clubs_table)
             }
         };
         xhr.open("POST", "club/add", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -140,7 +137,6 @@ $def with (clubs_table)
             }
         };
         xhr.open("POST", "club/delete", true);
-        xhr.responseType = "html";
         xhr.send(data);
     }
 
@@ -158,7 +154,6 @@ $def with (clubs_table)
             }
         };
         xhr.open("POST", "club/update", true);
-        xhr.responseType = "html";
         xhr.send();
     }
 
