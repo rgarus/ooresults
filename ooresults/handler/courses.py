@@ -21,7 +21,6 @@ import logging
 import pathlib
 
 import web
-from web.utils import Storage
 
 from ooresults.handler import model
 from ooresults.repo.repo import CourseUsedError
@@ -36,10 +35,10 @@ render = web.template.render(templates, globals=t_globals)
 
 
 def update(event_id: int):
-    courses_list = model.get_courses(event_id=event_id)
+    courses = model.get_courses(event_id=event_id)
     try:
         event = model.get_event(id=event_id)
-        return render.courses_table(event, courses_list)
+        return render.courses_table(event, courses)
     except EventNotFoundError:
         raise web.conflict("Event deleted")
     except:
@@ -61,9 +60,8 @@ class Import:
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
         try:
-            event = {}
             if data.cou_import == "cou.import.1":
-                event, courses, class_course = iof_course_data.parse_course_data(
+                _, courses, class_course = iof_course_data.parse_course_data(
                     data.browse1
                 )
                 model.import_courses(
@@ -163,17 +161,9 @@ class FillEditForm:
         data = web.input()
         try:
             if data.id == "":
-                course = Storage(
-                    {
-                        "id": "",
-                        "name": "",
-                        "length": None,
-                        "climb": None,
-                        "controls": "",
-                    }
-                )
+                course = None
             else:
-                course = model.get_course(id=int(data.id))[0]
+                course = model.get_course(id=int(data.id))
         except EventNotFoundError:
             raise web.conflict("Event deleted")
         except KeyError:

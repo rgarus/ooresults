@@ -20,6 +20,7 @@
 import datetime
 
 from ooresults.plugins import iof_course_data
+from ooresults.repo.course_type import CourseType
 from ooresults.repo.event_type import EventType
 
 
@@ -265,18 +266,22 @@ def test_export_course_data():
             fields=[],
         ),
         [
-            {
-                "name": "Bahn A",
-                "length": 4800,
-                "climb": 120,
-                "controls": ["101", "102", "103", "104"],
-            },
-            {
-                "name": "Bahn B",
-                "length": None,
-                "climb": None,
-                "controls": ["101", "105", "106", "104"],
-            },
+            CourseType(
+                id=1,
+                event_id=1,
+                name="Bahn A",
+                length=4800,
+                climb=120,
+                controls=["101", "102", "103", "104"],
+            ),
+            CourseType(
+                id=2,
+                event_id=1,
+                name="Bahn B",
+                length=None,
+                climb=None,
+                controls=["101", "105", "106", "104"],
+            ),
         ],
         [],
     )
@@ -348,18 +353,22 @@ def test_export_course_data_with_class_assignment():
             fields=[],
         ),
         [
-            {
-                "name": "Bahn A",
-                "length": 4800,
-                "climb": 120,
-                "controls": ["101", "102"],
-            },
-            {
-                "name": "Bahn B",
-                "length": None,
-                "climb": None,
-                "controls": ["104"],
-            },
+            CourseType(
+                id=1,
+                event_id=1,
+                name="Bahn A",
+                length=4800,
+                climb=120,
+                controls=["101", "102"],
+            ),
+            CourseType(
+                id=2,
+                event_id=1,
+                name="Bahn B",
+                length=None,
+                climb=None,
+                controls=["104"],
+            ),
         ],
         [
             {

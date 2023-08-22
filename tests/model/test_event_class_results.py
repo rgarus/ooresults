@@ -58,7 +58,7 @@ def course_a(db, event):
         climb=110,
         controls=["101", "102", "103", "104"],
     )
-    item = db.get_course(id=id)[0]
+    item = db.get_course(id=id)
     return copy.deepcopy(item)
 
 
@@ -71,7 +71,7 @@ def course_b(db, event):
         climb=90,
         controls=["101", "103"],
     )
-    item = db.get_course(id=id)[0]
+    item = db.get_course(id=id)
     return copy.deepcopy(item)
 
 
@@ -81,7 +81,7 @@ def class_a(db, event, course_a):
         event_id=event.id,
         name="Bahn A - Lang",
         short_name="Bahn A - Lang",
-        course_id=course_a["id"],
+        course_id=course_a.id,
         params=ClassParams(),
     )
     item = db.get_class(id=id)[0]
@@ -94,7 +94,7 @@ def class_b(db, event, course_b):
         event_id=event.id,
         name="Bahn B - Mittel",
         short_name="Bahn B - Mittel",
-        course_id=course_b["id"],
+        course_id=course_b.id,
         params=ClassParams(),
     )
     item = db.get_class(id=id)[0]

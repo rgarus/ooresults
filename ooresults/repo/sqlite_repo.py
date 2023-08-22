@@ -42,6 +42,7 @@ from ooresults.repo.repo import OperationalError
 from ooresults.repo.repo import TransactionMode
 from ooresults.repo.update import update_tables
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.course_type import CourseType
 from ooresults.repo.event_type import EventType
 from ooresults.repo import result_type
 from ooresults.repo import series_type
@@ -268,23 +269,40 @@ class SqliteRepo(Repo):
         else:
             raise ClassUsedError
 
-    def get_courses(self, event_id: int):
-        data = list(
-            self.db.select(
-                "courses",
-                where="event_id=" + web.db.sqlquote(event_id),
-                order="name ASC",
-            )
+    def get_courses(self, event_id: int) -> List[CourseType]:
+        values = self.db.select(
+            "courses",
+            where="event_id=" + web.db.sqlquote(event_id),
+            order="name ASC",
         )
-        for c in data:
-            c.controls = UnpicklerZoneInfo(io.BytesIO(c.controls)).load()
-        return data
+        courses = []
+        for c in values:
+            courses.append(
+                CourseType(
+                    id=c.id,
+                    event_id=c.event_id,
+                    name=c.name,
+                    length=c.length,
+                    climb=c.climb,
+                    controls=UnpicklerZoneInfo(io.BytesIO(c.controls)).load(),
+                )
+            )
+        return courses
 
-    def get_course(self, id: int):
-        data = list(self.db.where("courses", id=id))
-        for c in data:
-            c.controls = UnpicklerZoneInfo(io.BytesIO(c.controls)).load()
-        return data
+    def get_course(self, id: int) -> CourseType:
+        values = self.db.where("courses", id=id)
+        if values:
+            c = values[0]
+            return CourseType(
+                id=c.id,
+                event_id=c.event_id,
+                name=c.name,
+                length=c.length,
+                climb=c.climb,
+                controls=UnpicklerZoneInfo(io.BytesIO(c.controls)).load(),
+            )
+        else:
+            raise KeyError
 
     def add_course(
         self,
@@ -861,7 +879,7 @@ class SqliteRepo(Repo):
                 try:
                     course_id = class_["course_id"]
                     class_params = class_["params"]
-                    controls = self.get_course(id=course_id)[0]["controls"]
+                    controls = self.get_course(id=course_id).controls
                 except:
                     class_params = ClassParams()
                     controls = []

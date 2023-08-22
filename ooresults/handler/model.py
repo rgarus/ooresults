@@ -37,6 +37,7 @@ from ooresults.repo.repo import TransactionMode
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo import result_type
 from ooresults.repo import start_type
+from ooresults.repo.course_type import CourseType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.series_type import Settings
@@ -133,7 +134,7 @@ def update_class(
         # update results of the competitors belonging to the modified class
         try:
             class_params = params
-            controls = db.get_course(id=course_id)[0]["controls"]
+            controls = db.get_course(id=course_id).controls
         except:
             class_params = ClassParams()
             controls = []
@@ -166,12 +167,12 @@ def delete_class(id):
         db.delete_class(id=id)
 
 
-def get_courses(event_id: int):
+def get_courses(event_id: int) -> List[CourseType]:
     with db.transaction():
         return db.get_courses(event_id=event_id)
 
 
-def get_course(id):
+def get_course(id) -> CourseType:
     with db.transaction():
         return db.get_course(id=id)
 
@@ -180,13 +181,13 @@ def import_courses(
     event_id: int, courses: List[Dict], class_course: List[Dict]
 ) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
-        existing_courses = list(db.get_courses(event_id=event_id))
+        existing_courses = db.get_courses(event_id=event_id)
         for c in courses:
             for co in existing_courses:
-                if co["name"] == c["name"]:
+                if co.name == c["name"]:
                     db.update_course(
-                        id=co["id"],
-                        name=co["name"],
+                        id=co.id,
+                        name=co.name,
                         length=c.get("length", None),
                         climb=c.get("climb", None),
                         controls=c["controls"],
@@ -201,17 +202,17 @@ def import_courses(
                     controls=c["controls"],
                 )
         existing_classes = list(db.get_classes(event_id=event_id))
-        existing_courses = list(db.get_courses(event_id=event_id))
+        existing_courses = db.get_courses(event_id=event_id)
         for i in class_course:
             for co in existing_courses:
-                if co["name"] == i.get("course_name", None):
+                if co.name == i.get("course_name", None):
                     for cl in existing_classes:
                         if cl["name"] == i["class_name"]:
                             db.update_class(
                                 id=cl["id"],
                                 name=cl["name"],
                                 short_name=cl["short_name"],
-                                course_id=co["id"],
+                                course_id=co.id,
                                 params=cl.params,
                             )
                             break
@@ -220,7 +221,7 @@ def import_courses(
                             event_id=event_id,
                             name=i["class_name"],
                             short_name=None,
-                            course_id=co["id"],
+                            course_id=co.id,
                             params=ClassParams(),
                         )
                         existing_classes.append({"id": id, "name": i["class_name"]})
@@ -688,7 +689,7 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, EventType,
                         class_ = db.get_class(id=entry["class_id"])[0]
                         course_id = class_["course_id"]
                         class_params = class_["params"]
-                        controls = db.get_course(id=course_id)[0]["controls"]
+                        controls = db.get_course(id=course_id).controls
                     except:
                         class_params = ClassParams()
                         controls = []
@@ -857,7 +858,7 @@ def add_or_update_entry(
                 class_ = db.get_class(id=class_id)[0]
                 course_id = class_["course_id"]
                 class_params = class_["params"]
-                controls = db.get_course(id=course_id)[0]["controls"]
+                controls = db.get_course(id=course_id).controls
             except:
                 class_params = ClassParams()
                 controls = []
@@ -887,7 +888,7 @@ def add_or_update_entry(
                     class_ = db.get_class(id=class_id)[0]
                     course_id = class_["course_id"]
                     class_params = class_["params"]
-                    controls = db.get_course(id=course_id)[0]["controls"]
+                    controls = db.get_course(id=course_id).controls
                 except:
                     class_params = ClassParams()
                     controls = []

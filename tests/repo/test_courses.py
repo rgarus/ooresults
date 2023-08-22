@@ -77,7 +77,7 @@ def class_id(db, event_id, course_1_id):
 
 
 def test_get_courses_after_adding_one_course(db, event_id, course_1_id):
-    c = list(db.get_courses(event_id=event_id))
+    c = db.get_courses(event_id=event_id)
     assert len(c) == 1
     assert c[0].id == course_1_id
     assert c[0].name == "Course 1"
@@ -87,7 +87,7 @@ def test_get_courses_after_adding_one_course(db, event_id, course_1_id):
 
 
 def test_get_courses_after_adding_two_courses(db, event_id, course_1_id, course_2_id):
-    c = list(db.get_courses(event_id=event_id))
+    c = db.get_courses(event_id=event_id)
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -104,30 +104,28 @@ def test_get_courses_after_adding_two_courses(db, event_id, course_1_id, course_
 
 
 def test_get_first_added_course(db, course_1_id, course_2_id):
-    c = list(db.get_course(id=course_1_id))
-    assert len(c) == 1
-    assert c[0].id == course_1_id
-    assert c[0].name == "Course 1"
-    assert c[0].length == 4500
-    assert c[0].climb == 90
-    assert c[0].controls == ["101", "102", "103"]
+    c = db.get_course(id=course_1_id)
+    assert c.id == course_1_id
+    assert c.name == "Course 1"
+    assert c.length == 4500
+    assert c.climb == 90
+    assert c.controls == ["101", "102", "103"]
 
 
 def test_get_last_added_course(db, course_1_id, course_2_id):
-    c = list(db.get_course(id=course_2_id))
-    assert len(c) == 1
-    assert c[0].id == course_2_id
-    assert c[0].name == "Course 2"
-    assert c[0].length is None
-    assert c[0].climb is None
-    assert c[0].controls == []
+    c = db.get_course(id=course_2_id)
+    assert c.id == course_2_id
+    assert c.name == "Course 2"
+    assert c.length is None
+    assert c.climb is None
+    assert c.controls == []
 
 
 def test_update_first_added_course(db, event_id, course_1_id, course_2_id):
     db.update_course(
         id=course_1_id, name="Course 3", length=3900, climb=150, controls=["101"]
     )
-    c = list(db.get_courses(event_id=event_id))
+    c = db.get_courses(event_id=event_id)
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -151,7 +149,7 @@ def test_update_last_added_course(db, event_id, course_1_id, course_2_id):
         climb=None,
         controls=["301", "302", "303"],
     )
-    c = list(db.get_courses(event_id=event_id))
+    c = db.get_courses(event_id=event_id)
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -169,7 +167,7 @@ def test_update_last_added_course(db, event_id, course_1_id, course_2_id):
 
 def test_delete_first_added_course(db, event_id, course_1_id, course_2_id):
     db.delete_course(id=course_1_id)
-    c = list(db.get_courses(event_id=event_id))
+    c = db.get_courses(event_id=event_id)
     assert len(c) == 1
     assert c[0].id == course_2_id
     assert c[0].name == "Course 2"
@@ -180,7 +178,7 @@ def test_delete_first_added_course(db, event_id, course_1_id, course_2_id):
 
 def test_delete_last_added_course(db, event_id, course_1_id, course_2_id):
     db.delete_course(id=course_2_id)
-    c = list(db.get_courses(event_id=event_id))
+    c = db.get_courses(event_id=event_id)
     assert len(c) == 1
     assert c[0].id == course_1_id
     assert c[0].name == "Course 1"
@@ -191,7 +189,7 @@ def test_delete_last_added_course(db, event_id, course_1_id, course_2_id):
 
 def test_delete_courses_deletes_all_courses(db, event_id, course_1_id, course_2_id):
     db.delete_courses(event_id=event_id)
-    c = list(db.get_courses(event_id=event_id))
+    c = db.get_courses(event_id=event_id)
     assert len(c) == 0
 
 
@@ -227,7 +225,7 @@ def test_delete_course_with_unknown_id_do_not_change_anything(
     db, event_id, course_1_id
 ):
     db.delete_course(id=course_1_id + 1)
-    c = list(db.get_courses(event_id=event_id))
+    c = db.get_courses(event_id=event_id)
     assert len(c) == 1
     assert c[0].id == course_1_id
     assert c[0].name == "Course 1"
