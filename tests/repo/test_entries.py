@@ -738,7 +738,7 @@ def test_import_entries_empty_db(db, event_2_id):
     assert classes[1].number_of_controls is None
     assert classes[1].params == ClassParams()
 
-    clubs = list(db.get_clubs())
+    clubs = db.get_clubs()
     assert len(clubs) == 1
 
     assert clubs[0].name == "OL Bundestag"

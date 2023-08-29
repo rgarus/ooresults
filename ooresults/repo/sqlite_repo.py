@@ -42,6 +42,7 @@ from ooresults.repo.repo import OperationalError
 from ooresults.repo.repo import TransactionMode
 from ooresults.repo.update import update_tables
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.club_type import ClubType
 from ooresults.repo.course_type import CourseType
 from ooresults.repo.event_type import EventType
 from ooresults.repo import result_type
@@ -369,11 +370,28 @@ class SqliteRepo(Repo):
         else:
             raise CourseUsedError
 
-    def get_clubs(self):
-        return self.db.select("clubs", order="name ASC")
+    def get_clubs(self) -> List[ClubType]:
+        values = self.db.select("clubs", order="name ASC")
+        clubs = []
+        for c in values:
+            clubs.append(
+                ClubType(
+                    id=c.id,
+                    name=c.name,
+                )
+            )
+        return clubs
 
-    def get_club(self, id: int):
-        return self.db.where("clubs", id=id)
+    def get_club(self, id: int) -> ClubType:
+        values = self.db.where("clubs", id=id)
+        if values:
+            c = values[0]
+            return ClubType(
+                id=c.id,
+                name=c.name,
+            )
+        else:
+            raise KeyError
 
     def add_club(self, name: str) -> int:
         try:
@@ -381,7 +399,7 @@ class SqliteRepo(Repo):
         except sqlite3.IntegrityError:
             raise ConstraintError("Club already exist")
 
-    def update_club(self, id: int, name: str):
+    def update_club(self, id: int, name: str) -> None:
         try:
             nr_of_rows = self.db.update(
                 "clubs", where="id=" + web.db.sqlquote(id), name=name
@@ -391,7 +409,7 @@ class SqliteRepo(Repo):
         except sqlite3.IntegrityError:
             raise ConstraintError("Club already exist")
 
-    def delete_club(self, id: int):
+    def delete_club(self, id: int) -> None:
         if (
             self.db.where("competitors", club_id=id).first() is None
             and self.db.where("entries", club_id=id).first() is None

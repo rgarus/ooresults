@@ -21,7 +21,6 @@ import logging
 import pathlib
 
 import web
-from web.utils import Storage
 
 from ooresults.handler import model
 from ooresults.repo.repo import ClubUsedError
@@ -51,6 +50,8 @@ class Add:
                 model.update_club(int(data.id), data.name)
         except ConstraintError as e:
             raise web.conflict(str(e))
+        except KeyError:
+            raise web.conflict("Club deleted")
         except:
             logging.exception("Internal server error")
             raise
@@ -77,14 +78,15 @@ class FillEditForm:
     def POST(self):
         """Query data to fill add or edit form"""
         data = web.input()
-        if data.id == "":
-            club = Storage(
-                {
-                    "id": "",
-                    "name": "",
-                }
-            )
-        else:
-            club = model.get_club(int(data.id))[0]
+        try:
+            if data.id == "":
+                club = None
+            else:
+                club = model.get_club(int(data.id))
+        except KeyError:
+            raise web.conflict("Club deleted")
+        except:
+            logging.exception("Internal server error")
+            raise
 
         return render.add_club(club)

@@ -24,6 +24,7 @@ import pytest
 from ooresults.repo import repo
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.club_type import ClubType
 from ooresults.repo.result_type import ResultStatus
 
 
@@ -101,75 +102,62 @@ def entry_id(db, event_id, class_id, club_1_id):
 
 
 def test_get_clubs_after_adding_one_club(db, club_1_id):
-    c = list(db.get_clubs())
+    c = db.get_clubs()
     assert len(c) == 1
-    assert c[0].id == club_1_id
-    assert c[0].name == "Club 1"
+    assert c[0] == ClubType(id=club_1_id, name="Club 1")
 
 
 def test_get_clubs_after_adding_two_clubs(db, club_1_id, club_2_id):
-    c = list(db.get_clubs())
+    c = db.get_clubs()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].id == club_1_id
-    assert c[0].name == "Club 1"
-    assert c[1].id == club_2_id
-    assert c[1].name == "Club 2"
+    assert c[0] == ClubType(id=club_1_id, name="Club 1")
+    assert c[1] == ClubType(id=club_2_id, name="Club 2")
 
 
 def test_get_first_added_club(db, club_1_id, club_2_id):
-    c = list(db.get_club(id=club_1_id))
-    assert len(c) == 1
-    assert c[0].id == club_1_id
-    assert c[0].name == "Club 1"
+    c = db.get_club(id=club_1_id)
+    assert c == ClubType(id=club_1_id, name="Club 1")
 
 
 def test_get_last_added_club(db, club_1_id, club_2_id):
-    c = list(db.get_club(id=club_2_id))
-    assert len(c) == 1
-    assert c[0].id == club_2_id
-    assert c[0].name == "Club 2"
+    c = db.get_club(id=club_2_id)
+    assert c == ClubType(id=club_2_id, name="Club 2")
 
 
 def test_update_first_added_club(db, club_1_id, club_2_id):
     db.update_club(id=club_1_id, name="Club 3")
-    c = list(db.get_clubs())
+    c = db.get_clubs()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].id == club_2_id
-    assert c[0].name == "Club 2"
-    assert c[1].id == club_1_id
-    assert c[1].name == "Club 3"
+    assert c[0] == ClubType(id=club_2_id, name="Club 2")
+    assert c[1] == ClubType(id=club_1_id, name="Club 3")
 
 
 def test_update_last_added_club(db, club_1_id, club_2_id):
     db.update_club(id=club_2_id, name="Club 3")
-    c = list(db.get_clubs())
+    c = db.get_clubs()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].id == club_1_id
-    assert c[0].name == "Club 1"
-    assert c[1].id == club_2_id
-    assert c[1].name == "Club 3"
+    assert c[0] == ClubType(id=club_1_id, name="Club 1")
+    assert c[1] == ClubType(id=club_2_id, name="Club 3")
 
 
 def test_delete_first_added_club(db, club_1_id, club_2_id):
     db.delete_club(id=club_1_id)
-    c = list(db.get_clubs())
+    c = db.get_clubs()
     assert len(c) == 1
-    assert c[0].id == club_2_id
-    assert c[0].name == "Club 2"
+    assert c[0] == ClubType(id=club_2_id, name="Club 2")
 
 
 def test_delete_last_added_club(db, club_1_id, club_2_id):
     db.delete_club(id=club_2_id)
-    c = list(db.get_clubs())
+    c = db.get_clubs()
     assert len(c) == 1
-    assert c[0].id == club_1_id
-    assert c[0].name == "Club 1"
+    assert c[0] == ClubType(id=club_1_id, name="Club 1")
 
 
 def test_add_existing_name_raises_exception(db, club_1_id):
@@ -189,10 +177,9 @@ def test_update_with_unknown_id_raises_exception(db, club_1_id):
 
 def test_delete_club_with_unknown_id_do_not_change_anything(db, club_1_id):
     db.delete_club(id=club_1_id + 1)
-    c = list(db.get_clubs())
+    c = db.get_clubs()
     assert len(c) == 1
-    assert c[0].id == club_1_id
-    assert c[0].name == "Club 1"
+    assert c[0] == ClubType(id=club_1_id, name="Club 1")
 
 
 def test_delete_club_used_in_competitor_raises_exception(db, competitor_id, club_1_id):

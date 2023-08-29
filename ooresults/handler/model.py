@@ -37,6 +37,7 @@ from ooresults.repo.repo import TransactionMode
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo import result_type
 from ooresults.repo import start_type
+from ooresults.repo.club_type import ClubType
 from ooresults.repo.course_type import CourseType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
@@ -323,27 +324,27 @@ def delete_course(id):
         db.delete_course(id=id)
 
 
-def get_clubs():
+def get_clubs() -> List[ClubType]:
     with db.transaction():
         return db.get_clubs()
 
 
-def get_club(id):
+def get_club(id) -> ClubType:
     with db.transaction():
         return db.get_club(id=id)
 
 
-def add_club(name):
+def add_club(name) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.add_club(name=name)
 
 
-def update_club(id, name):
+def update_club(id, name) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.update_club(id=id, name=name)
 
 
-def delete_club(id):
+def delete_club(id) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_club(id=id)
 
