@@ -38,6 +38,7 @@ from ooresults.repo.class_params import ClassParams
 from ooresults.repo import result_type
 from ooresults.repo import start_type
 from ooresults.repo.club_type import ClubType
+from ooresults.repo.competitor_type import CompetitorType
 from ooresults.repo.course_type import CourseType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
@@ -349,12 +350,12 @@ def delete_club(id) -> None:
         db.delete_club(id=id)
 
 
-def get_competitors():
+def get_competitors() -> List[CompetitorType]:
     with db.transaction():
         return db.get_competitors()
 
 
-def get_competitor(id):
+def get_competitor(id: int) -> CompetitorType:
     with db.transaction():
         return db.get_competitor(id=id)
 

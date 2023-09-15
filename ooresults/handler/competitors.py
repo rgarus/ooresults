@@ -21,7 +21,6 @@ import logging
 import pathlib
 
 import web
-from web.utils import Storage
 
 from ooresults.handler import model
 from ooresults.plugins import iof_competitor_list
@@ -99,7 +98,9 @@ class Export:
         try:
             if data.comp_export == "comp.export.1":
                 competitors = model.get_competitors()
-                content = iof_competitor_list.create_competitor_list(competitors)
+                content = iof_competitor_list.create_competitor_list(
+                    competitors=competitors
+                )
 
         except:
             logging.exception("Internal server error")
@@ -127,20 +128,9 @@ class FillEditForm:
         """Query data to fill add or edit form"""
         data = web.input()
         if data.id == "":
-            competitor = Storage(
-                {
-                    "id": "",
-                    "first_name": "",
-                    "last_name": "",
-                    "club_id": "",
-                    "club_name": "",
-                    "gender": "",
-                    "year": "",
-                    "chip": "",
-                }
-            )
+            competitor = None
         else:
-            competitor = model.get_competitor(int(data.id))[0]
+            competitor = model.get_competitor(int(data.id))
 
         clubs = model.get_clubs()
         return render.add_competitor(competitor, clubs)

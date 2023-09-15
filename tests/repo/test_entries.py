@@ -25,6 +25,8 @@ import pytest
 
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.club_type import ClubType
+from ooresults.repo.competitor_type import CompetitorType
 from ooresults.repo import result_type
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo import start_type
@@ -221,18 +223,17 @@ def test_get_entries(
 def test_get_first_added_entry(
     db, event_2_id, club_id, class_2_id, entry_1_id, entry_2_id, entry_3_id
 ):
-    competitors = list(db.get_competitors())
-    competitor = [
-        c for c in competitors if c.first_name == "Angela" and c.last_name == "Merkel"
-    ][0]
-
-    assert competitor["first_name"] == "Angela"
-    assert competitor["last_name"] == "Merkel"
-    assert competitor["gender"] == "F"
-    assert competitor["year"] == 1957
-    assert competitor["chip"] == "9999999"
-    assert competitor["club_name"] == "OL Bundestag"
-    assert competitor["club_id"] == club_id
+    competitor = db.get_competitor_by_name(first_name="Angela", last_name="Merkel")
+    assert competitor == CompetitorType(
+        id=competitor.id,
+        first_name="Angela",
+        last_name="Merkel",
+        gender="F",
+        year=1957,
+        chip="9999999",
+        club_id=club_id,
+        club_name="OL Bundestag",
+    )
 
     data = list(db.get_entry(id=entry_2_id))
     assert len(data) == 1
@@ -260,18 +261,17 @@ def test_get_first_added_entry(
 def test_get_last_added_entry(
     db, event_2_id, club_id, class_2_id, entry_1_id, entry_2_id, entry_3_id
 ):
-    competitors = list(db.get_competitors())
-    competitor = [
-        c for c in competitors if c.first_name == "Jogi" and c.last_name == "Löw"
-    ][0]
-
-    assert competitor["first_name"] == "Jogi"
-    assert competitor["last_name"] == "Löw"
-    assert competitor["gender"] == "M"
-    assert competitor["year"] is None
-    assert competitor["chip"] == ""
-    assert competitor["club_name"] is None
-    assert competitor["club_id"] is None
+    competitor = db.get_competitor_by_name(first_name="Jogi", last_name="Löw")
+    assert competitor == CompetitorType(
+        id=competitor.id,
+        first_name="Jogi",
+        last_name="Löw",
+        gender="M",
+        year=None,
+        chip="",
+        club_id=None,
+        club_name=None,
+    )
 
     data = list(db.get_entry(id=entry_3_id))
     assert len(data) == 1
@@ -548,16 +548,17 @@ def test_add_existing_competitor_but_do_not_update_competitors_chip_and_club_if_
     assert data[0]["result"] == result_type.PersonRaceResult()
     assert data[0]["start"] == start_type.PersonRaceStart()
 
-    data = list(db.get_competitor(id=competitor_1_id))
-    assert len(data) == 1
-
-    assert data[0]["id"] == competitor_1_id
-    assert data[0]["first_name"] == "Angela"
-    assert data[0]["last_name"] == "Merkel"
-    assert data[0]["gender"] == "W"
-    assert data[0]["year"] is None
-    assert data[0]["chip"] == "1234567"
-    assert data[0]["club_id"] == club_id
+    data = db.get_competitor(id=competitor_1_id)
+    assert data == CompetitorType(
+        id=competitor_1_id,
+        first_name="Angela",
+        last_name="Merkel",
+        gender="W",
+        year=None,
+        chip="1234567",
+        club_id=club_id,
+        club_name="OL Bundestag",
+    )
 
 
 def test_add_existing_competitor_and_update_competitors_chip_and_club_if_undefined(
@@ -600,16 +601,17 @@ def test_add_existing_competitor_and_update_competitors_chip_and_club_if_undefin
     assert data[0]["result"] == result_type.PersonRaceResult()
     assert data[0]["start"] == start_type.PersonRaceStart()
 
-    data = list(db.get_competitor(id=competitor_2_id))
-    assert len(data) == 1
-
-    assert data[0]["id"] == competitor_2_id
-    assert data[0]["first_name"] == "Yogi"
-    assert data[0]["last_name"] == "Löw"
-    assert data[0]["gender"] == "M"
-    assert data[0]["year"] == 1975
-    assert data[0]["chip"] == "999"
-    assert data[0]["club_id"] == club_id
+    data = db.get_competitor(id=competitor_2_id)
+    assert data == CompetitorType(
+        id=competitor_2_id,
+        first_name="Yogi",
+        last_name="Löw",
+        gender="M",
+        year=1975,
+        chip="999",
+        club_id=club_id,
+        club_name="OL Bundestag",
+    )
 
 
 def test_add_entry_result(db, event_2_id, class_2_id, club_id, entry_2_id):
@@ -741,27 +743,35 @@ def test_import_entries_empty_db(db, event_2_id):
     clubs = db.get_clubs()
     assert len(clubs) == 1
 
-    assert clubs[0].name == "OL Bundestag"
+    assert ClubType(
+        id=clubs[0].id,
+        name="OL Bundestag",
+    )
 
-    c = list(db.get_competitors())
+    c = db.get_competitors()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].first_name == "Jogi"
-    assert c[0].last_name == "Löw"
-    assert c[0].club_id is None
-    assert c[0].club_name is None
-    assert c[0].gender == "M"
-    assert c[0].year == 1960
-    assert c[0].chip == "1234"
-
-    assert c[1].first_name == "Angela"
-    assert c[1].last_name == "Merkel"
-    assert c[1].club_id == clubs[0].id
-    assert c[1].club_name == clubs[0].name
-    assert c[1].gender == ""
-    assert c[1].year is None
-    assert c[1].chip == "4455"
+    assert c[0] == CompetitorType(
+        id=c[0].id,
+        first_name="Jogi",
+        last_name="Löw",
+        club_id=None,
+        club_name=None,
+        gender="M",
+        year=1960,
+        chip="1234",
+    )
+    assert c[1] == CompetitorType(
+        id=c[1].id,
+        first_name="Angela",
+        last_name="Merkel",
+        club_id=clubs[0].id,
+        club_name=clubs[0].name,
+        gender="",
+        year=None,
+        chip="4455",
+    )
 
     data = list(db.get_entries(event_id=event_2_id))
     assert len(data) == 2
@@ -835,25 +845,30 @@ def test_import_entries(db, event_2_id, class_1_id, club_id):
             },
         ],
     )
-    c = list(db.get_competitors())
+    c = db.get_competitors()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].first_name == "Jogi"
-    assert c[0].last_name == "Löw"
-    assert c[0].club_id is None
-    assert c[0].club_name is None
-    assert c[0].gender == "M"
-    assert c[0].year == 1960
-    assert c[0].chip == "1234"
-
-    assert c[1].first_name == "Angela"
-    assert c[1].last_name == "Merkel"
-    assert c[1].club_id == club_id
-    assert c[1].club_name == "OL Bundestag"
-    assert c[1].gender == ""
-    assert c[1].year is None
-    assert c[1].chip == "4455"
+    assert c[0] == CompetitorType(
+        id=c[0].id,
+        first_name="Jogi",
+        last_name="Löw",
+        club_id=None,
+        club_name=None,
+        gender="M",
+        year=1960,
+        chip="1234",
+    )
+    assert c[1] == CompetitorType(
+        id=c[1].id,
+        first_name="Angela",
+        last_name="Merkel",
+        club_id=club_id,
+        club_name="OL Bundestag",
+        gender="",
+        year=None,
+        chip="4455",
+    )
 
     data = list(db.get_entries(event_id=event_2_id))
     assert len(data) == 2
@@ -929,25 +944,30 @@ def test_import_entries_already_exist(
             },
         ],
     )
-    c = list(db.get_competitors())
+    c = db.get_competitors()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].first_name == "Jogi"
-    assert c[0].last_name == "Löw"
-    assert c[0].club_id is None
-    assert c[0].club_name is None
-    assert c[0].gender == "M"
-    assert c[0].year == 1960
-    assert c[0].chip == ""
-
-    assert c[1].first_name == "Angela"
-    assert c[1].last_name == "Merkel"
-    assert c[1].club_id == club_id
-    assert c[1].club_name == "OL Bundestag"
-    assert c[1].gender == "F"
-    assert c[1].year == 1957
-    assert c[1].chip == "9999999"
+    assert c[0] == CompetitorType(
+        id=c[0].id,
+        first_name="Jogi",
+        last_name="Löw",
+        club_id=None,
+        club_name=None,
+        gender="M",
+        year=1960,
+        chip="",
+    )
+    assert c[1] == CompetitorType(
+        id=c[1].id,
+        first_name="Angela",
+        last_name="Merkel",
+        club_id=club_id,
+        club_name="OL Bundestag",
+        gender="F",
+        year=1957,
+        chip="9999999",
+    )
 
     data = list(db.get_entries(event_id=event_2_id))
     assert len(data) == 2

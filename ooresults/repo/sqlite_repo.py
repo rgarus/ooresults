@@ -43,6 +43,7 @@ from ooresults.repo.repo import TransactionMode
 from ooresults.repo.update import update_tables
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.club_type import ClubType
+from ooresults.repo.competitor_type import CompetitorType
 from ooresults.repo.course_type import CourseType
 from ooresults.repo.event_type import EventType
 from ooresults.repo import result_type
@@ -162,7 +163,8 @@ class SqliteRepo(Repo):
             t.commit()
             logging.info(f"DB version initialized to {update_tables.VERSION}")
 
-        update_tables.update_tables(db=self.db, path=db)
+        else:
+            update_tables.update_tables(db=self.db, path=db)
 
     def start_transaction(self, mode: TransactionMode = TransactionMode.DEFERRED):
         self.t = self.db.transaction()
@@ -418,39 +420,94 @@ class SqliteRepo(Repo):
         else:
             raise ClubUsedError
 
-    def get_competitors(self):
+    def get_competitors(self) -> List[CompetitorType]:
         values = self.db.query(
-            "SELECT "
-            "competitors.id,"
-            "competitors.first_name,"
-            "competitors.last_name,"
-            "competitors.gender,"
-            "competitors.year,"
-            "competitors.chip,"
-            "clubs.id,"
-            "clubs.name "
+            "SELECT competitors.*, clubs.* "
             "FROM competitors "
             "LEFT JOIN clubs ON competitors.club_id = clubs.id "
             "ORDER BY competitors.last_name ASC, competitors.first_name ASC;"
         )
         values.names[values.names.index("id", 1)] = "club_id"
         values.names[values.names.index("name")] = "club_name"
-        return values
 
-    def get_competitor(self, id):
-        return self.db.where("competitors", id=id)
+        competitors = []
+        for c in values:
+            competitors.append(
+                CompetitorType(
+                    id=c["id"],
+                    first_name=c["first_name"],
+                    last_name=c["last_name"],
+                    gender=c["gender"],
+                    year=c["year"],
+                    chip=c["chip"],
+                    club_id=c["club_id"],
+                    club_name=c["club_name"],
+                )
+            )
+        return competitors
 
-    def get_competitor_by_name(self, first_name: str, last_name: str):
-        return self.db.where("competitors", first_name=first_name, last_name=last_name)
+    def get_competitor(self, id) -> CompetitorType:
+        values = self.db.query(
+            "SELECT competitors.*, clubs.* "
+            "FROM competitors "
+            "LEFT JOIN clubs ON competitors.club_id = clubs.id "
+            "WHERE competitors.id = " + web.db.sqlquote(id) + ";"
+        )
+        values.names[values.names.index("id", 1)] = "club_id"
+        values.names[values.names.index("name")] = "club_name"
+
+        if values:
+            c = values[0]
+            return CompetitorType(
+                id=c["id"],
+                first_name=c["first_name"],
+                last_name=c["last_name"],
+                gender=c["gender"],
+                year=c["year"],
+                chip=c["chip"],
+                club_id=c["club_id"],
+                club_name=c["club_name"],
+            )
+        else:
+            raise KeyError
+
+    def get_competitor_by_name(self, first_name: str, last_name: str) -> CompetitorType:
+        values = self.db.query(
+            "SELECT competitors.*, clubs.* "
+            "FROM competitors "
+            "LEFT JOIN clubs ON competitors.club_id = clubs.id "
+            "WHERE competitors.first_name = "
+            + web.db.sqlquote(first_name)
+            + "AND competitors.last_name = "
+            + web.db.sqlquote(last_name)
+            + ";"
+        )
+        values.names[values.names.index("id", 1)] = "club_id"
+        values.names[values.names.index("name")] = "club_name"
+
+        if values:
+            c = values[0]
+            return CompetitorType(
+                id=c["id"],
+                first_name=c["first_name"],
+                last_name=c["last_name"],
+                gender=c["gender"],
+                year=c["year"],
+                chip=c["chip"],
+                club_id=c["club_id"],
+                club_name=c["club_name"],
+            )
+        else:
+            raise KeyError
 
     def add_competitor(
         self,
         first_name: str,
         last_name: str,
         club_id: Optional[int],
-        gender,
+        gender: str,
         year: Optional[int],
-        chip,
+        chip: str,
     ) -> int:
         try:
             return self.db.insert(
@@ -471,9 +528,9 @@ class SqliteRepo(Repo):
         first_name: str,
         last_name: str,
         club_id: Optional[int],
-        gender,
+        gender: str,
         year: Optional[int],
-        chip,
+        chip: str,
     ) -> None:
         try:
             nr_of_rows = self.db.update(
@@ -491,62 +548,63 @@ class SqliteRepo(Repo):
         except sqlite3.IntegrityError:
             raise ConstraintError("Competitor already exist")
 
-    def delete_competitor(self, id: int):
+    def delete_competitor(self, id: int) -> None:
         if self.db.where("entries", competitor_id=id).first() is None:
             self.db.delete("competitors", where="id=" + web.db.sqlquote(id))
         else:
             raise CompetitorUsedError
 
-    def import_competitors(self, competitors):
+    def import_competitors(self, competitors: List[Dict]) -> None:
         list_of_competitors = []
         for c in competitors:
-            for clb in self.get_clubs():
-                if clb.name == c["club"]:
-                    break
-            else:
-                self.add_club(c["club"])
-            for clb in self.get_clubs():
-                if clb.name == c["club"]:
-                    break
+            club_id = None
+            if c["club"]:
+                for clb in self.get_clubs():
+                    if clb.name == c["club"]:
+                        club_id = clb.id
+                        break
+                else:
+                    club_id = self.add_club(name=c["club"])
 
-            competitor = self.get_competitor_by_name(
-                first_name=c["first_name"], last_name=c["last_name"]
-            ).first()
-            if competitor is None:
+            try:
+                c_name = self.get_competitor_by_name(
+                    first_name=c["first_name"],
+                    last_name=c["last_name"],
+                )
+            except KeyError:
                 list_of_competitors.append(
                     {
                         "last_name": c["last_name"],
                         "first_name": c["first_name"],
-                        "club_id": clb.id,
+                        "club_id": club_id,
                         "gender": c["gender"] if "gender" in c else "",
                         "year": c["year"] if "year" in c else "",
                         "chip": c["chip"] if "chip" in c else "",
                     }
                 )
             else:
+                gender = c_name.gender
+                if "gender" in c and c["gender"]:
+                    gender = c["gender"]
+                year = c_name.year
+                if "year" in c and c["year"] is not None:
+                    year = c["year"]
+                chip = c_name.chip
+                if "chip" in c and c["chip"]:
+                    chip = c["chip"]
                 self.update_competitor(
-                    id=competitor.id,
-                    first_name=competitor.first_name,
-                    last_name=competitor.last_name,
-                    club_id=clb.id
-                    if competitor.club_id is None
-                    else competitor.club_id,
-                    gender=c["gender"]
-                    if competitor.gender == "" and "gender" in c
-                    else competitor.gender,
-                    year=c["year"]
-                    if competitor.year == "" and "year" in c
-                    else competitor.year,
-                    chip=c["chip"]
-                    if competitor.chip == "" and "chip" in c
-                    else competitor.chip,
+                    id=c_name.id,
+                    first_name=c_name.first_name,
+                    last_name=c_name.last_name,
+                    club_id=c_name.club_id if club_id is None else club_id,
+                    gender=gender,
+                    year=year,
+                    chip=chip,
                 )
 
         self.db.supports_multiple_insert = True
-        for i in range(0, len(competitors), 25):
-            self.db.multiple_insert(
-                "competitors", list_of_competitors[i : min(i + 25, len(competitors))]
-            )
+        if list_of_competitors:
+            self.db.multiple_insert("competitors", list_of_competitors)
 
     def get_entries(self, event_id: int):
         values = self.db.query(
@@ -705,17 +763,17 @@ class SqliteRepo(Repo):
                     chip=chip,
                 )
         try:
-            competitor = list(self.get_competitor(id=competitor_id))
+            competitor = self.get_competitor(id=competitor_id)
             self.update_competitor(
-                id=competitor[0].id,
+                id=competitor.id,
                 first_name=first_name,
                 last_name=last_name,
                 gender=gender,
                 year=year,
-                club_id=competitor[0].club_id
-                if competitor[0].club_id is not None
+                club_id=competitor.club_id
+                if competitor.club_id is not None
                 else club_id,
-                chip=competitor[0].chip if competitor[0].chip != "" else chip,
+                chip=competitor.chip if competitor.chip != "" else chip,
             )
             return self.db.insert(
                 "entries",
@@ -777,15 +835,15 @@ class SqliteRepo(Repo):
             raise KeyError
 
         entry = self.get_entry(id=id)
-        competitor = list(self.get_competitor(id=entry[0].competitor_id))
+        competitor = self.get_competitor(id=entry[0].competitor_id)
         self.update_competitor(
-            id=competitor[0].id,
+            id=competitor.id,
             first_name=first_name,
             last_name=last_name,
             gender=gender,
             year=year,
-            club_id=competitor[0].club_id,
-            chip=competitor[0].chip,
+            club_id=competitor.club_id,
+            chip=competitor.chip,
         )
 
         result = entry[0].result
@@ -854,7 +912,7 @@ class SqliteRepo(Repo):
                 )
 
             club_id = None
-            if c["club"] != "":
+            if c["club"]:
                 for clb in self.get_clubs():
                     if clb.name == c["club"]:
                         club_id = clb.id
@@ -864,10 +922,12 @@ class SqliteRepo(Repo):
 
             gender = c["gender"] if "gender" in c else ""
             year = c["year"] if "year" in c else None
-            competitor = self.get_competitor_by_name(
-                first_name=c["first_name"], last_name=c["last_name"]
-            ).first()
-            if competitor is None:
+            try:
+                competitor = self.get_competitor_by_name(
+                    first_name=c["first_name"],
+                    last_name=c["last_name"],
+                )
+            except KeyError:
                 competitor_id = self.add_competitor(
                     first_name=c["first_name"],
                     last_name=c["last_name"],

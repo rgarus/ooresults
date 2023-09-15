@@ -21,8 +21,8 @@ $def with (competitors)
             <td class="dt">$competitor.last_name</td>
             <td class="dt">$competitor.gender</td>
             <td class="dt">$(str(competitor.year) if competitor.year is not None else '')</td>
-            <td class="dt" style="text-align:right">$competitor.chip</td>
-            <td class="dt">$competitor.club_name</td>
+            <td class="dt" style="text-align:right">$(competitor.chip if competitor.chip else "")</td>
+            <td class="dt">$(competitor.club_name if competitor.club_name else "")</td>
         </tr> 
     </tbody>
 </table>

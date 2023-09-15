@@ -1,53 +1,72 @@
 $def with (competitor, clubs)
 
+$if competitor:
+    $ id = str(competitor.id)
+    $ first_name = competitor.first_name
+    $ last_name = competitor.last_name
+    $ club_id = competitor.club_id
+    $ club_name = competitor.club_name if competitor.club_name else ""
+    $ gender = competitor.gender if competitor.gender else ""
+    $ year = str(competitor.year) if competitor.year is not None else ""
+    $ chip = competitor.chip if competitor.chip else ""
+$else:
+    $ id = ""
+    $ first_name = ""
+    $ last_name = ""
+    $ club_id = None
+    $ club_name = ""
+    $ gender = ""
+    $ year = ""
+    $ chip = ""
+
 <!-- Modal content -->
 <div class="modal-content">
     <span class="close" onclick="document.getElementById('comp.addDialog').style.display='none'">&times;</span>
     <form id="comp.formAdd" class="form-container" autocomplete="off" onsubmit="comp_submitAdd(); return false;">
-        <input id="comp.addId" name="id" type="text" value="$competitor.id" hidden/>
+        <input id="comp.addId" name="id" type="text" value="$id" hidden/>
         <table id="comp.addFormTable">
             <tr>
                 <th class="input-header"><label for="first_name">First name *</label></th>
-                <td><input id="first_name" name="first_name" type="text" value="$competitor.first_name" required onchange="mark_label(this)"/></td>
+                <td><input id="first_name" name="first_name" type="text" value="$first_name" required onchange="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="last_name">Last name *</label></th>
-                <td><input id="last_name" name="last_name" type="text" value="$competitor.last_name" required onchange="mark_label(this)"/></td>
+                <td><input id="last_name" name="last_name" type="text" value="$last_name" required onchange="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="gender">Gender</label></th>
                 <td>
                     <select id="gender" name="gender" onchange="mark_label(this)">
-                    $for gender in ['', 'F', 'M']:
-                        $if str(gender) == str(competitor.gender):
-                            <option value="$gender" selected>$gender</option>
+                    $for value in ['', 'F', 'M']:
+                        $if value == gender:
+                            <option value="$value" selected>$value</option>
                         $else:
-                            <option value="$gender">$gender</option>
+                            <option value="$value">$value</option>
                     </select>
                 </td>
             </tr>
             <tr>
                 <th class="input-header"><label for="year">Year</label></th>
                 <td><input id="year" name="year" type="number" min="1900" max="2099"
-                           value="$(str(competitor.year) if competitor.year is not None else '')" onchange="mark_label(this)"/></td>
+                           value="$year" onchange="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="chip">Chip</label></th>
-                <td><input id="chip" name="chip" type="text" value="$competitor.chip" onchange="mark_label(this)"/></td>
+                <td><input id="chip" name="chip" type="text" value="$chip" onchange="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="club">Club</label></th>
                 <td>
                     <select id="club" name="club" onchange="mark_label(this)">
-                    $if competitor.club_id is None:
+                    $if club_id is None:
                         <option value="" selected></option>
                     $else:
                         <option value=""></option>
                     $for club in clubs:
-                        $if club.id == competitor.club_id:
-                            <option value="$club.id" selected>$club.name</option>
+                        $if competitor and competitor.club_id == club.id:
+                            <option value="$str(club.id)" selected>$club.name</option>
                         $else:
-                            <option value="$club.id">$club.name</option>
+                            <option value="$str(club.id)">$club.name</option>
                     </select>
                 </td>
             </tr>

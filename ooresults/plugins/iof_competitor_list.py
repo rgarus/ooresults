@@ -24,6 +24,8 @@ from typing import Dict
 from lxml import etree
 from lxml.builder import ElementMaker
 
+from ooresults.repo.competitor_type import CompetitorType
+
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
 xml_schema = etree.XMLSchema(etree.parse(str(schema_file)))
@@ -33,7 +35,7 @@ iof_namespace = "http://www.orienteering.org/datastandard/3.0"
 namespaces = {None: iof_namespace}
 
 
-def create_competitor_list(competitors: List[Dict]) -> bytes:
+def create_competitor_list(competitors: List[CompetitorType]) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
     COMPETITORLIST = E.CompetitorList
@@ -59,14 +61,14 @@ def create_competitor_list(competitors: List[Dict]) -> bytes:
                 GIVEN(c.first_name),
             ),
         )
-        if c.gender != "":
+        if c.gender:
             person.set("sex", c.gender)
         if c.year is not None:
             person.append(BIRTHDATE(str(c.year) + "-01-01"))
         competitor.append(person)
-        if c.club_name is not None and c.club_name != "":
+        if c.club_name:
             competitor.append(ORGANISATION(NAME(c.club_name)))
-        if c.chip != "":
+        if c.chip:
             competitor.append(CONTROLCARD(c.chip, punchingSystem="SI"))
         root.append(competitor)
 
