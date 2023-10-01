@@ -27,6 +27,7 @@ from lxml.builder import ElementMaker
 import iso8601
 
 from ooresults.repo import result_type
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
 
@@ -40,7 +41,7 @@ namespaces = {None: iof_namespace}
 
 
 def create_result_list(
-    event: EventType, class_results: List[Tuple[Dict, List[Dict]]]
+    event: EventType, class_results: List[Tuple[ClassInfoType, List[Dict]]]
 ) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
@@ -84,18 +85,15 @@ def create_result_list(
 
     for class_, ranked_results in class_results:
         cr = CLASSRESULT()
-        cr.append(CLASS(NAME(class_["name"])))
+        cr.append(CLASS(NAME(class_.name)))
 
         co = COURSE()
-        if class_["course_length"] is not None:
-            co.append(LENGTH(str(round(class_["course_length"]))))
-        if class_["course_climb"] is not None:
-            co.append(CLIMB(str(round(class_["course_climb"]))))
-        if (
-            class_["number_of_controls"] is not None
-            and class_["number_of_controls"] > 0
-        ):
-            co.append(NUMBEROFCONTROLS(str(class_["number_of_controls"])))
+        if class_.course_length is not None:
+            co.append(LENGTH(str(round(class_.course_length))))
+        if class_.course_climb is not None:
+            co.append(CLIMB(str(round(class_.course_climb))))
+        if class_.number_of_controls is not None and class_.number_of_controls > 0:
+            co.append(NUMBEROFCONTROLS(str(class_.number_of_controls)))
         if len(co):
             cr.append(co)
 

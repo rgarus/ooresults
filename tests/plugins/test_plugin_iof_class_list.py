@@ -18,6 +18,8 @@
 
 
 from ooresults.plugins import iof_class_list
+from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_type import ClassInfoType
 
 
 def test_import_class_list():
@@ -83,21 +85,50 @@ def test_export_class_list():
 """
     document = iof_class_list.create_class_list(
         [
-            {
-                "name": "D 14-15",
-                "short_name": None,
-            },
-            {
-                "name": "H 14-15",
-            },
-            {
-                "name": "Schüler B",
-                "short_name": "SchB",
-            },
-            {
-                "name": "Offen Mittel",
-                "short_name": "OM",
-            },
+            ClassInfoType(
+                id=1,
+                name="D 14-15",
+                short_name=None,
+                course_id=None,
+                course=None,
+                course_length=None,
+                course_climb=None,
+                number_of_controls=None,
+                params=ClassParams(),
+            ),
+            ClassInfoType(
+                id=2,
+                name="H 14-15",
+                short_name=None,
+                course_id=None,
+                course=None,
+                course_length=None,
+                course_climb=None,
+                number_of_controls=None,
+                params=ClassParams(),
+            ),
+            ClassInfoType(
+                id=3,
+                name="Schüler B",
+                short_name="SchB",
+                course_id=None,
+                course=None,
+                course_length=None,
+                course_climb=None,
+                number_of_controls=None,
+                params=ClassParams(),
+            ),
+            ClassInfoType(
+                id=4,
+                name="Offen Mittel",
+                short_name="OM",
+                course_id=None,
+                course=None,
+                course_length=None,
+                course_climb=None,
+                number_of_controls=None,
+                params=ClassParams(),
+            ),
         ]
     )
     assert document == bytes(content, encoding="utf-8")

@@ -142,11 +142,11 @@ class Export:
             elif data.entr_export == "entr.export.3":
                 class_list = model.get_classes(event_id=event_id)
                 entry_list = model.get_entries(event_id=event_id)
-                content = oe2003.create(entry_list, list(class_list))
+                content = oe2003.create(entry_list, class_list)
             elif data.entr_export == "entr.export.4":
                 class_list = model.get_classes(event_id=event_id)
                 entry_list = model.get_entries(event_id=event_id)
-                content = oe12.create(entry_list, list(class_list))
+                content = oe12.create(entry_list, class_list)
 
         except EventNotFoundError:
             raise web.conflict("Event deleted")

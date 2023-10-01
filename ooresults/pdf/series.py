@@ -19,6 +19,7 @@
 
 from typing import Dict
 from typing import List
+from typing import Tuple
 from typing import Any
 from typing import Optional
 
@@ -28,7 +29,10 @@ from ooresults.repo.series_type import Settings
 
 
 def create_pdf(
-    settings: Settings, events: List[EventType], results: List, landscape: bool = False
+    settings: Settings,
+    events: List[EventType],
+    results: List[Tuple[str, List[Dict]]],
+    landscape: bool = False,
 ) -> bytes:
     W_SPACE = 3
     W_RANK = 9

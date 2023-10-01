@@ -26,6 +26,7 @@ from typing import Dict
 import clevercsv as csv
 from unidecode import unidecode
 
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo import result_type
 from ooresults.repo import start_type
 from ooresults.repo.result_type import ResultStatus
@@ -39,7 +40,7 @@ def cp1252(value: str) -> str:
         return unidecode(value)
 
 
-def create(entries: List[Dict], class_list: List[Dict]) -> bytes:
+def create(entries: List[Dict], class_list: List[ClassInfoType]) -> bytes:
     output = io.StringIO()
     writer = csv.writer(output, delimiter=";", quoting=csv.QUOTE_MINIMAL)
 
@@ -86,11 +87,11 @@ def create(entries: List[Dict], class_list: List[Dict]) -> bytes:
         class_name = ""
         class_short_name = ""
         for j, c in enumerate(class_list):
-            if c.get("id") == e.get("class_id", None):
+            if c.id == e.get("class_id", None):
                 class_no = str(j + 1)
-                class_name = c.get("name", "")
-                if c.get("short_name", None):
-                    class_short_name = c.get("short_name", class_name)
+                class_name = c.name
+                if c.short_name:
+                    class_short_name = c.short_name
                 else:
                     class_short_name = class_name
                 break

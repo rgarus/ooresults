@@ -19,10 +19,10 @@
 
 import pathlib
 from datetime import datetime
-from typing import Dict
 
 from fpdf import FPDF
 
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.result_type import ResultStatus
 
 
@@ -86,23 +86,22 @@ class PDF(FPDF):
         )
         self.cell(w=0, h=10, txt=f"Page {self.page_no()}/{{nb}}", align="R")
 
-    def course_data(self, class_: Dict) -> str:
+    def course_data(self, class_: ClassInfoType) -> str:
         #
         # compute course data string:
         # course length - course climb - number of controls
         #
         s = ""
-        for attr in ("course_length", "course_climb"):
-            if attr in class_ and class_[attr] is not None:
-                if s != "":
-                    s += " - "
-                s += str(round(class_[attr])) + " m"
-        if (
-            "number_of_controls" in class_
-            and class_["number_of_controls"] is not None
-            and class_["number_of_controls"] > 0
-        ):
+        if class_.course_length is not None:
             if s != "":
                 s += " - "
-            s += str(class_["number_of_controls"]) + " Posten"
+            s += str(round(class_.course_length)) + " m"
+        if class_.course_climb is not None:
+            if s != "":
+                s += " - "
+            s += str(round(class_.course_id)) + " m"
+        if class_.number_of_controls is not None and class_.number_of_controls > 0:
+            if s != "":
+                s += " - "
+            s += str(class_.number_of_controls) + " Posten"
         return s

@@ -25,6 +25,7 @@ import pytest
 
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.club_type import ClubType
 from ooresults.repo.competitor_type import CompetitorType
 from ooresults.repo import result_type
@@ -718,27 +719,32 @@ def test_import_entries_empty_db(db, event_2_id):
             },
         ],
     )
-    classes = list(db.get_classes(event_id=event_2_id))
+    classes = db.get_classes(event_id=event_2_id)
     assert len(classes) == 2
     assert classes[0].id != classes[1].id
 
-    assert classes[0].name == "Class 1"
-    assert classes[0].short_name is None
-    assert classes[0].course_id is None
-    assert classes[0].course is None
-    assert classes[0].course_length is None
-    assert classes[0].course_climb is None
-    assert classes[0].number_of_controls is None
-    assert classes[0].params == ClassParams()
-
-    assert classes[1].name == "Class 2"
-    assert classes[1].short_name is None
-    assert classes[1].course_id is None
-    assert classes[1].course is None
-    assert classes[1].course_length is None
-    assert classes[1].course_climb is None
-    assert classes[1].number_of_controls is None
-    assert classes[1].params == ClassParams()
+    assert classes[0] == ClassInfoType(
+        id=classes[0].id,
+        name="Class 1",
+        short_name=None,
+        course_id=None,
+        course=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+    assert classes[1] == ClassInfoType(
+        id=classes[1].id,
+        name="Class 2",
+        short_name=None,
+        course_id=None,
+        course=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
 
     clubs = db.get_clubs()
     assert len(clubs) == 1

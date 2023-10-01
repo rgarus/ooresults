@@ -22,6 +22,8 @@ import datetime
 import pytest
 
 from ooresults.repo import repo
+from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.class_type import ClassType
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.result_type import ResultStatus
@@ -131,81 +133,92 @@ def entry_id(db, event_1_id, class_1_id):
 
 
 def test_get_classes_after_adding_one_class(db, event_1_id, class_1_id):
-    c = list(db.get_classes(event_id=event_1_id))
+    c = db.get_classes(event_id=event_1_id)
     assert len(c) == 1
-    assert c[0].id == class_1_id
-    assert c[0].name == "Class 1"
-    assert c[0].short_name == "C 1"
-    assert c[0].course_id is None
-    assert c[0].course is None
-    assert c[0].course_length is None
-    assert c[0].course_climb is None
-    assert c[0].number_of_controls is None
-    assert c[0].params == ClassParams()
+    assert c[0] == ClassInfoType(
+        id=class_1_id,
+        name="Class 1",
+        short_name="C 1",
+        course_id=None,
+        course=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
 
 
 def test_get_classes_for_first_event(
     db, event_1_id, course_1_id, class_1_id, class_2_id, class_3_id
 ):
-    c = list(db.get_classes(event_id=event_1_id))
+    c = db.get_classes(event_id=event_1_id)
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].id == class_1_id
-    assert c[0].name == "Class 1"
-    assert c[0].short_name == "C 1"
-    assert c[0].course_id is None
-    assert c[0].course is None
-    assert c[0].course_length is None
-    assert c[0].course_climb is None
-    assert c[0].number_of_controls is None
-    assert c[0].params == ClassParams()
-    assert c[1].id == class_2_id
-    assert c[1].name == "Class 2"
-    assert c[1].short_name is None
-    assert c[1].course_id == course_1_id
-    assert c[1].course == "Course 1"
-    assert c[1].course_length is None
-    assert c[1].course_climb is None
-    assert c[1].number_of_controls == 0
-    assert c[1].params == ClassParams()
+    assert c[0] == ClassInfoType(
+        id=class_1_id,
+        name="Class 1",
+        short_name="C 1",
+        course_id=None,
+        course=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+    assert c[1] == ClassInfoType(
+        id=class_2_id,
+        name="Class 2",
+        short_name=None,
+        course_id=course_1_id,
+        course="Course 1",
+        course_length=None,
+        course_climb=None,
+        number_of_controls=0,
+        params=ClassParams(),
+    )
 
 
 def test_get_classes_for_second_event(
     db, event_2_id, course_1_id, class_1_id, class_2_id, class_3_id
 ):
-    c = list(db.get_classes(event_id=event_2_id))
+    c = db.get_classes(event_id=event_2_id)
     assert len(c) == 1
-
-    assert c[0].id == class_3_id
-    assert c[0].name == "Class 3"
-    assert c[0].short_name == "C 3"
-    assert c[0].course_id is None
-    assert c[0].course is None
-    assert c[0].course_length is None
-    assert c[0].course_climb is None
-    assert c[0].number_of_controls is None
-    assert c[0].params == ClassParams()
-
-
-def test_get_first_added_class(db, class_1_id, class_2_id):
-    c = list(db.get_class(id=class_1_id))
-    assert len(c) == 1
-    assert c[0].id == class_1_id
-    assert c[0].name == "Class 1"
-    assert c[0].short_name == "C 1"
-    assert c[0].course_id is None
-    assert c[0].params == ClassParams()
+    assert c[0] == ClassInfoType(
+        id=class_3_id,
+        name="Class 3",
+        short_name="C 3",
+        course_id=None,
+        course=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
 
 
-def test_get_last_added_class(db, course_1_id, class_1_id, class_2_id):
-    c = list(db.get_class(id=class_2_id))
-    assert len(c) == 1
-    assert c[0].id == class_2_id
-    assert c[0].name == "Class 2"
-    assert c[0].short_name is None
-    assert c[0].course_id == course_1_id
-    assert c[0].params == ClassParams()
+def test_get_first_added_class(db, event_1_id, class_1_id, class_2_id):
+    c = db.get_class(id=class_1_id)
+    assert c == ClassType(
+        id=class_1_id,
+        event_id=event_1_id,
+        name="Class 1",
+        short_name="C 1",
+        course_id=None,
+        params=ClassParams(),
+    )
+
+
+def test_get_last_added_class(db, event_1_id, course_1_id, class_1_id, class_2_id):
+    c = db.get_class(id=class_2_id)
+    assert c == ClassType(
+        id=class_2_id,
+        event_id=event_1_id,
+        name="Class 2",
+        short_name=None,
+        course_id=course_1_id,
+        params=ClassParams(),
+    )
 
 
 def test_update_first_added_class(db, event_1_id, course_1_id, class_1_id, class_2_id):
@@ -216,28 +229,32 @@ def test_update_first_added_class(db, event_1_id, course_1_id, class_1_id, class
         course_id=course_1_id,
         params=ClassParams(),
     )
-    c = list(db.get_classes(event_id=event_1_id))
+    c = db.get_classes(event_id=event_1_id)
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].id == class_2_id
-    assert c[0].name == "Class 2"
-    assert c[0].short_name is None
-    assert c[0].course_id == course_1_id
-    assert c[0].course == "Course 1"
-    assert c[0].course_length is None
-    assert c[0].course_climb is None
-    assert c[0].number_of_controls == 0
-    assert c[0].params == ClassParams()
-    assert c[1].id == class_1_id
-    assert c[1].name == "Class 3"
-    assert c[1].short_name == "C 3"
-    assert c[1].course_id == course_1_id
-    assert c[1].course == "Course 1"
-    assert c[1].course_length is None
-    assert c[1].course_climb is None
-    assert c[1].number_of_controls == 0
-    assert c[1].params == ClassParams()
+    assert c[0] == ClassInfoType(
+        id=class_2_id,
+        name="Class 2",
+        short_name=None,
+        course_id=course_1_id,
+        course="Course 1",
+        course_length=None,
+        course_climb=None,
+        number_of_controls=0,
+        params=ClassParams(),
+    )
+    assert c[1] == ClassInfoType(
+        id=class_1_id,
+        name="Class 3",
+        short_name="C 3",
+        course_id=course_1_id,
+        course="Course 1",
+        course_length=None,
+        course_climb=None,
+        number_of_controls=0,
+        params=ClassParams(),
+    )
 
 
 def test_update_last_added_class(db, event_1_id, class_1_id, class_2_id):
@@ -248,63 +265,71 @@ def test_update_last_added_class(db, event_1_id, class_1_id, class_2_id):
         course_id=None,
         params=ClassParams(),
     )
-    c = list(db.get_classes(event_id=event_1_id))
+    c = db.get_classes(event_id=event_1_id)
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].id == class_1_id
-    assert c[0].name == "Class 1"
-    assert c[0].short_name == "C 1"
-    assert c[0].course_id is None
-    assert c[0].course is None
-    assert c[0].course_length is None
-    assert c[0].course_climb is None
-    assert c[0].number_of_controls is None
-    assert c[0].params == ClassParams()
-    assert c[1].id == class_2_id
-    assert c[1].name == "Class 3"
-    assert c[1].short_name == "C 3"
-    assert c[1].course_id is None
-    assert c[1].course is None
-    assert c[1].course_length is None
-    assert c[1].course_climb is None
-    assert c[1].number_of_controls is None
-    assert c[1].params == ClassParams()
+    assert c[0] == ClassInfoType(
+        id=class_1_id,
+        name="Class 1",
+        short_name="C 1",
+        course_id=None,
+        course=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+    assert c[1] == ClassInfoType(
+        id=class_2_id,
+        name="Class 3",
+        short_name="C 3",
+        course_id=None,
+        course=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
 
 
 def test_delete_first_added_class(db, event_1_id, course_1_id, class_1_id, class_2_id):
     db.delete_class(id=class_1_id)
-    c = list(db.get_classes(event_id=event_1_id))
+    c = db.get_classes(event_id=event_1_id)
     assert len(c) == 1
-    assert c[0].id == class_2_id
-    assert c[0].name == "Class 2"
-    assert c[0].short_name is None
-    assert c[0].course_id == course_1_id
-    assert c[0].course == "Course 1"
-    assert c[0].course_length is None
-    assert c[0].course_climb is None
-    assert c[0].number_of_controls == 0
-    assert c[0].params == ClassParams()
+    assert c[0] == ClassInfoType(
+        id=class_2_id,
+        name="Class 2",
+        short_name=None,
+        course_id=course_1_id,
+        course="Course 1",
+        course_length=None,
+        course_climb=None,
+        number_of_controls=0,
+        params=ClassParams(),
+    )
 
 
 def test_delete_last_added_class(db, event_1_id, class_1_id, class_2_id):
     db.delete_class(id=class_2_id)
-    c = list(db.get_classes(event_id=event_1_id))
+    c = db.get_classes(event_id=event_1_id)
     assert len(c) == 1
-    assert c[0].id == class_1_id
-    assert c[0].name == "Class 1"
-    assert c[0].short_name == "C 1"
-    assert c[0].course_id is None
-    assert c[0].course is None
-    assert c[0].course_length is None
-    assert c[0].course_climb is None
-    assert c[0].number_of_controls is None
-    assert c[0].params == ClassParams()
+    assert c[0] == ClassInfoType(
+        id=class_1_id,
+        name="Class 1",
+        short_name="C 1",
+        course_id=None,
+        course=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
 
 
 def test_delete_classes_deletes_all_classes(db, event_1_id, class_1_id, class_2_id):
     db.delete_classes(event_id=event_1_id)
-    c = list(db.get_classes(event_id=event_1_id))
+    c = db.get_classes(event_id=event_1_id)
     assert len(c) == 0
 
 
@@ -356,17 +381,19 @@ def test_delete_class_with_unknown_id_do_not_change_anything(
     db, event_1_id, class_1_id
 ):
     db.delete_class(id=class_1_id + 1)
-    c = list(db.get_classes(event_id=event_1_id))
+    c = db.get_classes(event_id=event_1_id)
     assert len(c) == 1
-    assert c[0].id == class_1_id
-    assert c[0].name == "Class 1"
-    assert c[0].short_name == "C 1"
-    assert c[0].course_id is None
-    assert c[0].course is None
-    assert c[0].course_length is None
-    assert c[0].course_climb is None
-    assert c[0].number_of_controls is None
-    assert c[0].params == ClassParams()
+    assert c[0] == ClassInfoType(
+        id=class_1_id,
+        name="Class 1",
+        short_name="C 1",
+        course_id=None,
+        course=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
 
 
 def test_delete_class_used_in_entry_raises_exception(
@@ -393,25 +420,29 @@ def test_get_course_data(
         course_id=course_2_id,
         params=ClassParams(),
     )
-    c = list(db.get_classes(event_id=event_1_id))
+    c = db.get_classes(event_id=event_1_id)
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].id == class_2_id
-    assert c[0].name == "Class 2"
-    assert c[0].short_name is None
-    assert c[0].course_id == course_1_id
-    assert c[0].course == "Course 1"
-    assert c[0].course_length is None
-    assert c[0].course_climb is None
-    assert c[0].number_of_controls == 0
-    assert c[0].params == ClassParams()
-    assert c[1].id == class_1_id
-    assert c[1].name == "Class 3"
-    assert c[1].short_name == "C 3"
-    assert c[1].course_id == course_2_id
-    assert c[1].course == "Course 2"
-    assert c[1].course_length == 2300
-    assert c[1].course_climb == 90
-    assert c[1].number_of_controls == 2
-    assert c[1].params == ClassParams()
+    assert c[0] == ClassInfoType(
+        id=class_2_id,
+        name="Class 2",
+        short_name=None,
+        course_id=course_1_id,
+        course="Course 1",
+        course_length=None,
+        course_climb=None,
+        number_of_controls=0,
+        params=ClassParams(),
+    )
+    assert c[1] == ClassInfoType(
+        id=class_1_id,
+        name="Class 3",
+        short_name="C 3",
+        course_id=course_2_id,
+        course="Course 2",
+        course_length=2300,
+        course_climb=90,
+        number_of_controls=2,
+        params=ClassParams(),
+    )

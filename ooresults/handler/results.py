@@ -29,6 +29,7 @@ from ooresults.handler import model
 from ooresults.repo.repo import EventNotFoundError
 import ooresults.pdf.result
 import ooresults.pdf.splittimes
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.utils.globals import t_globals
 
 
@@ -36,7 +37,7 @@ templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
 render = web.template.render(templates, globals=t_globals)
 
 
-def build_columns(class_results: List[Tuple[Dict, Dict]]) -> set:
+def build_columns(class_results: List[Tuple[ClassInfoType, List[Dict]]]) -> set:
     columns = set()
     for class_, _ in class_results:
         if class_.params.apply_handicap_rule:

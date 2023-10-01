@@ -26,6 +26,7 @@ import iso8601
 from lxml import etree
 from lxml.builder import ElementMaker
 
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.course_type import CourseType
 from ooresults.repo.event_type import EventType
 
@@ -39,7 +40,7 @@ namespaces = {None: iof_namespace}
 
 
 def create_course_data(
-    event: EventType, courses: List[CourseType], classes: List[Dict]
+    event: EventType, courses: List[CourseType], classes: List[ClassInfoType]
 ) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
@@ -95,10 +96,10 @@ def create_course_data(
 
     for c in classes:
         class_course_assignment = CLASSCOURSEASSIGNMENT()
-        class_course_assignment.append(CLASSNAME(c["name"]))
+        class_course_assignment.append(CLASSNAME(c.name))
 
-        if c.get("course", None) is not None:
-            class_course_assignment.append(COURSENAME(c["course"]))
+        if c.course:
+            class_course_assignment.append(COURSENAME(c.course))
 
         race_course_data.append(class_course_assignment)
 

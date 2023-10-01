@@ -42,6 +42,8 @@ from ooresults.repo.repo import OperationalError
 from ooresults.repo.repo import TransactionMode
 from ooresults.repo.update import update_tables
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.class_type import ClassType
 from ooresults.repo.club_type import ClubType
 from ooresults.repo.competitor_type import CompetitorType
 from ooresults.repo.course_type import CourseType
@@ -179,7 +181,7 @@ class SqliteRepo(Repo):
     def rollback(self):
         self.t.rollback()
 
-    def get_classes(self, event_id: int):
+    def get_classes(self, event_id: int) -> List[ClassInfoType]:
         values = self.db.query(
             "SELECT "
             "classes.id,"
@@ -200,20 +202,42 @@ class SqliteRepo(Repo):
         values.names[values.names.index("name", 2)] = "course"
         values.names[values.names.index("length", 1)] = "course_length"
         values.names[values.names.index("climb", 1)] = "course_climb"
-        values.names[values.names.index("controls", 1)] = "number_of_controls"
-        values = list(values)
-        for c in values:
-            c.params = UnpicklerZoneInfo(io.BytesIO(c.params)).load()
-            if c.number_of_controls is not None:
-                controls = UnpicklerZoneInfo(io.BytesIO(c.number_of_controls)).load()
-                c.number_of_controls = len(controls)
-        return values
 
-    def get_class(self, id: int):
-        values = list(self.db.where("classes", id=id))
+        classes = []
         for c in values:
-            c.params = UnpicklerZoneInfo(io.BytesIO(c.params)).load()
-        return values
+            number_of_controls = None
+            if c["controls"] is not None:
+                controls = UnpicklerZoneInfo(io.BytesIO(c["controls"])).load()
+                number_of_controls = len(controls)
+            classes.append(
+                ClassInfoType(
+                    id=c["id"],
+                    name=c["name"],
+                    short_name=c["short_name"],
+                    course_id=c["course_id"],
+                    course=c["course"],
+                    course_length=c["course_length"],
+                    course_climb=c["course_climb"],
+                    number_of_controls=number_of_controls,
+                    params=UnpicklerZoneInfo(io.BytesIO(c["params"])).load(),
+                )
+            )
+        return classes
+
+    def get_class(self, id: int) -> ClassType:
+        values = self.db.where("classes", id=id)
+        if values:
+            c = values[0]
+            return ClassType(
+                id=c.id,
+                event_id=c.event_id,
+                name=c.name,
+                short_name=c.short_name,
+                course_id=c.course_id,
+                params=UnpicklerZoneInfo(io.BytesIO(c.params)).load(),
+            )
+        else:
+            raise KeyError
 
     def add_class(
         self,

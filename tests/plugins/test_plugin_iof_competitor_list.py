@@ -17,8 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from tests.competitor import Competitor
 from ooresults.plugins import iof_competitor_list
+from ooresults.repo.competitor_type import CompetitorType
 
 
 def test_import_name():
@@ -65,7 +65,16 @@ def test_export_name():
 """
     document = iof_competitor_list.create_competitor_list(
         [
-            Competitor(first_name="Angela", last_name="Merkel"),
+            CompetitorType(
+                id=1,
+                first_name="Angela",
+                last_name="Merkel",
+                gender=None,
+                year=None,
+                chip=None,
+                club_id=None,
+                club_name=None,
+            ),
         ]
     )
     assert document == bytes(content, encoding="utf-8")
@@ -128,13 +137,15 @@ def test_export_full():
 """
     document = iof_competitor_list.create_competitor_list(
         [
-            Competitor(
+            CompetitorType(
+                id=1,
                 first_name="Angela",
                 last_name="Merkel",
-                club_name="OC Kanzleramt",
                 gender="F",
                 year=1972,
                 chip="1234567",
+                club_id=2,
+                club_name="OC Kanzleramt",
             )
         ]
     )

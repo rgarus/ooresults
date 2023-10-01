@@ -24,7 +24,6 @@ from typing import Optional
 
 import tzlocal
 import web
-from web.utils import Storage
 
 from ooresults.handler import model
 from ooresults.repo.repo import ClassUsedError
@@ -218,17 +217,9 @@ class FillEditForm:
         event_id = int(data.event_id) if data.event_id != "" else -1
         try:
             if data.id == "":
-                class_ = Storage(
-                    {
-                        "id": "",
-                        "name": "",
-                        "short_name": None,
-                        "course_id": None,
-                        "params": ClassParams(),
-                    }
-                )
+                class_ = None
             else:
-                class_ = model.get_class(id=int(data.id))[0]
+                class_ = model.get_class(id=int(data.id))
 
         except EventNotFoundError:
             raise web.conflict("Event deleted")

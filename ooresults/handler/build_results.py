@@ -21,14 +21,16 @@ from decimal import Decimal
 from typing import List
 from typing import Dict
 from typing import Tuple
+from typing import Optional
 
 from ooresults.repo import series_type
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.result_type import ResultStatus
 
 
 def build_results(
-    classes: List[Dict], results: List[Dict]
-) -> List[Tuple[Dict, List[Dict]]]:
+    classes: List[ClassInfoType], results: List[Dict]
+) -> List[Tuple[ClassInfoType, List[Dict]]]:
     all_results = []
     for class_ in classes:
         if class_.name == "Organizer":
@@ -128,8 +130,12 @@ def build_results(
 
 
 def build_total_results(
-    settings: series_type.Settings, list_of_results: List, organizers: List = []
+    settings: series_type.Settings,
+    list_of_results: List[List[Tuple[ClassInfoType, List[Dict]]]],
+    organizers: Optional[List] = None,
 ) -> List[Tuple[str, List[Dict]]]:
+    if organizers is None:
+        organizers = []
     q = Decimal(10) ** -settings.decimal_places
 
     r = {}

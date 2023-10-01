@@ -20,6 +20,8 @@
 import datetime
 
 from ooresults.plugins import iof_course_data
+from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.course_type import CourseType
 from ooresults.repo.event_type import EventType
 
@@ -371,18 +373,39 @@ def test_export_course_data_with_class_assignment():
             ),
         ],
         [
-            {
-                "name": "Elite Men",
-                "course": "Bahn B",
-            },
-            {
-                "name": "Elite Woman",
-                "course": "Bahn A",
-            },
-            {
-                "name": "Beginners",
-                "course": None,
-            },
+            ClassInfoType(
+                id=1,
+                name="Elite Men",
+                short_name=None,
+                course_id=2,
+                course="Bahn B",
+                course_length=None,
+                course_climb=None,
+                number_of_controls=None,
+                params=ClassParams(),
+            ),
+            ClassInfoType(
+                id=2,
+                name="Elite Woman",
+                short_name=None,
+                course_id=1,
+                course="Bahn A",
+                course_length=None,
+                course_climb=None,
+                number_of_controls=None,
+                params=ClassParams(),
+            ),
+            ClassInfoType(
+                id=3,
+                name="Beginners",
+                short_name=None,
+                course_id=None,
+                course=None,
+                course_length=None,
+                course_climb=None,
+                number_of_controls=None,
+                params=ClassParams(),
+            ),
         ],
     )
     assert document == bytes(content, encoding="utf-8")

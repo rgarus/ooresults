@@ -17,10 +17,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import List
+from typing import Tuple
 from typing import Dict
 from typing import Optional
 from typing import Any
 
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.event_type import EventType
 from ooresults.pdf.pdf import PDF
@@ -28,7 +31,10 @@ from ooresults.utils import globals
 
 
 def create_pdf(
-    event: EventType, results: Dict, include_dns: bool = False, landscape: bool = True
+    event: EventType,
+    results: List[Tuple[ClassInfoType, List[Dict]]],
+    include_dns: bool = False,
+    landscape: bool = True,
 ) -> bytes:
     W_SPACE = 4
     W_RANK = 9
@@ -186,7 +192,7 @@ def create_pdf(
                 ResultStatus.DID_NOT_START,
             ):
                 pdf.set_font(family="Carlito", size=12)
-                if result.rank is not None:
+                if result["rank"] is not None:
                     ranked = True
                 elif ranked:
                     ranked = False

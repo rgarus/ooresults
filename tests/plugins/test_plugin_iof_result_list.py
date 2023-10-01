@@ -22,6 +22,8 @@ from datetime import timezone
 from datetime import timedelta
 
 from ooresults.plugins import iof_result_list
+from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo import result_type
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
@@ -268,12 +270,17 @@ def test_export_result_list():
         ),
         [
             (
-                {
-                    "name": "Bahn A - Lang",
-                    "course_length": None,
-                    "course_climb": None,
-                    "number_of_controls": None,
-                },
+                ClassInfoType(
+                    id=1,
+                    name="Bahn A - Lang",
+                    short_name=None,
+                    course_id=None,
+                    course=None,
+                    course_length=None,
+                    course_climb=None,
+                    number_of_controls=None,
+                    params=ClassParams(),
+                ),
                 [
                     {
                         "first_name": "Angela",
@@ -381,12 +388,17 @@ def test_export_result_list_not_competing():
         ),
         [
             (
-                {
-                    "name": "Bahn A - Lang",
-                    "course_length": None,
-                    "course_climb": None,
-                    "number_of_controls": None,
-                },
+                ClassInfoType(
+                    id=1,
+                    name="Bahn A - Lang",
+                    short_name=None,
+                    course_id=None,
+                    course=None,
+                    course_length=None,
+                    course_climb=None,
+                    number_of_controls=None,
+                    params=ClassParams(),
+                ),
                 [
                     {
                         "first_name": "Angela",
@@ -807,12 +819,17 @@ def test_export_result_list_classes():
         ),
         [
             (
-                {
-                    "name": "Bahn A - Lang",
-                    "course_length": 5100.0,
-                    "course_climb": 110.0,
-                    "number_of_controls": 10,
-                },
+                ClassInfoType(
+                    id=1,
+                    name="Bahn A - Lang",
+                    short_name=None,
+                    course_id=1,
+                    course="Bahn A",
+                    course_length=5100,
+                    course_climb=110,
+                    number_of_controls=10,
+                    params=ClassParams(),
+                ),
                 [
                     {
                         "first_name": "Angela",
@@ -876,12 +893,17 @@ def test_export_result_list_classes():
                 ],
             ),
             (
-                {
-                    "name": "Bahn B - Mittel",
-                    "course_length": 2800.0,
-                    "course_climb": None,
-                    "number_of_controls": 0,
-                },
+                ClassInfoType(
+                    id=2,
+                    name="Bahn B - Mittel",
+                    short_name=None,
+                    course_id=2,
+                    course="Bahn B",
+                    course_length=2800,
+                    course_climb=None,
+                    number_of_controls=0,
+                    params=ClassParams(),
+                ),
                 [
                     {
                         "first_name": "Claudia",

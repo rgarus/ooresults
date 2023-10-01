@@ -20,10 +20,11 @@
 import pathlib
 from typing import List
 from typing import Dict
-from typing import Tuple
 
 from lxml import etree
 from lxml.builder import ElementMaker
+
+from ooresults.repo.class_type import ClassInfoType
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
@@ -34,7 +35,7 @@ iof_namespace = "http://www.orienteering.org/datastandard/3.0"
 namespaces = {None: iof_namespace}
 
 
-def create_class_list(classes: List[Dict]) -> bytes:
+def create_class_list(classes: List[ClassInfoType]) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
     CLASSLIST = E.ClassList
@@ -49,10 +50,10 @@ def create_class_list(classes: List[Dict]) -> bytes:
 
     for c in classes:
         class_ = CLASS()
-        class_.append(NAME(c["name"]))
+        class_.append(NAME(c.name))
 
-        if c.get("short_name", None) is not None:
-            class_.append(SHORTNAME(str(c["short_name"])))
+        if c.short_name:
+            class_.append(SHORTNAME(c.short_name))
 
         root.append(class_)
 
@@ -63,7 +64,7 @@ def create_class_list(classes: List[Dict]) -> bytes:
     )
 
 
-def parse_class_list(content: bytes) -> Tuple[List[Dict]]:
+def parse_class_list(content: bytes) -> List[Dict]:
     # Class: Dict of {'name': str, 'short_name': Optional[str]}
 
     root = etree.XML(content)

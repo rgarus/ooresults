@@ -19,6 +19,7 @@
 
 from typing import Optional
 
+from ooresults.repo.class_type import ClassParams
 from ooresults.repo.result_type import ResultStatus
 from ooresults.utils.rental_cards import format_card
 
@@ -50,6 +51,7 @@ def minutes_seconds(time: Optional[int]) -> str:
 t_globals = {
     "str": str,
     "round": round,
+    "ClassParams": ClassParams,
     "ResultStatus": ResultStatus,
     "MAP_STATUS": MAP_STATUS,
     "EXPERIMENTAL": EXPERIMENTAL,

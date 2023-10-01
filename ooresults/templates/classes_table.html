@@ -68,10 +68,10 @@ $def format_voided_legs(legs):
                 <td class="dt">$({'standard': 'Standard', 'net': 'Net', 'score': 'Score'}.get(class_.params.otype, ''))</td>
                 <td class="dt">$({'if_punched': 'If punched', 'no': 'No', 'yes': 'Yes'}.get(class_.params.using_start_control, ''))</td>
                 <td class="dt">$('Yes' if class_.params.apply_handicap_rule else '')</td>
-                <td class="dt" style="text-align:right">$format_date(class_.params.get('mass_start', None))</td>
-                <td class="dt" style="text-align:right">$format_time(class_.params.get('time_limit', None))</td>
-                <td class="dt" style="text-align:right">$format_int(class_.params.get('penalty_controls', None))</td>
-                <td class="dt" style="text-align:right">$format_int(class_.params.get('penalty_overtime', None))</td>
+                <td class="dt" style="text-align:right">$format_date(class_.params.mass_start)</td>
+                <td class="dt" style="text-align:right">$format_time(class_.params.time_limit)</td>
+                <td class="dt" style="text-align:right">$format_int(class_.params.penalty_controls)</td>
+                <td class="dt" style="text-align:right">$format_int(class_.params.penalty_overtime)</td>
             </tr> 
         </tbody>
     </table>

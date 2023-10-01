@@ -20,64 +20,126 @@
 import datetime
 
 from tests.entry import Entry
-from ooresults.plugins import oe2003
+from ooresults.plugins import oe12
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 
 
-header = "Stnr;Chip;Datenbank Id;Nachname;Vorname;Jg;G;Block;AK;Start;Ziel;Zeit;Wertung;Club-Nr.;Abk;Ort;Nat;Katnr;Kurz;Lang"
+header = (
+    "OE0001_V12;"
+    "Entry Id;"
+    "Stno;"
+    "XStno;"
+    "Chipno;"
+    "Database Id;"
+    "IOF Id;"
+    "Surname;"
+    "First name;"
+    "Birthdate;"
+    "YB;"
+    "S;"
+    "Block;"
+    "nc;"
+    "Start;"
+    "Finish;"
+    "Time;"
+    "Classifier;"
+    "Credit -;"
+    "Penalty +;"
+    "Comment;"
+    "Club no.;"
+    "Cl.name;"
+    "City;"
+    "Nat;"
+    "Location;"
+    "Region;"
+    "Cl. no.;"
+    "Short;"
+    "Long;"
+    "Entry cl. No;"
+    "Entry class (short);"
+    "Entry class (long);"
+    "Rank;"
+    "Ranking points;"
+    "Num1;"
+    "Num2;"
+    "Num3;"
+    "Text1;"
+    "Text2;"
+    "Text3;"
+    "Addr. surname;"
+    "Addr. first name;"
+    "Street;"
+    "Line2;"
+    "Zip;"
+    "Addr. city;"
+    "Phone;"
+    "Mobile;"
+    "Fax;"
+    "EMail;"
+    "Rented;"
+    "Start fee;"
+    "Paid;"
+    "Team id;"
+    "Team name;"
+    "Course no.;"
+    "Course;"
+    "km;"
+    "m;"
+    "Course controls"
+)
 encoding = "windows-1252"
 
 
 def test_separator_semicolon():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[Entry(first_name="v", last_name="n", chip="c")], class_list=[]
     )
-    v1 = "1;c;;n;v;;;;0;;;;;;;;;;;"
+    v1 = ";;1;;c;;;n;v;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
 
     assert content == bytes(header + "\r\n" + v1 + "\r\n", encoding=encoding)
 
 
 def test_quote_within_quotes():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[Entry(first_name="v", last_name='n1"2', chip="c")], class_list=[]
     )
-    v1 = '1;c;;"n1""2";v;;;;0;;;;;;;;;;;'
+    v1 = ';;1;;c;;;"n1""2";v;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
 
     assert content == bytes(header + "\r\n" + v1 + "\r\n", encoding=encoding)
 
 
 def test_separator_within_quotes():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[Entry(first_name="v", last_name="n1;2", chip="c")], class_list=[]
     )
-    v1 = '1;c;;"n1;2";v;;;;0;;;;;;;;;;;'
+    v1 = ';;1;;c;;;"n1;2";v;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
 
     assert content == bytes(header + "\r\n" + v1 + "\r\n", encoding=encoding)
 
 
 def test_newline_within_quotes():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[Entry(first_name="v", last_name="n1\n2", chip="c")], class_list=[]
     )
-    v1 = '1;c;;"n1\n2";v;;;;0;;;;;;;;;;;'
+    v1 = ';;1;;c;;;"n1\n2";v;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
 
     assert content == bytes(header + "\r\n" + v1 + "\r\n", encoding=encoding)
 
 
 def test_special_characters():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[Entry(first_name="v", last_name="ÄÖÜßäüö", chip="c")], class_list=[]
     )
-    v1 = "1;c;;ÄÖÜßäüö;v;;;;0;;;;;;;;;;;"
+    v1 = ";;1;;c;;;ÄÖÜßäüö;v;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
 
     assert content == bytes(header + "\r\n" + v1 + "\r\n", encoding=encoding)
 
 
 def test_multiline():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(first_name="v1", last_name="n1", chip="c1"),
             Entry(first_name="v2", last_name="n2", chip="c2"),
@@ -85,9 +147,9 @@ def test_multiline():
         ],
         class_list=[],
     )
-    v1 = "1;c1;;n1;v1;;;;0;;;;;;;;;;;"
-    v2 = "2;c2;;n2;v2;;;;0;;;;;;;;;;;"
-    v3 = "3;c3;;n3;v3;;;;0;;;;;;;;;;;"
+    v1 = ";;1;;c1;;;n1;v1;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+    v2 = ";;2;;c2;;;n2;v2;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+    v3 = ";;3;;c3;;;n3;v3;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
 
     assert content == bytes(
         header + "\r\n" + v1 + "\r\n" + v2 + "\r\n" + v3 + "\r\n", encoding=encoding
@@ -95,7 +157,7 @@ def test_multiline():
 
 
 def test_year():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(first_name="a", last_name="b", year=2006),
             Entry(first_name="c", last_name="d", year=2000),
@@ -104,11 +166,11 @@ def test_year():
         class_list=[],
     )
     v1 = (
-        "1;;;b;a;2006;;;0;;;;;;;;;;;"
+        ";;1;;;;;b;a;;2006;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
-        "2;;;d;c;2000;;;0;;;;;;;;;;;"
+        ";;2;;;;;d;c;;2000;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
-        "3;;;f;e;1941;;;0;;;;;;;;;;;"
+        ";;3;;;;;f;e;;1941;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
     )
 
@@ -116,59 +178,79 @@ def test_year():
 
 
 def test_gender():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(first_name="a", last_name="b", gender="F"),
             Entry(first_name="c", last_name="d", gender="M"),
         ],
         class_list=[],
     )
-    v1 = "1;;;b;a;;W;;0;;;;;;;;;;;" + "\r\n" + "2;;;d;c;;M;;0;;;;;;;;;;;" + "\r\n"
+    v1 = (
+        ";;1;;;;;b;a;;;F;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+        ";;2;;;;;d;c;;;M;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+    )
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
 def test_not_competing():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(first_name="a", last_name="b", not_competing=False),
             Entry(first_name="c", last_name="d", not_competing=True),
         ],
         class_list=[],
     )
-    v1 = "1;;;b;a;;;;0;;;;;;;;;;;" + "\r\n" + "2;;;d;c;;;;X;;;;;;;;;;;" + "\r\n"
+    v1 = (
+        ";;1;;;;;b;a;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+        ";;2;;;;;d;c;;;;;X;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+    )
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
 def test_club():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(first_name="a", last_name="b", club_id=1, club="OL1"),
             Entry(first_name="c", last_name="d", club_id=2, club="OL2"),
         ],
         class_list=[],
     )
-    v1 = "1;;;b;a;;;;0;;;;;1;;OL1;;;;" + "\r\n" + "2;;;d;c;;;;0;;;;;2;;OL2;;;;" + "\r\n"
+    v1 = (
+        ";;1;;;;;b;a;;;;;0;;;;;;;;1;;OL1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+        ";;2;;;;;d;c;;;;;0;;;;;;;;2;;OL2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+    )
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
 def test_club_not_exported_without_club_id():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(first_name="a", last_name="b", club_id=None, club="OL1"),
             Entry(first_name="c", last_name="d", club_id=2, club="OL2"),
         ],
         class_list=[],
     )
-    v1 = "1;;;b;a;;;;0;;;;;;;;;;;" + "\r\n" + "2;;;d;c;;;;0;;;;;2;;OL2;;;;" + "\r\n"
+    v1 = (
+        ";;1;;;;;b;a;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+        ";;2;;;;;d;c;;;;;0;;;;;;;;2;;OL2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+    )
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
 def test_class():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(first_name="a", last_name="b", class_id=1, class_="Class_1"),
             Entry(first_name="c", last_name="d", class_id=2, class_="Class_2"),
@@ -199,9 +281,9 @@ def test_class():
         ],
     )
     v1 = (
-        "1;;;b;a;;;;0;;;;;;;;;1;Class_1;Class_1"
+        ";;1;;;;;b;a;;;;;0;;;;;;;;;;;;;;1;Class_1;Class_1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
-        "2;;;d;c;;;;0;;;;;;;;;2;Class_2;Class_2"
+        ";;2;;;;;d;c;;;;;0;;;;;;;;;;;;;;2;Class_2;Class_2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
     )
 
@@ -209,7 +291,7 @@ def test_class():
 
 
 def test_class_short_name():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(first_name="a", last_name="b", class_id=1, class_="Class_1"),
             Entry(first_name="c", last_name="d", class_id=2, class_="Class_2"),
@@ -240,9 +322,9 @@ def test_class_short_name():
         ],
     )
     v1 = (
-        "1;;;b;a;;;;0;;;;;;;;;1;C1;Class_1"
+        ";;1;;;;;b;a;;;;;0;;;;;;;;;;;;;;1;C1;Class_1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
-        "2;;;d;c;;;;0;;;;;;;;;2;C2;Class_2"
+        ";;2;;;;;d;c;;;;;0;;;;;;;;;;;;;;2;C2;Class_2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
     )
 
@@ -256,7 +338,7 @@ def test_start_time():
     s2 = datetime.datetime(
         2020, 3, 1, 22, 50, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=1))
     )
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(
                 first_name="a", last_name="b", result=PersonRaceResult(start_time=s1)
@@ -268,9 +350,9 @@ def test_start_time():
         class_list=[],
     )
     v1 = (
-        "1;;;b;a;;;;0;10:00:15;;;;;;;;;;"
+        ";;1;;;;;b;a;;;;;0;10:00:15;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
-        "2;;;d;c;;;;0;22:50:00;;;;;;;;;;"
+        ";;2;;;;;d;c;;;;;0;22:50:00;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
     )
 
@@ -284,7 +366,7 @@ def test_finish_time():
     f2 = datetime.datetime(
         2020, 3, 1, 22, 50, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=1))
     )
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(
                 first_name="a", last_name="b", result=PersonRaceResult(finish_time=f1)
@@ -296,9 +378,9 @@ def test_finish_time():
         class_list=[],
     )
     v1 = (
-        "1;;;b;a;;;;0;;10:00:15;;;;;;;;;"
+        ";;1;;;;;b;a;;;;;0;;10:00:15;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
-        "2;;;d;c;;;;0;;22:50:00;;;;;;;;;"
+        ";;2;;;;;d;c;;;;;0;;22:50:00;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
     )
 
@@ -306,7 +388,7 @@ def test_finish_time():
 
 
 def test_time():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(first_name="a", last_name="b", result=PersonRaceResult(time=301)),
             Entry(first_name="c", last_name="d", result=PersonRaceResult(time=8000)),
@@ -314,9 +396,9 @@ def test_time():
         class_list=[],
     )
     v1 = (
-        "1;;;b;a;;;;0;;;00:05:01;;;;;;;;"
+        ";;1;;;;;b;a;;;;;0;;;00:05:01;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
-        "2;;;d;c;;;;0;;;02:13:20;;;;;;;;"
+        ";;2;;;;;d;c;;;;;0;;;02:13:20;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
     )
 
@@ -324,7 +406,7 @@ def test_time():
 
 
 def test_status_ok():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(
                 first_name="a",
@@ -339,13 +421,18 @@ def test_status_ok():
         ],
         class_list=[],
     )
-    v1 = "1;;;b;a;;;;0;;;;0;;;;;;;" + "\r\n" + "2;;;d;c;;;;0;;;;0;;;;;;;" + "\r\n"
+    v1 = (
+        ";;1;;;;;b;a;;;;;0;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+        ";;2;;;;;d;c;;;;;0;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+    )
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
 def test_status_dns():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(
                 first_name="a",
@@ -360,13 +447,18 @@ def test_status_dns():
         ],
         class_list=[],
     )
-    v1 = "1;;;b;a;;;;0;;;;1;;;;;;;" + "\r\n" + "2;;;d;c;;;;0;;;;1;;;;;;;" + "\r\n"
+    v1 = (
+        ";;1;;;;;b;a;;;;;0;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+        ";;2;;;;;d;c;;;;;0;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+    )
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
 def test_status_dnf():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(
                 first_name="a",
@@ -381,13 +473,18 @@ def test_status_dnf():
         ],
         class_list=[],
     )
-    v1 = "1;;;b;a;;;;0;;;;2;;;;;;;" + "\r\n" + "2;;;d;c;;;;0;;;;2;;;;;;;" + "\r\n"
+    v1 = (
+        ";;1;;;;;b;a;;;;;0;;;;2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+        ";;2;;;;;d;c;;;;;0;;;;2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+    )
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
 def test_status_mp():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(
                 first_name="a",
@@ -402,13 +499,18 @@ def test_status_mp():
         ],
         class_list=[],
     )
-    v1 = "1;;;b;a;;;;0;;;;3;;;;;;;" + "\r\n" + "2;;;d;c;;;;0;;;;3;;;;;;;" + "\r\n"
+    v1 = (
+        ";;1;;;;;b;a;;;;;0;;;;3;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+        ";;2;;;;;d;c;;;;;0;;;;3;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+    )
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
 def test_status_disq():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(
                 first_name="a",
@@ -423,13 +525,18 @@ def test_status_disq():
         ],
         class_list=[],
     )
-    v1 = "1;;;b;a;;;;0;;;;4;;;;;;;" + "\r\n" + "2;;;d;c;;;;0;;;;4;;;;;;;" + "\r\n"
+    v1 = (
+        ";;1;;;;;b;a;;;;;0;;;;4;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+        ";;2;;;;;d;c;;;;;0;;;;4;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+    )
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
 def test_status_otl():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(
                 first_name="a",
@@ -444,13 +551,18 @@ def test_status_otl():
         ],
         class_list=[],
     )
-    v1 = "1;;;b;a;;;;0;;;;5;;;;;;;" + "\r\n" + "2;;;d;c;;;;0;;;;5;;;;;;;" + "\r\n"
+    v1 = (
+        ";;1;;;;;b;a;;;;;0;;;;5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+        ";;2;;;;;d;c;;;;;0;;;;5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        "\r\n"
+    )
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
 def test_status_diacritic_characters_cp1252_encoding():
-    content = oe2003.create(
+    content = oe12.create(
         entries=[
             Entry(first_name="Núria", last_name="Pavić", club_id=1, club="OC Kovač"),
             Entry(
@@ -466,11 +578,11 @@ def test_status_diacritic_characters_cp1252_encoding():
         class_list=[],
     )
     v1 = (
-        "1;;;Pavic;Núria;;;;0;;;;;1;;OC Kovac;;;;"
+        ";;1;;;;;Pavic;Núria;;;;;0;;;;;;;;1;;OC Kovac;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
-        "2;;;Müller;Nuria Istenic;;;;0;;;;;2;;Futó Club;;;;"
+        ";;2;;;;;Müller;Nuria Istenic;;;;;0;;;;;;;;2;;Futó Club;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
-        "3;;;Hugo;Pattantyús;;;;0;;;;;3;;OC Ábrahám;;;;"
+        ";;3;;;;;Hugo;Pattantyús;;;;;0;;;;;;;;3;;OC Ábrahám;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         "\r\n"
     )
 

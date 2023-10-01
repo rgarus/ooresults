@@ -17,25 +17,30 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-class Competitor:
-    def __init__(
-        self, first_name="", last_name="", club_name="", gender="", year=None, chip=""
-    ):
-        self.first_name = first_name
-        self.last_name = last_name
-        self.club_name = club_name
-        self.gender = gender
-        self.year = year
-        self.chip = chip
+import dataclasses
+from typing import Optional
 
-    def __contains__(self, key):
-        return hasattr(self, key)
+from ooresults.repo.class_params import ClassParams
 
-    def __getitem__(self, key):
-        return getattr(self, key)
 
-    def __setitem__(self, key, value):
-        return setattr(self, key, value)
+@dataclasses.dataclass
+class ClassType:
+    id: int
+    event_id: int
+    name: str
+    short_name: Optional[str]
+    course_id: Optional[int]
+    params: ClassParams
 
-    def get(self, key, default):
-        return getattr(self, key, default)
+
+@dataclasses.dataclass
+class ClassInfoType:
+    id: int
+    name: str
+    short_name: Optional[str]
+    course_id: Optional[int]
+    course: Optional[str]
+    course_length: Optional[int]
+    course_climb: Optional[int]
+    number_of_controls: Optional[int]
+    params: ClassParams

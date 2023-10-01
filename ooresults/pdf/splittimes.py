@@ -20,8 +20,10 @@
 from datetime import datetime
 from typing import Dict
 from typing import List
+from typing import Tuple
 from typing import Optional
 
+from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
@@ -29,7 +31,11 @@ from ooresults.pdf.pdf import PDF
 from ooresults.utils import globals
 
 
-def create_pdf(event: EventType, results: Dict, landscape: bool = False) -> bytes:
+def create_pdf(
+    event: EventType,
+    results: List[Tuple[ClassInfoType, List[Dict]]],
+    landscape: bool = False,
+) -> bytes:
     # Instantiation of inherited class
     pdf = PDF(name=event.name, landscape=landscape)
     pdf.set_margin(margin=10)
@@ -198,7 +204,7 @@ def create_pdf(event: EventType, results: Dict, landscape: bool = False) -> byte
             ):
                 with pdf.unbreakable() as doc:
                     doc.set_font(family="Carlito", size=8)
-                    if result.rank is not None:
+                    if result["rank"] is not None:
                         ranked = True
                     elif ranked:
                         ranked = False

@@ -34,6 +34,8 @@ from ooresults.handler import build_results
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import TransactionMode
+from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.class_type import ClassType
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo import result_type
 from ooresults.repo import start_type
@@ -62,24 +64,24 @@ def get_classes(event_id):
         return db.get_classes(event_id=event_id)
 
 
-def get_class(id):
+def get_class(id: int) -> ClassType:
     with db.transaction():
         return db.get_class(id=id)
 
 
 def import_classes(event_id: int, classes: List[Dict]) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
-        existing_classes = list(db.get_classes(event_id=event_id))
+        existing_classes = db.get_classes(event_id=event_id)
         for c in classes:
             for cl in existing_classes:
-                if cl["name"] == c["name"]:
+                if cl.name == c["name"]:
                     db.update_class(
-                        id=cl["id"],
-                        name=cl["name"],
+                        id=cl.id,
+                        name=cl.name,
                         short_name=c["short_name"]
                         if c.get("short_name", None) is not None
-                        else cl["short_name"],
-                        course_id=cl["course_id"],
+                        else cl.short_name,
+                        course_id=cl.course_id,
                         params=cl.params,
                     )
                     break
@@ -94,12 +96,12 @@ def import_classes(event_id: int, classes: List[Dict]) -> None:
 
 
 def add_class(
-    event_id,
-    name,
+    event_id: int,
+    name: str,
     short_name: Optional[str],
     course_id: Optional[int],
     params: ClassParams,
-):
+) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.add_class(
             event_id=event_id,
@@ -159,12 +161,12 @@ def update_class(
                 )
 
 
-def delete_classes(event_id):
+def delete_classes(event_id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_classes(event_id=event_id)
 
 
-def delete_class(id):
+def delete_class(id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_class(id=id)
 
@@ -174,7 +176,7 @@ def get_courses(event_id: int) -> List[CourseType]:
         return db.get_courses(event_id=event_id)
 
 
-def get_course(id) -> CourseType:
+def get_course(id: int) -> CourseType:
     with db.transaction():
         return db.get_course(id=id)
 
@@ -203,17 +205,17 @@ def import_courses(
                     climb=c.get("climb", None),
                     controls=c["controls"],
                 )
-        existing_classes = list(db.get_classes(event_id=event_id))
+        existing_classes = db.get_classes(event_id=event_id)
         existing_courses = db.get_courses(event_id=event_id)
         for i in class_course:
             for co in existing_courses:
                 if co.name == i.get("course_name", None):
                     for cl in existing_classes:
-                        if cl["name"] == i["class_name"]:
+                        if cl.name == i["class_name"]:
                             db.update_class(
-                                id=cl["id"],
-                                name=cl["name"],
-                                short_name=cl["short_name"],
+                                id=cl.id,
+                                name=cl.name,
+                                short_name=cl.short_name,
                                 course_id=co.id,
                                 params=cl.params,
                             )
@@ -226,16 +228,15 @@ def import_courses(
                             course_id=co.id,
                             params=ClassParams(),
                         )
-                        existing_classes.append({"id": id, "name": i["class_name"]})
                     break
             else:
                 if i["course_name"] is None:
                     for cl in existing_classes:
-                        if cl["name"] == i["class_name"]:
+                        if cl.name == i["class_name"]:
                             db.update_class(
-                                id=cl["id"],
-                                name=cl["name"],
-                                short_name=cl["short_name"],
+                                id=cl.id,
+                                name=cl.name,
+                                short_name=cl.short_name,
                                 course_id=None,
                                 params=cl.params,
                             )
@@ -248,7 +249,6 @@ def import_courses(
                             course_id=None,
                             params=ClassParams(),
                         )
-                        existing_classes.append({"id": id, "name": i["class_name"]})
 
 
 def add_course(
@@ -257,7 +257,7 @@ def add_course(
     length: Optional[float],
     climb: Optional[float],
     controls: List[str],
-):
+) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.add_course(
             event_id=event_id,
@@ -315,12 +315,12 @@ def update_course(
                     break
 
 
-def delete_courses(event_id):
+def delete_courses(event_id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_courses(event_id=event_id)
 
 
-def delete_course(id):
+def delete_course(id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_course(id=id)
 
@@ -330,7 +330,7 @@ def get_clubs() -> List[ClubType]:
         return db.get_clubs()
 
 
-def get_club(id) -> ClubType:
+def get_club(id: int) -> ClubType:
     with db.transaction():
         return db.get_club(id=id)
 
@@ -385,27 +385,27 @@ def update_competitor(id, first_name, last_name, club_id, gender, year, chip):
         )
 
 
-def delete_competitor(id):
+def delete_competitor(id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_competitor(id=id)
 
 
-def import_competitors(competitors):
+def import_competitors(competitors) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.import_competitors(competitors)
 
 
-def import_entries(event_id, entries):
+def import_entries(event_id: int, entries) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.import_entries(event_id=event_id, entries=entries)
 
 
-def get_entries(event_id):
+def get_entries(event_id: int):
     with db.transaction():
         return db.get_entries(event_id=event_id)
 
 
-def get_entry(id):
+def get_entry(id: int):
     with db.transaction():
         return db.get_entry(id=id)
 
@@ -688,11 +688,11 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, EventType,
                 ):
                     entry = assigned_entries[0]
                     try:
-                        class_ = db.get_class(id=entry["class_id"])[0]
-                        course_id = class_["course_id"]
-                        class_params = class_["params"]
+                        class_ = db.get_class(id=entry["class_id"])
+                        course_id = class_.course_id
+                        class_params = class_.params
                         controls = db.get_course(id=course_id).controls
-                    except:
+                    except KeyError:
                         class_params = ClassParams()
                         controls = []
 
@@ -857,11 +857,11 @@ def add_or_update_entry(
             # compute new result
             result_entry = db.get_entry(id=result_id)[0]
             try:
-                class_ = db.get_class(id=class_id)[0]
-                course_id = class_["course_id"]
-                class_params = class_["params"]
+                class_ = db.get_class(id=class_id)
+                course_id = class_.course_id
+                class_params = class_.params
                 controls = db.get_course(id=course_id).controls
-            except:
+            except KeyError:
                 class_params = ClassParams()
                 controls = []
 
@@ -887,11 +887,11 @@ def add_or_update_entry(
             result_entry = db.get_entry(id=id)[0]
             if result_entry.result.has_punches():
                 try:
-                    class_ = db.get_class(id=class_id)[0]
-                    course_id = class_["course_id"]
-                    class_params = class_["params"]
+                    class_ = db.get_class(id=class_id)
+                    course_id = class_.course_id
+                    class_params = class_.params
                     controls = db.get_course(id=course_id).controls
-                except:
+                except KeyError:
                     class_params = ClassParams()
                     controls = []
 
@@ -922,10 +922,10 @@ def update_series_settings(settings: Settings) -> None:
 
 def event_class_results(
     event_id: int,
-) -> Tuple[EventType, List[Tuple[Dict, List[Dict]]]]:
+) -> Tuple[EventType, List[Tuple[ClassInfoType, List[Dict]]]]:
     with db.transaction():
         event = db.get_event(id=event_id)
-        classes = list(db.get_classes(event_id=event_id))
+        classes = db.get_classes(event_id=event_id)
         entry_list = list(db.get_entries(event_id=event_id))
 
     class_results = build_results.build_results(
@@ -944,7 +944,9 @@ def create_event_list(events: List[EventType]) -> List[EventType]:
     return e_list
 
 
-def build_series_result():
+def build_series_result() -> (
+    Tuple[Settings, List[EventType], List[Tuple[str, List[Dict]]]]
+):
     with db.transaction():
         settings = db.get_series_settings()
         # build event list
@@ -954,7 +956,7 @@ def build_series_result():
         list_of_results = []
         organizers = []
         for i, event in enumerate(events):
-            classes = list(db.get_classes(event_id=event.id))
+            classes = db.get_classes(event_id=event.id)
             entry_list = list(db.get_entries(event_id=event.id))
             class_results = build_results.build_results(
                 classes=classes,

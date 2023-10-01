@@ -25,6 +25,9 @@ import pytest
 
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_type import ClassType
+from ooresults.repo.course_type import CourseType
+from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.series_type import Settings
@@ -52,7 +55,7 @@ def settings(db):
 
 
 @pytest.fixture
-def event_1(db):
+def event_1(db) -> EventType:
     id = db.add_event(
         name="Event 1",
         date=datetime.date(year=2015, month=1, day=1),
@@ -66,7 +69,7 @@ def event_1(db):
 
 
 @pytest.fixture
-def event_2(db):
+def event_2(db) -> EventType:
     id = db.add_event(
         name="Event 2",
         date=datetime.date(year=2015, month=1, day=1),
@@ -80,7 +83,7 @@ def event_2(db):
 
 
 @pytest.fixture
-def course_a(db, event_1):
+def course_a(db, event_1: EventType) -> CourseType:
     id = db.add_course(
         event_id=event_1.id,
         name="Bahn A",
@@ -93,7 +96,7 @@ def course_a(db, event_1):
 
 
 @pytest.fixture
-def course_b(db, event_1):
+def course_b(db, event_1: EventType) -> CourseType:
     id = db.add_course(
         event_id=event_1.id,
         name="Bahn B",
@@ -106,7 +109,7 @@ def course_b(db, event_1):
 
 
 @pytest.fixture
-def class_a(db, event_1, course_a):
+def class_a(db, event_1: EventType, course_a: CourseType) -> ClassType:
     id = db.add_class(
         event_id=event_1.id,
         name="Bahn A - Lang",
@@ -114,12 +117,12 @@ def class_a(db, event_1, course_a):
         course_id=course_a.id,
         params=ClassParams(),
     )
-    item = db.get_class(id=id)[0]
+    item = db.get_class(id=id)
     return copy.deepcopy(item)
 
 
 @pytest.fixture
-def class_b(db, event_1, course_b):
+def class_b(db, event_1: EventType, course_b: CourseType) -> ClassType:
     id = db.add_class(
         event_id=event_1.id,
         name="Bahn B - Mittel",
@@ -127,12 +130,12 @@ def class_b(db, event_1, course_b):
         course_id=course_b.id,
         params=ClassParams(),
     )
-    item = db.get_class(id=id)[0]
+    item = db.get_class(id=id)
     return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_1(db, event_1, class_a):
+def entry_1(db, event_1: EventType, class_a: ClassType):
     id = db.add_entry(
         event_id=event_1.id,
         competitor_id=None,
@@ -140,7 +143,7 @@ def entry_1(db, event_1, class_a):
         last_name="Merkel",
         gender="",
         year=None,
-        class_id=class_a["id"],
+        class_id=class_a.id,
         club_id=None,
         not_competing=False,
         chip="",
@@ -162,7 +165,7 @@ def entry_1(db, event_1, class_a):
 
 
 @pytest.fixture
-def entry_2(db, event_1, class_b):
+def entry_2(db, event_1: EventType, class_b: ClassType):
     id = db.add_entry(
         event_id=event_1.id,
         competitor_id=None,
@@ -170,7 +173,7 @@ def entry_2(db, event_1, class_b):
         last_name="Merkel",
         gender="",
         year=None,
-        class_id=class_b["id"],
+        class_id=class_b.id,
         club_id=None,
         not_competing=False,
         chip="",
@@ -192,7 +195,7 @@ def entry_2(db, event_1, class_b):
 
 
 @pytest.fixture
-def entry_3(db, event_1, class_b):
+def entry_3(db, event_1: EventType, class_b: ClassType):
     id = db.add_entry(
         event_id=event_1.id,
         competitor_id=None,
@@ -200,7 +203,7 @@ def entry_3(db, event_1, class_b):
         last_name="Merkel",
         gender="",
         year=None,
-        class_id=class_b["id"],
+        class_id=class_b.id,
         club_id=None,
         not_competing=False,
         chip="",
@@ -222,7 +225,7 @@ def entry_3(db, event_1, class_b):
 
 
 @pytest.fixture
-def entry_4(db, event_1, class_a):
+def entry_4(db, event_1: EventType, class_a: ClassType):
     id = db.add_entry(
         event_id=event_1.id,
         competitor_id=None,
@@ -230,7 +233,7 @@ def entry_4(db, event_1, class_a):
         last_name="Derkel",
         gender="",
         year=None,
-        class_id=class_a["id"],
+        class_id=class_a.id,
         club_id=None,
         not_competing=False,
         chip="",
@@ -253,13 +256,13 @@ def entry_4(db, event_1, class_a):
 
 def test_build_series_result(
     db,
-    settings,
-    event_1,
-    event_2,
-    class_a,
-    class_b,
-    course_a,
-    course_b,
+    settings: Settings,
+    event_1: EventType,
+    event_2: EventType,
+    class_a: ClassType,
+    class_b: ClassType,
+    course_a: CourseType,
+    course_b: CourseType,
     entry_1,
     entry_2,
     entry_3,
@@ -271,7 +274,7 @@ def test_build_series_result(
     assert m_events == [event_1, event_2]
     assert m_ranked_classes == [
         (
-            class_a["name"],
+            class_a.name,
             [
                 {
                     "first_name": "Birgit",
@@ -296,7 +299,7 @@ def test_build_series_result(
             ],
         ),
         (
-            class_b["name"],
+            class_b.name,
             [
                 {
                     "first_name": "Claudia",
