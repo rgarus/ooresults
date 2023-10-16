@@ -18,12 +18,13 @@
 
 
 from datetime import datetime
-from datetime import timedelta
 from datetime import timezone
 
 import pytest
 import jsonschema
 
+from ooresults.repo.result_type import CardReaderMessage
+from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import SplitTime
 from ooresults.repo.result_type import ResultStatus
 from ooresults.handler import model
@@ -49,23 +50,34 @@ def test_parse_with_start_time_and_with_finish_time():
     }
 
     d = model.parse_cardreader_log(item=item)
-    assert d["entryType"] == "cardRead"
-    assert d["entryTime"] == e1
-    assert d["controlCard"] == "123"
-    assert d["result"].start_time == s1
-    assert d["result"].finish_time == f1
-    assert d["result"].punched_clear_time is None
-    assert d["result"].punched_check_time is None
-    assert d["result"].punched_start_time == s1
-    assert d["result"].punched_finish_time == f1
-    assert d["result"].time is None
-    assert d["result"].status == ResultStatus.FINISHED
-    assert len(d["result"].split_times) == 2
-    assert d["result"].split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=None, status="Additional"
-    )
-    assert d["result"].split_times[1] == SplitTime(
-        control_code="103", punch_time=c2, time=None, status="Additional"
+    assert d == CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=e1,
+        control_card="123",
+        result=PersonRaceResult(
+            status=ResultStatus.FINISHED,
+            start_time=s1,
+            finish_time=f1,
+            punched_clear_time=None,
+            punched_check_time=None,
+            punched_start_time=s1,
+            punched_finish_time=f1,
+            time=None,
+            split_times=[
+                SplitTime(
+                    control_code="101",
+                    punch_time=c1,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="103",
+                    punch_time=c2,
+                    time=None,
+                    status="Additional",
+                ),
+            ],
+        ),
     )
 
 
@@ -87,23 +99,34 @@ def test_parse_without_start_time_and_with_finish_time():
     }
 
     d = model.parse_cardreader_log(item=item)
-    assert d["entryType"] == "cardRead"
-    assert d["entryTime"] == e1
-    assert d["controlCard"] == "123"
-    assert d["result"].start_time is None
-    assert d["result"].finish_time == f1
-    assert d["result"].punched_clear_time is None
-    assert d["result"].punched_check_time is None
-    assert d["result"].punched_start_time is None
-    assert d["result"].punched_finish_time == f1
-    assert d["result"].time is None
-    assert d["result"].status == ResultStatus.FINISHED
-    assert len(d["result"].split_times) == 2
-    assert d["result"].split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=None, status="Additional"
-    )
-    assert d["result"].split_times[1] == SplitTime(
-        control_code="103", punch_time=c2, time=None, status="Additional"
+    assert d == CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=e1,
+        control_card="123",
+        result=PersonRaceResult(
+            status=ResultStatus.FINISHED,
+            start_time=None,
+            finish_time=f1,
+            punched_clear_time=None,
+            punched_check_time=None,
+            punched_start_time=None,
+            punched_finish_time=f1,
+            time=None,
+            split_times=[
+                SplitTime(
+                    control_code="101",
+                    punch_time=c1,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="103",
+                    punch_time=c2,
+                    time=None,
+                    status="Additional",
+                ),
+            ],
+        ),
     )
 
 
@@ -125,23 +148,34 @@ def test_parse_with_start_time_and_without_finish_time():
     }
 
     d = model.parse_cardreader_log(item=item)
-    assert d["entryType"] == "cardRead"
-    assert d["entryTime"] == e1
-    assert d["controlCard"] == "123"
-    assert d["result"].start_time == s1
-    assert d["result"].finish_time is None
-    assert d["result"].punched_clear_time is None
-    assert d["result"].punched_check_time is None
-    assert d["result"].punched_start_time == s1
-    assert d["result"].punched_finish_time is None
-    assert d["result"].time is None
-    assert d["result"].status == ResultStatus.FINISHED
-    assert len(d["result"].split_times) == 2
-    assert d["result"].split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=None, status="Additional"
-    )
-    assert d["result"].split_times[1] == SplitTime(
-        control_code="103", punch_time=c2, time=None, status="Additional"
+    assert d == CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=e1,
+        control_card="123",
+        result=PersonRaceResult(
+            status=ResultStatus.FINISHED,
+            start_time=s1,
+            finish_time=None,
+            punched_clear_time=None,
+            punched_check_time=None,
+            punched_start_time=s1,
+            punched_finish_time=None,
+            time=None,
+            split_times=[
+                SplitTime(
+                    control_code="101",
+                    punch_time=c1,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="103",
+                    punch_time=c2,
+                    time=None,
+                    status="Additional",
+                ),
+            ],
+        ),
     )
 
 
@@ -161,23 +195,34 @@ def test_parse_without_start_time_and_without_finish_time():
     }
 
     d = model.parse_cardreader_log(item=item)
-    assert d["entryType"] == "cardRead"
-    assert d["entryTime"] == e1
-    assert d["controlCard"] == "123"
-    assert d["result"].start_time is None
-    assert d["result"].finish_time is None
-    assert d["result"].punched_clear_time is None
-    assert d["result"].punched_check_time is None
-    assert d["result"].punched_start_time is None
-    assert d["result"].punched_finish_time is None
-    assert d["result"].time is None
-    assert d["result"].status == ResultStatus.FINISHED
-    assert len(d["result"].split_times) == 2
-    assert d["result"].split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=None, status="Additional"
-    )
-    assert d["result"].split_times[1] == SplitTime(
-        control_code="103", punch_time=c2, time=None, status="Additional"
+    assert d == CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=e1,
+        control_card="123",
+        result=PersonRaceResult(
+            status=ResultStatus.FINISHED,
+            start_time=None,
+            finish_time=None,
+            punched_clear_time=None,
+            punched_check_time=None,
+            punched_start_time=None,
+            punched_finish_time=None,
+            time=None,
+            split_times=[
+                SplitTime(
+                    control_code="101",
+                    punch_time=c1,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="103",
+                    punch_time=c2,
+                    time=None,
+                    status="Additional",
+                ),
+            ],
+        ),
     )
 
 
@@ -199,23 +244,34 @@ def test_parse_with_clear_time():
     }
 
     d = model.parse_cardreader_log(item=item)
-    assert d["entryType"] == "cardRead"
-    assert d["entryTime"] == e1
-    assert d["controlCard"] == "123"
-    assert d["result"].start_time is None
-    assert d["result"].finish_time is None
-    assert d["result"].punched_clear_time == cl
-    assert d["result"].punched_check_time is None
-    assert d["result"].punched_start_time is None
-    assert d["result"].punched_finish_time is None
-    assert d["result"].time is None
-    assert d["result"].status == ResultStatus.FINISHED
-    assert len(d["result"].split_times) == 2
-    assert d["result"].split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=None, status="Additional"
-    )
-    assert d["result"].split_times[1] == SplitTime(
-        control_code="103", punch_time=c2, time=None, status="Additional"
+    assert d == CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=e1,
+        control_card="123",
+        result=PersonRaceResult(
+            status=ResultStatus.FINISHED,
+            start_time=None,
+            finish_time=None,
+            punched_clear_time=cl,
+            punched_check_time=None,
+            punched_start_time=None,
+            punched_finish_time=None,
+            time=None,
+            split_times=[
+                SplitTime(
+                    control_code="101",
+                    punch_time=c1,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="103",
+                    punch_time=c2,
+                    time=None,
+                    status="Additional",
+                ),
+            ],
+        ),
     )
 
 
@@ -237,23 +293,34 @@ def test_parse_with_check_time():
     }
 
     d = model.parse_cardreader_log(item=item)
-    assert d["entryType"] == "cardRead"
-    assert d["entryTime"] == e1
-    assert d["controlCard"] == "123"
-    assert d["result"].start_time is None
-    assert d["result"].finish_time is None
-    assert d["result"].punched_clear_time is None
-    assert d["result"].punched_check_time == ch
-    assert d["result"].punched_start_time is None
-    assert d["result"].punched_finish_time is None
-    assert d["result"].time is None
-    assert d["result"].status == ResultStatus.FINISHED
-    assert len(d["result"].split_times) == 2
-    assert d["result"].split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=None, status="Additional"
-    )
-    assert d["result"].split_times[1] == SplitTime(
-        control_code="103", punch_time=c2, time=None, status="Additional"
+    assert d == CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=e1,
+        control_card="123",
+        result=PersonRaceResult(
+            status=ResultStatus.FINISHED,
+            start_time=None,
+            finish_time=None,
+            punched_clear_time=None,
+            punched_check_time=ch,
+            punched_start_time=None,
+            punched_finish_time=None,
+            time=None,
+            split_times=[
+                SplitTime(
+                    control_code="101",
+                    punch_time=c1,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="103",
+                    punch_time=c2,
+                    time=None,
+                    status="Additional",
+                ),
+            ],
+        ),
     )
 
 
@@ -272,19 +339,22 @@ def test_parse_without_controls():
     }
 
     d = model.parse_cardreader_log(item=item)
-    assert d["entryType"] == "cardRead"
-    assert d["entryTime"] == e1
-    assert d["controlCard"] == "123"
-    assert d["result"].start_time == s1
-    assert d["result"].finish_time == f1
-    assert d["result"].punched_clear_time is None
-    assert d["result"].punched_check_time is None
-    assert d["result"].punched_start_time == s1
-    assert d["result"].punched_finish_time == f1
-    assert d["result"].time is None
-    assert d["result"].status == ResultStatus.FINISHED
-    assert len(d["result"].split_times) == 0
-    assert d["result"].split_times == []
+    assert d == CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=e1,
+        control_card="123",
+        result=PersonRaceResult(
+            status=ResultStatus.FINISHED,
+            start_time=s1,
+            finish_time=f1,
+            punched_clear_time=None,
+            punched_check_time=None,
+            punched_start_time=s1,
+            punched_finish_time=f1,
+            time=None,
+            split_times=[],
+        ),
+    )
 
 
 def test_parse_with_many_controls():
@@ -318,38 +388,64 @@ def test_parse_with_many_controls():
     }
 
     d = model.parse_cardreader_log(item=item)
-    assert d["entryType"] == "cardRead"
-    assert d["entryTime"] == e1
-    assert d["controlCard"] == "123"
-    assert d["result"].start_time == s1
-    assert d["result"].finish_time == f1
-    assert d["result"].punched_clear_time is None
-    assert d["result"].punched_check_time is None
-    assert d["result"].punched_start_time == s1
-    assert d["result"].punched_finish_time == f1
-    assert d["result"].time is None
-    assert d["result"].status == ResultStatus.FINISHED
-    assert len(d["result"].split_times) == 7
-    assert d["result"].split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=None, status="Additional"
-    )
-    assert d["result"].split_times[1] == SplitTime(
-        control_code="105", punch_time=c2, time=None, status="Additional"
-    )
-    assert d["result"].split_times[2] == SplitTime(
-        control_code="101", punch_time=c3, time=None, status="Additional"
-    )
-    assert d["result"].split_times[3] == SplitTime(
-        control_code="102", punch_time=c4, time=None, status="Additional"
-    )
-    assert d["result"].split_times[4] == SplitTime(
-        control_code="103", punch_time=c5, time=None, status="Additional"
-    )
-    assert d["result"].split_times[5] == SplitTime(
-        control_code="101", punch_time=c6, time=None, status="Additional"
-    )
-    assert d["result"].split_times[6] == SplitTime(
-        control_code="104", punch_time=c7, time=None, status="Additional"
+    assert d == CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=e1,
+        control_card="123",
+        result=PersonRaceResult(
+            status=ResultStatus.FINISHED,
+            start_time=s1,
+            finish_time=f1,
+            punched_clear_time=None,
+            punched_check_time=None,
+            punched_start_time=s1,
+            punched_finish_time=f1,
+            time=None,
+            split_times=[
+                SplitTime(
+                    control_code="101",
+                    punch_time=c1,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="105",
+                    punch_time=c2,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="101",
+                    punch_time=c3,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="102",
+                    punch_time=c4,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="103",
+                    punch_time=c5,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="101",
+                    punch_time=c6,
+                    time=None,
+                    status="Additional",
+                ),
+                SplitTime(
+                    control_code="104",
+                    punch_time=c7,
+                    time=None,
+                    status="Additional",
+                ),
+            ],
+        ),
     )
 
 

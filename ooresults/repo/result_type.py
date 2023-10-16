@@ -417,3 +417,11 @@ class PersonRaceResult:
                 if class_params.apply_handicap_rule and self.time is not None:
                     self.extensions["factor"] = handicap_factor
                     self.time = int(handicap_factor * self.time)
+
+
+@dataclasses.dataclass
+class CardReaderMessage:
+    entry_type: str
+    entry_time: datetime
+    control_card: Optional[str]
+    result: Optional[PersonRaceResult]

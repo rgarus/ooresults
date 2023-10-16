@@ -27,6 +27,7 @@ from ooresults.repo import repo
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.start_type import PersonRaceStart
+from ooresults.repo.result_type import CardReaderMessage
 from ooresults.repo.result_type import SplitTime
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
@@ -268,12 +269,12 @@ def test_assign_to_entry_if_cardnumber_is_unique(
             SplitTime(control_code="103", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "7410",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="7410",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -329,12 +330,12 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
             SplitTime(control_code="103", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "7410",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="7410",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -390,12 +391,12 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
             SplitTime(control_code="103", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "7410",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="7410",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -449,12 +450,12 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
             SplitTime(control_code="101", punch_time=c1, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "7410",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="7410",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -510,12 +511,12 @@ def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
             SplitTime(control_code="103", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "7410",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="7410",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
     print(res)
@@ -571,12 +572,12 @@ def test_store_as_new_entry_if_another_result_exists(
             SplitTime(control_code="103", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "7410",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="7410",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -659,12 +660,12 @@ def test_do_not_store_as_new_entry_if_result_already_exists(
             SplitTime(control_code="103", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "7410",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="7410",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -705,12 +706,12 @@ def test_store_as_new_entry_if_cardnumber_is_unknown(
             SplitTime(control_code="103", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "999999",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="999999",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -794,12 +795,12 @@ def test_store_as_new_entry_if_cardnumber_exist_several_times(
             SplitTime(control_code="103", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "12734",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="12734",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -883,12 +884,12 @@ def test_use_already_assigned_entry_if_it_has_the_same_result(
             SplitTime(control_code="103", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "7410",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="7410",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -930,12 +931,12 @@ def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
             SplitTime(control_code="109", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "7410",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="7410",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -1019,12 +1020,12 @@ def test_use_empty_control_list_if_course_is_undefined(
             SplitTime(control_code="109", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "12734",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="12734",
+        result=result,
+    )
 
     status, event, res = model.store_cardreader_result(event_key="4711", item=item)
 
@@ -1084,12 +1085,12 @@ def test_raise_exception_if_event_key_is_unknown(
             SplitTime(control_code="103", punch_time=c3, status="Additional"),
         ],
     )
-    item = {
-        "entryType": "cardRead",
-        "entryTime": entry_time,
-        "controlCard": "7410",
-        "result": result,
-    }
+    item = CardReaderMessage(
+        entry_type="cardRead",
+        entry_time=entry_time,
+        control_card="7410",
+        result=result,
+    )
 
     with pytest.raises(repo.EventNotFoundError, match='Event for key "4712" not found'):
         status, event, res = model.store_cardreader_result(event_key="4712", item=item)

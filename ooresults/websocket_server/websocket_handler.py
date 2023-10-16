@@ -146,12 +146,12 @@ class WebSocketHandler:
                             # }
                             #
 
-                            d = {
-                                "entryType": "cardRead",
-                                "entryTime": datetime.datetime.now(),
-                                "controlCard": item.get("card", None),
-                                "result": None,
-                            }
+                            d = result_type.CardReaderMessage(
+                                entry_type="cardRead",
+                                entry_time=datetime.datetime.now(),
+                                control_card=item.get("card", None),
+                                result=None,
+                            )
 
                             # add the event date to the times entered on the webpage
                             events = await asyncio.get_event_loop().run_in_executor(
@@ -195,7 +195,7 @@ class WebSocketHandler:
                                             status="Additional",
                                         )
                                     )
-                            d["result"] = result
+                            d.result = result
 
                             try:
                                 (

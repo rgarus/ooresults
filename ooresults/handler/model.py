@@ -578,24 +578,16 @@ def delete_event(id: int) -> None:
         db.delete_event(id)
 
 
-def parse_cardreader_log(item: Dict) -> Dict:
-    #
-    # returns a dict consisting of:
-    #
-    # 'entryType': str,
-    # 'entryTime': datetime.dateime,
-    # 'controlCard': Optional[str],
-    # 'result' : Optional[result_type.PersonRaceResult]
-    #
+def parse_cardreader_log(item: Dict) -> result_type.CardReaderMessage:
     jsonschema.validate(item, schema_cardreader_log)
-    d = {
-        "entryType": item["entryType"],
-        "entryTime": iso8601.parse_date(item["entryTime"]),
-        "controlCard": item.get("controlCard", None),
-        "result": None,
-    }
+    d = result_type.CardReaderMessage(
+        entry_type=item["entryType"],
+        entry_time=iso8601.parse_date(item["entryTime"]),
+        control_card=item.get("controlCard", None),
+        result=None,
+    )
 
-    if d["entryType"] == "cardRead":
+    if d.entry_type == "cardRead":
         result = result_type.PersonRaceResult(status=ResultStatus.FINISHED)
         if item.get("clearTime", None) is not None:
             result.punched_clear_time = iso8601.parse_date(item["clearTime"])
@@ -615,12 +607,14 @@ def parse_cardreader_log(item: Dict) -> Dict:
                     status="Additional",
                 )
             )
-        d["result"] = result
+        d.result = result
 
     return d
 
 
-def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, EventType, Dict]:
+def store_cardreader_result(
+    event_key: str, item: result_type.CardReaderMessage
+) -> Tuple[str, EventType, Dict]:
     def missing_controls(result: result_type.PersonRaceResult) -> List[str]:
         if result.finish_time is None:
             return ["FINISH"]
@@ -640,20 +634,20 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, EventType,
         else:
             raise EventNotFoundError(f'Event for key "{event_key}" not found')
 
-        if item["entryType"] == "cardRead":
-            result = item["result"]
+        if item.entry_type == "cardRead":
+            result = item.result
 
             entries = db.get_entries(event_id=event.id)
-            entries_controlcard = [e for e in entries if e.chip == item["controlCard"]]
-            assigned_entries = [e for e in entries_controlcard if e.class_ is not None]
-            unassigned_entries = [e for e in entries_controlcard if e.class_ is None]
+            entries_control_card = [e for e in entries if e.chip == item.control_card]
+            assigned_entries = [e for e in entries_control_card if e.class_ is not None]
+            unassigned_entries = [e for e in entries_control_card if e.class_ is None]
 
             for entry in assigned_entries:
                 r = entry["result"]
                 if r is not None and r.same_punches(other=result):
                     # result exists and is assigned to a competitor => nothing to do
                     res = {
-                        "entryTime": item["entryTime"],
+                        "entryTime": item.entry_time,
                         "eventId": event.id,
                         "controlCard": entry["chip"],
                         "firstName": entry["first_name"],
@@ -712,15 +706,15 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, EventType,
                         start_time=entry["start"].start_time,
                     )
                     res = {
-                        "entryTime": item["entryTime"],
+                        "entryTime": item.entry_time,
                         "eventId": event.id,
                         "controlCard": entry["chip"],
                         "firstName": entry["first_name"],
                         "lastName": entry["last_name"],
                         "club": entry["club"],
                         "class": entry["class_"],
-                        "status": result["status"],
-                        "time": result.extensions.get("running_time", result["time"]),
+                        "status": result.status,
+                        "time": result.extensions.get("running_time", result.time),
                         "error": None,
                         "missingControls": missing_controls(result=result),
                     }
@@ -735,19 +729,19 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, EventType,
                     if unassigned_entry is None:
                         db.add_entry_result(
                             event_id=event.id,
-                            chip=item["controlCard"],
+                            chip=item.control_card,
                             result=result,
                             start_time=None,
                         )
                     res = {
-                        "entryTime": item["entryTime"],
+                        "entryTime": item.entry_time,
                         "eventId": event.id,
-                        "controlCard": item["controlCard"],
+                        "controlCard": item.control_card,
                         "firstName": None,
                         "lastName": None,
                         "club": None,
                         "class": None,
-                        "status": result["status"],
+                        "status": result.status,
                         "time": None,
                     }
                     if len(assigned_entries) == 0:
@@ -757,12 +751,12 @@ def store_cardreader_result(event_key: str, item: Dict) -> Tuple[str, EventType,
                     else:
                         res["error"] = "There are other results for this card"
 
-        elif item["entryType"] == "cardInserted":
-            res = {"eventId": event.id, "controlCard": item["controlCard"]}
+        elif item.entry_type == "cardInserted":
+            res = {"eventId": event.id, "controlCard": item.control_card}
         else:
             res = {"eventId": event.id}
 
-    return item["entryType"], event, res
+    return item.entry_type, event, res
 
 
 def add_or_update_entry(
