@@ -86,7 +86,7 @@ $def format_date(time):
             </tr>
             <tr>
                 <th class="input-header"><label for="start_time">Start time</label></th>
-                <td><input id="start_time" name="start_time" type="time" step="1" value="$(format_date(entry.start.get('start_time', None)))" onchange="mark_label(this)"/></td>
+                <td><input id="start_time" name="start_time" type="time" step="1" value="$(format_date(entry.start.start_time))" onchange="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="status">Status</label></th>

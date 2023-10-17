@@ -1,5 +1,8 @@
 $def with (entry)
 
+$def format(value):
+    $return value if value is not None else ''
+
 $def format_date(time):
     $if time is not None:
         $return time.strftime('%H:%M:%S')
@@ -42,11 +45,11 @@ $def format_diff_time(t):
             </tr>
             <tr>
                 <th class="input-header"><label for="start_time">Start time</label></th>
-                <td><label>$(format_date(entry.result.get('start_time', None)))</label></td>
+                <td><label>$format_date(entry.result.start_time)</label></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="finish_time">Finish time</label></th>
-                <td><label>$(format_date(entry.result.get('finish_time', None)))</label></td>
+                <td><label>$format_date(entry.result.finish_time)</label></td>
             </tr>
             <tr>
                 <th class="input-header"><label>Status</label></th>
@@ -54,7 +57,7 @@ $def format_diff_time(t):
             </tr>
             <tr>
                 <th class="input-header"><label>Time</label></th>
-                <td><label>$(minutes_seconds(entry.result.extensions.get('running_time', entry.result.time)))</label></td>
+                <td><label>$minutes_seconds(entry.result.extensions.get('running_time', entry.result.time))</label></td>
             </tr>
         </table>
             
@@ -120,15 +123,15 @@ $def format_diff_time(t):
                     $ i = 0
                     $for punch in entry.result.split_times:
                         <tr class="dt">
-                            $if punch.get('status', '') in ('OK', 'Missing'):
+                            $if punch.status in ('OK', 'Missing'):
                                 $ i += 1
                                 <td class="dt" style="text-align:right">$str(i)</td>
                             $else:
                                 <td class="dt" style="text-align:right"></td>
-                            <td class="dt" style="text-align:right">$punch.get('control_code', '')</td>
-                            <td class="dt" style="text-align:right">$(format_date(punch.get('punch_time', None)))</td>
-                            <td class="dt" style="text-align:right">$(minutes_seconds(punch.get('time', None)))</td>
-                            <td class="dt">$punch.get('status', '')</td>
+                            <td class="dt" style="text-align:right">$format(punch.control_code)</td>
+                            <td class="dt" style="text-align:right">$format_date(punch.punch_time)</td>
+                            <td class="dt" style="text-align:right">$minutes_seconds(punch.time)</td>
+                            <td class="dt">$format(punch.status)</td>
                         </tr>
                 </tbody>
         </table>

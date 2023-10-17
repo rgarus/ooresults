@@ -28,15 +28,3 @@ class Settings:
     mode: str = "Proportional"
     maximum_points: int = 100
     decimal_places: int = 2
-
-    def __contains__(self, key):
-        return hasattr(self, key)
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value):
-        return setattr(self, key, value)
-
-    def get(self, key, default):
-        return getattr(self, key, default)

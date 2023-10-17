@@ -654,8 +654,8 @@ def store_cardreader_result(
                         "lastName": entry["last_name"],
                         "club": entry["club"],
                         "class": entry["class_"],
-                        "status": r["status"],
-                        "time": r.extensions.get("running_time", r["time"]),
+                        "status": r.status,
+                        "time": r.extensions.get("running_time", r.time),
                         "error": None,
                         "missingControls": missing_controls(result=r),
                     }

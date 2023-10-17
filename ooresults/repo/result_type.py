@@ -48,18 +48,6 @@ class SplitTime:
             )
             self.time = int(diff.total_seconds())
 
-    def __contains__(self, key):
-        return hasattr(self, key)
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value):
-        return setattr(self, key, value)
-
-    def get(self, key, default):
-        return getattr(self, key, default)
-
 
 class ResultStatus(enum.Enum):
     INACTIVE = 0
@@ -96,18 +84,6 @@ class PersonRaceResult:
     #   score_overtime: float    -- score points to subtract for exceeding the time limit
     #   score: float             -- total score points (score_controls - score_overtime)
     #
-
-    def __contains__(self, key):
-        return hasattr(self, key)
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value):
-        return setattr(self, key, value)
-
-    def get(self, key, default):
-        return getattr(self, key, default)
 
     def has_punches(self) -> bool:
         return (

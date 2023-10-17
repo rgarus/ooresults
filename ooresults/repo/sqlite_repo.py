@@ -1147,18 +1147,20 @@ class SqliteRepo(Repo):
         self.db.delete("events", where="id=" + web.db.sqlquote(id))
 
     def get_series_settings(self) -> series_type.Settings:
-        settings = series_type.Settings()
         values = self.db.query(
             "SELECT name, nr_of_best_results, mode, maximum_points, decimal_places FROM settings;"
         )
-        values = list(values)
-        if values != []:
-            settings.name = values[0].name
-            settings.nr_of_best_results = values[0].nr_of_best_results
-            settings.mode = values[0].mode
-            settings.maximum_points = values[0].maximum_points
-            settings.decimal_places = values[0].decimal_places
-        return settings
+        if values:
+            s = values[0]
+            return series_type.Settings(
+                name=s.name,
+                nr_of_best_results=s.nr_of_best_results,
+                mode=s.mode,
+                maximum_points=s.maximum_points,
+                decimal_places=s.decimal_places,
+            )
+        else:
+            return series_type.Settings()
 
     def update_series_settings(self, settings: series_type.Settings) -> None:
         nr_of_rows = self.db.update(

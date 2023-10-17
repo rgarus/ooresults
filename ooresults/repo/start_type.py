@@ -25,15 +25,3 @@ from typing import Optional
 @dataclasses.dataclass
 class PersonRaceStart:
     start_time: Optional[datetime] = None
-
-    def __contains__(self, key):
-        return hasattr(self, key)
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value):
-        return setattr(self, key, value)
-
-    def get(self, key, default):
-        return getattr(self, key, default)
