@@ -27,6 +27,7 @@ from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassType
 from ooresults.repo.course_type import CourseType
+from ooresults.repo.entry_type import EntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
@@ -135,7 +136,7 @@ def class_b(db, event_1: EventType, course_b: CourseType) -> ClassType:
 
 
 @pytest.fixture
-def entry_1(db, event_1: EventType, class_a: ClassType):
+def entry_1(db, event_1: EventType, class_a: ClassType) -> EntryType:
     id = db.add_entry(
         event_id=event_1.id,
         competitor_id=None,
@@ -160,12 +161,12 @@ def entry_1(db, event_1: EventType, class_a: ClassType):
             time=9876,
         ),
     )
-    item = db.get_entry(id=id)[0]
+    item = db.get_entry(id=id)
     return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_2(db, event_1: EventType, class_b: ClassType):
+def entry_2(db, event_1: EventType, class_b: ClassType) -> EntryType:
     id = db.add_entry(
         event_id=event_1.id,
         competitor_id=None,
@@ -190,12 +191,12 @@ def entry_2(db, event_1: EventType, class_b: ClassType):
             time=2001,
         ),
     )
-    item = db.get_entry(id=id)[0]
+    item = db.get_entry(id=id)
     return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_3(db, event_1: EventType, class_b: ClassType):
+def entry_3(db, event_1: EventType, class_b: ClassType) -> EntryType:
     id = db.add_entry(
         event_id=event_1.id,
         competitor_id=None,
@@ -220,12 +221,12 @@ def entry_3(db, event_1: EventType, class_b: ClassType):
             time=2113,
         ),
     )
-    item = db.get_entry(id=id)[0]
+    item = db.get_entry(id=id)
     return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_4(db, event_1: EventType, class_a: ClassType):
+def entry_4(db, event_1: EventType, class_a: ClassType) -> EntryType:
     id = db.add_entry(
         event_id=event_1.id,
         competitor_id=None,
@@ -250,7 +251,7 @@ def entry_4(db, event_1: EventType, class_a: ClassType):
             time=3333,
         ),
     )
-    item = db.get_entry(id=id)[0]
+    item = db.get_entry(id=id)
     return copy.deepcopy(item)
 
 
@@ -263,10 +264,10 @@ def test_build_series_result(
     class_b: ClassType,
     course_a: CourseType,
     course_b: CourseType,
-    entry_1,
-    entry_2,
-    entry_3,
-    entry_4,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
+    entry_4: EntryType,
 ):
     m_settings, m_events, m_ranked_classes = model.build_series_result()
 

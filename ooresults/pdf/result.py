@@ -19,20 +19,20 @@
 
 from typing import List
 from typing import Tuple
-from typing import Dict
 from typing import Optional
-from typing import Any
+from typing import Union
 
 from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
+from ooresults.repo.result_type import ResultStatus
 from ooresults.pdf.pdf import PDF
 from ooresults.utils import globals
 
 
 def create_pdf(
     event: EventType,
-    results: List[Tuple[ClassInfoType, List[Dict]]],
+    results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
     include_dns: bool = False,
     landscape: bool = True,
 ) -> bytes:
@@ -89,6 +89,23 @@ def create_pdf(
 
     for i, class_results in enumerate(results):
         class_, ranked_results = class_results
+
+        if not include_dns:
+            # filter results - use only started entries
+            ranked_results = [
+                r
+                for r in ranked_results
+                if r.entry.result.status
+                not in (
+                    ResultStatus.INACTIVE,
+                    ResultStatus.DID_NOT_START,
+                )
+            ]
+
+        # do not print classes without entries
+        if not ranked_results:
+            continue
+
         if i > 0:
             # insert a page break if there is not enough space left on the
             # page for the class header, the table header and two table rows
@@ -121,21 +138,12 @@ def create_pdf(
                 width += W_VALUE
             width += W_TOTAL
 
-        # number of entries
-        nr_entries = 0
-        for result in ranked_results:
-            if include_dns or result["result"].status not in (
-                ResultStatus.INACTIVE,
-                ResultStatus.DID_NOT_START,
-            ):
-                nr_entries += 1
-
         pdf.set_font(family="Carlito", style="B", size=12)
-        pdf.cell(txt=f"{class_.name}   ({nr_entries})")
+        pdf.cell(txt=f"{class_.name}   ({len(ranked_results)})")
 
         # print possible voided legs
-        if ranked_results and ranked_results[0]["result"] is not None:
-            voided_legs = ranked_results[0]["result"].voided_legs()
+        if ranked_results and ranked_results[0].entry.result is not None:
+            voided_legs = ranked_results[0].entry.result.voided_legs()
             if voided_legs:
                 pdf.cell(txt=f'(Voided legs: {", ".join(voided_legs)})')
 
@@ -181,116 +189,106 @@ def create_pdf(
         pdf.ln()
 
         ranked = False
-        for result in ranked_results:
+        for ranked_result in ranked_results:
+            entry = ranked_result.entry
+            result = entry.result
 
-            def get(d: Dict, key: str) -> Any:
-                s = d.get(key, "")
-                return s if s is not None else ""
+            def f(value: Union[Optional[int] | Optional[str]]) -> str:
+                return str(value) if value is not None else ""
 
-            if include_dns or result["result"].status not in (
-                ResultStatus.INACTIVE,
-                ResultStatus.DID_NOT_START,
-            ):
-                pdf.set_font(family="Carlito", size=12)
-                if result["rank"] is not None:
-                    ranked = True
-                elif ranked:
-                    ranked = False
-                    pdf.ln()
-                cell(
-                    w=W_RANK,
-                    h=None,
-                    txt=str(get(result, "rank"))
-                    if not get(result, "not_competing")
-                    else "AK",
-                    align="R",
-                )
-                cell(w=W_SPACE, h=None, txt="")
-                cell(
-                    w=W_NAME,
-                    h=None,
-                    txt=get(result, "last_name") + " " + get(result, "first_name"),
-                    align="L",
-                )
-                cell(w=W_SPACE, h=None, txt="")
-                cell(w=W_YEAR, h=None, txt=str(get(result, "year")), align="R")
-                cell(w=W_SPACE, h=None, txt="")
-                cell(w=W_CLUB - width, h=None, txt=get(result, "club"), align="L")
-                cell(w=W_SPACE, h=None, txt="")
-                status = result["result"].status
-                if class_.params.otype == "score":
-                    if class_.params.apply_handicap_rule:
-                        if status == ResultStatus.OK:
-                            cell(
-                                w=W_VALUE,
-                                h=None,
-                                txt="{:1.4f}".format(
-                                    result["result"].extensions.get("factor", 1)
-                                ),
-                                align="R",
-                            )
-                        else:
-                            cell(w=W_VALUE, h=None, txt="")
-                    print_time(
-                        width=W_RUNTIME, time=result["result"].time, status=status
-                    )
-                    print_points(
-                        width=W_VALUE,
-                        points=result["result"].extensions.get("score_controls", None),
-                        status=status,
-                    )
-                    print_points(
-                        width=W_VALUE,
-                        points=result["result"].extensions.get("score_overtime", None),
-                        status=status,
-                    )
-                    print_points_or_status(
-                        width=W_TOTAL,
-                        points=result["result"].extensions.get("score", None),
-                        status=status,
-                    )
-                else:
-                    if (
-                        class_.params.penalty_controls is not None
-                        or class_.params.penalty_overtime is not None
-                        or class_.params.apply_handicap_rule
-                    ):
-                        print_time(
-                            width=W_RUNTIME,
-                            time=result["result"].extensions.get("running_time", None),
-                            status=status,
-                        )
-                    if class_.params.penalty_controls is not None:
-                        print_time(
-                            width=W_VALUE,
-                            time=result["result"].extensions.get(
-                                "penalties_controls", None
-                            ),
-                            status=status,
-                        )
-                    if class_.params.penalty_overtime is not None:
-                        print_time(
-                            width=W_VALUE,
-                            time=result["result"].extensions.get(
-                                "penalties_overtime", None
-                            ),
-                            status=status,
-                        )
-                    if class_.params.apply_handicap_rule:
-                        if status == ResultStatus.OK:
-                            cell(
-                                w=W_VALUE,
-                                h=None,
-                                txt="{:1.4f}".format(
-                                    result["result"].extensions.get("factor", 1)
-                                ),
-                                align="R",
-                            )
-                        else:
-                            cell(w=W_VALUE, h=None, txt="")
-                    print_time_or_status(
-                        width=W_TOTAL, time=result["result"].time, status=status
-                    )
+            pdf.set_font(family="Carlito", size=12)
+            if ranked_result.rank is not None:
+                ranked = True
+            elif ranked:
+                ranked = False
                 pdf.ln()
+            cell(
+                w=W_RANK,
+                h=None,
+                txt=f(ranked_result.rank) if not entry.not_competing else "AK",
+                align="R",
+            )
+            cell(w=W_SPACE, h=None, txt="")
+            cell(
+                w=W_NAME,
+                h=None,
+                txt=f(entry.last_name) + " " + f(entry.first_name),
+                align="L",
+            )
+            cell(w=W_SPACE, h=None, txt="")
+            cell(w=W_YEAR, h=None, txt=f(entry.year), align="R")
+            cell(w=W_SPACE, h=None, txt="")
+            cell(w=W_CLUB - width, h=None, txt=f(entry.club_name), align="L")
+            cell(w=W_SPACE, h=None, txt="")
+            if class_.params.otype == "score":
+                if class_.params.apply_handicap_rule:
+                    if result.status == ResultStatus.OK:
+                        cell(
+                            w=W_VALUE,
+                            h=None,
+                            txt="{:1.4f}".format(result.extensions.get("factor", 1)),
+                            align="R",
+                        )
+                    else:
+                        cell(w=W_VALUE, h=None, txt="")
+                print_time(
+                    width=W_RUNTIME,
+                    time=result.time,
+                    status=result.status,
+                )
+                print_points(
+                    width=W_VALUE,
+                    points=result.extensions.get("score_controls", None),
+                    status=result.status,
+                )
+                print_points(
+                    width=W_VALUE,
+                    points=result.extensions.get("score_overtime", None),
+                    status=result.status,
+                )
+                print_points_or_status(
+                    width=W_TOTAL,
+                    points=result.extensions.get("score", None),
+                    status=result.status,
+                )
+            else:
+                if (
+                    class_.params.penalty_controls is not None
+                    or class_.params.penalty_overtime is not None
+                    or class_.params.apply_handicap_rule
+                ):
+                    print_time(
+                        width=W_RUNTIME,
+                        time=result.extensions.get("running_time", None),
+                        status=result.status,
+                    )
+                if class_.params.penalty_controls is not None:
+                    print_time(
+                        width=W_VALUE,
+                        time=result.extensions.get("penalties_controls", None),
+                        status=result.status,
+                    )
+                if class_.params.penalty_overtime is not None:
+                    print_time(
+                        width=W_VALUE,
+                        time=result.extensions.get("penalties_overtime", None),
+                        status=result.status,
+                    )
+                if class_.params.apply_handicap_rule:
+                    if result.status == ResultStatus.OK:
+                        cell(
+                            w=W_VALUE,
+                            h=None,
+                            txt="{:1.4f}".format(result.extensions.get("factor", 1)),
+                            align="R",
+                        )
+                    else:
+                        cell(w=W_VALUE, h=None, txt="")
+                print_time_or_status(
+                    width=W_TOTAL,
+                    time=result.time,
+                    status=result.status,
+                )
+            pdf.ln()
 
     return bytes(pdf.output())

@@ -17,23 +17,31 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import copy
 import datetime
+from datetime import timezone
 
 import pytest
 
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.course_type import CourseType
+from ooresults.repo.entry_type import EntryType
+from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import PersonRaceResult
+from ooresults.repo.result_type import SplitTime
 from ooresults.handler import model
 
 
 @pytest.fixture
-def db():
+def db() -> SqliteRepo:
     model.db = SqliteRepo(db=":memory:")
     return model.db
 
 
 @pytest.fixture
-def event_id(db):
+def event_id(db: SqliteRepo) -> int:
     return db.add_event(
         name="Event",
         date=datetime.date(year=2020, month=1, day=1),
@@ -45,7 +53,7 @@ def event_id(db):
 
 
 @pytest.fixture
-def course_1_id(db, event_id):
+def course_1_id(db: SqliteRepo, event_id: int) -> int:
     return db.add_course(
         event_id=event_id,
         name="Bahn A",
@@ -56,7 +64,7 @@ def course_1_id(db, event_id):
 
 
 @pytest.fixture
-def class_1_id(db, event_id, course_1_id):
+def class_1_id(db: SqliteRepo, event_id: int, course_1_id: int) -> int:
     return db.add_class(
         event_id=event_id,
         name="Elite Men",
@@ -67,7 +75,7 @@ def class_1_id(db, event_id, course_1_id):
 
 
 @pytest.fixture
-def class_2_id(db, event_id):
+def class_2_id(db: SqliteRepo, event_id: int) -> int:
     return db.add_class(
         event_id=event_id,
         name="Elite Women",
@@ -77,8 +85,54 @@ def class_2_id(db, event_id):
     )
 
 
+S1 = datetime.datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
+C1 = datetime.datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
+C2 = datetime.datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
+C3 = datetime.datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
+F1 = datetime.datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
+
+
+@pytest.fixture
+def entry_1(db: SqliteRepo, event_id: int, class_1_id: int) -> EntryType:
+    id = db.add_entry(
+        event_id=event_id,
+        competitor_id=None,
+        first_name="Claudia",
+        last_name="Merkel",
+        gender="",
+        year=None,
+        class_id=class_1_id,
+        club_id=None,
+        not_competing=False,
+        chip="",
+        fields={},
+        status=ResultStatus.INACTIVE,
+        start_time=None,
+    )
+    result = PersonRaceResult(
+        punched_start_time=S1,
+        punched_finish_time=F1,
+        status=ResultStatus.INACTIVE,
+        time=None,
+        split_times=[
+            SplitTime(control_code="101", punch_time=C1, status="Additional"),
+            SplitTime(control_code="102", punch_time=C2, status="Additional"),
+            SplitTime(control_code="103", punch_time=C3, status="Additional"),
+        ],
+    )
+    result.compute_result(controls=["101", "102", "103"], class_params=ClassParams())
+    db.update_entry_result(
+        id=id,
+        chip="7411",
+        start_time=None,
+        result=result,
+    )
+    item = db.get_entry(id=id)
+    return copy.deepcopy(item)
+
+
 def test_import_course_data_with_climb_update_existing_course(
-    db, event_id, course_1_id
+    event_id: int, course_1_id: int
 ):
     courses = [
         {
@@ -90,17 +144,20 @@ def test_import_course_data_with_climb_update_existing_course(
     ]
     model.import_courses(event_id=event_id, courses=courses, class_course=[])
 
-    co = list(model.get_courses(event_id=event_id))
+    co = model.get_courses(event_id=event_id)
     assert len(co) == 1
-    assert co[0].id == course_1_id
-    assert co[0].name == "Bahn A"
-    assert co[0].length == 4800
-    assert co[0].climb == 120
-    assert co[0].controls == ["101", "102"]
+    assert co[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Bahn A",
+        length=4800,
+        climb=120,
+        controls=["101", "102"],
+    )
 
 
 def test_import_course_data_without_climb_update_existing_course(
-    db, event_id, course_1_id
+    event_id: int, course_1_id: int
 ):
     courses = [
         {
@@ -112,16 +169,19 @@ def test_import_course_data_without_climb_update_existing_course(
     ]
     model.import_courses(event_id=event_id, courses=courses, class_course=[])
 
-    co = list(model.get_courses(event_id=event_id))
+    co = model.get_courses(event_id=event_id)
     assert len(co) == 1
-    assert co[0].id == course_1_id
-    assert co[0].name == "Bahn A"
-    assert co[0].length is None
-    assert co[0].climb is None
-    assert co[0].controls == ["101", "102"]
+    assert co[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Bahn A",
+        length=None,
+        climb=None,
+        controls=["101", "102"],
+    )
 
 
-def test_import_course_data_add_not_existing_course(db, event_id, course_1_id):
+def test_import_course_data_add_not_existing_course(event_id: int, course_1_id: int):
     courses = [
         {
             "name": "Bahn B",
@@ -132,21 +192,29 @@ def test_import_course_data_add_not_existing_course(db, event_id, course_1_id):
     ]
     model.import_courses(event_id=event_id, courses=courses, class_course=[])
 
-    co = list(model.get_courses(event_id=event_id))
+    co = model.get_courses(event_id=event_id)
     assert len(co) == 2
-    assert co[0].id == course_1_id
-    assert co[0].name == "Bahn A"
-    assert co[0].length == 4500
-    assert co[0].climb == 90
-    assert co[0].controls == ["101", "102", "103"]
     assert co[1].id != co[0].id
-    assert co[1].name == "Bahn B"
-    assert co[1].length == 4800
-    assert co[1].climb == 120
-    assert co[1].controls == ["104"]
+
+    assert co[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Bahn A",
+        length=4500,
+        climb=90,
+        controls=["101", "102", "103"],
+    )
+    assert co[1] == CourseType(
+        id=co[1].id,
+        event_id=event_id,
+        name="Bahn B",
+        length=4800,
+        climb=120,
+        controls=["104"],
+    )
 
 
-def test_import_course_data_update_or_add_courses(db, event_id, course_1_id):
+def test_import_course_data_update_or_add_courses(event_id: int, course_1_id: int):
     courses = [
         {
             "name": "Bahn A",
@@ -169,27 +237,40 @@ def test_import_course_data_update_or_add_courses(db, event_id, course_1_id):
     ]
     model.import_courses(event_id=event_id, courses=courses, class_course=[])
 
-    co = list(model.get_courses(event_id=event_id))
+    co = model.get_courses(event_id=event_id)
     assert len(co) == 3
-    assert co[0].id == course_1_id
-    assert co[0].name == "Bahn A"
-    assert co[0].length == 4800
-    assert co[0].climb is None
-    assert co[0].controls == ["101", "102"]
-    assert co[1].id != co[0].id
-    assert co[1].name == "Bahn B"
-    assert co[1].length == 3900
-    assert co[1].climb == 120
-    assert co[1].controls == ["201", "102"]
-    assert co[2].id != co[0].id
-    assert co[2].name == "Bahn C"
-    assert co[2].length is None
-    assert co[2].climb is None
-    assert co[2].controls == []
+    assert co[0].id != co[1].id
+    assert co[0].id != co[2].id
+    assert co[1].id != co[2].id
+
+    assert co[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Bahn A",
+        length=4800,
+        climb=None,
+        controls=["101", "102"],
+    )
+    assert co[1] == CourseType(
+        id=co[1].id,
+        event_id=event_id,
+        name="Bahn B",
+        length=3900,
+        climb=120,
+        controls=["201", "102"],
+    )
+    assert co[2] == CourseType(
+        id=co[2].id,
+        event_id=event_id,
+        name="Bahn C",
+        length=None,
+        climb=None,
+        controls=[],
+    )
 
 
 def test_import_course_data_add_not_existing_class(
-    db, event_id, class_1_id, course_1_id
+    event_id: int, class_1_id: int, course_1_id: int
 ):
     class_course = [
         {
@@ -199,37 +280,47 @@ def test_import_course_data_add_not_existing_class(
     ]
     model.import_courses(event_id=event_id, courses=[], class_course=class_course)
 
-    co = list(model.get_courses(event_id=event_id))
+    co = model.get_courses(event_id=event_id)
     assert len(co) == 1
-    assert co[0].id == course_1_id
-    assert co[0].name == "Bahn A"
-    assert co[0].length == 4500
-    assert co[0].climb == 90
-    assert co[0].controls == ["101", "102", "103"]
+    assert co[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Bahn A",
+        length=4500,
+        climb=90,
+        controls=["101", "102", "103"],
+    )
+
     cl = list(model.get_classes(event_id=event_id))
     assert len(cl) == 2
     assert cl[0].id != cl[1].id
-    assert cl[0].name == "Beginners"
-    assert cl[0].short_name is None
-    assert cl[0].course_id is None
-    assert cl[0].course is None
-    assert cl[0].course_length is None
-    assert cl[0].course_climb is None
-    assert cl[0].number_of_controls is None
-    assert cl[0].params == ClassParams()
-    assert cl[1].id == class_1_id
-    assert cl[1].name == "Elite Men"
-    assert cl[1].short_name == "E Men"
-    assert cl[1].course_id == course_1_id
-    assert cl[1].course == "Bahn A"
-    assert cl[1].course_length == 4500
-    assert cl[1].course_climb == 90
-    assert cl[1].number_of_controls == 3
-    assert cl[1].params == ClassParams()
+
+    assert cl[0] == ClassInfoType(
+        id=cl[0].id,
+        name="Beginners",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+    assert cl[1] == ClassInfoType(
+        id=class_1_id,
+        name="Elite Men",
+        short_name="E Men",
+        course_id=course_1_id,
+        course_name="Bahn A",
+        course_length=4500,
+        course_climb=90,
+        number_of_controls=3,
+        params=ClassParams(),
+    )
 
 
 def test_import_course_data_update_class_course_assignment(
-    db, event_id, class_1_id, class_2_id, course_1_id
+    event_id: int, class_1_id: int, class_2_id: int, course_1_id: int
 ):
     courses = [
         {
@@ -247,42 +338,56 @@ def test_import_course_data_update_class_course_assignment(
     ]
     model.import_courses(event_id=event_id, courses=courses, class_course=class_course)
 
-    co = list(model.get_courses(event_id=event_id))
+    co = model.get_courses(event_id=event_id)
     assert len(co) == 2
-    assert co[0].id == course_1_id
-    assert co[0].name == "Bahn A"
-    assert co[0].length == 4500
-    assert co[0].climb == 90
-    assert co[0].controls == ["101", "102", "103"]
-    assert co[1].id != course_1_id
-    assert co[1].name == "Bahn B"
-    assert co[1].length == 3900
-    assert co[1].climb == 120
-    assert co[1].controls == ["201", "102"]
-    cl = list(model.get_classes(event_id=event_id))
+    assert co[0].id != co[1].id
+
+    assert co[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Bahn A",
+        length=4500,
+        climb=90,
+        controls=["101", "102", "103"],
+    )
+    assert co[1] == CourseType(
+        id=co[1].id,
+        event_id=event_id,
+        name="Bahn B",
+        length=3900,
+        climb=120,
+        controls=["201", "102"],
+    )
+
+    cl = model.get_classes(event_id=event_id)
     assert len(cl) == 2
-    assert cl[0].id == class_1_id
-    assert cl[0].name == "Elite Men"
-    assert cl[0].short_name == "E Men"
-    assert cl[0].course_id == co[1].id
-    assert cl[0].course == "Bahn B"
-    assert cl[0].course_length == 3900
-    assert cl[0].course_climb == 120
-    assert cl[0].number_of_controls == 2
-    assert cl[0].params == ClassParams()
-    assert cl[1].id == class_2_id
-    assert cl[1].name == "Elite Women"
-    assert cl[1].short_name == "E Women"
-    assert cl[1].course_id is None
-    assert cl[1].course is None
-    assert cl[1].course_length is None
-    assert cl[1].course_climb is None
-    assert cl[1].number_of_controls is None
-    assert cl[1].params == ClassParams()
+
+    assert cl[0] == ClassInfoType(
+        id=class_1_id,
+        name="Elite Men",
+        short_name="E Men",
+        course_id=co[1].id,
+        course_name="Bahn B",
+        course_length=3900,
+        course_climb=120,
+        number_of_controls=2,
+        params=ClassParams(),
+    )
+    assert cl[1] == ClassInfoType(
+        id=class_2_id,
+        name="Elite Women",
+        short_name="E Women",
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
 
 
 def test_import_course_data_remove_class_course_assigment(
-    db, event_id, class_1_id, course_1_id
+    event_id: int, class_1_id: int, course_1_id: int
 ):
     class_course = [
         {
@@ -292,28 +397,36 @@ def test_import_course_data_remove_class_course_assigment(
     ]
     model.import_courses(event_id=event_id, courses=[], class_course=class_course)
 
-    co = list(model.get_courses(event_id=event_id))
+    co = model.get_courses(event_id=event_id)
     assert len(co) == 1
-    assert co[0].id == course_1_id
-    assert co[0].name == "Bahn A"
-    assert co[0].length == 4500
-    assert co[0].climb == 90
-    assert co[0].controls == ["101", "102", "103"]
+
+    assert co[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Bahn A",
+        length=4500,
+        climb=90,
+        controls=["101", "102", "103"],
+    )
+
     cl = list(model.get_classes(event_id=event_id))
     assert len(cl) == 1
-    assert cl[0].id == class_1_id
-    assert cl[0].name == "Elite Men"
-    assert cl[0].short_name == "E Men"
-    assert cl[0].course_id is None
-    assert cl[0].course is None
-    assert cl[0].course_length is None
-    assert cl[0].course_climb is None
-    assert cl[0].number_of_controls is None
-    assert cl[0].params == ClassParams()
+
+    assert cl[0] == ClassInfoType(
+        id=class_1_id,
+        name="Elite Men",
+        short_name="E Men",
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
 
 
 def test_import_course_data_update_or_add_class_course_assigments(
-    db, event_id, course_1_id, class_1_id, class_2_id
+    event_id: int, course_1_id: int, class_1_id: int, class_2_id: int
 ):
     courses = [
         {
@@ -349,53 +462,115 @@ def test_import_course_data_update_or_add_class_course_assigments(
     ]
     model.import_courses(event_id=event_id, courses=courses, class_course=class_course)
 
-    co = list(model.get_courses(event_id=event_id))
+    co = model.get_courses(event_id=event_id)
     assert len(co) == 2
-    assert co[0].id == course_1_id
-    assert co[0].name == "Bahn A"
-    assert co[0].length == 4800
-    assert co[0].climb == 120
-    assert co[0].controls == ["101", "102"]
-    assert co[1].id != co[0].id
-    assert co[1].name == "Bahn B"
-    assert co[1].length is None
-    assert co[1].climb is None
-    assert co[1].controls == ["104"]
+    assert co[0].id != co[1].id
 
-    cl = list(model.get_classes(event_id=event_id))
+    assert co[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Bahn A",
+        length=4800,
+        climb=120,
+        controls=["101", "102"],
+    )
+    assert co[1] == CourseType(
+        id=co[1].id,
+        event_id=event_id,
+        name="Bahn B",
+        length=None,
+        climb=None,
+        controls=["104"],
+    )
+
+    cl = model.get_classes(event_id=event_id)
     assert len(cl) == 4
-    assert cl[0].id not in (cl[2], cl[3])
-    assert cl[0].name == "Beginners"
-    assert cl[0].course_id is None
-    assert cl[0].course is None
-    assert cl[0].course_length is None
-    assert cl[0].course_climb is None
-    assert cl[0].number_of_controls is None
-    assert cl[0].params == ClassParams()
-    assert cl[1].id not in (cl[2], cl[3])
-    assert cl[1].name == "Elite"
-    assert cl[1].short_name is None
-    assert cl[1].course_id == co[1].id
-    assert cl[1].course == "Bahn B"
-    assert cl[1].course_length is None
-    assert cl[1].course_climb is None
-    assert cl[1].number_of_controls == 1
-    assert cl[1].params == ClassParams()
-    assert cl[2].id == class_1_id
-    assert cl[2].name == "Elite Men"
-    assert cl[2].short_name == "E Men"
-    assert cl[2].course_id == co[1].id
-    assert cl[2].course == "Bahn B"
-    assert cl[2].course_length is None
-    assert cl[2].course_climb is None
-    assert cl[2].number_of_controls == 1
-    assert cl[2].params == ClassParams()
-    assert cl[3].id == class_2_id
-    assert cl[3].name == "Elite Women"
-    assert cl[3].short_name == "E Women"
-    assert cl[3].course_id == course_1_id
-    assert cl[3].course == "Bahn A"
-    assert cl[3].course_length == 4800
-    assert cl[3].course_climb == 120
-    assert cl[3].number_of_controls == 2
-    assert cl[3].params == ClassParams()
+    assert cl[0].id not in (class_1_id, class_2_id, cl[2].id, cl[3].id)
+    assert cl[1].id not in (class_1_id, class_2_id, cl[2].id, cl[3].id)
+
+    assert cl[0] == ClassInfoType(
+        id=cl[0].id,
+        name="Beginners",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+    assert cl[1] == ClassInfoType(
+        id=cl[1].id,
+        name="Elite",
+        short_name=None,
+        course_id=co[1].id,
+        course_name="Bahn B",
+        course_length=None,
+        course_climb=None,
+        number_of_controls=1,
+        params=ClassParams(),
+    )
+    assert cl[2] == ClassInfoType(
+        id=class_1_id,
+        name="Elite Men",
+        short_name="E Men",
+        course_id=co[1].id,
+        course_name="Bahn B",
+        course_length=None,
+        course_climb=None,
+        number_of_controls=1,
+        params=ClassParams(),
+    )
+    assert cl[3] == ClassInfoType(
+        id=class_2_id,
+        name="Elite Women",
+        short_name="E Women",
+        course_id=course_1_id,
+        course_name="Bahn A",
+        course_length=4800,
+        course_climb=120,
+        number_of_controls=2,
+        params=ClassParams(),
+    )
+
+
+def test_update_course_data_recalculates_entry_result(
+    event_id: int, class_1_id: int, course_1_id: int, entry_1: EntryType
+):
+    model.update_course(
+        id=course_1_id,
+        event_id=event_id,
+        name="Course 3",
+        length=3900,
+        climb=150,
+        controls=["101", "104"],
+    )
+    co = model.get_courses(event_id=event_id)
+    assert len(co) == 1
+
+    assert co[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Course 3",
+        length=3900,
+        climb=150,
+        controls=["101", "104"],
+    )
+
+    e = model.get_entries(event_id=event_id)
+    assert len(e) == 1
+
+    assert e[0].result == PersonRaceResult(
+        start_time=S1,
+        punched_start_time=S1,
+        finish_time=F1,
+        punched_finish_time=F1,
+        status=ResultStatus.MISSING_PUNCH,
+        time=8,
+        split_times=[
+            SplitTime(control_code="101", punch_time=C1, status="OK", time=2),
+            SplitTime(control_code="104", punch_time=None, status="Missing", time=None),
+            SplitTime(control_code="102", punch_time=C2, status="Additional", time=4),
+            SplitTime(control_code="103", punch_time=C3, status="Additional", time=6),
+        ],
+    )

@@ -20,7 +20,6 @@
 import pathlib
 
 import web
-from web.utils import Storage
 
 from ooresults.handler import model
 from ooresults.utils.globals import t_globals

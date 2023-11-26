@@ -24,6 +24,7 @@ import pytest
 from ooresults.repo import repo
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.course_type import CourseType
 
 
 @pytest.fixture
@@ -79,11 +80,14 @@ def class_id(db, event_id, course_1_id):
 def test_get_courses_after_adding_one_course(db, event_id, course_1_id):
     c = db.get_courses(event_id=event_id)
     assert len(c) == 1
-    assert c[0].id == course_1_id
-    assert c[0].name == "Course 1"
-    assert c[0].length == 4500
-    assert c[0].climb == 90
-    assert c[0].controls == ["101", "102", "103"]
+    assert c[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Course 1",
+        length=4500,
+        climb=90,
+        controls=["101", "102", "103"],
+    )
 
 
 def test_get_courses_after_adding_two_courses(db, event_id, course_1_id, course_2_id):
@@ -91,34 +95,46 @@ def test_get_courses_after_adding_two_courses(db, event_id, course_1_id, course_
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].id == course_1_id
-    assert c[0].name == "Course 1"
-    assert c[0].length == 4500
-    assert c[0].climb == 90
-    assert c[0].controls == ["101", "102", "103"]
-    assert c[1].id == course_2_id
-    assert c[1].name == "Course 2"
-    assert c[1].length is None
-    assert c[1].climb is None
-    assert c[1].controls == []
+    assert c[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Course 1",
+        length=4500,
+        climb=90,
+        controls=["101", "102", "103"],
+    )
+    assert c[1] == CourseType(
+        id=course_2_id,
+        event_id=event_id,
+        name="Course 2",
+        length=None,
+        climb=None,
+        controls=[],
+    )
 
 
-def test_get_first_added_course(db, course_1_id, course_2_id):
+def test_get_first_added_course(db, event_id, course_1_id, course_2_id):
     c = db.get_course(id=course_1_id)
-    assert c.id == course_1_id
-    assert c.name == "Course 1"
-    assert c.length == 4500
-    assert c.climb == 90
-    assert c.controls == ["101", "102", "103"]
+    assert c == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Course 1",
+        length=4500,
+        climb=90,
+        controls=["101", "102", "103"],
+    )
 
 
-def test_get_last_added_course(db, course_1_id, course_2_id):
+def test_get_last_added_course(db, event_id, course_1_id, course_2_id):
     c = db.get_course(id=course_2_id)
-    assert c.id == course_2_id
-    assert c.name == "Course 2"
-    assert c.length is None
-    assert c.climb is None
-    assert c.controls == []
+    assert c == CourseType(
+        id=course_2_id,
+        event_id=event_id,
+        name="Course 2",
+        length=None,
+        climb=None,
+        controls=[],
+    )
 
 
 def test_update_first_added_course(db, event_id, course_1_id, course_2_id):
@@ -129,16 +145,22 @@ def test_update_first_added_course(db, event_id, course_1_id, course_2_id):
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].id == course_2_id
-    assert c[0].name == "Course 2"
-    assert c[0].length is None
-    assert c[0].climb is None
-    assert c[0].controls == []
-    assert c[1].id == course_1_id
-    assert c[1].name == "Course 3"
-    assert c[1].length == 3900
-    assert c[1].climb == 150
-    assert c[1].controls == ["101"]
+    assert c[0] == CourseType(
+        id=course_2_id,
+        event_id=event_id,
+        name="Course 2",
+        length=None,
+        climb=None,
+        controls=[],
+    )
+    assert c[1] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Course 3",
+        length=3900,
+        climb=150,
+        controls=["101"],
+    )
 
 
 def test_update_last_added_course(db, event_id, course_1_id, course_2_id):
@@ -153,38 +175,50 @@ def test_update_last_added_course(db, event_id, course_1_id, course_2_id):
     assert len(c) == 2
     assert c[0].id != c[1].id
 
-    assert c[0].id == course_1_id
-    assert c[0].name == "Course 1"
-    assert c[0].length == 4500
-    assert c[0].climb == 90
-    assert c[0].controls == ["101", "102", "103"]
-    assert c[1].id == course_2_id
-    assert c[1].name == "Course 3"
-    assert c[1].length == 5100
-    assert c[1].climb is None
-    assert c[1].controls == ["301", "302", "303"]
+    assert c[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Course 1",
+        length=4500,
+        climb=90,
+        controls=["101", "102", "103"],
+    )
+    assert c[1] == CourseType(
+        id=course_2_id,
+        event_id=event_id,
+        name="Course 3",
+        length=5100,
+        climb=None,
+        controls=["301", "302", "303"],
+    )
 
 
 def test_delete_first_added_course(db, event_id, course_1_id, course_2_id):
     db.delete_course(id=course_1_id)
     c = db.get_courses(event_id=event_id)
     assert len(c) == 1
-    assert c[0].id == course_2_id
-    assert c[0].name == "Course 2"
-    assert c[0].length is None
-    assert c[0].climb is None
-    assert c[0].controls == []
+    assert c[0] == CourseType(
+        id=course_2_id,
+        event_id=event_id,
+        name="Course 2",
+        length=None,
+        climb=None,
+        controls=[],
+    )
 
 
 def test_delete_last_added_course(db, event_id, course_1_id, course_2_id):
     db.delete_course(id=course_2_id)
     c = db.get_courses(event_id=event_id)
     assert len(c) == 1
-    assert c[0].id == course_1_id
-    assert c[0].name == "Course 1"
-    assert c[0].length == 4500
-    assert c[0].climb == 90
-    assert c[0].controls == ["101", "102", "103"]
+    assert c[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Course 1",
+        length=4500,
+        climb=90,
+        controls=["101", "102", "103"],
+    )
 
 
 def test_delete_courses_deletes_all_courses(db, event_id, course_1_id, course_2_id):
@@ -227,11 +261,14 @@ def test_delete_course_with_unknown_id_do_not_change_anything(
     db.delete_course(id=course_1_id + 1)
     c = db.get_courses(event_id=event_id)
     assert len(c) == 1
-    assert c[0].id == course_1_id
-    assert c[0].name == "Course 1"
-    assert c[0].length == 4500
-    assert c[0].climb == 90
-    assert c[0].controls == ["101", "102", "103"]
+    assert c[0] == CourseType(
+        id=course_1_id,
+        event_id=event_id,
+        name="Course 1",
+        length=4500,
+        climb=90,
+        controls=["101", "102", "103"],
+    )
 
 
 def test_delete_course_used_in_class_raises_exception(

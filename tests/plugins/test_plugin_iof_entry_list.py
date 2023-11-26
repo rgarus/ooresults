@@ -20,8 +20,10 @@
 import datetime
 
 from ooresults.plugins import iof_entry_list
-from ooresults.repo import result_type
+from ooresults.repo.entry_type import EntryType
 from ooresults.repo.event_type import EventType
+from ooresults.repo.result_type import PersonRaceResult
+from ooresults.repo.start_type import PersonRaceStart
 
 
 def test_import_entry_list_with_one_entry():
@@ -66,7 +68,7 @@ def test_import_entry_list_with_one_entry():
             "chip": "1234567",
             "gender": "F",
             "year": 1972,
-            "result": result_type.PersonRaceResult(),
+            "result": PersonRaceResult(),
         },
     ]
 
@@ -100,7 +102,7 @@ def test_export_entry_list_with_one_entry():
 </EntryList>
 """
     document = iof_entry_list.create_entry_list(
-        EventType(
+        event=EventType(
             id=1,
             name="1. O-Cup 2020",
             date=datetime.date(year=2020, month=2, day=9),
@@ -109,17 +111,22 @@ def test_export_entry_list_with_one_entry():
             series=None,
             fields=[],
         ),
-        [
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "class_": "Bahn A - Lang",
-                "club": "OC Kanzleramt",
-                "chip": "1234567",
-                "gender": "F",
-                "year": 1972,
-                "result": result_type.PersonRaceResult(),
-            },
+        entries=[
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="Angela",
+                last_name="Merkel",
+                gender="F",
+                year=1972,
+                class_id=1,
+                class_name="Bahn A - Lang",
+                not_competing=False,
+                chip="1234567",
+                club_id=1,
+                club_name="OC Kanzleramt",
+            ),
         ],
     )
     assert document == bytes(content, encoding="utf-8")
@@ -232,7 +239,7 @@ def test_import_entry_list_with_several_entries():
             "chip": "",
             "gender": "",
             "year": None,
-            "result": result_type.PersonRaceResult(),
+            "result": PersonRaceResult(),
         },
         {
             "first_name": "Claudia",
@@ -242,7 +249,7 @@ def test_import_entry_list_with_several_entries():
             "chip": "1234567",
             "gender": "",
             "year": None,
-            "result": result_type.PersonRaceResult(),
+            "result": PersonRaceResult(),
         },
         {
             "first_name": "Birgit",
@@ -252,7 +259,7 @@ def test_import_entry_list_with_several_entries():
             "chip": "",
             "gender": "",
             "year": None,
-            "result": result_type.PersonRaceResult(),
+            "result": PersonRaceResult(),
         },
     ]
 
@@ -304,7 +311,7 @@ def test_export_entry_list_with_several_entries():
 </EntryList>
 """
     document = iof_entry_list.create_entry_list(
-        EventType(
+        event=EventType(
             id=1,
             name="1. O-Cup 2020",
             date=datetime.date(year=2020, month=2, day=9),
@@ -313,26 +320,38 @@ def test_export_entry_list_with_several_entries():
             series=None,
             fields=[],
         ),
-        [
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(),
-            },
-            {
-                "first_name": "Claudia",
-                "last_name": "Merkel",
-                "class_": "Bahn B - Mittel",
-                "chip": "1234567",
-                "result": result_type.PersonRaceResult(),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Merkel",
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(),
-            },
+        entries=[
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="Angela",
+                last_name="Merkel",
+                class_id=1,
+                class_name="Bahn A - Lang",
+                not_competing=False,
+            ),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
+                first_name="Claudia",
+                last_name="Merkel",
+                class_id=2,
+                class_name="Bahn B - Mittel",
+                not_competing=False,
+                chip="1234567",
+            ),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=3,
+                first_name="Birgit",
+                last_name="Merkel",
+                class_id=1,
+                class_name="Bahn A - Lang",
+                not_competing=False,
+            ),
         ],
     )
     assert document == bytes(content, encoding="utf-8")

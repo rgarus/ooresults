@@ -123,9 +123,10 @@ class Static:
 
 
 def my_processor(handler):
-    if web.ctx.env.get("PATH_INFO") not in ("/",) and not web.ctx.env.get(
-        "PATH_INFO"
-    ).startswith("/mystatic/"):
+    if web.ctx.env.get("PATH_INFO") not in (
+        "/",
+        "/favicon.ico",
+    ) and not web.ctx.env.get("PATH_INFO").startswith("/mystatic/"):
         auth = web.ctx.env.get("HTTP_AUTHORIZATION")
         if auth is not None:
             auth = re.sub("^Basic ", "", auth)
@@ -139,6 +140,7 @@ def my_processor(handler):
             web.header("WWW-Authenticate", 'Basic realm="Authentication required"')
             web.ctx.status = "401 Unauthorized"
             return render.unauthorized()
+
     result = handler()
     return result
 

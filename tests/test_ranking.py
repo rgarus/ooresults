@@ -18,686 +18,848 @@
 
 
 from ooresults.handler import build_results
-from ooresults.repo import result_type
+from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.entry_type import EntryType
+from ooresults.repo.entry_type import RankedEntryType
+from ooresults.repo.start_type import PersonRaceStart
+from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.class_params import ClassParams
 
 
-class Class_:
-    def __init__(self, name: str, params: ClassParams):
-        self.name = name
-        self.params = params
-
-
 def test_ranking_with_one_class():
-    class_a = Class_(name="Bahn A - Lang", params=ClassParams())
+    class_info_a = ClassInfoType(
+        id=1,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+    entry_1 = EntryType(
+        id=1,
+        event_id=1,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=9876,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=1,
+        competitor_id=2,
+        first_name="Claudia",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=1,
+        competitor_id=3,
+        first_name="Birgit",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.MISSING_PUNCH,
+            time=1800,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_4 = EntryType(
+        id=4,
+        event_id=1,
+        competitor_id=4,
+        first_name="Birgit",
+        last_name="Derkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.DID_NOT_START,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
     data = build_results.build_results(
-        classes=[
-            class_a,
+        class_infos=[
+            class_info_a,
         ],
-        results=[
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=9876
-                ),
-            },
-            {
-                "first_name": "Claudia",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.MISSING_PUNCH
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Derkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.DID_NOT_START
-                ),
-            },
+        entries=[
+            entry_1,
+            entry_2,
+            entry_3,
+            entry_4,
         ],
     )
     assert data == [
         (
-            class_a,
+            class_info_a,
             [
-                {
-                    "first_name": "Claudia",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001
-                    ),
-                    "rank": 1,
-                    "time_behind": 0,
-                    "points": 1.0,
-                },
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=9876
-                    ),
-                    "rank": 2,
-                    "time_behind": 9876 - 2001,
-                    "points": 2001 / 9876,
-                },
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.MISSING_PUNCH, time=None
-                    ),
-                    "rank": None,
-                    "points": 0,
-                },
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Derkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.DID_NOT_START, time=None
-                    ),
-                    "rank": None,
-                },
+                RankedEntryType(
+                    entry=entry_2,
+                    rank=1,
+                    time_behind=0,
+                ),
+                RankedEntryType(
+                    entry=entry_1,
+                    rank=2,
+                    time_behind=9876 - 2001,
+                ),
+                RankedEntryType(
+                    entry=entry_3,
+                    rank=None,
+                    time_behind=None,
+                ),
+                RankedEntryType(
+                    entry=entry_4,
+                    rank=None,
+                    time_behind=None,
+                ),
             ],
         )
     ]
 
 
 def test_ranking_with_two_classes():
-    class_a = Class_(name="Bahn A - Lang", params=ClassParams())
-    class_b = Class_(name="Bahn B - Mittel", params=ClassParams())
+    class_info_a = ClassInfoType(
+        id=1,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+    class_info_b = ClassInfoType(
+        id=2,
+        name="Bahn B - Mittel",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+    entry_1 = EntryType(
+        id=1,
+        event_id=1,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=9876,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=1,
+        competitor_id=2,
+        first_name="Claudia",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=2,
+        class_name="Bahn B - Mittel",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=1,
+        competitor_id=3,
+        first_name="Birgit",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=2,
+        class_name="Bahn B - Mittel",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2113,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_4 = EntryType(
+        id=4,
+        event_id=1,
+        competitor_id=4,
+        first_name="Birgit",
+        last_name="Derkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=3333,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
     data = build_results.build_results(
-        classes=[
-            class_a,
-            class_b,
+        class_infos=[
+            class_info_a,
+            class_info_b,
         ],
-        results=[
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=9876
-                ),
-            },
-            {
-                "first_name": "Claudia",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn B - Mittel",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn B - Mittel",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2113
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Derkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=3333
-                ),
-            },
+        entries=[
+            entry_1,
+            entry_2,
+            entry_3,
+            entry_4,
         ],
     )
     assert data == [
         (
-            class_a,
+            class_info_a,
             [
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Derkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=3333
-                    ),
-                    "rank": 1,
-                    "time_behind": 0,
-                    "points": 1.0,
-                },
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=9876
-                    ),
-                    "rank": 2,
-                    "time_behind": 9876 - 3333,
-                    "points": 3333 / 9876,
-                },
+                RankedEntryType(
+                    entry=entry_4,
+                    rank=1,
+                    time_behind=0,
+                ),
+                RankedEntryType(
+                    entry=entry_1,
+                    rank=2,
+                    time_behind=9876 - 3333,
+                ),
             ],
         ),
         (
-            class_b,
+            class_info_b,
             [
-                {
-                    "first_name": "Claudia",
-                    "last_name": "Merkel",
-                    "class_": "Bahn B - Mittel",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001
-                    ),
-                    "rank": 1,
-                    "time_behind": 0,
-                    "points": 1.0,
-                },
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Merkel",
-                    "class_": "Bahn B - Mittel",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2113
-                    ),
-                    "rank": 2,
-                    "time_behind": 2113 - 2001,
-                    "points": 2001 / 2113,
-                },
+                RankedEntryType(
+                    entry=entry_2,
+                    rank=1,
+                    time_behind=0,
+                ),
+                RankedEntryType(
+                    entry=entry_3,
+                    rank=2,
+                    time_behind=2113 - 2001,
+                ),
             ],
         ),
     ]
 
 
 def test_ranking_with_two_winners():
-    class_a = Class_(name="Bahn A - Lang", params=ClassParams())
+    class_info_a = ClassInfoType(
+        id=1,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+    entry_1 = EntryType(
+        id=1,
+        event_id=1,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.MISSING_PUNCH,
+            time=9876,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=1,
+        competitor_id=2,
+        first_name="Claudia",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=1,
+        competitor_id=3,
+        first_name="Birgit",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
     data = build_results.build_results(
-        classes=[
-            class_a,
+        class_infos=[
+            class_info_a,
         ],
-        results=[
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.MISSING_PUNCH, time=9876
-                ),
-            },
-            {
-                "first_name": "Claudia",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001
-                ),
-            },
+        entries=[
+            entry_1,
+            entry_2,
+            entry_3,
         ],
     )
     assert data == [
         (
-            class_a,
+            class_info_a,
             [
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001
-                    ),
-                    "rank": 1,
-                    "time_behind": 0,
-                    "points": 1.0,
-                },
-                {
-                    "first_name": "Claudia",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001
-                    ),
-                    "rank": 1,
-                    "time_behind": 0,
-                    "points": 1.0,
-                },
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.MISSING_PUNCH, time=9876
-                    ),
-                    "rank": None,
-                    "points": 0,
-                },
+                RankedEntryType(
+                    entry=entry_3,
+                    rank=1,
+                    time_behind=0,
+                ),
+                RankedEntryType(
+                    entry=entry_2,
+                    rank=1,
+                    time_behind=0,
+                ),
+                RankedEntryType(
+                    entry=entry_1,
+                    rank=None,
+                    time_behind=None,
+                ),
             ],
         )
     ]
 
 
 def test_ranking_entries_with_same_time_are_orderd_by_name():
-    class_a = Class_(name="Bahn A - Lang", params=ClassParams())
+    class_info_a = ClassInfoType(
+        id=1,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+    entry_1 = EntryType(
+        id=1,
+        event_id=1,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=1,
+        competitor_id=2,
+        first_name="Claudia",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=1,
+        competitor_id=3,
+        first_name="Birgit",
+        last_name="Derkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_4 = EntryType(
+        id=4,
+        event_id=1,
+        competitor_id=4,
+        first_name="Birgit",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
     data = build_results.build_results(
-        classes=[
-            class_a,
+        class_infos=[
+            class_info_a,
         ],
-        results=[
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001
-                ),
-            },
-            {
-                "first_name": "Claudia",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Derkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001
-                ),
-            },
+        entries=[
+            entry_1,
+            entry_2,
+            entry_3,
+            entry_4,
         ],
     )
     assert data == [
         (
-            class_a,
+            class_info_a,
             [
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Derkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001
-                    ),
-                    "rank": 1,
-                    "time_behind": 0,
-                    "points": 1.0,
-                },
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001
-                    ),
-                    "rank": 1,
-                    "time_behind": 0,
-                    "points": 1.0,
-                },
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001
-                    ),
-                    "rank": 1,
-                    "time_behind": 0,
-                    "points": 1.0,
-                },
-                {
-                    "first_name": "Claudia",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001
-                    ),
-                    "rank": 1,
-                    "time_behind": 0,
-                    "points": 1.0,
-                },
+                RankedEntryType(
+                    entry=entry_3,
+                    rank=1,
+                    time_behind=0,
+                ),
+                RankedEntryType(
+                    entry=entry_1,
+                    rank=1,
+                    time_behind=0,
+                ),
+                RankedEntryType(
+                    entry=entry_4,
+                    rank=1,
+                    time_behind=0,
+                ),
+                RankedEntryType(
+                    entry=entry_2,
+                    rank=1,
+                    time_behind=0,
+                ),
             ],
         )
     ]
 
 
-def test_ranking_entries_with_same_time_are_orderd_by_name_2():
-    class_a = Class_(name="Bahn A - Lang", params=ClassParams(otype="score"))
+def test_ranking_entries_with_same_time_are_orderd_by_name_score():
+    class_info_a = ClassInfoType(
+        id=1,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(otype="score"),
+    )
+
+    entry_1 = EntryType(
+        id=1,
+        event_id=1,
+        competitor_id=1,
+        first_name="Claudia",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2000,
+            extensions={"score": 15.6},
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=1,
+        competitor_id=2,
+        first_name="Tanja",
+        last_name="Terkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+            extensions={"score": 15.6},
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=1,
+        competitor_id=3,
+        first_name="Angela",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2000,
+            extensions={"score": 15.6},
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_4 = EntryType(
+        id=4,
+        event_id=1,
+        competitor_id=4,
+        first_name="Birgit",
+        last_name="Derkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+            extensions={"score": 15.6},
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
     data = build_results.build_results(
-        classes=[
-            class_a,
+        class_infos=[
+            class_info_a,
         ],
-        results=[
-            {
-                "first_name": "Claudia",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2000, extensions={"score": 15.6}
-                ),
-            },
-            {
-                "first_name": "Tanja",
-                "last_name": "Terkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001, extensions={"score": 15.6}
-                ),
-            },
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2000, extensions={"score": 15.6}
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Derkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001, extensions={"score": 15.6}
-                ),
-            },
+        entries=[
+            entry_1,
+            entry_2,
+            entry_3,
+            entry_4,
         ],
     )
     assert data == [
         (
-            class_a,
+            class_info_a,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2000, extensions={"score": 15.6}
-                    ),
-                    "rank": 1,
-                },
-                {
-                    "first_name": "Claudia",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2000, extensions={"score": 15.6}
-                    ),
-                    "rank": 1,
-                },
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Derkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001, extensions={"score": 15.6}
-                    ),
-                    "rank": 3,
-                },
-                {
-                    "first_name": "Tanja",
-                    "last_name": "Terkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001, extensions={"score": 15.6}
-                    ),
-                    "rank": 3,
-                },
+                RankedEntryType(
+                    entry=entry_3,
+                    rank=1,
+                    time_behind=None,
+                ),
+                RankedEntryType(
+                    entry=entry_1,
+                    rank=1,
+                    time_behind=None,
+                ),
+                RankedEntryType(
+                    entry=entry_4,
+                    rank=3,
+                    time_behind=None,
+                ),
+                RankedEntryType(
+                    entry=entry_2,
+                    rank=3,
+                    time_behind=None,
+                ),
             ],
         )
     ]
 
 
 def test_ranking_with_not_competing_runners():
-    class_a = Class_(name="Bahn A - Lang", params=ClassParams())
+    class_info_a = ClassInfoType(
+        id=1,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+    entry_1 = EntryType(
+        id=1,
+        event_id=1,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=9876,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=1,
+        competitor_id=2,
+        first_name="Claudia",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=True,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.OK,
+            time=2001,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=1,
+        competitor_id=3,
+        first_name="Birgit",
+        last_name="Merkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=True,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.MISSING_PUNCH,
+            time=1800,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
+    entry_4 = EntryType(
+        id=4,
+        event_id=1,
+        competitor_id=4,
+        first_name="Birgit",
+        last_name="Derkel",
+        gender=None,
+        year=None,
+        class_id=1,
+        class_name="Bahn A - Lang",
+        not_competing=False,
+        chip=None,
+        fields={},
+        result=PersonRaceResult(
+            status=ResultStatus.DID_NOT_START,
+        ),
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
+
     data = build_results.build_results(
-        classes=[
-            class_a,
+        class_infos=[
+            class_info_a,
         ],
-        results=[
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=9876
-                ),
-            },
-            {
-                "first_name": "Claudia",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": True,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.OK, time=2001
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": "",
-                "not_competing": True,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.MISSING_PUNCH
-                ),
-            },
-            {
-                "first_name": "Birgit",
-                "last_name": "Derkel",
-                "gender": "",
-                "year": "",
-                "not_competing": False,
-                "class_": "Bahn A - Lang",
-                "result": result_type.PersonRaceResult(
-                    status=ResultStatus.DID_NOT_START
-                ),
-            },
+        entries=[
+            entry_1,
+            entry_2,
+            entry_3,
+            entry_4,
         ],
     )
     assert data == [
         (
-            class_a,
+            class_info_a,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=9876
-                    ),
-                    "rank": 1,
-                    "time_behind": 0,
-                    "points": 2001 / 2001,
-                },
-                {
-                    "first_name": "Claudia",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": True,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.OK, time=2001
-                    ),
-                    "rank": None,
-                    "points": 0,
-                },
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Merkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": True,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.MISSING_PUNCH, time=None
-                    ),
-                    "rank": None,
-                    "points": 0,
-                },
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Derkel",
-                    "class_": "Bahn A - Lang",
-                    "gender": "",
-                    "year": "",
-                    "not_competing": False,
-                    "result": result_type.PersonRaceResult(
-                        status=ResultStatus.DID_NOT_START, time=None
-                    ),
-                    "rank": None,
-                },
+                RankedEntryType(
+                    entry=entry_1,
+                    rank=1,
+                    time_behind=0,
+                ),
+                RankedEntryType(
+                    entry=entry_2,
+                    rank=None,
+                    time_behind=None,
+                ),
+                RankedEntryType(
+                    entry=entry_3,
+                    rank=None,
+                    time_behind=None,
+                ),
+                RankedEntryType(
+                    entry=entry_4,
+                    rank=None,
+                    time_behind=None,
+                ),
             ],
         )
     ]

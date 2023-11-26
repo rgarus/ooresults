@@ -26,6 +26,7 @@ import pytest
 from ooresults.repo import repo
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.entry_type import EntryType
 from ooresults.repo.start_type import PersonRaceStart
 from ooresults.repo.result_type import CardReaderMessage
 from ooresults.repo.result_type import SplitTime
@@ -99,7 +100,7 @@ def class_id_without_course(db, event_id):
 
 
 @pytest.fixture
-def entry_1(db, event_id, class_id):
+def entry_1(db, event_id, class_id) -> EntryType:
     id = db.add_entry(
         event_id=event_id,
         competitor_id=None,
@@ -115,12 +116,12 @@ def entry_1(db, event_id, class_id):
         status=ResultStatus.INACTIVE,
         start_time=None,
     )
-    entry = db.get_entry(id=id)[0]
+    entry = db.get_entry(id=id)
     return copy.deepcopy(entry)
 
 
 @pytest.fixture
-def entry_1_without_course(db, event_id, class_id_without_course):
+def entry_1_without_course(db, event_id, class_id_without_course) -> EntryType:
     id = db.add_entry(
         event_id=event_id,
         competitor_id=None,
@@ -136,12 +137,12 @@ def entry_1_without_course(db, event_id, class_id_without_course):
         status=ResultStatus.INACTIVE,
         start_time=None,
     )
-    entry = db.get_entry(id=id)[0]
+    entry = db.get_entry(id=id)
     return copy.deepcopy(entry)
 
 
 @pytest.fixture
-def entry_2(db, event_id, class_id):
+def entry_2(db, event_id, class_id) -> EntryType:
     id = db.add_entry(
         event_id=event_id,
         competitor_id=None,
@@ -157,16 +158,16 @@ def entry_2(db, event_id, class_id):
         status=ResultStatus.INACTIVE,
         start_time=None,
     )
-    entry = db.get_entry(id=id)[0]
+    entry = db.get_entry(id=id)
     return copy.deepcopy(entry)
 
 
 @pytest.fixture
-def entry_2_with_result(db, event_id, class_id, entry_2):
+def entry_2_with_result(db, event_id, class_id, entry_2) -> EntryType:
     db.update_entry_result(
-        id=entry_2["id"],
-        chip=entry_2["chip"],
-        start_time=entry_2["start"].start_time,
+        id=entry_2.id,
+        chip=entry_2.chip,
+        start_time=entry_2.start.start_time,
         result=PersonRaceResult(
             status=ResultStatus.OK,
             start_time=s1,
@@ -187,12 +188,12 @@ def entry_2_with_result(db, event_id, class_id, entry_2):
             ],
         ),
     )
-    entry = db.get_entry(id=entry_2["id"])[0]
+    entry = db.get_entry(id=entry_2.id)
     return copy.deepcopy(entry)
 
 
 @pytest.fixture
-def entry_3(db, event_id, class_id):
+def entry_3(db, event_id, class_id) -> EntryType:
     id = db.add_entry(
         event_id=event_id,
         competitor_id=None,
@@ -208,12 +209,12 @@ def entry_3(db, event_id, class_id):
         status=ResultStatus.INACTIVE,
         start_time=None,
     )
-    entry = db.get_entry(id=id)[0]
+    entry = db.get_entry(id=id)
     return copy.deepcopy(entry)
 
 
 @pytest.fixture
-def unassigned_entry(db, event_id):
+def unassigned_entry(db, event_id) -> EntryType:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -231,32 +232,12 @@ def unassigned_entry(db, event_id):
         result=result,
         start_time=None,
     )
-    entry = db.get_entry(id=id)[0]
+    entry = db.get_entry(id=id)
     return copy.deepcopy(entry)
 
 
-def assert_entries_are_equal(entry_a: Dict, entry_b: Dict) -> None:
-    assert entry_a["id"] == entry_b["id"]
-    assert entry_a["event_id"] == entry_b["event_id"]
-    assert entry_a["first_name"] == entry_b["first_name"]
-    assert entry_a["last_name"] == entry_b["last_name"]
-    assert entry_a["gender"] == entry_b["gender"]
-    assert entry_a["year"] == entry_b["year"]
-    assert entry_a["competitor_id"] == entry_b["competitor_id"]
-    assert entry_a["not_competing"] == entry_b["not_competing"]
-    assert entry_a["chip"] == entry_b["chip"]
-    assert entry_a["fields"] == entry_b["fields"]
-    assert entry_a["result"] == entry_b["result"]
-    assert entry_a["start"] == entry_b["start"]
-    assert entry_a["club_id"] == entry_b["club_id"]
-    assert entry_a["club"] == entry_b["club"]
-    assert entry_a["class_id"] == entry_b["class_id"]
-    assert entry_a["class_"] == entry_b["class_"]
-    assert entry_a.get("missingControls", None) == entry_b.get("missingControls", None)
-
-
 def test_assign_to_entry_if_cardnumber_is_unique(
-    db, event_id, entry_1, entry_2, entry_3
+    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -297,7 +278,7 @@ def test_assign_to_entry_if_cardnumber_is_unique(
     entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
-    entry_2["result"] = PersonRaceResult(
+    entry_2.result = PersonRaceResult(
         status=ResultStatus.OK,
         start_time=s1,
         finish_time=f1,
@@ -311,13 +292,13 @@ def test_assign_to_entry_if_cardnumber_is_unique(
         ],
     )
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_2)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+    assert entries[0] == entry_1
+    assert entries[1] == entry_2
+    assert entries[2] == entry_3
 
 
 def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
-    db, event_id, entry_1, entry_2, entry_3
+    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -358,7 +339,7 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
     entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
-    entry_2["result"] = PersonRaceResult(
+    entry_2.result = PersonRaceResult(
         status=ResultStatus.DID_NOT_FINISH,
         start_time=s1,
         finish_time=None,
@@ -372,13 +353,13 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
         ],
     )
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_2)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+    assert entries[0] == entry_1
+    assert entries[1] == entry_2
+    assert entries[2] == entry_3
 
 
 def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
-    db, event_id, entry_1, entry_2, entry_3
+    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -419,7 +400,7 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
     entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
-    entry_2["result"] = PersonRaceResult(
+    entry_2.result = PersonRaceResult(
         status=ResultStatus.MISSING_PUNCH,
         start_time=None,
         finish_time=f1,
@@ -433,13 +414,13 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
         ],
     )
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_2)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+    assert entries[0] == entry_1
+    assert entries[1] == entry_2
+    assert entries[2] == entry_3
 
 
 def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
-    db, event_id, entry_1, entry_2, entry_3
+    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -478,7 +459,7 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
     entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
-    entry_2["result"] = PersonRaceResult(
+    entry_2.result = PersonRaceResult(
         status=ResultStatus.MISSING_PUNCH,
         start_time=s1,
         finish_time=f1,
@@ -492,13 +473,18 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
         ],
     )
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_2)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+    assert entries[0] == entry_1
+    assert entries[1] == entry_2
+    assert entries[2] == entry_3
 
 
 def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
-    db, event_id, entry_1, entry_2, entry_3, unassigned_entry
+    db,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
+    unassigned_entry: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -540,7 +526,7 @@ def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
     entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
-    entry_2["result"] = PersonRaceResult(
+    entry_2.result = PersonRaceResult(
         status=ResultStatus.OK,
         start_time=s1,
         finish_time=f1,
@@ -554,13 +540,18 @@ def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
         ],
     )
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_2)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+    assert entries[0] == entry_1
+    assert entries[1] == entry_2
+    assert entries[2] == entry_3
 
 
 def test_store_as_new_entry_if_another_result_exists(
-    db, event_id, entry_1, entry_2, entry_3, unassigned_entry
+    db,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
+    unassigned_entry: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -615,39 +606,43 @@ def test_store_as_new_entry_if_another_result_exists(
             ),
         ],
     )
-    new_entry = {
-        "id": [
-            e["id"]
-            for e in entries
-            if e["id"]
-            not in [entry_1["id"], entry_2["id"], entry_3["id"], unassigned_entry["id"]]
-        ][0],
-        "event_id": event_id,
-        "first_name": None,
-        "last_name": None,
-        "gender": None,
-        "year": None,
-        "competitor_id": None,
-        "not_competing": False,
-        "chip": "7410",
-        "fields": {},
-        "result": result,
-        "start": PersonRaceStart(),
-        "club_id": None,
-        "club": None,
-        "class_id": None,
-        "class_": None,
-    }
+    ids = [
+        e.id
+        for e in entries
+        if e.id not in [entry_1.id, entry_2.id, entry_3.id, unassigned_entry.id]
+    ]
+    new_entry = EntryType(
+        id=ids[0],
+        event_id=event_id,
+        competitor_id=None,
+        first_name=None,
+        last_name=None,
+        gender=None,
+        year=None,
+        class_id=None,
+        class_name=None,
+        not_competing=False,
+        chip="7410",
+        fields={},
+        result=result,
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=unassigned_entry)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=new_entry)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[3], entry_b=entry_2)
-    assert_entries_are_equal(entry_a=entries[4], entry_b=entry_3)
+    assert entries[0] == unassigned_entry
+    assert entries[1] == new_entry
+    assert entries[2] == entry_1
+    assert entries[3] == entry_2
+    assert entries[4] == entry_3
 
 
 def test_do_not_store_as_new_entry_if_result_already_exists(
-    db, event_id, entry_1, entry_3, unassigned_entry
+    db,
+    event_id: int,
+    entry_1: EntryType,
+    entry_3: EntryType,
+    unassigned_entry: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -687,13 +682,13 @@ def test_do_not_store_as_new_entry_if_result_already_exists(
     entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=unassigned_entry)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+    assert entries[0] == unassigned_entry
+    assert entries[1] == entry_1
+    assert entries[2] == entry_3
 
 
 def test_store_as_new_entry_if_cardnumber_is_unknown(
-    db, event_id, entry_1, entry_2, entry_3
+    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -752,37 +747,34 @@ def test_store_as_new_entry_if_cardnumber_is_unknown(
             ),
         ],
     )
-    new_entry = {
-        "id": [
-            e["id"]
-            for e in entries
-            if e["id"] not in [entry_1["id"], entry_2["id"], entry_3["id"]]
-        ][0],
-        "event_id": event_id,
-        "first_name": None,
-        "last_name": None,
-        "gender": None,
-        "year": None,
-        "competitor_id": None,
-        "not_competing": False,
-        "chip": "999999",
-        "fields": {},
-        "result": result,
-        "start": PersonRaceStart(),
-        "club_id": None,
-        "club": None,
-        "class_id": None,
-        "class_": None,
-    }
+    ids = [e.id for e in entries if e.id not in [entry_1.id, entry_2.id, entry_3.id]]
+    new_entry = EntryType(
+        id=ids[0],
+        event_id=event_id,
+        competitor_id=None,
+        first_name=None,
+        last_name=None,
+        gender=None,
+        year=None,
+        class_id=None,
+        class_name=None,
+        not_competing=False,
+        chip="999999",
+        fields={},
+        result=result,
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=new_entry)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_2)
-    assert_entries_are_equal(entry_a=entries[3], entry_b=entry_3)
+    assert entries[0] == new_entry
+    assert entries[1] == entry_1
+    assert entries[2] == entry_2
+    assert entries[3] == entry_3
 
 
 def test_store_as_new_entry_if_cardnumber_exist_several_times(
-    db, event_id, entry_1, entry_2, entry_3
+    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -841,37 +833,38 @@ def test_store_as_new_entry_if_cardnumber_exist_several_times(
             ),
         ],
     )
-    new_entry = {
-        "id": [
-            e["id"]
-            for e in entries
-            if e["id"] not in [entry_1["id"], entry_2["id"], entry_3["id"]]
-        ][0],
-        "event_id": event_id,
-        "first_name": None,
-        "last_name": None,
-        "gender": None,
-        "year": None,
-        "competitor_id": None,
-        "not_competing": False,
-        "chip": "12734",
-        "fields": {},
-        "result": result,
-        "start": PersonRaceStart(),
-        "club_id": None,
-        "club": None,
-        "class_id": None,
-        "class_": None,
-    }
+    ids = [e.id for e in entries if e.id not in [entry_1.id, entry_2.id, entry_3.id]]
+    new_entry = EntryType(
+        id=ids[0],
+        event_id=event_id,
+        competitor_id=None,
+        first_name=None,
+        last_name=None,
+        gender=None,
+        year=None,
+        class_id=None,
+        class_name=None,
+        not_competing=False,
+        chip="12734",
+        fields={},
+        result=result,
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=new_entry)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_2)
-    assert_entries_are_equal(entry_a=entries[3], entry_b=entry_3)
+    assert entries[0] == new_entry
+    assert entries[1] == entry_1
+    assert entries[2] == entry_2
+    assert entries[3] == entry_3
 
 
 def test_use_already_assigned_entry_if_it_has_the_same_result(
-    db, event_id, entry_1, entry_2_with_result, entry_3
+    db,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2_with_result: EntryType,
+    entry_3: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -912,13 +905,17 @@ def test_use_already_assigned_entry_if_it_has_the_same_result(
     entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_2_with_result)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+    assert entries[0] == entry_1
+    assert entries[1] == entry_2_with_result
+    assert entries[2] == entry_3
 
 
 def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
-    db, event_id, entry_1, entry_2_with_result, entry_3
+    db,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2_with_result: EntryType,
+    entry_3: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -977,37 +974,38 @@ def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
             ),
         ],
     )
-    new_entry = {
-        "id": [
-            e["id"]
-            for e in entries
-            if e["id"] not in [entry_1["id"], entry_2_with_result["id"], entry_3["id"]]
-        ][0],
-        "event_id": event_id,
-        "first_name": None,
-        "last_name": None,
-        "gender": None,
-        "year": None,
-        "competitor_id": None,
-        "not_competing": False,
-        "chip": "7410",
-        "fields": {},
-        "result": result,
-        "start": PersonRaceStart(),
-        "club_id": None,
-        "club": None,
-        "class_id": None,
-        "class_": None,
-    }
+    ids = [
+        e.id
+        for e in entries
+        if e.id not in [entry_1.id, entry_2_with_result.id, entry_3.id]
+    ]
+    new_entry = EntryType(
+        id=ids[0],
+        event_id=event_id,
+        competitor_id=None,
+        first_name=None,
+        last_name=None,
+        gender=None,
+        year=None,
+        class_id=None,
+        class_name=None,
+        not_competing=False,
+        chip="7410",
+        fields={},
+        result=result,
+        start=PersonRaceStart(),
+        club_id=None,
+        club_name=None,
+    )
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=new_entry)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_2_with_result)
-    assert_entries_are_equal(entry_a=entries[3], entry_b=entry_3)
+    assert entries[0] == new_entry
+    assert entries[1] == entry_1
+    assert entries[2] == entry_2_with_result
+    assert entries[3] == entry_3
 
 
 def test_use_empty_control_list_if_course_is_undefined(
-    db, event_id, entry_1_without_course
+    db, event_id: int, entry_1_without_course: EntryType
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -1048,7 +1046,7 @@ def test_use_empty_control_list_if_course_is_undefined(
     entries = db.get_entries(event_id=event_id)
     assert len(entries) == 1
 
-    entry_1_without_course["result"] = PersonRaceResult(
+    entry_1_without_course.result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         start_time=s1,
         finish_time=f1,
@@ -1068,11 +1066,11 @@ def test_use_empty_control_list_if_course_is_undefined(
         ],
     )
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1_without_course)
+    assert entries[0] == entry_1_without_course
 
 
 def test_raise_exception_if_event_key_is_unknown(
-    db, event_id, entry_1, entry_2, entry_3
+    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -1098,6 +1096,6 @@ def test_raise_exception_if_event_key_is_unknown(
     entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
-    assert_entries_are_equal(entry_a=entries[0], entry_b=entry_1)
-    assert_entries_are_equal(entry_a=entries[1], entry_b=entry_2)
-    assert_entries_are_equal(entry_a=entries[2], entry_b=entry_3)
+    assert entries[0] == entry_1
+    assert entries[1] == entry_2
+    assert entries[2] == entry_3

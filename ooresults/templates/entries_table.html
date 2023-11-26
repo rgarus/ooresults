@@ -1,11 +1,5 @@
-$def with (event, competitors)
+$def with (event, entries)
 
-
-$def format_year(year) -> str:
-    $if year is not None:
-        $return str(year)
-    $else:
-        $return ''
 
 $def format_time(time):
     $if time is not None:
@@ -13,11 +7,16 @@ $def format_time(time):
     $else:
         $return ''
 
+
 $def format_date(time):
     $if time is not None:
         $return time.strftime('%H:%M:%S')
     $else:
         $return ''
+
+
+$def f(value) -> str:
+    $return str(value) if value is not None else ''
 
 
 <div id="entr.event">
@@ -59,22 +58,22 @@ $def format_date(time):
             </tr>
         </thead>
         <tbody id="entries_tbody">
-        $for competitor in competitors:
-            <tr class="dt" id="$competitor.get('id', '')">
-                <td class="dt">$competitor.get('first_name', '')</td>
-                <td class="dt" id="entr_table_lastname">$competitor.get('last_name', '')</td>
-                <td class="dt">$competitor.get('gender', '')</td>
-                <td class="dt">$format_year(competitor.get('year', None))</td>
-                <td class="dt" style="text-align:right">$format_card(competitor.get('chip', ''))</td>
-                <td class="dt">$competitor.get('club', '')</td>
-                <td class="dt">$competitor.get('class_', '')</td>
-                <td class="dt" style="text-align: center;">$('X' if competitor.get('not_competing', False) else '')</td>
+        $for entry in entries:
+            <tr class="dt" id="$entry.id">
+                <td class="dt">$f(entry.first_name)</td>
+                <td class="dt" id="entr_table_lastname">$f(entry.last_name)</td>
+                <td class="dt">$f(entry.gender)</td>
+                <td class="dt">$f(entry.year)</td>
+                <td class="dt" style="text-align:right">$format_card(entry.chip)</td>
+                <td class="dt">$f(entry.club_name)</td>
+                <td class="dt">$f(entry.class_name)</td>
+                <td class="dt" style="text-align: center;">$('X' if entry.not_competing else '')</td>
                 $if event is not None:
                     $for i in range(len(event.fields)):
-                        <td class="dt">$competitor.fields.get(i, '')</td>
-                <td class="dt" style="text-align:right">$(format_date(competitor.start.start_time))</td>
-                <td class="dt" style="text-align:right">$(format_time(competitor.result.extensions.get('running_time', competitor.result.time)))</td>
-                <td class="dt">$MAP_STATUS[competitor.result.status]</td>
+                        <td class="dt">$entry.fields.get(i, '')</td>
+                <td class="dt" style="text-align:right">$(format_date(entry.start.start_time))</td>
+                <td class="dt" style="text-align:right">$(format_time(entry.result.extensions.get('running_time', entry.result.time)))</td>
+                <td class="dt">$MAP_STATUS[entry.result.status]</td>
             </tr> 
         </tbody>
     </table>

@@ -47,6 +47,7 @@ from ooresults.repo.class_type import ClassType
 from ooresults.repo.club_type import ClubType
 from ooresults.repo.competitor_type import CompetitorType
 from ooresults.repo.course_type import CourseType
+from ooresults.repo.entry_type import EntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo import result_type
 from ooresults.repo import series_type
@@ -199,7 +200,7 @@ class SqliteRepo(Repo):
             "ORDER BY classes.name ASC;"
         )
         values.names[values.names.index("id", 1)] = "course_id"
-        values.names[values.names.index("name", 2)] = "course"
+        values.names[values.names.index("name", 2)] = "course_name"
         values.names[values.names.index("length", 1)] = "course_length"
         values.names[values.names.index("climb", 1)] = "course_climb"
 
@@ -215,7 +216,7 @@ class SqliteRepo(Repo):
                     name=c["name"],
                     short_name=c["short_name"],
                     course_id=c["course_id"],
-                    course=c["course"],
+                    course_name=c["course_name"],
                     course_length=c["course_length"],
                     course_climb=c["course_climb"],
                     number_of_controls=number_of_controls,
@@ -630,7 +631,7 @@ class SqliteRepo(Repo):
         if list_of_competitors:
             self.db.multiple_insert("competitors", list_of_competitors)
 
-    def get_entries(self, event_id: int):
+    def get_entries(self, event_id: int) -> List[EntryType]:
         values = self.db.query(
             "SELECT "
             "entries.id,"
@@ -657,17 +658,34 @@ class SqliteRepo(Repo):
             "ORDER BY competitors.last_name ASC, competitors.first_name ASC, entries.chip ASC;"
         )
         values.names[values.names.index("id", 1)] = "competitor_id"
-        values.names[values.names.index("name")] = "class_"
-        values.names[values.names.index("name")] = "club"
-        values = list(values)
-        for e in values:
-            e.fields = UnpicklerZoneInfo(io.BytesIO(e.fields)).load()
-            e.result = UnpicklerZoneInfo(io.BytesIO(e.result)).load()
-            e.start = UnpicklerZoneInfo(io.BytesIO(e.start)).load()
-            e.not_competing = bool(e.not_competing)
-        return values
+        values.names[values.names.index("name")] = "class_name"
+        values.names[values.names.index("name")] = "club_name"
 
-    def get_entry(self, id: int):
+        entries = []
+        for c in values:
+            entries.append(
+                EntryType(
+                    id=c["id"],
+                    event_id=c["event_id"],
+                    competitor_id=c["competitor_id"],
+                    first_name=c["first_name"],
+                    last_name=c["last_name"],
+                    gender=c["gender"],
+                    year=c["year"],
+                    class_id=c["class_id"],
+                    class_name=c["class_name"],
+                    not_competing=bool(c.not_competing),
+                    chip=c["chip"],
+                    fields=UnpicklerZoneInfo(io.BytesIO(c.fields)).load(),
+                    result=UnpicklerZoneInfo(io.BytesIO(c.result)).load(),
+                    start=UnpicklerZoneInfo(io.BytesIO(c.start)).load(),
+                    club_id=c["club_id"],
+                    club_name=c["club_name"],
+                )
+            )
+        return entries
+
+    def get_entry(self, id: int) -> EntryType:
         values = self.db.query(
             "SELECT "
             "entries.id,"
@@ -695,17 +713,35 @@ class SqliteRepo(Repo):
         values.names[values.names.index("id", 1)] = "competitor_id"
         values.names[values.names.index("id", 1)] = "class_id"
         values.names[values.names.index("id", 1)] = "club_id"
-        values.names[values.names.index("name")] = "class_"
-        values.names[values.names.index("name")] = "club"
-        values = list(values)
-        for e in values:
-            e.fields = UnpicklerZoneInfo(io.BytesIO(e.fields)).load()
-            e.result = UnpicklerZoneInfo(io.BytesIO(e.result)).load()
-            e.start = UnpicklerZoneInfo(io.BytesIO(e.start)).load()
-            e.not_competing = bool(e.not_competing)
-        return values
+        values.names[values.names.index("name")] = "class_name"
+        values.names[values.names.index("name")] = "club_name"
 
-    def get_entry_by_name(self, event_id: int, first_name: str, last_name: str):
+        if values:
+            c = values[0]
+            return EntryType(
+                id=c["id"],
+                event_id=c["event_id"],
+                competitor_id=c["competitor_id"],
+                first_name=c["first_name"],
+                last_name=c["last_name"],
+                gender=c["gender"],
+                year=c["year"],
+                class_id=c["class_id"],
+                class_name=c["class_name"],
+                not_competing=bool(c.not_competing),
+                chip=c["chip"],
+                fields=UnpicklerZoneInfo(io.BytesIO(c.fields)).load(),
+                result=UnpicklerZoneInfo(io.BytesIO(c.result)).load(),
+                start=UnpicklerZoneInfo(io.BytesIO(c.start)).load(),
+                club_id=c["club_id"],
+                club_name=c["club_name"],
+            )
+        else:
+            raise KeyError
+
+    def get_entry_by_name(
+        self, event_id: int, first_name: str, last_name: str
+    ) -> EntryType:
         values = self.db.query(
             "SELECT "
             "entries.id,"
@@ -735,15 +771,31 @@ class SqliteRepo(Repo):
         values.names[values.names.index("id", 1)] = "competitor_id"
         values.names[values.names.index("id", 1)] = "class_id"
         values.names[values.names.index("id", 1)] = "club_id"
-        values.names[values.names.index("name")] = "class_"
-        values.names[values.names.index("name")] = "club"
-        values = list(values)
-        for e in values:
-            e.fields = UnpicklerZoneInfo(io.BytesIO(e.fields)).load()
-            e.result = UnpicklerZoneInfo(io.BytesIO(e.result)).load()
-            e.start = UnpicklerZoneInfo(io.BytesIO(e.start)).load()
-            e.not_competing = bool(e.not_competing)
-        return values
+        values.names[values.names.index("name")] = "class_name"
+        values.names[values.names.index("name")] = "club_name"
+
+        if values:
+            c = values[0]
+            return EntryType(
+                id=c["id"],
+                event_id=c["event_id"],
+                competitor_id=c["competitor_id"],
+                first_name=c["first_name"],
+                last_name=c["last_name"],
+                gender=c["gender"],
+                year=c["year"],
+                class_id=c["class_id"],
+                class_name=c["class_name"],
+                not_competing=bool(c.not_competing),
+                chip=c["chip"],
+                fields=UnpicklerZoneInfo(io.BytesIO(c.fields)).load(),
+                result=UnpicklerZoneInfo(io.BytesIO(c.result)).load(),
+                start=UnpicklerZoneInfo(io.BytesIO(c.start)).load(),
+                club_id=c["club_id"],
+                club_name=c["club_name"],
+            )
+        else:
+            raise KeyError
 
     def add_entry(
         self,
@@ -855,11 +907,8 @@ class SqliteRepo(Repo):
         status: result_type.ResultStatus,
         start_time: Optional[datetime.datetime],
     ) -> None:
-        if self.get_entry(id=id) == []:
-            raise KeyError
-
         entry = self.get_entry(id=id)
-        competitor = self.get_competitor(id=entry[0].competitor_id)
+        competitor = self.get_competitor(id=entry.competitor_id)
         self.update_competitor(
             id=competitor.id,
             first_name=first_name,
@@ -870,9 +919,9 @@ class SqliteRepo(Repo):
             chip=competitor.chip,
         )
 
-        result = entry[0].result
+        result = entry.result
         result.status = status
-        start = entry[0].start
+        start = entry.start
         start.start_time = start_time
         self.db.update(
             "entries",
@@ -893,11 +942,8 @@ class SqliteRepo(Repo):
         start_time: Optional[datetime.datetime],
         result: result_type.PersonRaceResult,
     ) -> None:
-        if self.get_entry(id=id) == []:
-            raise KeyError
-
         entry = self.get_entry(id=id)
-        start = entry[0].start
+        start = entry.start
         start.start_time = start_time
         self.db.update(
             "entries",
@@ -907,13 +953,13 @@ class SqliteRepo(Repo):
             start=pickle.dumps(start),
         )
 
-    def delete_entries(self, event_id: int):
+    def delete_entries(self, event_id: int) -> None:
         self.db.delete("entries", where="event_id=" + web.db.sqlquote(event_id))
 
-    def delete_entry(self, id: int):
+    def delete_entry(self, id: int) -> None:
         self.db.delete("entries", where="id=" + web.db.sqlquote(id))
 
-    def import_entries(self, event_id: int, entries):
+    def import_entries(self, event_id: int, entries: Dict) -> None:
         # check if the event still exists
         self.get_event(id=event_id)
 
@@ -993,10 +1039,35 @@ class SqliteRepo(Repo):
                     gender=gender if gender != "" else None,
                 )
 
-            entry = self.get_entry_by_name(
-                event_id=event_id, first_name=c["first_name"], last_name=c["last_name"]
-            )
-            if entry == []:
+            try:
+                entry = self.get_entry_by_name(
+                    event_id=event_id,
+                    first_name=c["first_name"],
+                    last_name=c["last_name"],
+                )
+                fields = entry.fields
+                if "fields" in c:
+                    fields = copy.deepcopy(c["fields"])
+                result = entry.result
+                if "result" in c:
+                    result = copy.deepcopy(c["result"])
+                start = entry.start
+                if "start" in c:
+                    start = copy.deepcopy(c["start"])
+                self.db.update(
+                    "entries",
+                    where="id=" + web.db.sqlquote(entry.id),
+                    class_id=class_id,
+                    club_id=club_id,
+                    not_competing=c["not_competing"]
+                    if "not_competing" in c
+                    else entry.not_competing,
+                    chip=c["chip"] if "chip" in c else entry.chip,
+                    fields=pickle.dumps(fields),
+                    result=pickle.dumps(result),
+                    start=pickle.dumps(start),
+                )
+            except KeyError:
                 if "result" in c:
                     result = copy.deepcopy(c["result"])
                 else:
@@ -1019,29 +1090,6 @@ class SqliteRepo(Repo):
                         "result": pickle.dumps(result),
                         "start": pickle.dumps(start),
                     }
-                )
-            else:
-                fields = entry[0].fields
-                if "fields" in c:
-                    fields = copy.deepcopy(c["fields"])
-                result = entry[0].result
-                if "result" in c:
-                    result = copy.deepcopy(c["result"])
-                start = entry[0].start
-                if "start" in c:
-                    start = copy.deepcopy(c["start"])
-                self.db.update(
-                    "entries",
-                    where="id=" + web.db.sqlquote(entry[0].id),
-                    class_id=class_id,
-                    club_id=club_id,
-                    not_competing=c["not_competing"]
-                    if "not_competing" in c
-                    else entry[0].not_competing,
-                    chip=c["chip"] if "chip" in c else entry[0].chip,
-                    fields=pickle.dumps(fields),
-                    result=pickle.dumps(result),
-                    start=pickle.dumps(start),
                 )
 
         self.db.supports_multiple_insert = True

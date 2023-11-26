@@ -98,8 +98,8 @@ def create_course_data(
         class_course_assignment = CLASSCOURSEASSIGNMENT()
         class_course_assignment.append(CLASSNAME(c.name))
 
-        if c.course:
-            class_course_assignment.append(COURSENAME(c.course))
+        if c.course_name:
+            class_course_assignment.append(COURSENAME(c.course_name))
 
         race_course_data.append(class_course_assignment)
 

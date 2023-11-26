@@ -25,56 +25,42 @@ from typing import Optional
 
 from ooresults.repo import series_type
 from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.entry_type import EntryType
+from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import PersonRaceResult
 
 
 def build_results(
-    classes: List[ClassInfoType], results: List[Dict]
-) -> List[Tuple[ClassInfoType, List[Dict]]]:
+    class_infos: List[ClassInfoType],
+    entries: List[EntryType],
+) -> List[Tuple[ClassInfoType, List[RankedEntryType]]]:
     all_results = []
-    for class_ in classes:
-        if class_.name == "Organizer":
+    for class_info in class_infos:
+        if class_info.name == "Organizer":
             continue
+
+        class_results: List[RankedEntryType] = []
+
         # filter results belonging to this class
-        class_results = []
-        for r in results:
-            if r["class_"] == class_.name:
-                class_results.append(r)
-
-        if class_results != []:
-            # set the time column used for sorting
-            def result_equal(c1, c2) -> bool:
-                if class_.params.otype == "score":
-                    return (
-                        c1.extensions["score"] == c2.extensions["score"]
-                        and c1.time == c2.time
-                    )
-                else:
-                    return c1.time == c2.time
-
+        class_entries = [e for e in entries if e.class_name == class_info.name]
+        if class_entries:
             # sort the results
-            if class_.params.otype == "score":
-                class_results.sort(key=lambda c: c["last_name"] + "," + c["first_name"])
-                class_results.sort(
-                    key=lambda c: c["result"].time
-                    if c["result"].time is not None
-                    else 0
-                )
-                class_results.sort(
-                    key=lambda c: c["result"].extensions["score"]
-                    if c["result"].extensions.get("score", None) is not None
+            class_entries.sort(
+                key=lambda e: e.last_name + "," + e.first_name,
+            )
+            class_entries.sort(
+                key=lambda e: e.result.time if e.result.time is not None else 0,
+            )
+            if class_info.params.otype == "score":
+                class_entries.sort(
+                    key=lambda e: e.result.extensions["score"]
+                    if e.result.extensions.get("score", None) is not None
                     else -999999,
                     reverse=True,
                 )
-            else:
-                class_results.sort(key=lambda c: c["last_name"] + "," + c["first_name"])
-                class_results.sort(
-                    key=lambda c: c["result"].time
-                    if c["result"].time is not None
-                    else 0
-                )
 
-            def sort_for_rank(e) -> int:
+            def sort_for_rank(e: EntryType) -> int:
                 mapping = {
                     (ResultStatus.OK, False): 0,
                     (ResultStatus.MISSING_PUNCH, False): 1,
@@ -89,50 +75,53 @@ def build_results(
                     (ResultStatus.DID_NOT_START, False): 10,
                     (ResultStatus.DID_NOT_START, True): 11,
                 }
-                return mapping.get((e["result"].status, e["not_competing"]), 99)
+                return mapping.get((e.result.status, e.not_competing), 99)
 
-            class_results.sort(key=sort_for_rank)
+            class_entries.sort(key=sort_for_rank)
 
-            # add rank: Optional[int]
-            for i, r in enumerate(class_results):
-                if r["result"].status == ResultStatus.OK and not r["not_competing"]:
-                    if i > 0 and result_equal(
-                        class_results[i]["result"], class_results[i - 1]["result"]
-                    ):
-                        r["rank"] = class_results[i - 1]["rank"]
+            # compute rank: Optional[int]
+            for i, e in enumerate(class_entries):
+                rank = None
+                time_behind = None
+
+                def result_equal(r1: PersonRaceResult, r2: PersonRaceResult) -> bool:
+                    if class_info.params.otype == "score":
+                        return (
+                            r1.extensions["score"] == r2.extensions["score"]
+                            and r1.time == r2.time
+                        )
                     else:
-                        r["rank"] = i + 1
+                        return r1.time == r2.time
 
-                    if class_.params.otype != "score":
-                        winner_time = class_results[0]["result"].time
-                        r["time_behind"] = r["result"].time - winner_time
-                else:
-                    r["rank"] = None
-
-            # add points
-            if class_.params.otype != "score":
-                ref_time = class_results[0]["result"].time
-                for r in class_results:
-                    if r["rank"] is not None:
-                        r["points"] = ref_time / r["result"].time
-                    elif r["result"].status == ResultStatus.OK and r["not_competing"]:
-                        r["points"] = 0
-                    elif r["result"].status in (
-                        ResultStatus.MISSING_PUNCH,
-                        ResultStatus.DID_NOT_FINISH,
-                        ResultStatus.OVER_TIME,
-                        ResultStatus.DISQUALIFIED,
+                winner_time = class_entries[0].result.time
+                if e.result.status == ResultStatus.OK and not e.not_competing:
+                    if i > 0 and result_equal(
+                        class_entries[i].result, class_entries[i - 1].result
                     ):
-                        r["points"] = 0
+                        rank = class_results[i - 1].rank
+                    else:
+                        rank = i + 1
 
-            all_results.append((class_, class_results))
+                    if class_info.params.otype != "score":
+                        time_behind = e.result.time - winner_time
+
+                class_results.append(
+                    RankedEntryType(
+                        entry=e,
+                        rank=rank,
+                        time_behind=time_behind,
+                    )
+                )
+
+        all_results.append((class_info, class_results))
+
     return all_results
 
 
 def build_total_results(
     settings: series_type.Settings,
-    list_of_results: List[List[Tuple[ClassInfoType, List[Dict]]]],
-    organizers: Optional[List] = None,
+    list_of_results: List[List[Tuple[ClassInfoType, List[RankedEntryType]]]],
+    organizers: Optional[List[List[EntryType]]] = None,
 ) -> List[Tuple[str, List[Dict]]]:
     if organizers is None:
         organizers = []
@@ -140,45 +129,62 @@ def build_total_results(
 
     r = {}
     for i, class_results in enumerate(list_of_results):
-        for class_, results in class_results:
+        for class_, ranked_entries in class_results:
             if class_.name == "Organizer":
                 continue
             if class_.name not in r:
                 r[class_.name] = {}
-            for entry in results:
+
+            for e in ranked_entries:
+                entry = e.entry
+
+                # compute points
+                points = None
+                if class_.params.otype != "score":
+                    if e.rank is not None:
+                        winner_time = ranked_entries[0].entry.result.time
+                        points = winner_time / e.entry.result.time
+                    elif entry.result.status == ResultStatus.OK and entry.not_competing:
+                        points = 0
+                    elif entry.result.status in (
+                        ResultStatus.MISSING_PUNCH,
+                        ResultStatus.DID_NOT_FINISH,
+                        ResultStatus.OVER_TIME,
+                        ResultStatus.DISQUALIFIED,
+                    ):
+                        points = 0
+
                 # check if competitor has points
-                if entry.get("points", None) is not None:
-                    if (entry["last_name"], entry["first_name"]) not in r[class_.name]:
-                        r[class_.name][(entry["last_name"], entry["first_name"])] = {
-                            "last_name": entry["last_name"],
-                            "first_name": entry["first_name"],
-                            "year": entry.get("year", None),
-                            "club": entry.get("club", None),
+                if points is not None:
+                    if (entry.last_name, entry.first_name) not in r[class_.name]:
+                        r[class_.name][(entry.last_name, entry.first_name)] = {
+                            "last_name": entry.last_name,
+                            "first_name": entry.first_name,
+                            "year": entry.year,
+                            "club": entry.club_name,
                             "sum": 0,
                             "races": {},
                             "organizer": {},
                         }
 
-                    p = Decimal(settings.maximum_points * entry["points"]).quantize(q)
-                    r[class_.name][(entry["last_name"], entry["first_name"])]["races"][
-                        i
-                    ] = p
+                    p = Decimal(settings.maximum_points * points).quantize(q)
+                    r[class_.name][(entry.last_name, entry.first_name)]["races"][i] = p
+
             # add organizers
             if len(organizers) > i:
                 for entry in organizers[i]:
-                    if (entry["last_name"], entry["first_name"]) not in r[class_.name]:
-                        r[class_.name][(entry["last_name"], entry["first_name"])] = {
-                            "last_name": entry["last_name"],
-                            "first_name": entry["first_name"],
-                            "year": entry.get("year", None),
-                            "club": entry.get("club", None),
+                    name = (entry.last_name, entry.first_name)
+                    if name not in r[class_.name]:
+                        r[class_.name][name] = {
+                            "last_name": entry.last_name,
+                            "first_name": entry.first_name,
+                            "year": entry.year,
+                            "club": entry.club_name,
                             "sum": 0,
                             "races": {},
                             "organizer": {},
                         }
-                    r[class_.name][(entry["last_name"], entry["first_name"])][
-                        "organizer"
-                    ][i] = 0
+                    r[class_.name][name]["organizer"][i] = 0
 
     # build sum of points
     ranked_classes = []

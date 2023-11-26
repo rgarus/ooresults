@@ -23,64 +23,177 @@ import pytest
 
 from ooresults.handler import build_results
 from ooresults.handler import model
-from ooresults.repo import result_type
+from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.entry_type import EntryType
+from ooresults.repo.entry_type import RankedEntryType
+from ooresults.repo.event_type import EventType
+from ooresults.repo.result_type import PersonRaceResult
+from ooresults.repo.result_type import ResultStatus
 from ooresults.repo import series_type
 
 
-class Event:
-    def __init__(self, name: str, date: str, series: bool):
-        self.name = name
-        self.date = date
-        self.series = series
-
-
-class Class_:
-    def __init__(self, name: str):
-        self.name = name
+@pytest.fixture
+def event_1() -> EventType:
+    return EventType(
+        id=1,
+        name="ev1",
+        date="2021-03-20",
+        key=None,
+        publish=False,
+        series="Run 1",
+        fields=[],
+    )
 
 
 @pytest.fixture
-def event_1():
-    return Event(name="ev1", date="2021-03-20", series="Run 1")
+def event_2() -> EventType:
+    return EventType(
+        id=2,
+        name="ev2",
+        date="2021-02-20",
+        key=None,
+        publish=False,
+        series=None,
+        fields=[],
+    )
 
 
 @pytest.fixture
-def event_2():
-    return Event(name="ev2", date="2021-02-20", series=None)
+def event_3() -> EventType:
+    return EventType(
+        id=3,
+        name="ev3",
+        date="2021-02-21",
+        key=None,
+        publish=False,
+        series="Run 3",
+        fields=[],
+    )
 
 
 @pytest.fixture
-def event_3():
-    return Event(name="ev3", date="2021-02-21", series="Run 3")
+def event_4() -> EventType:
+    return EventType(
+        id=4,
+        name="ev4",
+        date="2021-02-21",
+        key=None,
+        publish=False,
+        series="Run 4",
+        fields=[],
+    )
 
 
 @pytest.fixture
-def event_4():
-    return Event(name="ev4", date="2021-02-21", series="Run 4")
+def event_5() -> EventType:
+    return EventType(
+        id=5,
+        name="ev5",
+        date="2021-02-19",
+        key=None,
+        publish=False,
+        series="Run 5",
+        fields=[],
+    )
 
 
 @pytest.fixture
-def event_5():
-    return Event(name="ev5", date="2021-02-19", series="Run 5")
+def class_info_1() -> ClassInfoType:
+    return ClassInfoType(
+        id=1,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
 
 
-def test_use_only_events_in_series(event_1, event_2, event_3):
+@pytest.fixture
+def class_info_2() -> ClassInfoType:
+    return ClassInfoType(
+        id=2,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+
+@pytest.fixture
+def class_info_3() -> ClassInfoType:
+    return ClassInfoType(
+        id=3,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+
+@pytest.fixture
+def class_info_4() -> ClassInfoType:
+    return ClassInfoType(
+        id=1,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+
+@pytest.fixture
+def class_info_5() -> ClassInfoType:
+    return ClassInfoType(
+        id=5,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+
+def test_use_only_events_in_series(
+    event_1: EventType, event_2: EventType, event_3: EventType
+):
     events = [event_1, event_2, event_3]
     data = model.create_event_list(events=events)
     assert data == [event_3, event_1]
 
 
-def test_sort_events_by_date(event_1, event_3, event_5):
+def test_sort_events_by_date(
+    event_1: EventType, event_3: EventType, event_5: EventType
+):
     events = [event_1, event_3, event_5]
     data = model.create_event_list(events=events)
     assert data == [event_5, event_3, event_1]
 
-    events = [event_1, event_3, event_5]
+    events = [event_3, event_5, event_1]
     data = model.create_event_list(events=events)
     assert data == [event_5, event_3, event_1]
 
 
-def test_sort_events_by_name_if_dates_are_equal(event_3, event_4):
+def test_sort_events_by_name_if_dates_are_equal(event_3: EventType, event_4: EventType):
     events = [event_3, event_4]
     data = model.create_event_list(events=events)
     assert data == [event_3, event_4]
@@ -90,49 +203,75 @@ def test_sort_events_by_name_if_dates_are_equal(event_3, event_4):
     assert data == [event_3, event_4]
 
 
-def test_no_results():
-    class_a = Class_(name="Bahn A - Lang")
+def test_no_results(event_1: EventType, class_info_1: ClassInfoType):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_1.id,
+        competitor_id=2,
+        first_name="Claudia",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=event_1.id,
+        competitor_id=3,
+        first_name="Birgit",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                        },
-                        {
-                            "first_name": "Claudia",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                        },
-                        {
-                            "first_name": "Birgit",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                        },
+                        RankedEntryType(
+                            entry=entry_1,
+                        ),
+                        RankedEntryType(
+                            entry=entry_2,
+                        ),
+                        RankedEntryType(
+                            entry=entry_3,
+                        ),
                     ],
                 ),
             ]
         ],
     )
-    assert data == [(class_a.name, [])]
+    assert data == [(class_info_1.name, [])]
 
 
-def test_best_3_of_1_race():
-    class_a = Class_(name="Bahn A - Lang")
+def test_best_3_of_1_race(event_1: EventType, class_info_1: ClassInfoType):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(
             nr_of_best_results=3,
@@ -140,17 +279,12 @@ def test_best_3_of_1_race():
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.365,
-                        },
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
@@ -159,16 +293,16 @@ def test_best_3_of_1_race():
     print(data)
     assert data == [
         (
-            class_a.name,
+            class_info_1.name,
             [
                 {
                     "first_name": "Angela",
                     "last_name": "Merkel",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {0: Decimal("36.5")},
+                    "races": {0: Decimal("100")},
                     "organizer": {},
-                    "sum": Decimal("36.5"),
+                    "sum": Decimal("100"),
                     "rank": 1,
                 },
             ],
@@ -176,8 +310,38 @@ def test_best_3_of_1_race():
     ]
 
 
-def test_best_3_of_2_races():
-    class_a = Class_(name="Bahn A - Lang")
+def test_best_3_of_2_races(
+    event_1: EventType,
+    event_2: EventType,
+    class_info_1: ClassInfoType,
+    class_info_2: ClassInfoType,
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_2.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_2.id,
+        class_name=class_info_2.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(
             nr_of_best_results=3,
@@ -185,33 +349,23 @@ def test_best_3_of_2_races():
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.365,
-                        },
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
             [
                 (
-                    class_a,
+                    class_info_2,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.991,
-                        },
+                        RankedEntryType(
+                            entry=entry_2,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
@@ -220,16 +374,16 @@ def test_best_3_of_2_races():
     print(data)
     assert data == [
         (
-            class_a.name,
+            class_info_1.name,
             [
                 {
                     "first_name": "Angela",
                     "last_name": "Merkel",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {0: Decimal("36.5"), 1: Decimal("99.1")},
+                    "races": {0: Decimal("100"), 1: Decimal("100")},
                     "organizer": {},
-                    "sum": Decimal("135.6"),
+                    "sum": Decimal("200"),
                     "rank": 1,
                 },
             ],
@@ -237,8 +391,68 @@ def test_best_3_of_2_races():
     ]
 
 
-def test_best_3_of_4_races():
-    class_a = Class_(name="Bahn A - Lang")
+def test_best_3_of_4_races(
+    event_1: EventType,
+    event_2: EventType,
+    event_3: EventType,
+    event_4: EventType,
+    class_info_1: ClassInfoType,
+    class_info_2: ClassInfoType,
+    class_info_3: ClassInfoType,
+    class_info_4: ClassInfoType,
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_2.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_2.id,
+        class_name=class_info_2.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=event_3.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_3.id,
+        class_name=class_info_3.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_4 = EntryType(
+        id=4,
+        event_id=event_4.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_4.id,
+        class_name=class_info_4.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(
             nr_of_best_results=3,
@@ -246,65 +460,45 @@ def test_best_3_of_4_races():
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.365,
-                        },
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
             [
                 (
-                    class_a,
+                    class_info_2,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.991,
-                        },
+                        RankedEntryType(
+                            entry=entry_2,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
             [
                 (
-                    class_a,
+                    class_info_3,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.012,
-                        },
+                        RankedEntryType(
+                            entry=entry_3,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
             [
                 (
-                    class_a,
+                    class_info_4,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.2,
-                        },
+                        RankedEntryType(
+                            entry=entry_4,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
@@ -313,21 +507,21 @@ def test_best_3_of_4_races():
     print(data)
     assert data == [
         (
-            class_a.name,
+            class_info_1.name,
             [
                 {
                     "first_name": "Angela",
                     "last_name": "Merkel",
-                    "year": "",
+                    "year": None,
                     "club": None,
                     "races": {
-                        0: Decimal("36.5"),
-                        1: Decimal("99.1"),
-                        2: Decimal("1.2"),
-                        3: Decimal("20.0"),
+                        0: Decimal("100"),
+                        1: Decimal("100"),
+                        2: Decimal("100"),
+                        3: Decimal("100"),
                     },
                     "organizer": {},
-                    "sum": Decimal("155.6"),
+                    "sum": Decimal("300"),
                     "rank": 1,
                 },
             ],
@@ -335,49 +529,71 @@ def test_best_3_of_4_races():
     ]
 
 
-def test_bonus_1_race():
-    class_a = Class_(name="Bahn A - Lang")
+def test_bonus_1_race(
+    event_1: EventType,
+    event_2: EventType,
+    class_info_1: ClassInfoType,
+    class_info_2: ClassInfoType,
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_2.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=2,
+        class_name="Organizer",
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.365,
-                        },
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
             [
-                (class_a, []),
+                (class_info_2, []),
             ],
         ],
         organizers=[
             [],
-            [{"first_name": "Angela", "last_name": "Merkel"}],
+            [entry_2],
         ],
     )
     print(data)
     assert data == [
         (
-            class_a.name,
+            class_info_1.name,
             [
                 {
                     "first_name": "Angela",
                     "last_name": "Merkel",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {0: Decimal("36.5")},
-                    "organizer": {1: Decimal("18.25")},
-                    "sum": Decimal("54.75"),
+                    "races": {0: Decimal("100.00")},
+                    "organizer": {1: Decimal("50.00")},
+                    "sum": Decimal("150.00"),
                     "rank": 1,
                 },
             ],
@@ -385,66 +601,98 @@ def test_bonus_1_race():
     ]
 
 
-def test_bonus_2_races():
-    class_a = Class_(name="Bahn A - Lang")
+def test_bonus_2_races(
+    event_1: EventType,
+    event_2: EventType,
+    event_3: EventType,
+    class_info_1: ClassInfoType,
+    class_info_2: ClassInfoType,
+    class_info_3: ClassInfoType,
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_2.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=2,
+        class_name="Organizer",
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=event_3.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_3.id,
+        class_name=class_info_3.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.365,
-                        },
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
             [
-                (class_a, []),
+                (class_info_2, []),
             ],
             [
                 (
-                    class_a,
+                    class_info_3,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.991,
-                        },
+                        RankedEntryType(
+                            entry=entry_3,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
         ],
         organizers=[
             [],
-            [{"first_name": "Angela", "last_name": "Merkel"}],
+            [entry_2],
             [],
         ],
     )
     print(data)
     assert data == [
         (
-            class_a.name,
+            class_info_1.name,
             [
                 {
                     "first_name": "Angela",
                     "last_name": "Merkel",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {0: Decimal("36.5"), 2: Decimal("99.1")},
-                    "organizer": {1: Decimal("67.8")},
-                    "sum": Decimal("203.4"),
+                    "races": {0: Decimal("100.0"), 2: Decimal("100")},
+                    "organizer": {1: Decimal("100")},
+                    "sum": Decimal("300"),
                     "rank": 1,
                 },
             ],
@@ -452,8 +700,80 @@ def test_bonus_2_races():
     ]
 
 
-def test_bonus_4_races():
-    class_a = Class_(name="Bahn A - Lang")
+def test_bonus_4_races(
+    event_1: EventType,
+    event_2: EventType,
+    event_3: EventType,
+    event_4: EventType,
+    event_5: EventType,
+    class_info_1: ClassInfoType,
+    class_info_2: ClassInfoType,
+    class_info_3: ClassInfoType,
+    class_info_4: ClassInfoType,
+    class_info_5: ClassInfoType,
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=1,
+        event_id=event_2.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_2.id,
+        class_name=class_info_2.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_3 = EntryType(
+        id=1,
+        event_id=event_3.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=3,
+        class_name="Organizer",
+    )
+
+    entry_4 = EntryType(
+        id=4,
+        event_id=event_4.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_4.id,
+        class_name=class_info_4.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_5 = EntryType(
+        id=5,
+        event_id=event_5.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_5.id,
+        class_name=class_info_5.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(
             nr_of_best_results=3,
@@ -461,68 +781,48 @@ def test_bonus_4_races():
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "year": "",
-                            "gender": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.365,
-                        },
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
             [
                 (
-                    class_a,
+                    class_info_2,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.991,
-                        },
+                        RankedEntryType(
+                            entry=entry_2,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
             [
-                (class_a, []),
+                (class_info_3, []),
             ],
             [
                 (
-                    class_a,
+                    class_info_4,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.012,
-                        },
+                        RankedEntryType(
+                            entry=entry_4,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
             [
                 (
-                    class_a,
+                    class_info_5,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.2,
-                        },
+                        RankedEntryType(
+                            entry=entry_5,
+                            rank=1,
+                        ),
                     ],
                 ),
             ],
@@ -530,7 +830,7 @@ def test_bonus_4_races():
         organizers=[
             [],
             [],
-            [{"first_name": "Angela", "last_name": "Merkel"}],
+            [entry_3],
             [],
             [],
         ],
@@ -538,21 +838,21 @@ def test_bonus_4_races():
     print(data)
     assert data == [
         (
-            class_a.name,
+            class_info_1.name,
             [
                 {
                     "first_name": "Angela",
                     "last_name": "Merkel",
-                    "year": "",
+                    "year": None,
                     "club": None,
                     "races": {
-                        0: Decimal("36.5"),
-                        1: Decimal("99.1"),
-                        3: Decimal("1.2"),
-                        4: Decimal("20.0"),
+                        0: Decimal("100"),
+                        1: Decimal("100"),
+                        3: Decimal("100"),
+                        4: Decimal("100"),
                     },
-                    "organizer": {2: Decimal("67.8")},
-                    "sum": Decimal("203.4"),
+                    "organizer": {2: Decimal("100")},
+                    "sum": Decimal("300"),
                     "rank": 1,
                 },
             ],
@@ -560,33 +860,48 @@ def test_bonus_4_races():
     ]
 
 
-def test_ranking_1():
-    class_a = Class_(name="Bahn A - Lang")
+def test_ranking_1(event_1: EventType, class_info_1: ClassInfoType):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_1.id,
+        competitor_id=2,
+        first_name="Gerd",
+        last_name="Müller",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=400,
+        ),
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.365,
-                        },
-                        {
-                            "first_name": "Gerd",
-                            "last_name": "Müller",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.991,
-                        },
+                        RankedEntryType(
+                            entry=entry_2,
+                            rank=1,
+                        ),
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=2,
+                        ),
                     ],
                 ),
             ],
@@ -595,26 +910,26 @@ def test_ranking_1():
     print(data)
     assert data == [
         (
-            class_a.name,
+            class_info_1.name,
             [
                 {
                     "first_name": "Gerd",
                     "last_name": "Müller",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {0: Decimal("99.1")},
+                    "races": {0: Decimal("100")},
                     "organizer": {},
-                    "sum": Decimal("99.1"),
+                    "sum": Decimal("100"),
                     "rank": 1,
                 },
                 {
                     "first_name": "Angela",
                     "last_name": "Merkel",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {0: Decimal("36.5")},
+                    "races": {0: Decimal("66.67")},
                     "organizer": {},
-                    "sum": Decimal("36.5"),
+                    "sum": Decimal("66.67"),
                     "rank": 2,
                 },
             ],
@@ -622,40 +937,77 @@ def test_ranking_1():
     ]
 
 
-def test_ranking_2():
-    class_a = Class_(name="Bahn A - Lang")
+def test_ranking_2(
+    event_1: EventType,
+    event_2: EventType,
+    class_info_1: ClassInfoType,
+    class_info_2: ClassInfoType,
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_2.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_2.id,
+        class_name=class_info_2.name,
+        result=PersonRaceResult(
+            time=600,
+        ),
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=event_2.id,
+        competitor_id=1,
+        first_name="Gerd",
+        last_name="Müller",
+        class_id=class_info_2.id,
+        class_name=class_info_2.name,
+        result=PersonRaceResult(
+            time=300,
+        ),
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.995,
-                        },
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=1,
+                        ),
                     ],
                 )
             ],
             [
                 (
-                    class_a,
+                    class_info_2,
                     [
-                        {
-                            "first_name": "Gerd",
-                            "last_name": "Müller",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.091,
-                        },
+                        RankedEntryType(
+                            entry=entry_3,
+                            rank=1,
+                        ),
+                        RankedEntryType(
+                            entry=entry_2,
+                            rank=2,
+                        ),
                     ],
                 ),
             ],
@@ -664,26 +1016,26 @@ def test_ranking_2():
     print(data)
     assert data == [
         (
-            class_a.name,
+            class_info_1.name,
             [
                 {
                     "first_name": "Angela",
                     "last_name": "Merkel",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {0: Decimal("99.5")},
+                    "races": {0: Decimal("100"), 1: Decimal("50")},
                     "organizer": {},
-                    "sum": Decimal("99.5"),
+                    "sum": Decimal("150"),
                     "rank": 1,
                 },
                 {
                     "first_name": "Gerd",
                     "last_name": "Müller",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {1: Decimal("9.1")},
+                    "races": {1: Decimal("100")},
                     "organizer": {},
-                    "sum": Decimal("9.1"),
+                    "sum": Decimal("100"),
                     "rank": 2,
                 },
             ],
@@ -691,49 +1043,94 @@ def test_ranking_2():
     ]
 
 
-def test_ranking_3():
-    class_a = Class_(name="Bahn A - Lang")
+def test_ranking_3(
+    event_1: EventType,
+    event_2: EventType,
+    class_info_1: ClassInfoType,
+    class_info_2: ClassInfoType,
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=320,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_1.id,
+        competitor_id=2,
+        first_name="Gerd",
+        last_name="Müller",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=640,
+        ),
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=event_2.id,
+        competitor_id=2,
+        first_name="Gerd",
+        last_name="Müller",
+        class_id=class_info_2.id,
+        class_name=class_info_2.name,
+        result=PersonRaceResult(
+            time=375,
+        ),
+    )
+
+    entry_4 = EntryType(
+        id=4,
+        event_id=event_2.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_2.id,
+        class_name=class_info_2.name,
+        result=PersonRaceResult(
+            time=750,
+        ),
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.65,
-                        },
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=1,
+                        ),
+                        RankedEntryType(
+                            entry=entry_2,
+                            rank=2,
+                        ),
                     ],
                 )
             ],
             [
                 (
-                    class_a,
+                    class_info_2,
                     [
-                        {
-                            "first_name": "Gerd",
-                            "last_name": "Müller",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.95,
-                        },
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.3,
-                        },
+                        RankedEntryType(
+                            entry=entry_3,
+                            rank=1,
+                        ),
+                        RankedEntryType(
+                            entry=entry_4,
+                            rank=2,
+                        ),
                     ],
                 ),
             ],
@@ -742,26 +1139,26 @@ def test_ranking_3():
     print(data)
     assert data == [
         (
-            class_a.name,
+            class_info_1.name,
             [
                 {
                     "first_name": "Angela",
                     "last_name": "Merkel",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {0: Decimal("65.0"), 1: Decimal("30.0")},
+                    "races": {0: Decimal("100"), 1: Decimal("50")},
                     "organizer": {},
-                    "sum": Decimal("95.0"),
+                    "sum": Decimal("150"),
                     "rank": 1,
                 },
                 {
                     "first_name": "Gerd",
                     "last_name": "Müller",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {1: Decimal("95.0")},
+                    "races": {0: Decimal("50"), 1: Decimal("100")},
                     "organizer": {},
-                    "sum": Decimal("95.0"),
+                    "sum": Decimal("150"),
                     "rank": 1,
                 },
             ],
@@ -769,49 +1166,78 @@ def test_ranking_3():
     ]
 
 
-def test_if_sum_is_0_then_rank_is_None():
-    class_a = Class_(name="Bahn A - Lang")
+def test_if_sum_is_0_then_rank_is_none(
+    event_1: EventType,
+    event_2: EventType,
+    class_info_1: ClassInfoType,
+    class_info_2: ClassInfoType,
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=300,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_2.id,
+        competitor_id=2,
+        first_name="Gerd",
+        last_name="Müller",
+        class_id=class_info_2.id,
+        class_name=class_info_2.name,
+        result=PersonRaceResult(
+            status=ResultStatus.MISSING_PUNCH,
+            time=280,
+        ),
+    )
+
+    entry_3 = EntryType(
+        id=3,
+        event_id=event_2.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_2.id,
+        class_name=class_info_2.name,
+        result=PersonRaceResult(
+            time=300,
+        ),
+    )
+
     data = build_results.build_total_results(
         settings=series_type.Settings(),
         list_of_results=[
             [
                 (
-                    class_a,
+                    class_info_1,
                     [
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.65,
-                        },
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=1,
+                        ),
                     ],
                 )
             ],
             [
                 (
-                    class_a,
+                    class_info_2,
                     [
-                        {
-                            "first_name": "Gerd",
-                            "last_name": "Müller",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0,
-                        },
-                        {
-                            "first_name": "Angela",
-                            "last_name": "Merkel",
-                            "gender": "",
-                            "year": "",
-                            "class_": "Bahn A - Lang",
-                            "result": result_type.PersonRaceResult(),
-                            "points": 0.3,
-                        },
+                        RankedEntryType(
+                            entry=entry_3,
+                            rank=1,
+                        ),
+                        RankedEntryType(
+                            entry=entry_2,
+                            rank=None,
+                        ),
                     ],
                 ),
             ],
@@ -820,26 +1246,322 @@ def test_if_sum_is_0_then_rank_is_None():
     print(data)
     assert data == [
         (
-            class_a.name,
+            class_info_1.name,
             [
                 {
                     "first_name": "Angela",
                     "last_name": "Merkel",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {0: Decimal("65.0"), 1: Decimal("30.0")},
+                    "races": {0: Decimal("100"), 1: Decimal("100")},
                     "organizer": {},
-                    "sum": Decimal("95.0"),
+                    "sum": Decimal("200"),
                     "rank": 1,
                 },
                 {
                     "first_name": "Gerd",
                     "last_name": "Müller",
-                    "year": "",
+                    "year": None,
                     "club": None,
-                    "races": {1: Decimal("0.0")},
+                    "races": {1: Decimal("0")},
                     "organizer": {},
-                    "sum": Decimal("0.0"),
+                    "sum": Decimal("0"),
+                    "rank": None,
+                },
+            ],
+        ),
+    ]
+
+
+def test_compute_points_for_max_points_100_and_decimals_2(
+    event_1: EventType, class_info_1: ClassInfoType
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=300,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_1.id,
+        competitor_id=2,
+        first_name="Gerd",
+        last_name="Müller",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=260,
+        ),
+    )
+
+    data = build_results.build_total_results(
+        settings=series_type.Settings(
+            maximum_points=100,
+            decimal_places=2,
+        ),
+        list_of_results=[
+            [
+                (
+                    class_info_1,
+                    [
+                        RankedEntryType(
+                            entry=entry_2,
+                            rank=1,
+                        ),
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=2,
+                        ),
+                    ],
+                )
+            ],
+        ],
+    )
+    print(data)
+    assert data == [
+        (
+            class_info_1.name,
+            [
+                {
+                    "first_name": "Gerd",
+                    "last_name": "Müller",
+                    "year": None,
+                    "club": None,
+                    "races": {0: Decimal("100")},
+                    "organizer": {},
+                    "sum": Decimal("100"),
+                    "rank": 1,
+                },
+                {
+                    "first_name": "Angela",
+                    "last_name": "Merkel",
+                    "year": None,
+                    "club": None,
+                    "races": {
+                        0: Decimal("86.67"),
+                    },
+                    "organizer": {},
+                    "sum": Decimal("86.67"),
+                    "rank": 2,
+                },
+            ],
+        ),
+    ]
+
+
+def test_compute_points_for_max_points_85_and_decimals_3(
+    event_1: EventType, class_info_1: ClassInfoType
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=300,
+        ),
+    )
+
+    entry_2 = EntryType(
+        id=2,
+        event_id=event_1.id,
+        competitor_id=2,
+        first_name="Gerd",
+        last_name="Müller",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=260,
+        ),
+    )
+
+    data = build_results.build_total_results(
+        settings=series_type.Settings(
+            maximum_points=85,
+            decimal_places=3,
+        ),
+        list_of_results=[
+            [
+                (
+                    class_info_1,
+                    [
+                        RankedEntryType(
+                            entry=entry_2,
+                            rank=1,
+                        ),
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=2,
+                        ),
+                    ],
+                )
+            ],
+        ],
+    )
+    print(data)
+    assert data == [
+        (
+            class_info_1.name,
+            [
+                {
+                    "first_name": "Gerd",
+                    "last_name": "Müller",
+                    "year": None,
+                    "club": None,
+                    "races": {0: Decimal("85")},
+                    "organizer": {},
+                    "sum": Decimal("85"),
+                    "rank": 1,
+                },
+                {
+                    "first_name": "Angela",
+                    "last_name": "Merkel",
+                    "year": None,
+                    "club": None,
+                    "races": {
+                        0: Decimal("73.667"),
+                    },
+                    "organizer": {},
+                    "sum": Decimal("73.667"),
+                    "rank": 2,
+                },
+            ],
+        ),
+    ]
+
+
+@pytest.mark.parametrize(
+    "status, not_competing",
+    [
+        (ResultStatus.INACTIVE, False),
+        (ResultStatus.INACTIVE, True),
+        (ResultStatus.FINISHED, False),
+        (ResultStatus.FINISHED, True),
+        (ResultStatus.DID_NOT_START, False),
+        (ResultStatus.DID_NOT_START, True),
+    ],
+)
+def test_points_are_none_for_not_started_entries(
+    event_1: EventType,
+    class_info_1: ClassInfoType,
+    status: ResultStatus,
+    not_competing: bool,
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        result=PersonRaceResult(
+            time=300,
+        ),
+    )
+
+    data = build_results.build_total_results(
+        settings=series_type.Settings(),
+        list_of_results=[
+            [
+                (
+                    class_info_1,
+                    [
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=None,
+                        ),
+                    ],
+                )
+            ],
+        ],
+    )
+    print(data)
+    assert data == [
+        (
+            class_info_1.name,
+            [],
+        ),
+    ]
+
+
+@pytest.mark.parametrize(
+    "status, not_competing",
+    [
+        (ResultStatus.OK, True),
+        (ResultStatus.MISSING_PUNCH, False),
+        (ResultStatus.MISSING_PUNCH, True),
+        (ResultStatus.DID_NOT_FINISH, False),
+        (ResultStatus.DID_NOT_FINISH, True),
+        (ResultStatus.OVER_TIME, False),
+        (ResultStatus.OVER_TIME, True),
+        (ResultStatus.DISQUALIFIED, False),
+        (ResultStatus.DISQUALIFIED, True),
+    ],
+)
+def test_points_are_0_for_not_classified_entries(
+    event_1: EventType,
+    class_info_1: ClassInfoType,
+    status: ResultStatus,
+    not_competing: bool,
+):
+    entry_1 = EntryType(
+        id=1,
+        event_id=event_1.id,
+        competitor_id=1,
+        first_name="Angela",
+        last_name="Merkel",
+        class_id=class_info_1.id,
+        class_name=class_info_1.name,
+        not_competing=True,
+        result=PersonRaceResult(
+            status=status,
+            time=300,
+        ),
+    )
+
+    data = build_results.build_total_results(
+        settings=series_type.Settings(),
+        list_of_results=[
+            [
+                (
+                    class_info_1,
+                    [
+                        RankedEntryType(
+                            entry=entry_1,
+                            rank=None,
+                        ),
+                    ],
+                )
+            ],
+        ],
+    )
+    print(data)
+    assert data == [
+        (
+            class_info_1.name,
+            [
+                {
+                    "first_name": "Angela",
+                    "last_name": "Merkel",
+                    "year": None,
+                    "club": None,
+                    "races": {
+                        0: Decimal("0"),
+                    },
+                    "organizer": {},
+                    "sum": Decimal("0"),
                     "rank": None,
                 },
             ],

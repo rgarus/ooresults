@@ -25,6 +25,7 @@ import clevercsv as csv
 from unidecode import unidecode
 
 from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.entry_type import EntryType
 from ooresults.repo.result_type import ResultStatus
 
 
@@ -36,7 +37,7 @@ def cp1252(value: str) -> str:
         return unidecode(value)
 
 
-def create(entries: List[Dict], class_list: List[ClassInfoType]) -> bytes:
+def create(entries: List[EntryType], class_list: List[ClassInfoType]) -> bytes:
     output = io.StringIO()
     writer = csv.writer(output, delimiter=";", quoting=csv.QUOTE_MINIMAL)
 
@@ -124,7 +125,7 @@ def create(entries: List[Dict], class_list: List[ClassInfoType]) -> bytes:
         class_name = ""
         class_short_name = ""
         for j, c in enumerate(class_list):
-            if c.id == e.get("class_id", None):
+            if c.id == e.class_id:
                 class_no = str(j + 1)
                 class_name = c.name
                 if c.short_name:
@@ -134,17 +135,15 @@ def create(entries: List[Dict], class_list: List[ClassInfoType]) -> bytes:
                 break
 
         # export only items with defined name
-        if e.get("last_name", None) is not None:
-            chip = e.get("chip", "")
-            last_name = e.get("last_name", "")
-            first_name = e.get("first_name", "")
+        if e.last_name:
+            chip = e.chip if e.chip is not None else ""
+            last_name = e.last_name
+            first_name = e.first_name
 
-            year = ""
-            if e.get("year", None) is not None:
-                year = str(e.get("year", None))
+            year = str(e.year) if e.year is not None else ""
 
-            gender = {"": "", "F": "F", "M": "M"}[e.get("gender", "")]
-            not_competing = "X" if e.get("not_competing", False) else "0"
+            gender = {None: "", "": "", "F": "F", "M": "M"}[e.gender]
+            not_competing = "X" if e.not_competing else "0"
 
             start_time = ""
             if e.result.start_time is not None:
@@ -165,12 +164,12 @@ def create(entries: List[Dict], class_list: List[ClassInfoType]) -> bytes:
             status = STATUS_MAP.get(e.result.status, "")
 
             club_id = ""
-            if e.get("club_id", None) is not None:
-                club_id = str(e.get("club_id", None))
+            if e.club_id is not None:
+                club_id = str(e.club_id)
 
             club_name = ""
-            if e.get("club_id", None) is not None:
-                club_name = e.get("club", "")
+            if e.club_id is not None:
+                club_name = e.club_name
 
             writer.writerow(
                 [

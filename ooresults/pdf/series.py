@@ -53,9 +53,10 @@ def create_pdf(
     pdf.add_page()
 
     def cell(w: int, h: Optional[int] = None, txt: str = "", align: str = "L") -> None:
-        while pdf.get_string_width(txt) > w:
-            txt = txt[:-1]
-        pdf.cell(w=w, h=h, txt=txt, align=align)
+        if w > 0:
+            while pdf.get_string_width(txt) > w:
+                txt = txt[:-1]
+            pdf.cell(w=w, h=h, txt=txt, align=align)
 
     def format_points(points: float) -> str:
         if points is not None:

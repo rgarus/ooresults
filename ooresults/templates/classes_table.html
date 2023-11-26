@@ -63,7 +63,7 @@ $def format_voided_legs(legs):
             <tr class="dt" id="$class_.id">
                 <td class="dt">$class_.name</td>
                 <td class="dt">$(class_.short_name if class_.short_name is not None else '')</td>
-                <td class="dt">$(class_.course if class_.course is not None else '')</td>
+                <td class="dt">$(class_.course_name if class_.course_name is not None else '')</td>
                 <td class="dt">$format_voided_legs(class_.params.voided_legs)</td>
                 <td class="dt">$({'standard': 'Standard', 'net': 'Net', 'score': 'Score'}.get(class_.params.otype, ''))</td>
                 <td class="dt">$({'if_punched': 'If punched', 'no': 'No', 'yes': 'Yes'}.get(class_.params.using_start_control, ''))</td>

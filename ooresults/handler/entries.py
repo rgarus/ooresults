@@ -26,7 +26,6 @@ from typing import Optional
 
 import tzlocal
 import web
-from web.utils import Storage
 
 from ooresults.handler import model
 from ooresults.plugins.imports.entries import text
@@ -34,8 +33,6 @@ from ooresults.plugins import oe12
 from ooresults.plugins import oe2003
 from ooresults.plugins import iof_entry_list
 from ooresults.plugins import iof_result_list
-from ooresults.repo import result_type
-from ooresults.repo import start_type
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import ConstraintError
@@ -133,8 +130,8 @@ class Export:
         event_id = int(data.event_id) if data.event_id != "" else -1
         try:
             if data.entr_export == "entr.export.1":
-                event = model.get_event(id=event_id)
                 entry_list = model.get_entries(event_id=event_id)
+                event = model.get_event(id=event_id)
                 content = iof_entry_list.create_entry_list(event, entry_list)
             elif data.entr_export == "entr.export.2":
                 event, class_results = model.event_class_results(event_id=event_id)
@@ -200,16 +197,14 @@ class Add:
                 last_name=data.last_name,
                 gender=data.gender,
                 year=int(data.year) if data.year != "" else None,
-                class_id=int(data.class_),
-                club_id=int(data.club) if data.club != "" else None,
+                class_id=int(data.class_id),
+                club_id=int(data.club_id) if data.club_id != "" else None,
                 not_competing="not_competing" in data and data.not_competing == "true",
                 chip=data.chip,
                 fields=fields,
                 status=ResultStatus(int(data.status)),
                 start_time=entered_start_time,
-                result_id=int(data.get("result", ""))
-                if data.get("result", "") != ""
-                else None,
+                result_id=int(data.result) if data.get("result", "") else None,
             )
 
         except EventNotFoundError:
@@ -257,27 +252,9 @@ class FillEditForm:
 
             results = []
             if data.id == "":
-                entry = Storage(
-                    {
-                        "id": "",
-                        "competitor_id": "",
-                        "first_name": "",
-                        "last_name": "",
-                        "class_id": "",
-                        "class_name": "",
-                        "club_id": "",
-                        "club_name": "",
-                        "gender": "",
-                        "year": None,
-                        "not_competing": False,
-                        "chip": "",
-                        "fields": {},
-                        "result": result_type.PersonRaceResult(),
-                        "start": start_type.PersonRaceStart(),
-                    }
-                )
+                entry = None
             else:
-                entry = model.get_entry(int(data.id))[0]
+                entry = model.get_entry(int(data.id))
                 if entry.result is not None and entry.result.has_punches():
                     results += [{"key": -1, "value": "Remove result"}]
 
@@ -312,7 +289,7 @@ class FillResultForm:
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
         try:
-            entry = model.get_entry(int(data.id))[0]
+            entry = model.get_entry(int(data.id))
         except EventNotFoundError:
             raise web.conflict("Event deleted")
         except KeyError:

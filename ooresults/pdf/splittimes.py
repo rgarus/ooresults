@@ -22,8 +22,10 @@ from typing import Dict
 from typing import List
 from typing import Tuple
 from typing import Optional
+from typing import Union
 
 from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
@@ -33,7 +35,7 @@ from ooresults.utils import globals
 
 def create_pdf(
     event: EventType,
-    results: List[Tuple[ClassInfoType, List[Dict]]],
+    results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
     landscape: bool = False,
 ) -> bytes:
     # Instantiation of inherited class
@@ -70,16 +72,24 @@ def create_pdf(
         cell(pdf=pdf, w=12, h=None, txt=t3, align="R")
         pdf.set_font(style="")
 
-    def t(a: Optional[datetime], b: Optional[datetime]) -> Optional[int]:
-        if a is not None and b is not None:
-            diff = b.replace(microsecond=0) - a.replace(microsecond=0)
-            return int(diff.total_seconds())
-        else:
-            return None
-
     for i, class_results in enumerate(results):
         class_, ranked_results = class_results
         standard = class_.params.otype == "standard"
+
+        # filter results - use only started entries
+        ranked_results = [
+            r
+            for r in ranked_results
+            if r.entry.result.status
+            not in (
+                ResultStatus.INACTIVE,
+                ResultStatus.DID_NOT_START,
+            )
+        ]
+
+        # do not print classes without entries
+        if not ranked_results:
+            continue
 
         if i > 0:
             # insert a page break if there is not enough space left on the
@@ -94,8 +104,8 @@ def create_pdf(
         pdf.cell(txt=class_.name)
 
         # print possible voided legs
-        if ranked_results and ranked_results[0]["result"] is not None:
-            voided_legs = ranked_results[0]["result"].voided_legs()
+        if ranked_results and ranked_results[0].entry.result is not None:
+            voided_legs = ranked_results[0].entry.result.voided_legs()
             if voided_legs:
                 pdf.cell(txt=f'(Voided legs: {", ".join(voided_legs)})')
 
@@ -114,7 +124,7 @@ def create_pdf(
         for i, j in enumerate(
             [
                 t
-                for t in ranked_results[0]["result"].split_times
+                for t in ranked_results[0].entry.result.split_times
                 if t.status != "Additional"
             ]
         ):
@@ -134,23 +144,37 @@ def create_pdf(
         pdf.ln()
 
         ranked = False
-        for result in ranked_results:
+        for ranked_result in ranked_results:
+            entry = ranked_result.entry
+            result = entry.result
 
             def get(d: Dict, key: str) -> str:
                 s = d.get(key, "")
                 return s if s is not None else ""
 
+            def f(value: Union[Optional[int] | Optional[str]]) -> str:
+                return str(value) if value is not None else ""
+
             class Result:
                 def __init__(self, result: PersonRaceResult):
                     self.result = result
+
+                def t(
+                    self, a: Optional[datetime], b: Optional[datetime]
+                ) -> Optional[int]:
+                    if a is not None and b is not None:
+                        diff = b.replace(microsecond=0) - a.replace(microsecond=0)
+                        return int(diff.total_seconds())
+                    else:
+                        return None
 
                 def next(self) -> str:
                     if (
                         self.result.start_time is not None
                         and self.result.finish_time is not None
                     ):
-                        running_time = t(
-                            self.result.start_time, self.result.finish_time
+                        running_time = self.t(
+                            a=self.result.start_time, b=self.result.finish_time
                         )
                     else:
                         running_time = self.result.extensions.get(
@@ -198,87 +222,81 @@ def create_pdf(
                         else:
                             yield f"*({i.control_code})", format_splittime(i.time), ""
 
-            if result["result"].status not in (
-                ResultStatus.INACTIVE,
-                ResultStatus.DID_NOT_START,
-            ):
-                with pdf.unbreakable() as doc:
-                    doc.set_font(family="Carlito", size=8)
-                    if result["rank"] is not None:
-                        ranked = True
-                    elif ranked:
-                        ranked = False
-                        doc.ln()
+            with pdf.unbreakable() as doc:
+                doc.set_font(family="Carlito", size=8)
+                if ranked_result.rank is not None:
+                    ranked = True
+                elif ranked:
+                    ranked = False
+                    doc.ln()
 
-                    sp = 0
-                    result_data = Result(result=result["result"])
+                sp = 0
+                result_data = Result(result=result)
 
-                    def print_line_1(sp: int, line_1: List[str]) -> None:
-                        if sp <= nr_splittimes:
-                            running_time = result["result"].extensions.get(
-                                "running_time", result["result"].time
-                            )
+                def print_line_1(sp: int, line_1: List[str]) -> None:
+                    if sp <= nr_splittimes:
+                        running_time = result.extensions.get(
+                            "running_time", result.time
+                        )
 
-                            pre(
-                                pdf=doc,
-                                t1=str(get(result, "rank"))
-                                if not get(result, "not_competing")
-                                else "AK",
-                                t2=get(result, "last_name")
-                                + " "
-                                + get(result, "first_name"),
-                                t3=format_time(running_time, result["result"].status),
-                            )
-                        else:
-                            doc.ln()
-                            pre(pdf=doc)
-
-                        for i in line_1:
-                            cell(pdf=doc, w=10, h=None, txt=i, align="R")
-
-                    def print_line_2(sp: int, line_2: List[str]) -> None:
-                        if sp <= nr_splittimes:
-                            doc.ln()
-                            # first line: rank, lastname+firstname, time, splittimes
-                            pre(pdf=doc, t2=get(result, "club"))
-                        else:
-                            doc.ln()
-                            pre(pdf=doc)
-
-                        for i in line_2:
-                            cell(pdf=doc, w=10, h=None, txt=i, align="R")
-
-                    def print_line_3(sp: int, line_3: List[str]) -> None:
+                        pre(
+                            pdf=doc,
+                            t1=f(ranked_result.rank)
+                            if not entry.not_competing
+                            else "AK",
+                            t2=f(entry.last_name) + " " + f(entry.first_name),
+                            t3=format_time(running_time, result.status),
+                        )
+                    else:
                         doc.ln()
                         pre(pdf=doc)
 
-                        for i in line_3:
-                            cell(pdf=doc, w=10, h=None, txt=i, align="R")
+                    for i in line_1:
+                        cell(pdf=doc, w=10, h=None, txt=i, align="R")
 
-                    line_1 = []
-                    line_2 = []
-                    line_3 = []
-                    for i, j, k in result_data.next():
-                        line_1.append(i)
-                        line_2.append(j)
-                        line_3.append(k)
-                        sp += 1
-                        if sp % nr_splittimes == 0:
-                            print_line_1(sp=sp, line_1=line_1)
-                            print_line_2(sp=sp, line_2=line_2)
-                            if not standard:
-                                print_line_3(sp=sp, line_3=line_3)
-                            line_1 = []
-                            line_2 = []
-                            line_3 = []
-                    if line_1 != []:
+                def print_line_2(sp: int, line_2: List[str]) -> None:
+                    if sp <= nr_splittimes:
+                        doc.ln()
+                        # first line: rank, lastname+firstname, time, splittimes
+                        pre(pdf=doc, t2=f(entry.club_name))
+                    else:
+                        doc.ln()
+                        pre(pdf=doc)
+
+                    for i in line_2:
+                        cell(pdf=doc, w=10, h=None, txt=i, align="R")
+
+                def print_line_3(sp: int, line_3: List[str]) -> None:
+                    doc.ln()
+                    pre(pdf=doc)
+
+                    for i in line_3:
+                        cell(pdf=doc, w=10, h=None, txt=i, align="R")
+
+                line_1 = []
+                line_2 = []
+                line_3 = []
+                for i, j, k in result_data.next():
+                    line_1.append(i)
+                    line_2.append(j)
+                    line_3.append(k)
+                    sp += 1
+                    if sp % nr_splittimes == 0:
                         print_line_1(sp=sp, line_1=line_1)
                         print_line_2(sp=sp, line_2=line_2)
                         if not standard:
                             print_line_3(sp=sp, line_3=line_3)
-                    doc.ln()
+                        line_1 = []
+                        line_2 = []
+                        line_3 = []
+                if line_1 != []:
+                    print_line_1(sp=sp, line_1=line_1)
+                    print_line_2(sp=sp, line_2=line_2)
+                    if not standard:
+                        print_line_3(sp=sp, line_3=line_3)
+                doc.ln()
 
-                # add a separator line (1/2 height of a line)
-                pdf.ln(0.5 * 0.3515 * 8)
+            # add a separator line (1/2 height of a line)
+            pdf.ln(0.5 * 0.3515 * 8)
 
     return bytes(pdf.output())

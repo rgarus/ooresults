@@ -19,10 +19,10 @@
 
 import datetime
 
-from tests.entry import Entry
 from ooresults.plugins import oe12
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.entry_type import EntryType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 
@@ -95,7 +95,17 @@ encoding = "windows-1252"
 
 def test_separator_semicolon():
     content = oe12.create(
-        entries=[Entry(first_name="v", last_name="n", chip="c")], class_list=[]
+        entries=[
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="v",
+                last_name="n",
+                chip="c",
+            ),
+        ],
+        class_list=[],
     )
     v1 = ";;1;;c;;;n;v;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
 
@@ -104,7 +114,17 @@ def test_separator_semicolon():
 
 def test_quote_within_quotes():
     content = oe12.create(
-        entries=[Entry(first_name="v", last_name='n1"2', chip="c")], class_list=[]
+        entries=[
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="v",
+                last_name='n1"2',
+                chip="c",
+            ),
+        ],
+        class_list=[],
     )
     v1 = ';;1;;c;;;"n1""2";v;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
 
@@ -113,7 +133,17 @@ def test_quote_within_quotes():
 
 def test_separator_within_quotes():
     content = oe12.create(
-        entries=[Entry(first_name="v", last_name="n1;2", chip="c")], class_list=[]
+        entries=[
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="v",
+                last_name="n1;2",
+                chip="c",
+            ),
+        ],
+        class_list=[],
     )
     v1 = ';;1;;c;;;"n1;2";v;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
 
@@ -122,7 +152,17 @@ def test_separator_within_quotes():
 
 def test_newline_within_quotes():
     content = oe12.create(
-        entries=[Entry(first_name="v", last_name="n1\n2", chip="c")], class_list=[]
+        entries=[
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="v",
+                last_name="n1\n2",
+                chip="c",
+            ),
+        ],
+        class_list=[],
     )
     v1 = ';;1;;c;;;"n1\n2";v;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
 
@@ -131,7 +171,17 @@ def test_newline_within_quotes():
 
 def test_special_characters():
     content = oe12.create(
-        entries=[Entry(first_name="v", last_name="ÄÖÜßäüö", chip="c")], class_list=[]
+        entries=[
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="v",
+                last_name="ÄÖÜßäüö",
+                chip="c",
+            ),
+        ],
+        class_list=[],
     )
     v1 = ";;1;;c;;;ÄÖÜßäüö;v;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
 
@@ -141,9 +191,30 @@ def test_special_characters():
 def test_multiline():
     content = oe12.create(
         entries=[
-            Entry(first_name="v1", last_name="n1", chip="c1"),
-            Entry(first_name="v2", last_name="n2", chip="c2"),
-            Entry(first_name="v3", last_name="n3", chip="c3"),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="v1",
+                last_name="n1",
+                chip="c1",
+            ),
+            EntryType(
+                id=2,
+                event_id=1,
+                competitor_id=2,
+                first_name="v2",
+                last_name="n2",
+                chip="c2",
+            ),
+            EntryType(
+                id=3,
+                event_id=1,
+                competitor_id=3,
+                first_name="v3",
+                last_name="n3",
+                chip="c3",
+            ),
         ],
         class_list=[],
     )
@@ -159,9 +230,30 @@ def test_multiline():
 def test_year():
     content = oe12.create(
         entries=[
-            Entry(first_name="a", last_name="b", year=2006),
-            Entry(first_name="c", last_name="d", year=2000),
-            Entry(first_name="e", last_name="f", year=1941),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="a",
+                last_name="b",
+                year=2006,
+            ),
+            EntryType(
+                id=2,
+                event_id=1,
+                competitor_id=2,
+                first_name="c",
+                last_name="d",
+                year=2000,
+            ),
+            EntryType(
+                id=3,
+                event_id=1,
+                competitor_id=3,
+                first_name="e",
+                last_name="f",
+                year=1941,
+            ),
         ],
         class_list=[],
     )
@@ -180,8 +272,22 @@ def test_year():
 def test_gender():
     content = oe12.create(
         entries=[
-            Entry(first_name="a", last_name="b", gender="F"),
-            Entry(first_name="c", last_name="d", gender="M"),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="a",
+                last_name="b",
+                gender="F",
+            ),
+            EntryType(
+                id=2,
+                event_id=1,
+                competitor_id=2,
+                first_name="c",
+                last_name="d",
+                gender="M",
+            ),
         ],
         class_list=[],
     )
@@ -198,8 +304,22 @@ def test_gender():
 def test_not_competing():
     content = oe12.create(
         entries=[
-            Entry(first_name="a", last_name="b", not_competing=False),
-            Entry(first_name="c", last_name="d", not_competing=True),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="a",
+                last_name="b",
+                not_competing=False,
+            ),
+            EntryType(
+                id=2,
+                event_id=1,
+                competitor_id=2,
+                first_name="c",
+                last_name="d",
+                not_competing=True,
+            ),
         ],
         class_list=[],
     )
@@ -216,8 +336,24 @@ def test_not_competing():
 def test_club():
     content = oe12.create(
         entries=[
-            Entry(first_name="a", last_name="b", club_id=1, club="OL1"),
-            Entry(first_name="c", last_name="d", club_id=2, club="OL2"),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="a",
+                last_name="b",
+                club_id=1,
+                club_name="OL1",
+            ),
+            EntryType(
+                id=2,
+                event_id=1,
+                competitor_id=2,
+                first_name="c",
+                last_name="d",
+                club_id=2,
+                club_name="OL2",
+            ),
         ],
         class_list=[],
     )
@@ -234,8 +370,24 @@ def test_club():
 def test_club_not_exported_without_club_id():
     content = oe12.create(
         entries=[
-            Entry(first_name="a", last_name="b", club_id=None, club="OL1"),
-            Entry(first_name="c", last_name="d", club_id=2, club="OL2"),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="a",
+                last_name="b",
+                club_id=None,
+                club_name="OL1",
+            ),
+            EntryType(
+                id=2,
+                event_id=1,
+                competitor_id=2,
+                first_name="c",
+                last_name="d",
+                club_id=2,
+                club_name="OL2",
+            ),
         ],
         class_list=[],
     )
@@ -252,8 +404,24 @@ def test_club_not_exported_without_club_id():
 def test_class():
     content = oe12.create(
         entries=[
-            Entry(first_name="a", last_name="b", class_id=1, class_="Class_1"),
-            Entry(first_name="c", last_name="d", class_id=2, class_="Class_2"),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="a",
+                last_name="b",
+                class_id=1,
+                class_name="Class_1",
+            ),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
+                first_name="c",
+                last_name="d",
+                class_id=2,
+                class_name="Class_2",
+            ),
         ],
         class_list=[
             ClassInfoType(
@@ -261,7 +429,7 @@ def test_class():
                 name="Class_1",
                 short_name=None,
                 course_id=None,
-                course=None,
+                course_name=None,
                 course_length=None,
                 course_climb=None,
                 number_of_controls=None,
@@ -272,7 +440,7 @@ def test_class():
                 name="Class_2",
                 short_name=None,
                 course_id=None,
-                course=None,
+                course_name=None,
                 course_length=None,
                 course_climb=None,
                 number_of_controls=None,
@@ -293,8 +461,24 @@ def test_class():
 def test_class_short_name():
     content = oe12.create(
         entries=[
-            Entry(first_name="a", last_name="b", class_id=1, class_="Class_1"),
-            Entry(first_name="c", last_name="d", class_id=2, class_="Class_2"),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="a",
+                last_name="b",
+                class_id=1,
+                class_name="Class_1",
+            ),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
+                first_name="c",
+                last_name="d",
+                class_id=2,
+                class_name="Class_2",
+            ),
         ],
         class_list=[
             ClassInfoType(
@@ -302,7 +486,7 @@ def test_class_short_name():
                 name="Class_1",
                 short_name="C1",
                 course_id=None,
-                course=None,
+                course_name=None,
                 course_length=None,
                 course_climb=None,
                 number_of_controls=None,
@@ -313,7 +497,7 @@ def test_class_short_name():
                 name="Class_2",
                 short_name="C2",
                 course_id=None,
-                course=None,
+                course_name=None,
                 course_length=None,
                 course_climb=None,
                 number_of_controls=None,
@@ -340,11 +524,21 @@ def test_start_time():
     )
     content = oe12.create(
         entries=[
-            Entry(
-                first_name="a", last_name="b", result=PersonRaceResult(start_time=s1)
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="a",
+                last_name="b",
+                result=PersonRaceResult(start_time=s1),
             ),
-            Entry(
-                first_name="c", last_name="d", result=PersonRaceResult(start_time=s2)
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
+                first_name="c",
+                last_name="d",
+                result=PersonRaceResult(start_time=s2),
             ),
         ],
         class_list=[],
@@ -368,11 +562,21 @@ def test_finish_time():
     )
     content = oe12.create(
         entries=[
-            Entry(
-                first_name="a", last_name="b", result=PersonRaceResult(finish_time=f1)
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="a",
+                last_name="b",
+                result=PersonRaceResult(finish_time=f1),
             ),
-            Entry(
-                first_name="c", last_name="d", result=PersonRaceResult(finish_time=f2)
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
+                first_name="c",
+                last_name="d",
+                result=PersonRaceResult(finish_time=f2),
             ),
         ],
         class_list=[],
@@ -390,8 +594,22 @@ def test_finish_time():
 def test_time():
     content = oe12.create(
         entries=[
-            Entry(first_name="a", last_name="b", result=PersonRaceResult(time=301)),
-            Entry(first_name="c", last_name="d", result=PersonRaceResult(time=8000)),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="a",
+                last_name="b",
+                result=PersonRaceResult(time=301),
+            ),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
+                first_name="c",
+                last_name="d",
+                result=PersonRaceResult(time=8000),
+            ),
         ],
         class_list=[],
     )
@@ -408,12 +626,18 @@ def test_time():
 def test_status_ok():
     content = oe12.create(
         entries=[
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
                 first_name="a",
                 last_name="b",
                 result=PersonRaceResult(status=ResultStatus.OK),
             ),
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
                 first_name="c",
                 last_name="d",
                 result=PersonRaceResult(status=ResultStatus.OK),
@@ -434,12 +658,18 @@ def test_status_ok():
 def test_status_dns():
     content = oe12.create(
         entries=[
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
                 first_name="a",
                 last_name="b",
                 result=PersonRaceResult(status=ResultStatus.DID_NOT_START),
             ),
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
                 first_name="c",
                 last_name="d",
                 result=PersonRaceResult(status=ResultStatus.DID_NOT_START),
@@ -460,12 +690,18 @@ def test_status_dns():
 def test_status_dnf():
     content = oe12.create(
         entries=[
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
                 first_name="a",
                 last_name="b",
                 result=PersonRaceResult(status=ResultStatus.DID_NOT_FINISH),
             ),
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
                 first_name="c",
                 last_name="d",
                 result=PersonRaceResult(status=ResultStatus.DID_NOT_FINISH),
@@ -486,12 +722,18 @@ def test_status_dnf():
 def test_status_mp():
     content = oe12.create(
         entries=[
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
                 first_name="a",
                 last_name="b",
                 result=PersonRaceResult(status=ResultStatus.MISSING_PUNCH),
             ),
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
                 first_name="c",
                 last_name="d",
                 result=PersonRaceResult(status=ResultStatus.MISSING_PUNCH),
@@ -512,12 +754,18 @@ def test_status_mp():
 def test_status_disq():
     content = oe12.create(
         entries=[
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
                 first_name="a",
                 last_name="b",
                 result=PersonRaceResult(status=ResultStatus.DISQUALIFIED),
             ),
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
                 first_name="c",
                 last_name="d",
                 result=PersonRaceResult(status=ResultStatus.DISQUALIFIED),
@@ -538,12 +786,18 @@ def test_status_disq():
 def test_status_otl():
     content = oe12.create(
         entries=[
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
                 first_name="a",
                 last_name="b",
                 result=PersonRaceResult(status=ResultStatus.OVER_TIME),
             ),
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
                 first_name="c",
                 last_name="d",
                 result=PersonRaceResult(status=ResultStatus.OVER_TIME),
@@ -564,15 +818,32 @@ def test_status_otl():
 def test_status_diacritic_characters_cp1252_encoding():
     content = oe12.create(
         entries=[
-            Entry(first_name="Núria", last_name="Pavić", club_id=1, club="OC Kovač"),
-            Entry(
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="Núria",
+                last_name="Pavić",
+                club_id=1,
+                club_name="OC Kovač",
+            ),
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=2,
                 first_name="Núria Istenič",
                 last_name="Müller",
                 club_id=2,
-                club="Futó Club",
+                club_name="Futó Club",
             ),
-            Entry(
-                first_name="Pattantyús", last_name="Hugo", club_id=3, club="OC Ábrahám"
+            EntryType(
+                id=1,
+                event_id=1,
+                competitor_id=1,
+                first_name="Pattantyús",
+                last_name="Hugo",
+                club_id=3,
+                club_name="OC Ábrahám",
             ),
         ],
         class_list=[],

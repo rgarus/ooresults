@@ -42,6 +42,8 @@ from ooresults.repo import start_type
 from ooresults.repo.club_type import ClubType
 from ooresults.repo.competitor_type import CompetitorType
 from ooresults.repo.course_type import CourseType
+from ooresults.repo.entry_type import EntryType
+from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.series_type import Settings
@@ -59,7 +61,7 @@ with open(data_path, "r") as f:
     schema_cardreader_log = json.loads(f.read())
 
 
-def get_classes(event_id):
+def get_classes(event_id: int) -> List[ClassInfoType]:
     with db.transaction():
         return db.get_classes(event_id=event_id)
 
@@ -154,8 +156,8 @@ def update_class(
                     gender=entry.gender if entry.gender != "" else None,
                 )
                 db.update_entry_result(
-                    id=entry["id"],
-                    chip=entry["chip"],
+                    id=entry.id,
+                    chip=entry.chip,
                     result=entry.result,
                     start_time=entry.start.start_time,
                 )
@@ -307,8 +309,8 @@ def update_course(
                         gender=entry.gender if entry.gender != "" else None,
                     )
                     db.update_entry_result(
-                        id=entry["id"],
-                        chip=entry["chip"],
+                        id=entry.id,
+                        chip=entry.chip,
                         result=entry.result,
                         start_time=entry.start.start_time,
                     )
@@ -400,12 +402,12 @@ def import_entries(event_id: int, entries) -> None:
         db.import_entries(event_id=event_id, entries=entries)
 
 
-def get_entries(event_id: int):
+def get_entries(event_id: int) -> List[EntryType]:
     with db.transaction():
         return db.get_entries(event_id=event_id)
 
 
-def get_entry(id: int):
+def get_entry(id: int) -> EntryType:
     with db.transaction():
         return db.get_entry(id=id)
 
@@ -474,7 +476,12 @@ def update_entry(
         )
 
 
-def add_entry_result(event_id, chip, start_time, result):
+def add_entry_result(
+    event_id,
+    chip: str,
+    start_time: Optional[datetime.datetime],
+    result: result_type.PersonRaceResult,
+) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.add_entry_result(
             event_id=event_id,
@@ -484,7 +491,12 @@ def add_entry_result(event_id, chip, start_time, result):
         )
 
 
-def update_entry_result(id, chip, start_time, result):
+def update_entry_result(
+    id: int,
+    chip: str,
+    start_time: Optional[datetime.datetime],
+    result: result_type.PersonRaceResult,
+) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.update_entry_result(
             id=id,
@@ -494,12 +506,12 @@ def update_entry_result(id, chip, start_time, result):
         )
 
 
-def delete_entries(event_id: int):
+def delete_entries(event_id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_entries(event_id=event_id)
 
 
-def delete_entry(id: int):
+def delete_entry(id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_entry(id=id)
 
@@ -639,21 +651,25 @@ def store_cardreader_result(
 
             entries = db.get_entries(event_id=event.id)
             entries_control_card = [e for e in entries if e.chip == item.control_card]
-            assigned_entries = [e for e in entries_control_card if e.class_ is not None]
-            unassigned_entries = [e for e in entries_control_card if e.class_ is None]
+            assigned_entries = [
+                e for e in entries_control_card if e.class_name is not None
+            ]
+            unassigned_entries = [
+                e for e in entries_control_card if e.class_name is None
+            ]
 
             for entry in assigned_entries:
-                r = entry["result"]
+                r = entry.result
                 if r is not None and r.same_punches(other=result):
                     # result exists and is assigned to a competitor => nothing to do
                     res = {
                         "entryTime": item.entry_time,
                         "eventId": event.id,
-                        "controlCard": entry["chip"],
-                        "firstName": entry["first_name"],
-                        "lastName": entry["last_name"],
-                        "club": entry["club"],
-                        "class": entry["class_"],
+                        "controlCard": entry.chip,
+                        "firstName": entry.first_name,
+                        "lastName": entry.last_name,
+                        "club": entry.club_name,
+                        "class": entry.class_name,
                         "status": r.status,
                         "time": r.extensions.get("running_time", r.time),
                         "error": None,
@@ -664,7 +680,7 @@ def store_cardreader_result(
                 # check if result is already read out
                 unassigned_entry = None
                 for entry in unassigned_entries:
-                    if entry["result"].same_punches(other=result):
+                    if entry.result.same_punches(other=result):
                         unassigned_entry = entry
                         break
 
@@ -673,16 +689,16 @@ def store_cardreader_result(
                 #   (2) there is no unassigned entry or one unassigned entry with same result
                 if (
                     len(assigned_entries) == 1
-                    and not assigned_entries[0]["result"].has_punches()
+                    and not assigned_entries[0].result.has_punches()
                     and (
                         len(unassigned_entries) == 0
                         or len(unassigned_entries) == 1
-                        and unassigned_entries[0]["result"].same_punches(other=result)
+                        and unassigned_entries[0].result.same_punches(other=result)
                     )
                 ):
                     entry = assigned_entries[0]
                     try:
-                        class_ = db.get_class(id=entry["class_id"])
+                        class_ = db.get_class(id=entry.class_id)
                         course_id = class_.course_id
                         class_params = class_.params
                         controls = db.get_course(id=course_id).controls
@@ -694,25 +710,23 @@ def store_cardreader_result(
                         controls=controls,
                         class_params=class_params,
                         start_time=entry.start.start_time,
-                        year=int(entry.get("year", None))
-                        if entry.get("year", None) is not None
-                        else None,
-                        gender=entry.get("gender", None),
+                        year=int(entry.year) if entry.year is not None else None,
+                        gender=entry.gender,
                     )
                     db.update_entry_result(
-                        id=entry["id"],
-                        chip=entry["chip"],
+                        id=entry.id,
+                        chip=entry.chip,
                         result=result,
-                        start_time=entry["start"].start_time,
+                        start_time=entry.start.start_time,
                     )
                     res = {
                         "entryTime": item.entry_time,
                         "eventId": event.id,
-                        "controlCard": entry["chip"],
-                        "firstName": entry["first_name"],
-                        "lastName": entry["last_name"],
-                        "club": entry["club"],
-                        "class": entry["class_"],
+                        "controlCard": entry.chip,
+                        "firstName": entry.first_name,
+                        "lastName": entry.last_name,
+                        "club": entry.club_name,
+                        "class": entry.class_name,
                         "status": result.status,
                         "time": result.extensions.get("running_time", result.time),
                         "error": None,
@@ -782,7 +796,7 @@ def add_or_update_entry(
 
     with db.transaction(mode=TransactionMode.IMMEDIATE):
 
-        def store_result_as_new_entry(entry) -> None:
+        def store_result_as_new_entry(entry: EntryType) -> None:
             result = entry.result
             result.status = ResultStatus.FINISHED
             result.split_times = [
@@ -800,11 +814,7 @@ def add_or_update_entry(
             )
 
         if id is None:
-            entry = {
-                "result": result_type.PersonRaceResult(),
-                "start": start_type.PersonRaceStart(),
-            }
-            entry["id"] = db.add_entry(
+            id = db.add_entry(
                 event_id=event_id,
                 competitor_id=competitor_id,
                 first_name=first_name,
@@ -819,8 +829,26 @@ def add_or_update_entry(
                 status=status,
                 start_time=start_time,
             )
+            entry = EntryType(
+                id=id,
+                event_id=event_id,
+                competitor_id=competitor_id,
+                first_name=first_name,
+                last_name=last_name,
+                gender=gender,
+                year=year,
+                class_id=class_id,
+                class_name=None,
+                not_competing=not_competing,
+                chip=chip,
+                fields=fields,
+                result=result_type.PersonRaceResult(status=status),
+                start=start_type.PersonRaceStart(start_time=start_time),
+                club_id=club_id,
+                club_name=None,
+            )
         else:
-            entry = db.get_entry(id=id)[0]
+            entry = db.get_entry(id=id)
             if result_id is not None and entry.result.has_punches():
                 store_result_as_new_entry(entry=entry)
 
@@ -849,7 +877,7 @@ def add_or_update_entry(
 
         if result_id is not None and result_id != -1:
             # compute new result
-            result_entry = db.get_entry(id=result_id)[0]
+            result_entry = db.get_entry(id=result_id)
             try:
                 class_ = db.get_class(id=class_id)
                 course_id = class_.course_id
@@ -867,18 +895,16 @@ def add_or_update_entry(
                 gender=gender if gender != "" else None,
             )
             db.update_entry_result(
-                id=entry["id"],
-                chip=result_entry["chip"],
+                id=entry.id,
+                chip=result_entry.chip,
                 result=result_entry.result,
                 start_time=start_time,
             )
-            db.delete_entry(id=result_entry["id"])
+            db.delete_entry(id=result_entry.id)
 
-        elif id is not None and (
-            class_id != entry.class_ or start_time != entry["start"].start_time
-        ):
+        elif class_id != entry.class_name or start_time != entry.start.start_time:
             # compute new result
-            result_entry = db.get_entry(id=id)[0]
+            result_entry = db.get_entry(id=id)
             if result_entry.result.has_punches():
                 try:
                     class_ = db.get_class(id=class_id)
@@ -897,8 +923,8 @@ def add_or_update_entry(
                     gender=gender if gender != "" else None,
                 )
                 db.update_entry_result(
-                    id=entry["id"],
-                    chip=result_entry["chip"],
+                    id=entry.id,
+                    chip=result_entry.chip,
                     result=result_entry.result,
                     start_time=start_time,
                 )
@@ -916,15 +942,15 @@ def update_series_settings(settings: Settings) -> None:
 
 def event_class_results(
     event_id: int,
-) -> Tuple[EventType, List[Tuple[ClassInfoType, List[Dict]]]]:
+) -> Tuple[EventType, List[Tuple[ClassInfoType, List[RankedEntryType]]]]:
     with db.transaction():
         event = db.get_event(id=event_id)
         classes = db.get_classes(event_id=event_id)
-        entry_list = list(db.get_entries(event_id=event_id))
+        entries = db.get_entries(event_id=event_id)
 
     class_results = build_results.build_results(
-        classes=classes,
-        results=copy.deepcopy(entry_list),
+        class_infos=classes,
+        entries=copy.deepcopy(entries),
     )
     return event, class_results
 
@@ -951,13 +977,13 @@ def build_series_result() -> (
         organizers = []
         for i, event in enumerate(events):
             classes = db.get_classes(event_id=event.id)
-            entry_list = list(db.get_entries(event_id=event.id))
+            entries = db.get_entries(event_id=event.id)
             class_results = build_results.build_results(
-                classes=classes,
-                results=copy.deepcopy(entry_list),
+                class_infos=classes,
+                entries=copy.deepcopy(entries),
             )
             list_of_results.append(class_results)
-            organizers.append([e for e in entry_list if e.class_ == "Organizer"])
+            organizers.append([e for e in entries if e.class_name == "Organizer"])
 
     ranked_classes = build_results.build_total_results(
         settings=settings,

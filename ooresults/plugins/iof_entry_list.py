@@ -27,6 +27,7 @@ from lxml import etree
 from lxml.builder import ElementMaker
 
 from ooresults.repo import result_type
+from ooresults.repo.entry_type import EntryType
 from ooresults.repo.event_type import EventType
 
 
@@ -38,7 +39,7 @@ iof_namespace = "http://www.orienteering.org/datastandard/3.0"
 namespaces = {None: iof_namespace}
 
 
-def create_entry_list(event: EventType, entries: List[Dict]) -> bytes:
+def create_entry_list(event: EventType, entries: List[EntryType]) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
     ENTRYLIST = E.EntryList
@@ -68,33 +69,33 @@ def create_entry_list(event: EventType, entries: List[Dict]) -> bytes:
     for e in entries:
         # do not export pseudo entries without name
         # (used to store not already assigned sportident results)
-        if e["last_name"] is None:
+        if e.last_name is None:
             continue
 
         pe = PERSONENTRY()
         person = PERSON(
             NAME(
-                FAMILY(e["last_name"]),
-                GIVEN(e["first_name"]),
+                FAMILY(e.last_name),
+                GIVEN(e.first_name),
             ),
         )
-        if e.get("gender", "") != "":
-            person.set("sex", e["gender"])
-        if e.get("year", None) is not None:
-            person.append(BIRTHDATE(str(e["year"]) + "-01-01"))
+        if e.gender:
+            person.set("sex", e.gender)
+        if e.year is not None:
+            person.append(BIRTHDATE(str(e.year) + "-01-01"))
         pe.append(person)
 
-        if e.get("club", "") != "" and e.get("club", None) is not None:
+        if e.club_name:
             pe.append(
                 ORGANISATION(
-                    NAME(e["club"]),
+                    NAME(e.club_name),
                 ),
             )
 
-        if e.get("chip", "") != "":
-            pe.append(CONTROLCARD(e["chip"], punchingSystem="SI"))
-        if e.get("class_", "") != "":
-            pe.append(CLASS(NAME(e["class_"])))
+        if e.chip:
+            pe.append(CONTROLCARD(e.chip, punchingSystem="SI"))
+        if e.class_name:
+            pe.append(CLASS(NAME(e.class_name)))
 
         root.append(pe)
 

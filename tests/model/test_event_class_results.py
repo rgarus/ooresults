@@ -27,6 +27,8 @@ from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.class_type import ClassType
 from ooresults.repo.course_type import CourseType
+from ooresults.repo.entry_type import EntryType
+from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
@@ -106,7 +108,7 @@ def class_b(db, event: EventType, course_b: CourseType) -> ClassType:
 
 
 @pytest.fixture
-def entry_1(db, event: EventType, class_a: ClassType):
+def entry_1(db, event: EventType, class_a: ClassType) -> EntryType:
     id = db.add_entry(
         event_id=event.id,
         competitor_id=None,
@@ -131,12 +133,12 @@ def entry_1(db, event: EventType, class_a: ClassType):
             time=9876,
         ),
     )
-    item = db.get_entry(id=id)[0]
+    item = db.get_entry(id=id)
     return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_2(db, event: EventType, class_b: ClassType):
+def entry_2(db, event: EventType, class_b: ClassType) -> EntryType:
     id = db.add_entry(
         event_id=event.id,
         competitor_id=None,
@@ -161,12 +163,12 @@ def entry_2(db, event: EventType, class_b: ClassType):
             time=2001,
         ),
     )
-    item = db.get_entry(id=id)[0]
+    item = db.get_entry(id=id)
     return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_3(db, event: EventType, class_b: ClassType):
+def entry_3(db, event: EventType, class_b: ClassType) -> EntryType:
     id = db.add_entry(
         event_id=event.id,
         competitor_id=None,
@@ -191,12 +193,12 @@ def entry_3(db, event: EventType, class_b: ClassType):
             time=2113,
         ),
     )
-    item = db.get_entry(id=id)[0]
+    item = db.get_entry(id=id)
     return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_4(db, event: EventType, class_a: ClassType):
+def entry_4(db, event: EventType, class_a: ClassType) -> EntryType:
     id = db.add_entry(
         event_id=event.id,
         competitor_id=None,
@@ -221,7 +223,7 @@ def entry_4(db, event: EventType, class_a: ClassType):
             time=3333,
         ),
     )
-    item = db.get_entry(id=id)[0]
+    item = db.get_entry(id=id)
     return copy.deepcopy(item)
 
 
@@ -232,10 +234,10 @@ def test_event_class_results(
     class_b: ClassType,
     course_a: CourseType,
     course_b: CourseType,
-    entry_1,
-    entry_2,
-    entry_3,
-    entry_4,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
+    entry_4: EntryType,
 ):
     m_event, m_class_results = model.event_class_results(event_id=event.id)
 
@@ -244,7 +246,7 @@ def test_event_class_results(
         name=class_a.name,
         short_name=class_a.short_name,
         course_id=course_a.id,
-        course=course_a.name,
+        course_name=course_a.name,
         course_length=course_a.length,
         course_climb=course_a.climb,
         number_of_controls=len(course_a.controls),
@@ -255,40 +257,43 @@ def test_event_class_results(
         name=class_b.name,
         short_name=class_b.short_name,
         course_id=course_b.id,
-        course=course_b.name,
+        course_name=course_b.name,
         course_length=course_b.length,
         course_climb=course_b.climb,
         number_of_controls=len(course_b.controls),
         params=class_b.params,
     )
 
-    entry_1["rank"] = 2
-    entry_1["time_behind"] = 9876 - 3333
-    entry_1["points"] = 3333 / 9876
-    entry_2["rank"] = 1
-    entry_2["time_behind"] = 2001 - 2001
-    entry_2["points"] = 2001 / 2001
-    entry_3["rank"] = 2
-    entry_3["time_behind"] = 2113 - 2001
-    entry_3["points"] = 2001 / 2113
-    entry_4["rank"] = 1
-    entry_4["time_behind"] = 3333 - 3333
-    entry_4["points"] = 3333 / 3333
-
     assert m_event == event
     assert m_class_results == [
         (
             class_info_a,
             [
-                entry_4,
-                entry_1,
+                RankedEntryType(
+                    entry=entry_4,
+                    rank=1,
+                    time_behind=3333 - 3333,
+                ),
+                RankedEntryType(
+                    entry=entry_1,
+                    rank=2,
+                    time_behind=9876 - 3333,
+                ),
             ],
         ),
         (
             class_info_b,
             [
-                entry_2,
-                entry_3,
+                RankedEntryType(
+                    entry=entry_2,
+                    rank=1,
+                    time_behind=2001 - 2001,
+                ),
+                RankedEntryType(
+                    entry=entry_3,
+                    rank=2,
+                    time_behind=2113 - 2001,
+                ),
             ],
         ),
     ]

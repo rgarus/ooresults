@@ -160,7 +160,7 @@ class Add:
             event = model.get_event(id=event_id)
 
             params.mass_start = self.parse_start_time(data.massStart, event.date)
-            course_id = int(data.course) if data.course != "" else None
+            course_id = int(data.course_id) if data.course_id != "" else None
             if data.id == "":
                 model.add_class(
                     event_id=event_id,
@@ -176,7 +176,7 @@ class Add:
                     event_id=event_id,
                     name=data.name,
                     short_name=data.short_name if data.short_name != "" else None,
-                    course_id=int(data.course) if data.course != "" else None,
+                    course_id=course_id,
                     params=params,
                 )
 

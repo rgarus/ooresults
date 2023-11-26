@@ -28,6 +28,7 @@ import iso8601
 
 from ooresults.repo import result_type
 from ooresults.repo.class_type import ClassInfoType
+from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
 
@@ -41,7 +42,7 @@ namespaces = {None: iof_namespace}
 
 
 def create_result_list(
-    event: EventType, class_results: List[Tuple[ClassInfoType, List[Dict]]]
+    event: EventType, class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]]
 ) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
@@ -84,6 +85,9 @@ def create_result_list(
     root.append(e_event)
 
     for class_, ranked_results in class_results:
+        if not ranked_results:
+            continue
+
         cr = CLASSRESULT()
         cr.append(CLASS(NAME(class_.name)))
 
@@ -97,51 +101,50 @@ def create_result_list(
         if len(co):
             cr.append(co)
 
-        for r in ranked_results:
+        for ranked_result in ranked_results:
+            entry = ranked_result.entry
+            result = entry.result
+
             pr = PERSONRESULT()
             person = PERSON(
                 NAME(
-                    FAMILY(r["last_name"]),
-                    GIVEN(r["first_name"]),
+                    FAMILY(entry.last_name),
+                    GIVEN(entry.first_name),
                 ),
             )
-            if r.get("gender", "") != "":
-                person.set("sex", r["gender"])
-            if r.get("year", None) is not None:
-                person.append(BIRTHDATE(str(r["year"]) + "-01-01"))
+            if entry.gender:
+                person.set("sex", entry.gender)
+            if entry.year is not None:
+                person.append(BIRTHDATE(str(entry.year) + "-01-01"))
             pr.append(person)
 
-            if r.get("club", "") != "" and r.get("club", None) is not None:
+            if entry.club_name:
                 pr.append(
                     ORGANISATION(
-                        NAME(r["club"]),
+                        NAME(entry.club_name),
                     ),
                 )
 
-            result = RESULT()
-            if r["result"].start_time is not None:
-                result.append(
-                    STARTTIME(r["result"].start_time.isoformat(timespec="seconds"))
-                )
-            if r["result"].finish_time is not None:
-                result.append(
-                    FINISHTIME(r["result"].finish_time.isoformat(timespec="seconds"))
-                )
-            if r["result"].time is not None:
-                result.append(TIME(str(r["result"].time)))
+            res = RESULT()
+            if result.start_time is not None:
+                res.append(STARTTIME(result.start_time.isoformat(timespec="seconds")))
+            if result.finish_time is not None:
+                res.append(FINISHTIME(result.finish_time.isoformat(timespec="seconds")))
+            if result.time is not None:
+                res.append(TIME(str(result.time)))
 
-            if r["result"].status == ResultStatus.OK:
-                if r["not_competing"]:
-                    result.append(STATUS("NotCompeting"))
+            if result.status == ResultStatus.OK:
+                if entry.not_competing:
+                    res.append(STATUS("NotCompeting"))
                 else:
-                    if "time_behind" in r and r["time_behind"] is not None:
-                        result.append(TIMEBEHIND(str(r["time_behind"])))
+                    if ranked_result.time_behind is not None:
+                        res.append(TIMEBEHIND(str(ranked_result.time_behind)))
 
-                    if "rank" in r and r["rank"] is not None:
-                        result.append(POSITION(str(r["rank"])))
-                    result.append(STATUS("OK"))
+                    if ranked_result.rank is not None:
+                        res.append(POSITION(str(ranked_result.rank)))
+                    res.append(STATUS("OK"))
             else:
-                result.append(
+                res.append(
                     STATUS(
                         {
                             ResultStatus.INACTIVE: "Inactive",
@@ -152,19 +155,19 @@ def create_result_list(
                             ResultStatus.DISQUALIFIED: "Disqualified",
                             ResultStatus.OVER_TIME: "OverTime",
                             ResultStatus.FINISHED: "Finished",
-                        }[r["result"].status]
+                        }[result.status]
                     )
                 )
-            for s in r["result"].split_times:
+            for s in result.split_times:
                 split_time = SPLITTIME(CONTROLCODE(s.control_code))
                 if s.status is not None and s.status != "OK":
                     split_time.set("status", s.status)
                 if s.time is not None:
                     split_time.append(TIME(str(s.time)))
-                result.append(split_time)
-            if r.get("chip", "") != "":
-                result.append(CONTROLCARD(r["chip"], punchingSystem="SI"))
-            pr.append(result)
+                res.append(split_time)
+            if entry.chip:
+                res.append(CONTROLCARD(entry.chip, punchingSystem="SI"))
+            pr.append(res)
             cr.append(pr)
         root.append(cr)
 
