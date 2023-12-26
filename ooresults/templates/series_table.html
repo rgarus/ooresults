@@ -9,7 +9,7 @@ $code
 
 
 <table style="border-collapse: collapse">
-$for class_name, ranked_results in results:
+$for class_name, series_results in results:
     <thead>
         <tr><th colspan="4" style="text-align:left;padding-top:3em"><h3>$class_name</h3></th></tr>
         <tr class="dt">
@@ -22,18 +22,21 @@ $for class_name, ranked_results in results:
         </tr>
     </thead>
     <tbody>
-    $for result in ranked_results:
-        $if result['races'] != {}:
+    $for ser_result in series_results:
+        $if ser_result.races:
             <tr class="dt">
-                <td class="dt">$(str(result.get('rank', None)) if result.get('rank', None) is not None else '')</td>
-                <td class="dt">$result.get('first_name', '') $result.get('last_name', '')</td>
-                <td class="dt">$result.get('club', '')</td>
-                <td class="dt" style="text-align:right">$format_points(result.get('sum', None))</td>
+                <td class="dt">$(str(ser_result.rank) if ser_result.rank else '')</td>
+                <td class="dt">$ser_result.first_name $ser_result.last_name</td>
+                <td class="dt">$(ser_result.club_name if ser_result.club_name else '')</td>
+                <td class="dt" style="text-align:right">$format_points(ser_result.total_points)</td>
                 $for i in range(len(events)):
-                    $if i in result['organizer'].keys():
-                        <td class="dt" style="text-align:right">($format_points(result['organizer'].get(i, None)))</td>
+                    $if i in ser_result.races:
+                        $if ser_result.races[i].bonus:
+                            <td class="dt" style="text-align:right">($str(ser_result.races[i].points))</td>
+                        $else:
+                            <td class="dt" style="text-align:right">$str(ser_result.races[i].points)</td>
                     $else:
-                        <td class="dt" style="text-align:right">$format_points(result['races'].get(i, None))</td>
+                        <td class="dt" style="text-align:right"></td>
             </tr>
     </tbody>
 </table>

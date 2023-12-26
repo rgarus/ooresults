@@ -31,6 +31,7 @@ import iso8601
 import jsonschema
 
 from ooresults.handler import build_results
+from ooresults.handler.build_results import PersonSeriesResult
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import TransactionMode
@@ -965,7 +966,7 @@ def create_event_list(events: List[EventType]) -> List[EventType]:
 
 
 def build_series_result() -> (
-    Tuple[Settings, List[EventType], List[Tuple[str, List[Dict]]]]
+    Tuple[Settings, List[EventType], List[Tuple[str, List[PersonSeriesResult]]]]
 ):
     with db.transaction():
         settings = db.get_series_settings()

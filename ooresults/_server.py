@@ -93,7 +93,7 @@ class Admin:
         courses_tab_content = render.courses_tab_content(courses_table)
         results_table = render.results_table(None, [], set())
         results_tab_content = render.results_tab_content(results_table)
-        series_table = render.series_table(0, [])
+        series_table = render.series_table([], [])
         series_tab_content = render.series_tab_content(series_table)
         competitors_table = render.competitors_table([])
         competitors_tab_content = render.competitors_tab_content(competitors_table)

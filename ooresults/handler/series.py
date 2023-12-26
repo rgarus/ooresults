@@ -108,10 +108,10 @@ class CsvResult:
                 ]
             )
 
-            for class_name, ranked_results in results:
-                for result in ranked_results:
-                    if result.get("rank", None) is not None:
-                        rank = str(result.get("rank", None))
+            for class_name, series_results in results:
+                for ser_result in series_results:
+                    if ser_result.rank is not None:
+                        rank = str(ser_result.rank)
                         if rank == "1":
                             rank_eng = rank + "st"
                         elif rank == "2":
@@ -120,15 +120,19 @@ class CsvResult:
                             rank_eng = rank + "rd"
                         else:
                             rank_eng = rank + "th"
+
+                        def format(value: any) -> str:
+                            return str(value) if value is not None else ""
+
                         writer.writerow(
                             [
                                 class_name,
                                 rank,
                                 rank_eng,
-                                result.get("first_name", ""),
-                                result.get("last_name", ""),
-                                result.get("club", ""),
-                                str(result.get("sum", None)),
+                                format(ser_result.first_name),
+                                format(ser_result.last_name),
+                                format(ser_result.club_name),
+                                format(ser_result.total_points),
                             ]
                         )
 

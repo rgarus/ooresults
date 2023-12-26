@@ -23,6 +23,7 @@ import pytest
 
 from ooresults.handler import build_results
 from ooresults.handler import model
+from ooresults.repo import series_type
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.entry_type import EntryType
@@ -30,7 +31,8 @@ from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
-from ooresults.repo import series_type
+from ooresults.repo.series_type import PersonSeriesResult
+from ooresults.repo.series_type import Points
 
 
 @pytest.fixture
@@ -295,16 +297,17 @@ def test_best_3_of_1_race(event_1: EventType, class_info_1: ClassInfoType):
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("100")},
-                    "organizer": {},
-                    "sum": Decimal("100"),
-                    "rank": 1,
-                },
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100")),
+                    },
+                    total_points=Decimal("100"),
+                    rank=1,
+                ),
             ],
         ),
     ]
@@ -376,16 +379,18 @@ def test_best_3_of_2_races(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("100"), 1: Decimal("100")},
-                    "organizer": {},
-                    "sum": Decimal("200"),
-                    "rank": 1,
-                },
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100")),
+                        1: Points(points=Decimal("100")),
+                    },
+                    total_points=Decimal("200"),
+                    rank=1,
+                ),
             ],
         ),
     ]
@@ -509,21 +514,20 @@ def test_best_3_of_4_races(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {
-                        0: Decimal("100"),
-                        1: Decimal("100"),
-                        2: Decimal("100"),
-                        3: Decimal("100"),
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100")),
+                        1: Points(points=Decimal("100")),
+                        2: Points(points=Decimal("100")),
+                        3: Points(points=Decimal("100")),
                     },
-                    "organizer": {},
-                    "sum": Decimal("300"),
-                    "rank": 1,
-                },
+                    total_points=Decimal("300"),
+                    rank=1,
+                ),
             ],
         ),
     ]
@@ -586,16 +590,18 @@ def test_bonus_1_race(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("100.00")},
-                    "organizer": {1: Decimal("50.00")},
-                    "sum": Decimal("150.00"),
-                    "rank": 1,
-                },
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100.00")),
+                        1: Points(points=Decimal("50.00"), bonus=True),
+                    },
+                    total_points=Decimal("150.00"),
+                    rank=1,
+                ),
             ],
         ),
     ]
@@ -685,16 +691,19 @@ def test_bonus_2_races(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("100.0"), 2: Decimal("100")},
-                    "organizer": {1: Decimal("100")},
-                    "sum": Decimal("300"),
-                    "rank": 1,
-                },
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100")),
+                        2: Points(points=Decimal("100")),
+                        1: Points(points=Decimal("100"), bonus=True),
+                    },
+                    total_points=Decimal("300"),
+                    rank=1,
+                ),
             ],
         ),
     ]
@@ -840,21 +849,21 @@ def test_bonus_4_races(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {
-                        0: Decimal("100"),
-                        1: Decimal("100"),
-                        3: Decimal("100"),
-                        4: Decimal("100"),
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100")),
+                        1: Points(points=Decimal("100")),
+                        3: Points(points=Decimal("100")),
+                        4: Points(points=Decimal("100")),
+                        2: Points(points=Decimal("100"), bonus=True),
                     },
-                    "organizer": {2: Decimal("100")},
-                    "sum": Decimal("300"),
-                    "rank": 1,
-                },
+                    total_points=Decimal("300"),
+                    rank=1,
+                ),
             ],
         ),
     ]
@@ -912,26 +921,28 @@ def test_ranking_1(event_1: EventType, class_info_1: ClassInfoType):
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Gerd",
-                    "last_name": "Müller",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("100")},
-                    "organizer": {},
-                    "sum": Decimal("100"),
-                    "rank": 1,
-                },
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("66.67")},
-                    "organizer": {},
-                    "sum": Decimal("66.67"),
-                    "rank": 2,
-                },
+                PersonSeriesResult(
+                    first_name="Gerd",
+                    last_name="Müller",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100")),
+                    },
+                    total_points=Decimal("100"),
+                    rank=1,
+                ),
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("66.67")),
+                    },
+                    total_points=Decimal("66.67"),
+                    rank=2,
+                ),
             ],
         ),
     ]
@@ -1018,26 +1029,29 @@ def test_ranking_2(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("100"), 1: Decimal("50")},
-                    "organizer": {},
-                    "sum": Decimal("150"),
-                    "rank": 1,
-                },
-                {
-                    "first_name": "Gerd",
-                    "last_name": "Müller",
-                    "year": None,
-                    "club": None,
-                    "races": {1: Decimal("100")},
-                    "organizer": {},
-                    "sum": Decimal("100"),
-                    "rank": 2,
-                },
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100")),
+                        1: Points(points=Decimal("50")),
+                    },
+                    total_points=Decimal("150"),
+                    rank=1,
+                ),
+                PersonSeriesResult(
+                    first_name="Gerd",
+                    last_name="Müller",
+                    year=None,
+                    club_name=None,
+                    races={
+                        1: Points(points=Decimal("100")),
+                    },
+                    total_points=Decimal("100"),
+                    rank=2,
+                ),
             ],
         ),
     ]
@@ -1141,26 +1155,30 @@ def test_ranking_3(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("100"), 1: Decimal("50")},
-                    "organizer": {},
-                    "sum": Decimal("150"),
-                    "rank": 1,
-                },
-                {
-                    "first_name": "Gerd",
-                    "last_name": "Müller",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("50"), 1: Decimal("100")},
-                    "organizer": {},
-                    "sum": Decimal("150"),
-                    "rank": 1,
-                },
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100")),
+                        1: Points(points=Decimal("50")),
+                    },
+                    total_points=Decimal("150"),
+                    rank=1,
+                ),
+                PersonSeriesResult(
+                    first_name="Gerd",
+                    last_name="Müller",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("50")),
+                        1: Points(points=Decimal("100")),
+                    },
+                    total_points=Decimal("150"),
+                    rank=1,
+                ),
             ],
         ),
     ]
@@ -1248,26 +1266,29 @@ def test_if_sum_is_0_then_rank_is_none(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("100"), 1: Decimal("100")},
-                    "organizer": {},
-                    "sum": Decimal("200"),
-                    "rank": 1,
-                },
-                {
-                    "first_name": "Gerd",
-                    "last_name": "Müller",
-                    "year": None,
-                    "club": None,
-                    "races": {1: Decimal("0")},
-                    "organizer": {},
-                    "sum": Decimal("0"),
-                    "rank": None,
-                },
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100")),
+                        1: Points(points=Decimal("100")),
+                    },
+                    total_points=Decimal("200"),
+                    rank=1,
+                ),
+                PersonSeriesResult(
+                    first_name="Gerd",
+                    last_name="Müller",
+                    year=None,
+                    club_name=None,
+                    races={
+                        1: Points(points=Decimal("0")),
+                    },
+                    total_points=Decimal("0"),
+                    rank=None,
+                ),
             ],
         ),
     ]
@@ -1330,28 +1351,28 @@ def test_compute_points_for_max_points_100_and_decimals_2(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Gerd",
-                    "last_name": "Müller",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("100")},
-                    "organizer": {},
-                    "sum": Decimal("100"),
-                    "rank": 1,
-                },
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {
-                        0: Decimal("86.67"),
+                PersonSeriesResult(
+                    first_name="Gerd",
+                    last_name="Müller",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("100")),
                     },
-                    "organizer": {},
-                    "sum": Decimal("86.67"),
-                    "rank": 2,
-                },
+                    total_points=Decimal("100"),
+                    rank=1,
+                ),
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("86.67")),
+                    },
+                    total_points=Decimal("86.67"),
+                    rank=2,
+                ),
             ],
         ),
     ]
@@ -1414,28 +1435,28 @@ def test_compute_points_for_max_points_85_and_decimals_3(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Gerd",
-                    "last_name": "Müller",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("85")},
-                    "organizer": {},
-                    "sum": Decimal("85"),
-                    "rank": 1,
-                },
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {
-                        0: Decimal("73.667"),
+                PersonSeriesResult(
+                    first_name="Gerd",
+                    last_name="Müller",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("85")),
                     },
-                    "organizer": {},
-                    "sum": Decimal("73.667"),
-                    "rank": 2,
-                },
+                    total_points=Decimal("85"),
+                    rank=1,
+                ),
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("73.667")),
+                    },
+                    total_points=Decimal("73.667"),
+                    rank=2,
+                ),
             ],
         ),
     ]
@@ -1552,18 +1573,17 @@ def test_points_are_0_for_not_classified_entries(
         (
             class_info_1.name,
             [
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {
-                        0: Decimal("0"),
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("0")),
                     },
-                    "organizer": {},
-                    "sum": Decimal("0"),
-                    "rank": None,
-                },
+                    total_points=Decimal("0"),
+                    rank=None,
+                ),
             ],
         ),
     ]

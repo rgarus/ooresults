@@ -18,7 +18,9 @@
 
 
 import dataclasses
+from decimal import Decimal
 from typing import Optional
+from typing import Dict
 
 
 @dataclasses.dataclass
@@ -28,3 +30,20 @@ class Settings:
     mode: str = "Proportional"
     maximum_points: int = 100
     decimal_places: int = 2
+
+
+@dataclasses.dataclass
+class Points:
+    points: Decimal
+    bonus: bool = False
+
+
+@dataclasses.dataclass
+class PersonSeriesResult:
+    last_name: str
+    first_name: str
+    year: Optional[int]
+    club_name: Optional[str]
+    races: Dict[int, Points]
+    total_points: Decimal
+    rank: Optional[int]

@@ -17,7 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Dict
 from typing import List
 from typing import Tuple
 from typing import Any
@@ -26,12 +25,13 @@ from typing import Optional
 from ooresults.pdf.pdf import PDF
 from ooresults.repo.event_type import EventType
 from ooresults.repo.series_type import Settings
+from ooresults.repo.series_type import PersonSeriesResult
 
 
 def create_pdf(
     settings: Settings,
     events: List[EventType],
-    results: List[Tuple[str, List[Dict]]],
+    results: List[Tuple[str, List[PersonSeriesResult]]],
     landscape: bool = False,
 ) -> bytes:
     W_SPACE = 3
@@ -58,14 +58,8 @@ def create_pdf(
                 txt = txt[:-1]
             pdf.cell(w=w, h=h, txt=txt, align=align)
 
-    def format_points(points: float) -> str:
-        if points is not None:
-            return str(points)
-        else:
-            return "-----"
-
     for i, class_results in enumerate(results):
-        class_name, ranked_results = class_results
+        class_name, series_results = class_results
         if i > 0:
             # insert a page break if there is not enough space left on the
             # page for the class header, the table header and two table rows
@@ -94,57 +88,61 @@ def create_pdf(
         pdf.ln()
         pdf.ln()
 
-        for result in ranked_results:
+        for ser_result in series_results:
 
-            def get(d: Dict, key: str) -> Any:
-                s = d.get(key, "")
-                return s if s is not None else ""
+            def get(value: Any) -> Any:
+                return value if value is not None else ""
 
-            if result["races"] != {}:
+            if ser_result.races != {}:
+                print(class_name, ser_result)
                 pdf.set_font(family="Carlito", size=10)
                 cell(
                     w=W_RANK,
                     h=None,
-                    txt=str(get(result, "rank"))
-                    if str(get(result, "rank")) != ""
-                    else "-",
+                    txt=str(ser_result.rank) if ser_result.rank is not None else "-",
                     align="R",
                 )
                 cell(w=W_SPACE, h=None, txt="")
                 cell(
                     w=W_NAME,
                     h=None,
-                    txt=get(result, "last_name") + " " + get(result, "first_name"),
+                    txt=get(ser_result.last_name) + " " + get(ser_result.first_name),
                     align="L",
                 )
                 cell(w=W_SPACE, h=None, txt="")
-                cell(w=W_YEAR, h=None, txt=str(get(result, "year")), align="R")
+                cell(w=W_YEAR, h=None, txt=str(get(ser_result.year)), align="R")
                 cell(w=W_SPACE, h=None, txt="")
-                cell(w=W_CLUB, h=None, txt=get(result, "club"), align="L")
+                cell(w=W_CLUB, h=None, txt=get(ser_result.club_name), align="L")
                 cell(w=W_SPACE, h=None, txt="")
                 pdf.set_font(style="B")
                 cell(
                     w=W_SUM,
                     h=None,
-                    txt=format_points(result.get("sum", None)),
+                    txt=str(ser_result.total_points),
                     align="R",
                 )
                 pdf.set_font()
                 for i in range(len(events)):
-                    if i in result["organizer"].keys():
-                        cell(
-                            w=W_POINTS,
-                            h=None,
-                            txt="("
-                            + format_points(result["organizer"].get(i, None))
-                            + ")",
-                            align="R",
-                        )
+                    if i in ser_result.races:
+                        if ser_result.races[i].bonus:
+                            cell(
+                                w=W_POINTS,
+                                h=None,
+                                txt="(" + str(ser_result.races[i].points) + ")",
+                                align="R",
+                            )
+                        else:
+                            cell(
+                                w=W_POINTS,
+                                h=None,
+                                txt=str(ser_result.races[i].points),
+                                align="R",
+                            )
                     else:
                         cell(
                             w=W_POINTS,
                             h=None,
-                            txt=format_points(result["races"].get(i, None)),
+                            txt="-----",
                             align="R",
                         )
                 pdf.ln()

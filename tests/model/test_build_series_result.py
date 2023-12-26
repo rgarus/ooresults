@@ -23,6 +23,7 @@ from decimal import Decimal
 
 import pytest
 
+from ooresults.handler import model
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassType
@@ -32,7 +33,8 @@ from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.series_type import Settings
-from ooresults.handler import model
+from ooresults.repo.series_type import PersonSeriesResult
+from ooresults.repo.series_type import Points
 
 
 @pytest.fixture
@@ -277,51 +279,55 @@ def test_build_series_result(
         (
             class_a.name,
             [
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Derkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("500.000")},
-                    "organizer": {},
-                    "sum": Decimal("500.000"),
-                    "rank": 1,
-                },
-                {
-                    "first_name": "Angela",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("168.742")},
-                    "organizer": {},
-                    "sum": Decimal("168.742"),
-                    "rank": 2,
-                },
+                PersonSeriesResult(
+                    first_name="Birgit",
+                    last_name="Derkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("500.000")),
+                    },
+                    total_points=Decimal("500.000"),
+                    rank=1,
+                ),
+                PersonSeriesResult(
+                    first_name="Angela",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("168.742")),
+                    },
+                    total_points=Decimal("168.742"),
+                    rank=2,
+                ),
             ],
         ),
         (
             class_b.name,
             [
-                {
-                    "first_name": "Claudia",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("500.000")},
-                    "organizer": {},
-                    "sum": Decimal("500.000"),
-                    "rank": 1,
-                },
-                {
-                    "first_name": "Birgit",
-                    "last_name": "Merkel",
-                    "year": None,
-                    "club": None,
-                    "races": {0: Decimal("473.497")},
-                    "organizer": {},
-                    "sum": Decimal("473.497"),
-                    "rank": 2,
-                },
+                PersonSeriesResult(
+                    first_name="Claudia",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("500.000")),
+                    },
+                    total_points=Decimal("500.000"),
+                    rank=1,
+                ),
+                PersonSeriesResult(
+                    first_name="Birgit",
+                    last_name="Merkel",
+                    year=None,
+                    club_name=None,
+                    races={
+                        0: Points(points=Decimal("473.497")),
+                    },
+                    total_points=Decimal("473.497"),
+                    rank=2,
+                ),
             ],
         ),
     ]

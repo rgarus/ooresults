@@ -29,6 +29,8 @@ from ooresults.repo.entry_type import EntryType
 from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.result_type import PersonRaceResult
+from ooresults.repo.series_type import PersonSeriesResult
+from ooresults.repo.series_type import Points
 
 
 def build_results(
@@ -122,12 +124,12 @@ def build_total_results(
     settings: series_type.Settings,
     list_of_results: List[List[Tuple[ClassInfoType, List[RankedEntryType]]]],
     organizers: Optional[List[List[EntryType]]] = None,
-) -> List[Tuple[str, List[Dict]]]:
+) -> List[Tuple[str, List[PersonSeriesResult]]]:
     if organizers is None:
         organizers = []
     q = Decimal(10) ** -settings.decimal_places
 
-    r = {}
+    r: Dict[str, Dict[Tuple[str, str], PersonSeriesResult]] = {}
     for i, class_results in enumerate(list_of_results):
         for class_, ranked_entries in class_results:
             if class_.name == "Organizer":
@@ -135,10 +137,10 @@ def build_total_results(
             if class_.name not in r:
                 r[class_.name] = {}
 
+            # compute points
             for e in ranked_entries:
                 entry = e.entry
 
-                # compute points
                 points = None
                 if class_.params.otype != "score":
                     if e.rank is not None:
@@ -154,77 +156,79 @@ def build_total_results(
                     ):
                         points = 0
 
-                # check if competitor has points
                 if points is not None:
-                    if (entry.last_name, entry.first_name) not in r[class_.name]:
-                        r[class_.name][(entry.last_name, entry.first_name)] = {
-                            "last_name": entry.last_name,
-                            "first_name": entry.first_name,
-                            "year": entry.year,
-                            "club": entry.club_name,
-                            "sum": 0,
-                            "races": {},
-                            "organizer": {},
-                        }
+                    person_name = (entry.last_name, entry.first_name)
+                    if person_name not in r[class_.name]:
+                        r[class_.name][person_name] = PersonSeriesResult(
+                            last_name=entry.last_name,
+                            first_name=entry.first_name,
+                            year=entry.year,
+                            club_name=entry.club_name,
+                            races={},
+                            total_points=Decimal(0),
+                            rank=None,
+                        )
 
                     p = Decimal(settings.maximum_points * points).quantize(q)
-                    r[class_.name][(entry.last_name, entry.first_name)]["races"][i] = p
+                    r[class_.name][person_name].races[i] = Points(points=p)
 
-            # add organizers
-            if len(organizers) > i:
-                for entry in organizers[i]:
-                    name = (entry.last_name, entry.first_name)
-                    if name not in r[class_.name]:
-                        r[class_.name][name] = {
-                            "last_name": entry.last_name,
-                            "first_name": entry.first_name,
-                            "year": entry.year,
-                            "club": entry.club_name,
-                            "sum": 0,
-                            "races": {},
-                            "organizer": {},
-                        }
-                    r[class_.name][name]["organizer"][i] = 0
+    # add organizer bonus
+    for i, entries in enumerate(organizers):
+        for entry in entries:
+            person_name = (entry.last_name, entry.first_name)
+            for class_name, person_series_results in r.items():
+                if person_name in person_series_results:
+                    person_series_result = person_series_results[person_name]
+                    # compute organizer bonus
+                    sorted_points = sorted(
+                        person_series_results[person_name].races.values(),
+                        key=lambda p: p.points,
+                        reverse=True,
+                    )
+                    if len(sorted_points) == 0:
+                        p = Decimal(0)
+                    elif len(sorted_points) == 1:
+                        p = sorted_points[0].points / 2
+                    else:
+                        p = (sorted_points[0].points + sorted_points[1].points) / 2
 
-    # build sum of points
+                    person_series_results[person_name].races[i] = Points(
+                        points=p.quantize(q),
+                        bonus=True,
+                    )
+
     ranked_classes = []
-    for class_name, entries in r.items():
-        for entry in entries.values():
-            points_of_series = sorted(entry["races"].values(), reverse=True)
-            # add organizer bonus
-            if entry["organizer"] != {}:
-                if len(points_of_series) == 0:
-                    points = Decimal(0)
-                elif len(points_of_series) == 1:
-                    points = points_of_series[0] / 2
-                else:
-                    points = (points_of_series[0] + points_of_series[1]) / 2
-                for i in entry["organizer"].keys():
-                    entry["organizer"][i] = points.quantize(q)
-
-            # compute sum
-            points_of_series = sorted(
-                list(entry["races"].values()) + list(entry["organizer"].values()),
+    for class_name, person_series_results in r.items():
+        # compute total points
+        for person_series_result in person_series_results.values():
+            sorted_points = sorted(
+                person_series_result.races.values(),
+                key=lambda p: p.points,
                 reverse=True,
             )
-            if settings.nr_of_best_results is not None:
-                points_of_series = points_of_series[0 : settings.nr_of_best_results]
-            for points in points_of_series:
-                entry["sum"] += points
+            for i, points in enumerate(sorted_points):
+                if (
+                    settings.nr_of_best_results is None
+                    or i < settings.nr_of_best_results
+                ):
+                    person_series_result.total_points += points.points
 
         # build a list and rank the list
-        ranked_entries = list(entries.values())
-        ranked_entries.sort(key=lambda e: e["last_name"] + "," + e["first_name"])
-        ranked_entries.sort(key=lambda e: e["sum"], reverse=True)
+        ranked_entries = list(person_series_results.values())
+        ranked_entries.sort(key=lambda e: e.last_name + "," + e.first_name)
+        ranked_entries.sort(key=lambda e: e.total_points, reverse=True)
 
         for j, e in enumerate(ranked_entries):
-            if j > 0 and ranked_entries[j]["sum"] == ranked_entries[j - 1]["sum"]:
-                e["rank"] = ranked_entries[j - 1]["rank"]
+            if (
+                j > 0
+                and ranked_entries[j].total_points == ranked_entries[j - 1].total_points
+            ):
+                e.rank = ranked_entries[j - 1].rank
             else:
-                e["rank"] = j + 1
+                e.rank = j + 1
             # rank is None if sum is 0
-            if e["sum"] == 0:
-                e["rank"] = None
+            if e.total_points == 0:
+                e.rank = None
 
         ranked_classes.append((class_name, ranked_entries))
 
