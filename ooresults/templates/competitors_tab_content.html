@@ -120,6 +120,9 @@ $def with (competitors_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "competitor/fill_edit_form", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         xhr.send("id=");
@@ -163,6 +166,9 @@ $def with (competitors_table)
                         window.alert(this.responseText);
                     }
                 };
+                xhr.onerror = function() {
+                    window.alert("Network error");
+                };
                 xhr.open("POST", "competitor/fill_edit_form", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
                 xhr.send("id=".concat(table.rows[i].id));
@@ -185,6 +191,9 @@ $def with (competitors_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "competitor/add", true);
         xhr.send(data);
     }
@@ -203,6 +212,9 @@ $def with (competitors_table)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(this.responseText);
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "competitor/import", true);
         xhr.send(data);
@@ -225,6 +237,9 @@ $def with (competitors_table)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(new TextDecoder().decode(this.response));
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "competitor/export", true);
         xhr.responseType = "arraybuffer";
@@ -252,6 +267,9 @@ $def with (competitors_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "competitor/delete", true);
         xhr.send(data);
     }
@@ -268,6 +286,9 @@ $def with (competitors_table)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(this.responseText);
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "competitor/update", true);
         xhr.send();

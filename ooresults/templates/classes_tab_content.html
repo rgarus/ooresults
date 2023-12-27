@@ -129,6 +129,9 @@ $def with (classes_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "class/fill_edit_form", true);
         var data = new FormData();
         data.append('event_id', window.event_id);
@@ -164,6 +167,9 @@ $def with (classes_table)
                         window.alert(this.responseText);
                     }
                 };
+                xhr.onerror = function() {
+                    window.alert("Network error");
+                };
                 xhr.open("POST", "class/fill_edit_form", true);
                 var data = new FormData();
                 data.append('event_id', window.event_id);
@@ -189,6 +195,9 @@ $def with (classes_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "class/import", true);
         xhr.send(data);
     }
@@ -211,6 +220,9 @@ $def with (classes_table)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(new TextDecoder().decode(this.response));
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "class/export", true);
         xhr.responseType = "arraybuffer";
@@ -236,6 +248,9 @@ $def with (classes_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "class/add", true);
         xhr.send(data);
     }
@@ -256,6 +271,9 @@ $def with (classes_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "class/delete", true);
         xhr.send(data);
     }
@@ -274,6 +292,9 @@ $def with (classes_table)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(this.responseText);
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "class/update", true);
         var data = new FormData();

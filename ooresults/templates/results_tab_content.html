@@ -76,6 +76,9 @@ $def with (results)
                 window.alert(new TextDecoder().decode(this.response));
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "result/pdfResult", true);
         xhr.responseType = "arraybuffer";
         xhr.send(data);
@@ -99,6 +102,9 @@ $def with (results)
                 window.alert(new TextDecoder().decode(this.response));
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "result/pdfSplittimes", true);
         xhr.responseType = "arraybuffer";
         xhr.send(data);
@@ -118,6 +124,9 @@ $def with (results)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(this.responseText);
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "result/update", true);
         var data = new FormData();

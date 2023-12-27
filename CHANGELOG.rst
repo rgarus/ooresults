@@ -10,6 +10,11 @@ Changed
 
 - Internally used data structures and interfaces changed.
 
+Fixed
+^^^^^
+
+- Display error message if the server cannot be reached when executing a function.
+
 
 [0.2.6] - 2023-07-17
 --------------------

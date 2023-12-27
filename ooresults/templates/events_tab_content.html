@@ -76,6 +76,9 @@ $def with (events_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "event/fill_edit_form", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         xhr.send("id=");
@@ -109,6 +112,9 @@ $def with (events_table)
                         window.alert(this.responseText);
                     }
                 };
+                xhr.onerror = function() {
+                    window.alert("Network error");
+                };
                 xhr.open("POST", "event/fill_edit_form", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
                 xhr.send("id=".concat(table.rows[i].id));
@@ -131,6 +137,9 @@ $def with (events_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "event/add", true);
         xhr.send(data);
     }
@@ -150,6 +159,9 @@ $def with (events_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "event/delete", true);
         xhr.send(data);
     }
@@ -166,6 +178,9 @@ $def with (events_table)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(this.responseText);
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "event/update", true);
         xhr.send();

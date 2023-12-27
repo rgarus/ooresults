@@ -225,6 +225,9 @@ $def with (entries_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "entry/fill_edit_form", true);
         var data = new FormData();
         data.append('event_id', window.event_id);
@@ -245,6 +248,9 @@ $def with (entries_table)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(this.responseText);
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "entry/fill_competitors_form", true);
         var data = {'event_id': window.event_id};
@@ -268,6 +274,9 @@ $def with (entries_table)
                     if (this.readyState == 4 && this.status == 500) {
                         window.alert(this.responseText);
                     }
+                };
+                xhr.onerror = function() {
+                    window.alert("Network error");
                 };
                 xhr.open("POST", "entry/fill_edit_form", true);
                 var data = new FormData();
@@ -305,6 +314,9 @@ $def with (entries_table)
                         window.alert(this.responseText);
                     }
                 };
+                xhr.onerror = function() {
+                    window.alert("Network error");
+                };
                 xhr.open("POST", "entry/fill_result_form", true);
                 //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
                 var data = new FormData();
@@ -331,6 +343,9 @@ $def with (entries_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "entry/import", true);
         xhr.send(data);
     }
@@ -354,6 +369,9 @@ $def with (entries_table)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(new TextDecoder().decode(this.response));
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "entry/export", true);
         xhr.responseType = "arraybuffer";
@@ -390,6 +408,9 @@ $def with (entries_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "entry/add", true);
         xhr.send(data);
     }
@@ -410,6 +431,9 @@ $def with (entries_table)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "entry/delete", true);
         xhr.send(data);
     }
@@ -428,6 +452,9 @@ $def with (entries_table)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(this.responseText);
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "entry/update", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");

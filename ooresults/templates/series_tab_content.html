@@ -69,6 +69,9 @@ $def with (results)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "series/fill_settings_form", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         xhr.send();
@@ -98,6 +101,9 @@ $def with (results)
                 window.alert(this.responseText);
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "series/settings", true);
         xhr.send(data);
     }
@@ -119,6 +125,9 @@ $def with (results)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(new TextDecoder().decode(this.response));
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "series/pdfResult", true);
         xhr.responseType = "arraybuffer";
@@ -143,6 +152,9 @@ $def with (results)
                 window.alert(new TextDecoder().decode(this.response));
             }
         };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
         xhr.open("POST", "series/csvResult", true);
         xhr.responseType = "arraybuffer";
         xhr.send(data);
@@ -160,6 +172,9 @@ $def with (results)
             if (this.readyState == 4 && this.status == 500) {
                 window.alert(this.responseText);
             }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
         };
         xhr.open("POST", "series/update", true);
         var data = new FormData();
