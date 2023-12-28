@@ -55,9 +55,9 @@ $else:
                 <td><input id="chip" name="chip" type="text" value="$chip" onchange="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="club">Club</label></th>
+                <th class="input-header"><label for="club_id">Club</label></th>
                 <td>
-                    <select id="club" name="club" onchange="mark_label(this)">
+                    <select id="club_id" name="club_id" onchange="mark_label(this)">
                     $if club_id is None:
                         <option value="" selected></option>
                     $else:

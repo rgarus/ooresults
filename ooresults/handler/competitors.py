@@ -49,7 +49,7 @@ class Add:
                 model.add_competitor(
                     first_name=data.first_name,
                     last_name=data.last_name,
-                    club_id=int(data.club) if data.club != "" else None,
+                    club_id=int(data.club_id) if data.club_id != "" else None,
                     gender=data.gender,
                     year=int(data.year) if data.year != "" else None,
                     chip=data.chip,
@@ -59,7 +59,7 @@ class Add:
                     id=int(data.id),
                     first_name=data.first_name,
                     last_name=data.last_name,
-                    club_id=int(data.club) if data.club != "" else None,
+                    club_id=int(data.club_id) if data.club_id != "" else None,
                     gender=data.gender,
                     year=int(data.year) if data.year != "" else None,
                     chip=data.chip,
