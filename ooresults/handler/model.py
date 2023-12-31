@@ -903,10 +903,10 @@ def add_or_update_entry(
             )
             db.delete_entry(id=result_entry.id)
 
-        elif class_id != entry.class_name or start_time != entry.start.start_time:
+        elif class_id != entry.class_id or start_time != entry.start.start_time:
             # compute new result
             result_entry = db.get_entry(id=id)
-            if result_entry.result.has_punches():
+            if result_entry.result.has_punches() or result_entry.result.split_times:
                 try:
                     class_ = db.get_class(id=class_id)
                     course_id = class_.course_id

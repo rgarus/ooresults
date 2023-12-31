@@ -9,11 +9,13 @@ Changed
 ^^^^^^^
 
 - Internally used data structures and interfaces changed.
+- Course names added to IOF ResultList export.
 
 Fixed
 ^^^^^
 
 - Display error message if the server cannot be reached when executing a function.
+- Start times of an IOF ResultList of not started participants are no longer imported as punched times.
 
 
 [0.2.6] - 2023-07-17

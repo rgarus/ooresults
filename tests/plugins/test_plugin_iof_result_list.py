@@ -25,6 +25,7 @@ from ooresults.plugins import iof_result_list
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo import result_type
+from ooresults.repo import start_type
 from ooresults.repo.entry_type import EntryType
 from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
@@ -457,6 +458,164 @@ def test_export_result_list_not_competing():
     assert document == bytes(content, encoding="utf-8")
 
 
+def test_import_result_list_with_start_time_but_not_started():
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+    <StartTime>
+      <Date>2020-02-09</Date>
+    </StartTime>
+  </Event>
+  <ClassResult>
+    <Class>
+      <Name>Bahn A - Lang</Name>
+    </Class>
+    <PersonResult>
+      <Person sex="F">
+        <Name>
+          <Family>Merkel</Family>
+          <Given>Angela</Given>
+        </Name>
+        <BirthDate>1972-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Kanzleramt</Name>
+      </Organisation>
+      <Result>
+        <StartTime>2020-02-09T10:00:00+01:00</StartTime>
+        <Status>DidNotStart</Status>
+        <ControlCard punchingSystem="SI">1234567</ControlCard>
+      </Result>
+    </PersonResult>
+  </ClassResult>
+</ResultList>
+"""
+    event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
+    assert event == {
+        "name": "1. O-Cup 2020",
+        "date": datetime.date(year=2020, month=2, day=9),
+    }
+    assert results == [
+        {
+            "first_name": "Angela",
+            "last_name": "Merkel",
+            "class_": "Bahn A - Lang",
+            "club": "OC Kanzleramt",
+            "chip": "1234567",
+            "gender": "F",
+            "year": 1972,
+            "not_competing": False,
+            "result": result_type.PersonRaceResult(
+                status=ResultStatus.DID_NOT_START,
+            ),
+            "start": start_type.PersonRaceStart(
+                start_time=datetime.datetime(
+                    2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
+                ),
+            ),
+        },
+    ]
+
+
+def test_export_result_list_with_start_time_but_not_started():
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+    <StartTime>
+      <Date>2020-02-09</Date>
+    </StartTime>
+  </Event>
+  <ClassResult>
+    <Class>
+      <Name>Bahn A - Lang</Name>
+    </Class>
+    <PersonResult>
+      <Person sex="F">
+        <Name>
+          <Family>Merkel</Family>
+          <Given>Angela</Given>
+        </Name>
+        <BirthDate>1972-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Kanzleramt</Name>
+      </Organisation>
+      <Result>
+        <Status>DidNotStart</Status>
+        <ControlCard punchingSystem="SI">1234567</ControlCard>
+      </Result>
+    </PersonResult>
+  </ClassResult>
+</ResultList>
+"""
+    document = iof_result_list.create_result_list(
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=datetime.date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
+        [
+            (
+                ClassInfoType(
+                    id=1,
+                    name="Bahn A - Lang",
+                    short_name=None,
+                    course_id=None,
+                    course_name=None,
+                    course_length=None,
+                    course_climb=None,
+                    number_of_controls=None,
+                    params=ClassParams(),
+                ),
+                [
+                    RankedEntryType(
+                        entry=EntryType(
+                            id=1,
+                            event_id=1,
+                            competitor_id=1,
+                            first_name="Angela",
+                            last_name="Merkel",
+                            class_id=1,
+                            class_name="Bahn A - Lang",
+                            club_id=1,
+                            club_name="OC Kanzleramt",
+                            chip="1234567",
+                            gender="F",
+                            year=1972,
+                            not_competing=False,
+                            result=result_type.PersonRaceResult(
+                                status=ResultStatus.DID_NOT_START,
+                            ),
+                            start=start_type.PersonRaceStart(
+                                start_time=datetime.datetime(
+                                    2020,
+                                    2,
+                                    9,
+                                    10,
+                                    0,
+                                    0,
+                                    tzinfo=timezone(timedelta(hours=1)),
+                                ),
+                            ),
+                        ),
+                        rank=None,
+                        time_behind=None,
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert document == bytes(content, encoding="utf-8")
+
+
 def test_import_result_list_without_class_result():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
@@ -722,6 +881,7 @@ def test_export_result_list_classes():
       <Name>Bahn A - Lang</Name>
     </Class>
     <Course>
+      <Name>Bahn A</Name>
       <Length>5100</Length>
       <Climb>110</Climb>
       <NumberOfControls>10</NumberOfControls>
@@ -790,6 +950,7 @@ def test_export_result_list_classes():
       <Name>Bahn B - Mittel</Name>
     </Class>
     <Course>
+      <Name>Bahn B</Name>
       <Length>2800</Length>
     </Course>
     <PersonResult>

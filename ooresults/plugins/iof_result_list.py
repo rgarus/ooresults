@@ -27,6 +27,7 @@ from lxml.builder import ElementMaker
 import iso8601
 
 from ooresults.repo import result_type
+from ooresults.repo import start_type
 from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
@@ -92,6 +93,8 @@ def create_result_list(
         cr.append(CLASS(NAME(class_.name)))
 
         co = COURSE()
+        if class_.course_name:
+            co.append(NAME(class_.course_name))
         if class_.course_length is not None:
             co.append(LENGTH(str(round(class_.course_length))))
         if class_.course_climb is not None:
@@ -217,8 +220,8 @@ def parse_result_list(content: bytes) -> Tuple[Dict, List[Dict]]:
         person_result_list = c.findall("PersonResult", namespaces=namespaces)
         for pr in person_result_list:
             r = {
-                "first_name": "",
-                "last_name": "",
+                "first_name": pr.find("Person/Name/Given", namespaces=namespaces).text,
+                "last_name": pr.find("Person/Name/Family", namespaces=namespaces).text,
                 "class_": class_,
                 "club": "",
                 "chip": "",
@@ -227,9 +230,6 @@ def parse_result_list(content: bytes) -> Tuple[Dict, List[Dict]]:
                 "not_competing": False,
                 "result": result_type.PersonRaceResult(),
             }
-
-            r["last_name"] = pr.find("Person/Name/Family", namespaces=namespaces).text
-            r["first_name"] = pr.find("Person/Name/Given", namespaces=namespaces).text
 
             e_person = pr.find("Person", namespaces=namespaces)
             if e_person.get("sex") is not None:
@@ -254,8 +254,16 @@ def parse_result_list(content: bytes) -> Tuple[Dict, List[Dict]]:
 
             e_start_time = e_result.find("StartTime", namespaces=namespaces)
             if e_start_time is not None:
-                r["result"].start_time = iso8601.parse_date(e_start_time.text)
-                r["result"].punched_start_time = r["result"].start_time
+                if r["result"].status in [
+                    ResultStatus.INACTIVE,
+                    ResultStatus.DID_NOT_START,
+                ]:
+                    r["start"] = start_type.PersonRaceStart(
+                        start_time=iso8601.parse_date(e_start_time.text)
+                    )
+                else:
+                    r["result"].start_time = iso8601.parse_date(e_start_time.text)
+                    r["result"].punched_start_time = r["result"].start_time
             e_finish_time = e_result.find("FinishTime", namespaces=namespaces)
             if e_finish_time is not None:
                 r["result"].finish_time = iso8601.parse_date(e_finish_time.text)
