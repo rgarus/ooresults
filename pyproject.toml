@@ -22,6 +22,27 @@ classifiers = [
     "Development Status :: 4 - Beta",
 ]
 keywords = ["orienteering", "sportident"]
+dependencies = [
+    "web.py",
+    "lxml",
+    "requests",
+    "sireader",
+    "iso8601",
+    "clevercsv",
+    "jsonschema",
+    "websocket-client",
+    "websockets",
+    "fpdf2 != 2.5.7",
+    "pyserial",
+    "tzlocal",
+    "unidecode",
+    "pyOpenSSL",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
 
 [project.scripts]
 ooresults-server = "ooresults._server:main"
@@ -31,3 +52,21 @@ ooresults-reader = "ooresults._reader:main"
 Repository = "https://github.com/rgarus/ooresults"
 Documentation = "https://ooresults.readthedocs.io/en/latest"
 
+[tool.setuptools]
+packages = [
+    "ooresults",
+    "ooresults.handler",
+    "ooresults.pdf",
+    "ooresults.pdf.fonts",
+    "ooresults.plugins",
+    "ooresults.plugins.imports",
+    "ooresults.plugins.imports.entries",
+    "ooresults.repo",
+    "ooresults.repo.update",
+    "ooresults.schema",
+    "ooresults.static",
+    "ooresults.templates",
+    "ooresults.templates.si",
+    "ooresults.utils",
+    "ooresults.websocket_server",
+]
