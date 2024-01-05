@@ -9,7 +9,7 @@
 project = 'ooresults'
 copyright = '2022, rgarus'
 author = 'rgarus'
-release = '0.2.7'
+release = '0.2.8'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
