@@ -18,6 +18,7 @@
 
 
 import dataclasses
+from dataclasses import field
 from typing import Dict
 from typing import Optional
 
@@ -38,9 +39,9 @@ class EntryType:
     class_name: Optional[str] = None
     not_competing: bool = False
     chip: Optional[str] = None
-    fields: Dict[int, str] = dataclasses.field(default_factory=lambda: {})
-    result: PersonRaceResult = PersonRaceResult()
-    start: PersonRaceStart = PersonRaceStart()
+    fields: Dict[int, str] = field(default_factory=lambda: {})
+    result: PersonRaceResult = field(default_factory=lambda: PersonRaceResult())
+    start: PersonRaceStart = field(default_factory=lambda: PersonRaceStart())
     club_id: Optional[int] = None
     club_name: Optional[str] = None
 

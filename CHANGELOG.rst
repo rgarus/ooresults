@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Fixed
+^^^^^
+
+- ooresults.server startup error when using Python 3.11 fixed.
+
+
 [0.2.7] - 2024-01-04
 --------------------
 
