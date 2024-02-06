@@ -26,6 +26,7 @@ import bz2
 from typing import List
 
 import pytest
+import pytest_asyncio
 import websockets
 
 from ooresults.repo.sqlite_repo import SqliteRepo
@@ -100,365 +101,310 @@ def websocket_server():
     future.result()
 
 
-@pytest.fixture
-def loop():
-    return asyncio.new_event_loop()
-
-
-def test_no_access_if_event_not_found(
-    loop: asyncio.BaseEventLoop,
+@pytest.mark.asyncio
+async def test_no_access_if_event_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async def test():
-        async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
-            await si1_client.send("xxx,local")
-            response = await si1_client.recv()
-            assert response == "__no_access__"
+    async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
+        await si1_client.send("xxx,local")
+        response = await si1_client.recv()
+        assert response == "__no_access__"
 
-            # websocket is closed by the server
-            with pytest.raises(websockets.ConnectionClosedOK):
-                await si1_client.recv()
-
-    loop.run_until_complete(test())
+        # websocket is closed by the server
+        with pytest.raises(websockets.ConnectionClosedOK):
+            await si1_client.recv()
 
 
-def test_no_access_if_key_not_found(
-    loop: asyncio.BaseEventLoop,
+@pytest.mark.asyncio
+async def test_no_access_if_key_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async def test():
-        async with websockets.connect("ws://localhost:8081/si1") as si1_client:
-            await si1_client.send(f"{event_id},xxx")
-            response = await si1_client.recv()
-            assert response == "__no_access__"
+    async with websockets.connect("ws://localhost:8081/si1") as si1_client:
+        await si1_client.send(f"{event_id},xxx")
+        response = await si1_client.recv()
+        assert response == "__no_access__"
 
-            # websocket is closed by the server
-            with pytest.raises(websockets.ConnectionClosedOK):
-                await si1_client.recv()
-
-    loop.run_until_complete(test())
+        # websocket is closed by the server
+        with pytest.raises(websockets.ConnectionClosedOK):
+            await si1_client.recv()
 
 
-def test_reader_status_received_if_event_and_key_found(
-    loop: asyncio.BaseEventLoop,
+@pytest.mark.asyncio
+async def test_reader_status_received_if_event_and_key_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async def test():
-        async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
-            await si1_client.send(f"{event_id},local")
-            response = await si1_client.recv()
-            assert json.loads(response) == {"status": "offline", "data": ""}
-            await si1_client.close()
-
-    loop.run_until_complete(test())
+    async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
+        await si1_client.send(f"{event_id},local")
+        response = await si1_client.recv()
+        assert json.loads(response) == {"status": "offline", "data": ""}
+        await si1_client.close()
 
 
-def test_cardreader_event_key_not_found(
-    loop: asyncio.BaseEventLoop,
+@pytest.mark.asyncio
+async def test_cardreader_event_key_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async def test():
+    async with websockets.connect(
+        uri="ws://localhost:8081/cardreader",
+        extra_headers={"X-Event-Key": "xxx"},
+    ) as reader:
+        # send a cardreader state message
+        item = {
+            "entryType": "readerDisconnected",
+            "entryTime": "2021-05-18T17:24:33+02:00",
+        }
+        await reader.send(bz2.compress(json.dumps(item).encode()))
+        response = await reader.recv()
+        assert response == 'Event for key "xxx" not found'
+
+        # websocket is closed by the server
+        with pytest.raises(websockets.ConnectionClosedOK):
+            await reader.recv()
+
+
+@pytest.mark.asyncio
+async def test_cardreader_event_key_found_and_reader_disconnected(
+    event_id: int,
+    websocket_server: WebSocketServer,
+):
+    async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
+        await si1_client.send(f"{event_id},local")
+        response = await si1_client.recv()
+        assert json.loads(response) == {"status": "offline", "data": ""}
+
         async with websockets.connect(
             uri="ws://localhost:8081/cardreader",
-            extra_headers={"X-Event-Key": "xxx"},
+            extra_headers={"X-Event-Key": "local"},
         ) as reader:
             # send a cardreader state message
             item = {
                 "entryType": "readerDisconnected",
                 "entryTime": "2021-05-18T17:24:33+02:00",
             }
-            await reader.send(bz2.compress(json.dumps(item).encode()))
+            data = bz2.compress(json.dumps(item).encode())
+            await reader.send(data)
             response = await reader.recv()
-            assert response == 'Event for key "xxx" not found'
+            assert json.loads(response) == {
+                "eventId": event_id,
+                "readerStatus": "readerDisconnected",
+                "event": "Event",
+            }
 
-            # websocket is closed by the server
-            with pytest.raises(websockets.ConnectionClosedOK):
-                await reader.recv()
+            # si1_client receives cardreader readerDisconnected message
+            response = await si1_client.recv()
+            assert json.loads(response) == {"status": "readerDisconnected", "data": ""}
 
-    loop.run_until_complete(test())
+        # si1_client receives cardreader offline message
+        response = await si1_client.recv()
+        assert json.loads(response) == {"status": "offline", "data": ""}
+
+        await si1_client.close()
 
 
-def test_cardreader_event_key_found_and_reader_disconnected(
-    loop: asyncio.BaseEventLoop,
+@pytest_asyncio.fixture
+async def reader(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async def test():
-        async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
-            await si1_client.send(f"{event_id},local")
-            response = await si1_client.recv()
-            assert json.loads(response) == {"status": "offline", "data": ""}
-
-            async with websockets.connect(
-                uri="ws://localhost:8081/cardreader",
-                extra_headers={"X-Event-Key": "local"},
-            ) as reader:
-                # send a cardreader state message
-                item = {
-                    "entryType": "readerDisconnected",
-                    "entryTime": "2021-05-18T17:24:33+02:00",
-                }
-                data = bz2.compress(json.dumps(item).encode())
-                await reader.send(data)
-                response = await reader.recv()
-                assert json.loads(response) == {
-                    "eventId": event_id,
-                    "readerStatus": "readerDisconnected",
-                    "event": "Event",
-                }
-
-                # si1_client receives cardreader readerDisconnected message
-                response = await si1_client.recv()
-                assert json.loads(response) == {
-                    "status": "readerDisconnected",
-                    "data": "",
-                }
-
-            # si1_client receives cardreader offline message
-            response = await si1_client.recv()
-            assert json.loads(response) == {"status": "offline", "data": ""}
-
-            await si1_client.close()
-
-    loop.run_until_complete(test())
-
-
-@pytest.fixture
-def reader(
-    loop: asyncio.BaseEventLoop,
-    event_id: int,
-    websocket_server: WebSocketServer,
-):
-    async def setup():
-        client = await websockets.connect(
-            uri="ws://localhost:8081/cardreader",
-            extra_headers={"X-Event-Key": "local"},
-        )
-        item = {
-            "entryType": "readerDisconnected",
-            "entryTime": "2021-05-18T17:24:33+02:00",
-        }
-        data = bz2.compress(json.dumps(item).encode())
-        await client.send(data)
-        response = await client.recv()
-        assert json.loads(response) == {
-            "eventId": event_id,
-            "readerStatus": "readerDisconnected",
-            "event": "Event",
-        }
-        return client
-
-    async def teardown(client):
-        await client.close()
-
-    client = loop.run_until_complete(setup())
+    client = await websockets.connect(
+        uri="ws://localhost:8081/cardreader",
+        extra_headers={"X-Event-Key": "local"},
+    )
+    item = {
+        "entryType": "readerDisconnected",
+        "entryTime": "2021-05-18T17:24:33+02:00",
+    }
+    data = bz2.compress(json.dumps(item).encode())
+    await client.send(data)
+    response = await client.recv()
+    assert json.loads(response) == {
+        "eventId": event_id,
+        "readerStatus": "readerDisconnected",
+        "event": "Event",
+    }
     yield client
-    loop.run_until_complete(teardown(client=client))
+    await client.close()
 
 
-@pytest.fixture
-def si1_clients(
-    loop: asyncio.BaseEventLoop,
+@pytest_asyncio.fixture
+async def si1_clients(
     event_id: int,
     reader: websockets.WebSocketClientProtocol,
     websocket_server: WebSocketServer,
 ):
-    async def setup():
-        si1_clients = []
-        for i in range(4):
-            c = await websockets.connect(uri="ws://localhost:8081/si1")
-            si1_clients.append(c)
+    connect = websockets.connect(uri="ws://localhost:8081/si1")
+    async with connect as c1, connect as c2, connect as c3, connect as c4:
+        si1_clients = [c1, c2, c3, c4]
         for c in si1_clients:
             await c.send(f"{event_id},local")
         for c in si1_clients:
             response = await c.recv()
             assert json.loads(response) == {"status": "readerDisconnected", "data": ""}
-        return si1_clients
-
-    async def teardown(si1_clients):
+        yield si1_clients
         for c in si1_clients:
             await c.close()
 
-    si1_clients = loop.run_until_complete(setup())
-    yield si1_clients
-    loop.run_until_complete(teardown(si1_clients=si1_clients))
 
-
-def test_cardreader_reader_connected(
-    loop: asyncio.BaseEventLoop,
+@pytest.mark.asyncio
+async def test_cardreader_reader_connected(
     event_id: int,
     reader: websockets.WebSocketClientProtocol,
     si1_clients: List[websockets.WebSocketClientProtocol],
     websocket_server: WebSocketServer,
 ):
-    async def test():
-        item = {
-            "entryType": "readerConnected",
-            "entryTime": "2021-05-18T17:24:33+02:00",
-        }
-        data = bz2.compress(json.dumps(item).encode())
-        await reader.send(data)
-        response = await reader.recv()
-        assert json.loads(response) == {
-            "eventId": event_id,
-            "readerStatus": "readerConnected",
-            "event": "Event",
-        }
+    item = {
+        "entryType": "readerConnected",
+        "entryTime": "2021-05-18T17:24:33+02:00",
+    }
+    data = bz2.compress(json.dumps(item).encode())
+    await reader.send(data)
+    response = await reader.recv()
+    assert json.loads(response) == {
+        "eventId": event_id,
+        "readerStatus": "readerConnected",
+        "event": "Event",
+    }
 
-        # new state is sent to all clients
-        for c in si1_clients:
-            response = await c.recv()
-            assert json.loads(response) == {"status": "readerConnected", "data": ""}
-
-    loop.run_until_complete(test())
+    # new state is sent to all clients
+    for c in si1_clients:
+        response = await c.recv()
+        assert json.loads(response) == {"status": "readerConnected", "data": ""}
 
 
-def test_cardreader_reader_disconnected(
-    loop: asyncio.BaseEventLoop,
+@pytest.mark.asyncio
+async def test_cardreader_reader_disconnected(
     event_id: int,
     reader: websockets.WebSocketClientProtocol,
     si1_clients: List[websockets.WebSocketClientProtocol],
     websocket_server: WebSocketServer,
 ):
-    async def test():
-        item = {
-            "entryType": "readerDisconnected",
-            "entryTime": "2021-05-18T17:24:33+02:00",
-        }
-        data = bz2.compress(json.dumps(item).encode())
-        await reader.send(data)
-        response = await reader.recv()
-        assert json.loads(response) == {
-            "eventId": event_id,
-            "readerStatus": "readerDisconnected",
-            "event": "Event",
-        }
+    item = {
+        "entryType": "readerDisconnected",
+        "entryTime": "2021-05-18T17:24:33+02:00",
+    }
+    data = bz2.compress(json.dumps(item).encode())
+    await reader.send(data)
+    response = await reader.recv()
+    assert json.loads(response) == {
+        "eventId": event_id,
+        "readerStatus": "readerDisconnected",
+        "event": "Event",
+    }
 
-        # new state is sent to all clients
-        for c in si1_clients:
-            response = await c.recv()
-            assert json.loads(response) == {"status": "readerDisconnected", "data": ""}
-
-    loop.run_until_complete(test())
+    # new state is sent to all clients
+    for c in si1_clients:
+        response = await c.recv()
+        assert json.loads(response) == {"status": "readerDisconnected", "data": ""}
 
 
-def test_cardreader_card_inserted(
-    loop: asyncio.BaseEventLoop,
+@pytest.mark.asyncio
+async def test_cardreader_card_inserted(
     event_id: int,
     reader: websockets.WebSocketClientProtocol,
     si1_clients: List[websockets.WebSocketClientProtocol],
     websocket_server: WebSocketServer,
 ):
-    async def test():
-        item = {
-            "entryType": "cardInserted",
-            "entryTime": "2021-05-18T17:24:33+02:00",
-            "controlCard": "84752",
-        }
-        data = bz2.compress(json.dumps(item).encode())
-        await reader.send(data)
-        response = await reader.recv()
-        assert json.loads(response) == {
-            "eventId": event_id,
-            "controlCard": "84752",
-            "readerStatus": "cardInserted",
-            "event": "Event",
-        }
+    item = {
+        "entryType": "cardInserted",
+        "entryTime": "2021-05-18T17:24:33+02:00",
+        "controlCard": "84752",
+    }
+    data = bz2.compress(json.dumps(item).encode())
+    await reader.send(data)
+    response = await reader.recv()
+    assert json.loads(response) == {
+        "eventId": event_id,
+        "controlCard": "84752",
+        "readerStatus": "cardInserted",
+        "event": "Event",
+    }
 
-        # new state is sent to all clients
-        for c in si1_clients:
-            response = await c.recv()
-            assert json.loads(response) == {"status": "cardInserted", "data": "84752"}
-
-    loop.run_until_complete(test())
+    # new state is sent to all clients
+    for c in si1_clients:
+        response = await c.recv()
+        assert json.loads(response) == {"status": "cardInserted", "data": "84752"}
 
 
-def test_cardreader_card_removed(
-    loop: asyncio.BaseEventLoop,
+@pytest.mark.asyncio
+async def test_cardreader_card_removed(
     event_id: int,
     reader: websockets.WebSocketClientProtocol,
     si1_clients: List[websockets.WebSocketClientProtocol],
     websocket_server: WebSocketServer,
 ):
-    async def test():
-        item = {
-            "entryType": "cardRemoved",
-            "entryTime": "2021-05-18T17:24:33+02:00",
-        }
-        data = bz2.compress(json.dumps(item).encode())
-        await reader.send(data)
-        response = await reader.recv()
-        assert json.loads(response) == {
-            "eventId": event_id,
-            "readerStatus": "cardRemoved",
-            "event": "Event",
-        }
+    item = {
+        "entryType": "cardRemoved",
+        "entryTime": "2021-05-18T17:24:33+02:00",
+    }
+    data = bz2.compress(json.dumps(item).encode())
+    await reader.send(data)
+    response = await reader.recv()
+    assert json.loads(response) == {
+        "eventId": event_id,
+        "readerStatus": "cardRemoved",
+        "event": "Event",
+    }
 
-        # new state is sent to all clients
-        for c in si1_clients:
-            response = await c.recv()
-            assert json.loads(response) == {"status": "cardRemoved", "data": ""}
-
-    loop.run_until_complete(test())
+    # new state is sent to all clients
+    for c in si1_clients:
+        response = await c.recv()
+        assert json.loads(response) == {"status": "cardRemoved", "data": ""}
 
 
-def test_cardreader_card_read(
-    loop: asyncio.BaseEventLoop,
+@pytest.mark.asyncio
+async def test_cardreader_card_read(
     db,
     event_id: int,
     reader: websockets.WebSocketClientProtocol,
     si1_clients: List[websockets.WebSocketClientProtocol],
     websocket_server: WebSocketServer,
 ):
-    async def test():
-        item = {
-            "entryType": "cardRead",
-            "entryTime": "2021-05-18T17:24:33+02:00",
-            "cardType": "SI10",
-            "controlCard": "8084753",
-            "startTime": "2021-05-18T16:31:19+02:00",
-            "finishTime": "2021-05-18T16:31:50+02:00",
-            "checkTime": "2021-05-18T16:31:18+02:00",
-            "punches": [
-                {"controlCode": "141", "punchTime": "2021-05-18T16:31:25+02:00"},
-                {"controlCode": "143", "punchTime": "2021-05-18T16:31:31+02:00"},
-            ],
-        }
-        data = bz2.compress(json.dumps(item).encode())
-        await reader.send(data)
-        response = await reader.recv()
-        assert json.loads(response) == {
-            "entryTime": "17:24:33",
-            "eventId": 1,
-            "controlCard": "8084753",
-            "firstName": None,
-            "lastName": None,
-            "club": None,
-            "class": None,
-            "status": "FINISHED",
-            "time": None,
-            "error": "Control card unknown",
-            "readerStatus": "cardRead",
-            "event": "Event",
-        }
+    item = {
+        "entryType": "cardRead",
+        "entryTime": "2021-05-18T17:24:33+02:00",
+        "cardType": "SI10",
+        "controlCard": "8084753",
+        "startTime": "2021-05-18T16:31:19+02:00",
+        "finishTime": "2021-05-18T16:31:50+02:00",
+        "checkTime": "2021-05-18T16:31:18+02:00",
+        "punches": [
+            {"controlCode": "141", "punchTime": "2021-05-18T16:31:25+02:00"},
+            {"controlCode": "143", "punchTime": "2021-05-18T16:31:31+02:00"},
+        ],
+    }
+    data = bz2.compress(json.dumps(item).encode())
+    await reader.send(data)
+    response = await reader.recv()
+    assert json.loads(response) == {
+        "entryTime": "17:24:33",
+        "eventId": 1,
+        "controlCard": "8084753",
+        "firstName": None,
+        "lastName": None,
+        "club": None,
+        "class": None,
+        "status": "FINISHED",
+        "time": None,
+        "error": "Control card unknown",
+        "readerStatus": "cardRead",
+        "event": "Event",
+    }
 
-        # new state is sent to all clients
-        for c in si1_clients:
-            response = await c.recv()
-            assert json.loads(response)["status"] == "cardRead"
+    # new state is sent to all clients
+    for c in si1_clients:
+        response = await c.recv()
+        assert json.loads(response)["status"] == "cardRead"
 
-        # result is stored in database
-        data = db.get_entries(event_id=event_id)
-        assert len(data) == 1
-        assert data[0].event_id == event_id
-        assert data[0].competitor_id is None
-        assert data[0].first_name is None
-        assert data[0].last_name is None
-        assert data[0].chip == "8084753"
-        assert data[0].result.status == ResultStatus.FINISHED
-
-    loop.run_until_complete(test())
+    # result is stored in database
+    data = db.get_entries(event_id=event_id)
+    assert len(data) == 1
+    assert data[0].event_id == event_id
+    assert data[0].competitor_id is None
+    assert data[0].first_name is None
+    assert data[0].last_name is None
+    assert data[0].chip == "8084753"
+    assert data[0].result.status == ResultStatus.FINISHED
