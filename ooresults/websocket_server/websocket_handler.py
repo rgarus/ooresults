@@ -22,9 +22,9 @@ import copy
 import json
 import pathlib
 import datetime
+import logging
 import bz2
 import functools
-import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
 
@@ -71,31 +71,19 @@ class WebSocketHandler:
                 for k, v in self.connections.items()
                 if v[0] == "/si2" and str(event.id) == v[1]
             }
-            if connections:
-                await asyncio.wait(
-                    [
-                        self.send(conn=conn, event=copy.deepcopy(event), message={})
-                        for conn in connections
-                    ]
-                )
+            for conn in connections:
+                await self.send(conn=conn, event=copy.deepcopy(event), message={})
 
-    async def send_to_all(self, event: EventType, message: Dict = {}) -> None:
+    async def send_to_all(self, event: EventType, message: Dict) -> None:
         if event:
             connections = {
                 k: v for k, v in self.connections.items() if str(event.id) == v[1]
             }
-            if connections:
-                await asyncio.wait(
-                    [
-                        self.send(
-                            conn=conn, event=copy.deepcopy(event), message=message
-                        )
-                        for conn in connections
-                    ]
-                )
+            for conn in connections:
+                await self.send(conn=conn, event=copy.deepcopy(event), message=message)
 
     async def send(
-        self, conn: WebSocketServerProtocol, event: EventType, message: Dict = {}
+        self, conn: WebSocketServerProtocol, event: EventType, message: Dict
     ) -> None:
         status = (
             self.cardreader_status[event.id]
@@ -115,14 +103,15 @@ class WebSocketHandler:
             else:
                 return
             data = json.dumps({"status": status, "data": str(data)})
-        print("WEBSOCKET SEND ...", conn)
-        await conn.send(str(data))
+        try:
+            await conn.send(str(data))
+        except websockets.ConnectionClosed:
+            pass
 
     async def handler(self, websocket: WebSocketServerProtocol, path: str) -> None:
-        print("WEBSOCKET CONNECTED")
-        print("websocket:", websocket)
+        addr = f"addr: {websocket.remote_address}, path: {path}"
+        print(f"WEBSOCKET CONNECTED, {addr}")
         print("websocket.request_headers:", websocket.request_headers)
-        print("path:", path)
 
         if path == "/demo":
             event = None
@@ -212,9 +201,6 @@ class WebSocketHandler:
                                 )
                             except EventNotFoundError as e:
                                 raise RuntimeError(str(e))
-                            except Exception as e:
-                                traceback.print_exc()
-                                raise RuntimeError(str(e))
 
                             self.cardreader_status[event.id] = status
 
@@ -233,10 +219,13 @@ class WebSocketHandler:
                                 res["status"] = res["status"].name
                             print(res)
 
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 pass
+            except Exception as e:
+                logging.exception(e)
+                await websocket.close()
             finally:
-                print("WEBSOCKET CONNECTION CLOSED", websocket)
+                print(f"WEBSOCKET CLOSED, {addr}")
                 if event:
                     if event.id in self.cardreader_status:
                         del self.cardreader_status[event.id]
@@ -278,9 +267,6 @@ class WebSocketHandler:
                         )
                     except EventNotFoundError as e:
                         raise RuntimeError(str(e))
-                    except Exception as e:
-                        traceback.print_exc()
-                        raise RuntimeError(str(e))
 
                     self.cardreader_status[event.id] = status
 
@@ -300,13 +286,14 @@ class WebSocketHandler:
                     print(res)
                     await websocket.send(json.dumps(res))
 
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 pass
             except Exception as e:
+                logging.exception(e)
                 await websocket.send(str(e))
-                print(str(e))
+                await websocket.close()
             finally:
-                print("CARDREADER CONNECTION CLOSED", websocket)
+                print(f"WEBSOCKET CLOSED, {addr}")
                 if event:
                     if event.id in self.cardreader_status:
                         del self.cardreader_status[event.id]
@@ -332,13 +319,14 @@ class WebSocketHandler:
                                 if message == "__ping__":
                                     await websocket.send("__pong__")
                                 else:
-                                    print("WEBSOCKET RECEIVED", websocket, message)
+                                    print(f"WEBSOCKET RECEIVED, {addr}, {message}")
                                     break
                     else:
                         await websocket.send("__no_access__")
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 pass
             finally:
                 if websocket in self.connections:
                     del self.connections[websocket]
-                print("WEBSOCKET CONNECTION CLOSED", websocket)
+                await websocket.close()
+                print(f"WEBSOCKET CLOSED, {addr}")

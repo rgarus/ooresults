@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Fixed
+^^^^^
+
+- Python TypeError exception when using Python 3.11 fixed, if a /si1 or /si2 pages is opened in a webbrowser.
+
+
 [0.2.8] - 2024-01-05
 --------------------
 
