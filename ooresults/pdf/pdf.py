@@ -40,7 +40,7 @@ class PDF(FPDF):
 
     def __init__(self, name: str, landscape: bool = False):
         orientation = "landscape" if landscape else "portrait"
-        super().__init__(font_cache_dir=None, orientation=orientation)
+        super().__init__(orientation=orientation)
         self.name = name
         self.creation_time = datetime.now()
         self.set_creator(creator="https://pypi.org/project/ooresults")
@@ -50,25 +50,21 @@ class PDF(FPDF):
         self.add_font(
             family="Carlito",
             fname=str(self.fonts_dir / "Carlito-Regular.ttf"),
-            uni=True,
         )
         self.add_font(
             family="Carlito",
             style="B",
             fname=str(self.fonts_dir / "Carlito-Bold.ttf"),
-            uni=True,
         )
         self.add_font(
             family="Carlito",
             style="I",
             fname=str(self.fonts_dir / "Carlito-Italic.ttf"),
-            uni=True,
         )
         self.add_font(
             family="Carlito",
             style="BI",
             fname=str(self.fonts_dir / "Carlito-BoldItalic.ttf"),
-            uni=True,
         )
 
     def header(self):
@@ -86,22 +82,25 @@ class PDF(FPDF):
         )
         self.cell(w=0, h=10, txt=f"Page {self.page_no()}/{{nb}}", align="R")
 
-    def course_data(self, class_: ClassInfoType) -> str:
+    def course_data(self, class_info: ClassInfoType) -> str:
         #
         # compute course data string:
         # course length - course climb - number of controls
         #
         s = ""
-        if class_.course_length is not None:
+        if class_info.course_length is not None:
             if s != "":
                 s += " - "
-            s += str(round(class_.course_length)) + " m"
-        if class_.course_climb is not None:
+            s += str(round(class_info.course_length)) + " m"
+        if class_info.course_climb is not None:
             if s != "":
                 s += " - "
-            s += str(round(class_.course_id)) + " m"
-        if class_.number_of_controls is not None and class_.number_of_controls > 0:
+            s += str(round(class_info.course_climb)) + " Hm"
+        if (
+            class_info.number_of_controls is not None
+            and class_info.number_of_controls > 0
+        ):
             if s != "":
                 s += " - "
-            s += str(class_.number_of_controls) + " Posten"
+            s += str(class_info.number_of_controls) + " Posten"
         return s
