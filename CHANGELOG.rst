@@ -9,6 +9,7 @@ Fixed
 ^^^^^
 
 - Python TypeError exception when using Python 3.11 fixed, if a /si1 or /si2 pages is opened in a webbrowser.
+- Python TypeError exception when using Python 3.8 or 3.9 fixed when printing results or split times.
 
 
 [0.2.8] - 2024-01-05

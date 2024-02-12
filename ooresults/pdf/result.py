@@ -193,7 +193,7 @@ def create_pdf(
             entry = ranked_result.entry
             result = entry.result
 
-            def f(value: Union[Optional[int] | Optional[str]]) -> str:
+            def f(value: Union[Optional[int], Optional[str]]) -> str:
                 return str(value) if value is not None else ""
 
             pdf.set_font(family="Carlito", size=12)

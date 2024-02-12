@@ -152,7 +152,7 @@ def create_pdf(
                 s = d.get(key, "")
                 return s if s is not None else ""
 
-            def f(value: Union[Optional[int] | Optional[str]]) -> str:
+            def f(value: Union[Optional[int], Optional[str]]) -> str:
                 return str(value) if value is not None else ""
 
             class Result:
