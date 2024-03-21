@@ -39,6 +39,8 @@ from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo import result_type
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import SpStatus
+
 
 templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
 render = web.template.render(templates, globals=t_globals)
@@ -181,7 +183,7 @@ class WebSocketHandler:
                                         result_type.SplitTime(
                                             control_code=_code[i],
                                             punch_time=parse_time(_time[i]),
-                                            status="Additional",
+                                            status=SpStatus.ADDITIONAL,
                                         )
                                     )
                             d.result = result

@@ -19,7 +19,6 @@
 
 import copy
 import datetime
-from typing import Dict
 
 import pytest
 
@@ -30,6 +29,7 @@ from ooresults.repo.entry_type import EntryType
 from ooresults.repo.start_type import PersonRaceStart
 from ooresults.repo.result_type import CardReaderMessage
 from ooresults.repo.result_type import SplitTime
+from ooresults.repo.result_type import SpStatus
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 from ooresults.handler import model
@@ -177,13 +177,22 @@ def entry_2_with_result(db, event_id, class_id, entry_2) -> EntryType:
             time=t(s1, f1),
             split_times=[
                 SplitTime(
-                    control_code="101", punch_time=c1, time=t(s1, c1), status="OK"
+                    control_code="101",
+                    punch_time=c1,
+                    time=t(s1, c1),
+                    status=SpStatus.OK,
                 ),
                 SplitTime(
-                    control_code="102", punch_time=c2, time=t(s1, c2), status="OK"
+                    control_code="102",
+                    punch_time=c2,
+                    time=t(s1, c2),
+                    status=SpStatus.OK,
                 ),
                 SplitTime(
-                    control_code="103", punch_time=c3, time=t(s1, c3), status="OK"
+                    control_code="103",
+                    punch_time=c3,
+                    time=t(s1, c3),
+                    status=SpStatus.OK,
                 ),
             ],
         ),
@@ -221,9 +230,9 @@ def unassigned_entry(db, event_id) -> EntryType:
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     id = db.add_entry_result(
@@ -245,9 +254,9 @@ def test_assign_to_entry_if_cardnumber_is_unique(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -286,9 +295,15 @@ def test_assign_to_entry_if_cardnumber_is_unique(
         punched_finish_time=f1,
         time=t(s1, f1),
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, time=t(s1, c1), status="OK"),
-            SplitTime(control_code="102", punch_time=c2, time=t(s1, c2), status="OK"),
-            SplitTime(control_code="103", punch_time=c3, time=t(s1, c3), status="OK"),
+            SplitTime(
+                control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="103", punch_time=c3, time=t(s1, c3), status=SpStatus.OK
+            ),
         ],
     )
 
@@ -306,9 +321,9 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
         punched_finish_time=None,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -347,9 +362,15 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
         punched_finish_time=None,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, time=t(s1, c1), status="OK"),
-            SplitTime(control_code="102", punch_time=c2, time=t(s1, c2), status="OK"),
-            SplitTime(control_code="103", punch_time=c3, time=t(s1, c3), status="OK"),
+            SplitTime(
+                control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="103", punch_time=c3, time=t(s1, c3), status=SpStatus.OK
+            ),
         ],
     )
 
@@ -367,9 +388,9 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -408,9 +429,9 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, time=None, status="OK"),
-            SplitTime(control_code="102", punch_time=c2, time=None, status="OK"),
-            SplitTime(control_code="103", punch_time=c3, time=None, status="OK"),
+            SplitTime(control_code="101", punch_time=c1, time=None, status=SpStatus.OK),
+            SplitTime(control_code="102", punch_time=c2, time=None, status=SpStatus.OK),
+            SplitTime(control_code="103", punch_time=c3, time=None, status=SpStatus.OK),
         ],
     )
 
@@ -428,7 +449,7 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -467,9 +488,15 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
         punched_finish_time=f1,
         time=t(s1, f1),
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, time=t(s1, c1), status="OK"),
-            SplitTime(control_code="102", punch_time=None, time=None, status="Missing"),
-            SplitTime(control_code="103", punch_time=None, time=None, status="Missing"),
+            SplitTime(
+                control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="102", punch_time=None, time=None, status=SpStatus.MISSING
+            ),
+            SplitTime(
+                control_code="103", punch_time=None, time=None, status=SpStatus.MISSING
+            ),
         ],
     )
 
@@ -492,9 +519,9 @@ def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -534,9 +561,15 @@ def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
         punched_finish_time=f1,
         time=t(s1, f1),
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, time=t(s1, c1), status="OK"),
-            SplitTime(control_code="102", punch_time=c2, time=t(s1, c2), status="OK"),
-            SplitTime(control_code="103", punch_time=c3, time=t(s1, c3), status="OK"),
+            SplitTime(
+                control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="103", punch_time=c3, time=t(s1, c3), status=SpStatus.OK
+            ),
         ],
     )
 
@@ -559,8 +592,8 @@ def test_store_as_new_entry_if_another_result_exists(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -599,10 +632,16 @@ def test_store_as_new_entry_if_another_result_exists(
         time=t(s1, f1),
         split_times=[
             SplitTime(
-                control_code="101", punch_time=c1, time=t(s1, c1), status="Additional"
+                control_code="101",
+                punch_time=c1,
+                time=t(s1, c1),
+                status=SpStatus.ADDITIONAL,
             ),
             SplitTime(
-                control_code="103", punch_time=c3, time=t(s1, c3), status="Additional"
+                control_code="103",
+                punch_time=c3,
+                time=t(s1, c3),
+                status=SpStatus.ADDITIONAL,
             ),
         ],
     )
@@ -650,9 +689,9 @@ def test_do_not_store_as_new_entry_if_result_already_exists(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -696,9 +735,9 @@ def test_store_as_new_entry_if_cardnumber_is_unknown(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -737,13 +776,22 @@ def test_store_as_new_entry_if_cardnumber_is_unknown(
         time=t(s1, f1),
         split_times=[
             SplitTime(
-                control_code="101", punch_time=c1, time=t(s1, c1), status="Additional"
+                control_code="101",
+                punch_time=c1,
+                time=t(s1, c1),
+                status=SpStatus.ADDITIONAL,
             ),
             SplitTime(
-                control_code="102", punch_time=c2, time=t(s1, c2), status="Additional"
+                control_code="102",
+                punch_time=c2,
+                time=t(s1, c2),
+                status=SpStatus.ADDITIONAL,
             ),
             SplitTime(
-                control_code="103", punch_time=c3, time=t(s1, c3), status="Additional"
+                control_code="103",
+                punch_time=c3,
+                time=t(s1, c3),
+                status=SpStatus.ADDITIONAL,
             ),
         ],
     )
@@ -782,9 +830,9 @@ def test_store_as_new_entry_if_cardnumber_exist_several_times(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -823,13 +871,22 @@ def test_store_as_new_entry_if_cardnumber_exist_several_times(
         time=t(s1, f1),
         split_times=[
             SplitTime(
-                control_code="101", punch_time=c1, time=t(s1, c1), status="Additional"
+                control_code="101",
+                punch_time=c1,
+                time=t(s1, c1),
+                status=SpStatus.ADDITIONAL,
             ),
             SplitTime(
-                control_code="102", punch_time=c2, time=t(s1, c2), status="Additional"
+                control_code="102",
+                punch_time=c2,
+                time=t(s1, c2),
+                status=SpStatus.ADDITIONAL,
             ),
             SplitTime(
-                control_code="103", punch_time=c3, time=t(s1, c3), status="Additional"
+                control_code="103",
+                punch_time=c3,
+                time=t(s1, c3),
+                status=SpStatus.ADDITIONAL,
             ),
         ],
     )
@@ -872,9 +929,9 @@ def test_use_already_assigned_entry_if_it_has_the_same_result(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -923,9 +980,9 @@ def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="109", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="109", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -964,13 +1021,22 @@ def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
         time=t(s1, f1),
         split_times=[
             SplitTime(
-                control_code="101", punch_time=c1, time=t(s1, c1), status="Additional"
+                control_code="101",
+                punch_time=c1,
+                time=t(s1, c1),
+                status=SpStatus.ADDITIONAL,
             ),
             SplitTime(
-                control_code="102", punch_time=c2, time=t(s1, c2), status="Additional"
+                control_code="102",
+                punch_time=c2,
+                time=t(s1, c2),
+                status=SpStatus.ADDITIONAL,
             ),
             SplitTime(
-                control_code="109", punch_time=c3, time=t(s1, c3), status="Additional"
+                control_code="109",
+                punch_time=c3,
+                time=t(s1, c3),
+                status=SpStatus.ADDITIONAL,
             ),
         ],
     )
@@ -1013,9 +1079,9 @@ def test_use_empty_control_list_if_course_is_undefined(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="109", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="109", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(
@@ -1055,13 +1121,22 @@ def test_use_empty_control_list_if_course_is_undefined(
         time=t(s1, f1),
         split_times=[
             SplitTime(
-                control_code="101", punch_time=c1, time=t(s1, c1), status="Additional"
+                control_code="101",
+                punch_time=c1,
+                time=t(s1, c1),
+                status=SpStatus.ADDITIONAL,
             ),
             SplitTime(
-                control_code="102", punch_time=c2, time=t(s1, c2), status="Additional"
+                control_code="102",
+                punch_time=c2,
+                time=t(s1, c2),
+                status=SpStatus.ADDITIONAL,
             ),
             SplitTime(
-                control_code="109", punch_time=c3, time=t(s1, c3), status="Additional"
+                control_code="109",
+                punch_time=c3,
+                time=t(s1, c3),
+                status=SpStatus.ADDITIONAL,
             ),
         ],
     )
@@ -1078,9 +1153,9 @@ def test_raise_exception_if_event_key_is_unknown(
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     item = CardReaderMessage(

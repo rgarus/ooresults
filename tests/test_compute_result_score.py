@@ -24,6 +24,7 @@ import pytest
 
 from ooresults.handler import handicap
 from ooresults.repo.result_type import SplitTime
+from ooresults.repo.result_type import SpStatus
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.class_params import ClassParams
@@ -49,9 +50,9 @@ def test_compute_result_status_ok(time_limit, score_overtime):
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="103", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="101", punch_time=c3, status="Additional"),
+            SplitTime(control_code="103", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="101", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     class_params = ClassParams(otype="score", time_limit=time_limit)
@@ -65,13 +66,13 @@ def test_compute_result_status_ok(time_limit, score_overtime):
     assert result.status == ResultStatus.OK
     assert len(result.split_times) == 3
     assert result.split_times[0] == SplitTime(
-        control_code="103", punch_time=c1, time=t(s1, c1), status="OK"
+        control_code="103", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
     )
     assert result.split_times[1] == SplitTime(
-        control_code="102", punch_time=c2, time=t(s1, c2), status="OK"
+        control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.OK
     )
     assert result.split_times[2] == SplitTime(
-        control_code="101", punch_time=c3, time=t(s1, c3), status="OK"
+        control_code="101", punch_time=c3, time=t(s1, c3), status=SpStatus.OK
     )
     assert len(result.extensions) == 3
     assert result.extensions["score_controls"] == 3
@@ -92,8 +93,8 @@ def test_compute_result_status_mispunched():
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="103", punch_time=c3, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
     class_params = ClassParams(otype="score", time_limit=60)
@@ -107,16 +108,16 @@ def test_compute_result_status_mispunched():
     assert result.status == ResultStatus.OK
     assert len(result.split_times) == 4
     assert result.split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=t(s1, c1), status="OK"
+        control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
     )
     assert result.split_times[1] == SplitTime(
-        control_code="103", punch_time=c3, time=t(s1, c3), status="OK"
+        control_code="103", punch_time=c3, time=t(s1, c3), status=SpStatus.OK
     )
     assert result.split_times[2] == SplitTime(
-        control_code="102", punch_time=None, time=None, status="Missing"
+        control_code="102", punch_time=None, time=None, status=SpStatus.MISSING
     )
     assert result.split_times[3] == SplitTime(
-        control_code="104", punch_time=None, time=None, status="Missing"
+        control_code="104", punch_time=None, time=None, status=SpStatus.MISSING
     )
     assert len(result.extensions) == 3
     assert result.extensions["score_controls"] == 2
@@ -142,13 +143,13 @@ def test_compute_result_status_ok_with_additionals():
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="105", punch_time=c2, status="Additional"),
-            SplitTime(control_code="101", punch_time=c3, status="Additional"),
-            SplitTime(control_code="103", punch_time=c4, status="Additional"),
-            SplitTime(control_code="102", punch_time=c5, status="Additional"),
-            SplitTime(control_code="101", punch_time=c6, status="Additional"),
-            SplitTime(control_code="104", punch_time=c7, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="105", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="101", punch_time=c3, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c4, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c5, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="101", punch_time=c6, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="104", punch_time=c7, status=SpStatus.ADDITIONAL),
         ],
     )
     class_params = ClassParams(otype="score", time_limit=60)
@@ -162,25 +163,25 @@ def test_compute_result_status_ok_with_additionals():
     assert result.status == ResultStatus.OK
     assert len(result.split_times) == 7
     assert result.split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=t(s1, c1), status="OK"
+        control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
     )
     assert result.split_times[1] == SplitTime(
-        control_code="105", punch_time=c2, time=t(s1, c2), status="Additional"
+        control_code="105", punch_time=c2, time=t(s1, c2), status=SpStatus.ADDITIONAL
     )
     assert result.split_times[2] == SplitTime(
-        control_code="101", punch_time=c3, time=t(s1, c3), status="Additional"
+        control_code="101", punch_time=c3, time=t(s1, c3), status=SpStatus.ADDITIONAL
     )
     assert result.split_times[3] == SplitTime(
-        control_code="103", punch_time=c4, time=t(s1, c4), status="OK"
+        control_code="103", punch_time=c4, time=t(s1, c4), status=SpStatus.OK
     )
     assert result.split_times[4] == SplitTime(
-        control_code="102", punch_time=c5, time=t(s1, c5), status="OK"
+        control_code="102", punch_time=c5, time=t(s1, c5), status=SpStatus.OK
     )
     assert result.split_times[5] == SplitTime(
-        control_code="101", punch_time=c6, time=t(s1, c6), status="Additional"
+        control_code="101", punch_time=c6, time=t(s1, c6), status=SpStatus.ADDITIONAL
     )
     assert result.split_times[6] == SplitTime(
-        control_code="104", punch_time=c7, time=t(s1, c7), status="Additional"
+        control_code="104", punch_time=c7, time=t(s1, c7), status=SpStatus.ADDITIONAL
     )
     assert len(result.extensions) == 3
     assert result.extensions["score_controls"] == 3
@@ -203,10 +204,10 @@ def test_compute_result_status_last_three_stations_missing():
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
-            SplitTime(control_code="106", punch_time=c3, status="Additional"),
-            SplitTime(control_code="107", punch_time=c4, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="106", punch_time=c3, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="107", punch_time=c4, status=SpStatus.ADDITIONAL),
         ],
     )
     class_params = ClassParams(otype="score", time_limit=60)
@@ -220,25 +221,25 @@ def test_compute_result_status_last_three_stations_missing():
     assert result.status == ResultStatus.OK
     assert len(result.split_times) == 7
     assert result.split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=t(s1, c1), status="OK"
+        control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
     )
     assert result.split_times[1] == SplitTime(
-        control_code="102", punch_time=c2, time=t(s1, c2), status="OK"
+        control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.OK
     )
     assert result.split_times[2] == SplitTime(
-        control_code="106", punch_time=c3, time=t(s1, c3), status="Additional"
+        control_code="106", punch_time=c3, time=t(s1, c3), status=SpStatus.ADDITIONAL
     )
     assert result.split_times[3] == SplitTime(
-        control_code="107", punch_time=c4, time=t(s1, c4), status="Additional"
+        control_code="107", punch_time=c4, time=t(s1, c4), status=SpStatus.ADDITIONAL
     )
     assert result.split_times[4] == SplitTime(
-        control_code="103", punch_time=None, time=None, status="Missing"
+        control_code="103", punch_time=None, time=None, status=SpStatus.MISSING
     )
     assert result.split_times[5] == SplitTime(
-        control_code="104", punch_time=None, time=None, status="Missing"
+        control_code="104", punch_time=None, time=None, status=SpStatus.MISSING
     )
     assert result.split_times[6] == SplitTime(
-        control_code="105", punch_time=None, time=None, status="Missing"
+        control_code="105", punch_time=None, time=None, status=SpStatus.MISSING
     )
     assert len(result.extensions) == 3
     assert result.extensions["score_controls"] == 2
@@ -259,8 +260,8 @@ def test_given_no_controls_but_punches_when_compute_results_then_status_is_ok():
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
-            SplitTime(control_code="102", punch_time=c2, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
         ],
     )
     class_params = ClassParams(otype="score", time_limit=60)
@@ -274,10 +275,10 @@ def test_given_no_controls_but_punches_when_compute_results_then_status_is_ok():
     assert result.status == ResultStatus.OK
     assert len(result.split_times) == 2
     assert result.split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=t(s1, c1), status="Additional"
+        control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.ADDITIONAL
     )
     assert result.split_times[1] == SplitTime(
-        control_code="102", punch_time=c2, time=t(s1, c2), status="Additional"
+        control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.ADDITIONAL
     )
     assert len(result.extensions) == 3
     assert result.extensions["score_controls"] == 0
@@ -301,7 +302,7 @@ def test_compute_handicap_ok(time_limit, score_overtime, female, year_of_birth):
         punched_finish_time=f1,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=c1, status="Additional"),
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
         ],
     )
     class_params = ClassParams(
@@ -327,7 +328,7 @@ def test_compute_handicap_ok(time_limit, score_overtime, female, year_of_birth):
     assert result.status == ResultStatus.OK
     assert len(result.split_times) == 1
     assert result.split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=t(s1, c1), status="OK"
+        control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
     )
     assert len(result.extensions) == 4
     assert result.extensions["score_controls"] == 1
@@ -374,7 +375,7 @@ def test_compute_handicap_mp(female, year_of_birth):
     assert result.status == ResultStatus.OK
     assert len(result.split_times) == 1
     assert result.split_times[0] == SplitTime(
-        control_code="101", punch_time=None, time=None, status="Missing"
+        control_code="101", punch_time=None, time=None, status=SpStatus.MISSING
     )
     assert len(result.extensions) == 4
     assert result.extensions["score_controls"] == 0

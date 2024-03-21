@@ -31,6 +31,7 @@ from ooresults.repo.competitor_type import CompetitorType
 from ooresults.repo.entry_type import EntryType
 from ooresults.repo import result_type
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import SpStatus
 from ooresults.repo import start_type
 
 
@@ -1069,14 +1070,20 @@ def test_import_entries_with_results(db, event_2_id, class_1_id):
                     status=ResultStatus.OK,
                     time=2001,
                     split_times=[
-                        result_type.SplitTime(control_code="31", status="OK", time=501),
-                        result_type.SplitTime(control_code="32", status="OK", time=720),
-                        result_type.SplitTime(control_code="31", status="OK", time=818),
                         result_type.SplitTime(
-                            control_code="33", status="OK", time=1136
+                            control_code="31", status=SpStatus.OK, time=501
                         ),
                         result_type.SplitTime(
-                            control_code="31", status="OK", time=1593
+                            control_code="32", status=SpStatus.OK, time=720
+                        ),
+                        result_type.SplitTime(
+                            control_code="31", status=SpStatus.OK, time=818
+                        ),
+                        result_type.SplitTime(
+                            control_code="33", status=SpStatus.OK, time=1136
+                        ),
+                        result_type.SplitTime(
+                            control_code="31", status=SpStatus.OK, time=1593
                         ),
                     ],
                 ),
@@ -1111,11 +1118,11 @@ def test_import_entries_with_results(db, event_2_id, class_1_id):
             status=ResultStatus.OK,
             time=2001,
             split_times=[
-                result_type.SplitTime(control_code="31", status="OK", time=501),
-                result_type.SplitTime(control_code="32", status="OK", time=720),
-                result_type.SplitTime(control_code="31", status="OK", time=818),
-                result_type.SplitTime(control_code="33", status="OK", time=1136),
-                result_type.SplitTime(control_code="31", status="OK", time=1593),
+                result_type.SplitTime(control_code="31", status=SpStatus.OK, time=501),
+                result_type.SplitTime(control_code="32", status=SpStatus.OK, time=720),
+                result_type.SplitTime(control_code="31", status=SpStatus.OK, time=818),
+                result_type.SplitTime(control_code="33", status=SpStatus.OK, time=1136),
+                result_type.SplitTime(control_code="31", status=SpStatus.OK, time=1593),
             ],
         ),
         start=start_type.PersonRaceStart(),
@@ -1146,14 +1153,20 @@ def test_import_entries_already_exist_with_results(db, event_2_id, class_1_id):
                     status=ResultStatus.OK,
                     time=2001,
                     split_times=[
-                        result_type.SplitTime(control_code="31", status="OK", time=501),
-                        result_type.SplitTime(control_code="32", status="OK", time=720),
-                        result_type.SplitTime(control_code="31", status="OK", time=818),
                         result_type.SplitTime(
-                            control_code="33", status="OK", time=1136
+                            control_code="31", status=SpStatus.OK, time=501
                         ),
                         result_type.SplitTime(
-                            control_code="31", status="OK", time=1593
+                            control_code="32", status=SpStatus.OK, time=720
+                        ),
+                        result_type.SplitTime(
+                            control_code="31", status=SpStatus.OK, time=818
+                        ),
+                        result_type.SplitTime(
+                            control_code="33", status=SpStatus.OK, time=1136
+                        ),
+                        result_type.SplitTime(
+                            control_code="31", status=SpStatus.OK, time=1593
                         ),
                     ],
                 ),
@@ -1179,16 +1192,20 @@ def test_import_entries_already_exist_with_results(db, event_2_id, class_1_id):
                     status=ResultStatus.MISSING_PUNCH,
                     time=1753,
                     split_times=[
-                        result_type.SplitTime(control_code="31", status="OK", time=333),
-                        result_type.SplitTime(control_code="34", status="OK", time=720),
                         result_type.SplitTime(
-                            control_code="31", status="Missing", time=None
+                            control_code="31", status=SpStatus.OK, time=333
                         ),
                         result_type.SplitTime(
-                            control_code="33", status="OK", time=1136
+                            control_code="34", status=SpStatus.OK, time=720
                         ),
                         result_type.SplitTime(
-                            control_code="31", status="OK", time=1593
+                            control_code="31", status=SpStatus.MISSING, time=None
+                        ),
+                        result_type.SplitTime(
+                            control_code="33", status=SpStatus.OK, time=1136
+                        ),
+                        result_type.SplitTime(
+                            control_code="31", status=SpStatus.OK, time=1593
                         ),
                     ],
                 ),
@@ -1221,11 +1238,13 @@ def test_import_entries_already_exist_with_results(db, event_2_id, class_1_id):
             status=ResultStatus.MISSING_PUNCH,
             time=1753,
             split_times=[
-                result_type.SplitTime(control_code="31", status="OK", time=333),
-                result_type.SplitTime(control_code="34", status="OK", time=720),
-                result_type.SplitTime(control_code="31", status="Missing", time=None),
-                result_type.SplitTime(control_code="33", status="OK", time=1136),
-                result_type.SplitTime(control_code="31", status="OK", time=1593),
+                result_type.SplitTime(control_code="31", status=SpStatus.OK, time=333),
+                result_type.SplitTime(control_code="34", status=SpStatus.OK, time=720),
+                result_type.SplitTime(
+                    control_code="31", status=SpStatus.MISSING, time=None
+                ),
+                result_type.SplitTime(control_code="33", status=SpStatus.OK, time=1136),
+                result_type.SplitTime(control_code="31", status=SpStatus.OK, time=1593),
             ],
         ),
         start=start_type.PersonRaceStart(),

@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+
+- Database schema updated to version 9.
+
+
 [0.2.9] - 2024-02-13
 --------------------
 

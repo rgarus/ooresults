@@ -31,6 +31,7 @@ from ooresults.repo.entry_type import EntryType
 from ooresults.repo import result_type
 from ooresults.repo import start_type
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import SpStatus
 
 
 def cp1252(value: str) -> str:
@@ -365,11 +366,12 @@ def parse(content: bytes) -> List[Dict]:
                         except:
                             t = None
 
+                        status = SpStatus.MISSING if control_time == "-----" else None
                         r["result"].split_times.append(
                             result_type.SplitTime(
                                 control_code=control_code,
                                 time=t,
-                                status="Missing" if control_time == "-----" else None,
+                                status=status,
                             )
                         )
                 else:

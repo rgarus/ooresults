@@ -30,6 +30,7 @@ from ooresults.repo.entry_type import EntryType
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import SplitTime
+from ooresults.repo.result_type import SpStatus
 from ooresults.handler import model
 
 
@@ -114,9 +115,9 @@ def entry_1(db: SqliteRepo, event_id: int, class_1_id: int) -> EntryType:
         status=ResultStatus.INACTIVE,
         time=None,
         split_times=[
-            SplitTime(control_code="101", punch_time=C1, status="Additional"),
-            SplitTime(control_code="102", punch_time=C2, status="Additional"),
-            SplitTime(control_code="103", punch_time=C3, status="Additional"),
+            SplitTime(control_code="101", punch_time=C1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=C2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=C3, status=SpStatus.ADDITIONAL),
         ],
     )
     result.compute_result(controls=["101", "102", "103"], class_params=ClassParams())
@@ -320,9 +321,29 @@ def test_update_class_data_recalculates_entry_result(
         status=ResultStatus.MISSING_PUNCH,
         time=8,
         split_times=[
-            SplitTime(control_code="101", punch_time=C1, status="OK", time=2),
-            SplitTime(control_code="104", punch_time=None, status="Missing", time=None),
-            SplitTime(control_code="102", punch_time=C2, status="Additional", time=4),
-            SplitTime(control_code="103", punch_time=C3, status="OK", time=6),
+            SplitTime(
+                control_code="101",
+                punch_time=C1,
+                status=SpStatus.OK,
+                time=2,
+            ),
+            SplitTime(
+                control_code="104",
+                punch_time=None,
+                status=SpStatus.MISSING,
+                time=None,
+            ),
+            SplitTime(
+                control_code="102",
+                punch_time=C2,
+                status=SpStatus.ADDITIONAL,
+                time=4,
+            ),
+            SplitTime(
+                control_code="103",
+                punch_time=C3,
+                status=SpStatus.OK,
+                time=6,
+            ),
         ],
     )

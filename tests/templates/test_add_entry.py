@@ -36,6 +36,7 @@ from ooresults.repo.entry_type import EntryType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.result_type import SplitTime
+from ooresults.repo.result_type import SpStatus
 from ooresults.repo.start_type import PersonRaceStart
 from ooresults.utils.globals import t_globals
 
@@ -327,11 +328,11 @@ def test_add_entry_for_edit_with_results(
             status=ResultStatus.OK,
             time=2001,
             split_times=[
-                SplitTime(control_code="31", status="OK", time=501),
-                SplitTime(control_code="32", status="OK", time=720),
-                SplitTime(control_code="31", status="OK", time=818),
-                SplitTime(control_code="33", status="OK", time=1136),
-                SplitTime(control_code="31", status="OK", time=1593),
+                SplitTime(control_code="31", status=SpStatus.OK, time=501),
+                SplitTime(control_code="32", status=SpStatus.OK, time=720),
+                SplitTime(control_code="31", status=SpStatus.OK, time=818),
+                SplitTime(control_code="33", status=SpStatus.OK, time=1136),
+                SplitTime(control_code="31", status=SpStatus.OK, time=1593),
             ],
         ),
         start=PersonRaceStart(start_time=S1),

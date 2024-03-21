@@ -47,6 +47,7 @@ from ooresults.repo.entry_type import EntryType
 from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import SpStatus
 from ooresults.repo.series_type import Settings
 from ooresults.websocket_server.websocket_server import WebSocketServer
 
@@ -617,7 +618,7 @@ def parse_cardreader_log(item: Dict) -> result_type.CardReaderMessage:
                 result_type.SplitTime(
                     control_code=p["controlCode"],
                     punch_time=iso8601.parse_date(p["punchTime"]),
-                    status="Additional",
+                    status=SpStatus.ADDITIONAL,
                 )
             )
         d.result = result
@@ -635,7 +636,7 @@ def store_cardreader_result(
             return ["START"]
         controls = []
         for sp in result.split_times:
-            if sp.status == "Missing":
+            if sp.status == SpStatus.MISSING:
                 controls.append(sp.control_code)
         return controls
 
@@ -801,10 +802,10 @@ def add_or_update_entry(
             result = entry.result
             result.status = ResultStatus.FINISHED
             result.split_times = [
-                s for s in result.split_times if s.status != "Missing"
+                s for s in result.split_times if s.status != SpStatus.MISSING
             ]
             for s in result.split_times:
-                s.status = "Additional"
+                s.status = SpStatus.ADDITIONAL
                 if result.start_time is None:
                     s.time = None
             db.add_entry_result(

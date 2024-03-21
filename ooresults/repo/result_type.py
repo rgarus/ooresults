@@ -30,12 +30,34 @@ from ooresults.handler import handicap
 from ooresults.repo.class_params import ClassParams
 
 
+class SpStatus(enum.Enum):
+    """
+    SplitTime status according to IOF XML 3.0:
+
+        OK:
+            Control belongs to the course and has been punched
+            (either by electronical punching or pin punching).
+            If the time is not available or invalid, omit the Time element.
+
+        MISSING:
+            Control belongs to the course but has not been punched.
+
+        ADDITIONAL:
+            Control does not belong to the course, but the competitor has punched it.
+
+    """
+
+    OK = 0
+    MISSING = 1
+    ADDITIONAL = 2
+
+
 @dataclasses.dataclass
 class SplitTime:
     control_code: str
     punch_time: Optional[datetime] = None
     time: Optional[int] = None
-    status: Optional[str] = None
+    status: Optional[SpStatus] = None
     leg_voided: bool = False
 
     def recalculate_time(self, start_time: Optional[datetime]) -> None:
@@ -50,6 +72,36 @@ class SplitTime:
 
 
 class ResultStatus(enum.Enum):
+    """
+    Result status according to IOF XML 3.0:
+
+        INACTIVE:
+            Has not yet started.
+
+        FINISHED:
+            Finished but not yet validated.
+
+        OK:
+            Finished and validated.
+
+        MISSING_PUNCH:
+            Missing punch.
+
+        DID_NOT_START:
+             Did not start (in this race).
+
+        DID_NOT_FINISHED:
+            Did not finish (i.e. conciously cancelling the race after having started,
+            in contrast to MissingPunch).
+
+        OVER_TIME:
+            Overtime, i.e. did not finish within the maximum time set by the organiser.
+
+        DISQUALIFIED:
+            Disqualified (for some other reason than a missing punch).
+
+    """
+
     INACTIVE = 0
     FINISHED = 2
     OK = 3
@@ -89,7 +141,7 @@ class PersonRaceResult:
         return (
             self.punched_start_time is not None
             or self.punched_finish_time is not None
-            or [p for p in self.split_times if p.status != "Missing"] != []
+            or [p for p in self.split_times if p.status != SpStatus.MISSING]
         )
 
     def same_punches(self, other: PersonRaceResult) -> bool:
@@ -99,19 +151,21 @@ class PersonRaceResult:
             and [
                 (p.control_code, p.punch_time)
                 for p in self.split_times
-                if p.status != "Missing"
+                if p.status != SpStatus.MISSING
             ]
             == [
                 (p.control_code, p.punch_time)
                 for p in other.split_times
-                if p.status != "Missing"
+                if p.status != SpStatus.MISSING
             ]
         )
 
     def voided_legs(self) -> List[str]:
         voided_legs = []
         c1 = "S"
-        for split_time in [s for s in self.split_times if s.status != "Additional"]:
+        for split_time in [
+            s for s in self.split_times if s.status != SpStatus.ADDITIONAL
+        ]:
             c2 = split_time.control_code
             if split_time.leg_voided and f"{c1}-{c2}" not in voided_legs:
                 voided_legs.append(f"{c1}-{c2}")
@@ -150,7 +204,7 @@ class PersonRaceResult:
 
         # remove missing controls and reset results
         old_status = self.status
-        split_times = [s for s in self.split_times if s.status != "Missing"]
+        split_times = [s for s in self.split_times if s.status != SpStatus.MISSING]
         self.time = None
         self.status = ResultStatus.INACTIVE
         self.extensions = {}
@@ -196,16 +250,16 @@ class PersonRaceResult:
             self.split_times = split_times
             for p in self.split_times:
                 if p.control_code in control_codes:
-                    p.status = "OK"
+                    p.status = SpStatus.OK
                     p.recalculate_time(start_time=self.start_time)
                     control_codes = [c for c in control_codes if c != p.control_code]
                 else:
-                    p.status = "Additional"
+                    p.status = SpStatus.ADDITIONAL
                     p.recalculate_time(start_time=self.start_time)
 
             for control_code in control_codes:
                 self.split_times.append(
-                    SplitTime(control_code=control_code, status="Missing")
+                    SplitTime(control_code=control_code, status=SpStatus.MISSING)
                 )
                 if class_params.penalty_controls is not None:
                     penalties_controls += class_params.penalty_controls
@@ -219,17 +273,17 @@ class PersonRaceResult:
             self.split_times = split_times
             for p in self.split_times:
                 if p.control_code in control_codes:
-                    p.status = "OK"
+                    p.status = SpStatus.OK
                     score_controls += 1
                     p.recalculate_time(start_time=self.start_time)
                     control_codes = [c for c in control_codes if c != p.control_code]
                 else:
-                    p.status = "Additional"
+                    p.status = SpStatus.ADDITIONAL
                     p.recalculate_time(start_time=self.start_time)
 
             for control_code in control_codes:
                 self.split_times.append(
-                    SplitTime(control_code=control_code, status="Missing")
+                    SplitTime(control_code=control_code, status=SpStatus.MISSING)
                 )
 
         else:
@@ -240,17 +294,17 @@ class PersonRaceResult:
                     if control == p.control_code:
                         for k in range(i):
                             p0 = split_times.pop(0)
-                            p0.status = "Additional"
+                            p0.status = SpStatus.ADDITIONAL
                             p0.recalculate_time(start_time=self.start_time)
                             self.split_times.append(p0)
                         p0 = split_times.pop(0)
-                        p0.status = "OK"
+                        p0.status = SpStatus.OK
                         p0.recalculate_time(start_time=self.start_time)
                         self.split_times.append(p0)
                         break
                 else:
                     self.split_times.append(
-                        SplitTime(control_code=control, status="Missing")
+                        SplitTime(control_code=control, status=SpStatus.MISSING)
                     )
                     if class_params.penalty_controls is not None:
                         penalties_controls += class_params.penalty_controls
@@ -258,7 +312,7 @@ class PersonRaceResult:
                         mp = True
 
             for p in split_times:
-                p.status = "Additional"
+                p.status = SpStatus.ADDITIONAL
                 p.recalculate_time(start_time=self.start_time)
                 self.split_times.append(p)
 
@@ -282,9 +336,9 @@ class PersonRaceResult:
             # result status is DidNotFinish if the last three stations are missing
             missing = 0
             for p in reversed(self.split_times):
-                if p.status == "OK":
+                if p.status == SpStatus.OK:
                     break
-                elif p.status == "Missing":
+                elif p.status == SpStatus.MISSING:
                     missing += 1
             if (
                 class_params.otype == "standard"
@@ -303,7 +357,9 @@ class PersonRaceResult:
         if class_params.otype == "standard" and class_params.voided_legs:
             # mark voided legs
             c1 = "S"
-            for split_time in [s for s in self.split_times if s.status != "Additional"]:
+            for split_time in [
+                s for s in self.split_times if s.status != SpStatus.ADDITIONAL
+            ]:
                 c2 = split_time.control_code
                 if (c1, c2) in class_params.voided_legs:
                     split_time.leg_voided = True
@@ -316,7 +372,7 @@ class PersonRaceResult:
             if self.time is not None:
                 t1 = 0
                 for split_time in [
-                    s for s in self.split_times if s.status != "Additional"
+                    s for s in self.split_times if s.status != SpStatus.ADDITIONAL
                 ]:
                     t2 = split_time.time
                     if split_time.leg_voided and t2 is not None and t1 is not None:

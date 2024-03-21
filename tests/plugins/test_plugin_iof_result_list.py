@@ -30,6 +30,7 @@ from ooresults.repo.entry_type import EntryType
 from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import SpStatus
 
 
 def test_import_result_list():
@@ -121,11 +122,21 @@ def test_import_result_list():
                 status=ResultStatus.OK,
                 time=2001,
                 split_times=[
-                    result_type.SplitTime(control_code="31", status="OK", time=501),
-                    result_type.SplitTime(control_code="32", status="OK", time=720),
-                    result_type.SplitTime(control_code="31", status="OK", time=818),
-                    result_type.SplitTime(control_code="33", status="OK", time=1136),
-                    result_type.SplitTime(control_code="31", status="OK", time=1593),
+                    result_type.SplitTime(
+                        control_code="31", status=SpStatus.OK, time=501
+                    ),
+                    result_type.SplitTime(
+                        control_code="32", status=SpStatus.OK, time=720
+                    ),
+                    result_type.SplitTime(
+                        control_code="31", status=SpStatus.OK, time=818
+                    ),
+                    result_type.SplitTime(
+                        control_code="33", status=SpStatus.OK, time=1136
+                    ),
+                    result_type.SplitTime(
+                        control_code="31", status=SpStatus.OK, time=1593
+                    ),
                 ],
             ),
         },
@@ -323,19 +334,19 @@ def test_export_result_list():
                                 time=2001,
                                 split_times=[
                                     result_type.SplitTime(
-                                        control_code="31", status="OK", time=501
+                                        control_code="31", status=SpStatus.OK, time=501
                                     ),
                                     result_type.SplitTime(
-                                        control_code="32", status="OK", time=720
+                                        control_code="32", status=SpStatus.OK, time=720
                                     ),
                                     result_type.SplitTime(
-                                        control_code="31", status="OK", time=818
+                                        control_code="31", status=SpStatus.OK, time=818
                                     ),
                                     result_type.SplitTime(
-                                        control_code="33", status="OK", time=1136
+                                        control_code="33", status=SpStatus.OK, time=1136
                                     ),
                                     result_type.SplitTime(
-                                        control_code="31", status="OK", time=1593
+                                        control_code="31", status=SpStatus.OK, time=1593
                                     ),
                                 ],
                             ),
@@ -801,10 +812,18 @@ def test_import_result_list_classes():
                 ),
                 time=1221,
                 split_times=[
-                    result_type.SplitTime(control_code="41", status="OK", time=301),
-                    result_type.SplitTime(control_code="42", status="OK", time=526),
-                    result_type.SplitTime(control_code="41", status="OK", time=914),
-                    result_type.SplitTime(control_code="43", status="OK", time=1100),
+                    result_type.SplitTime(
+                        control_code="41", status=SpStatus.OK, time=301
+                    ),
+                    result_type.SplitTime(
+                        control_code="42", status=SpStatus.OK, time=526
+                    ),
+                    result_type.SplitTime(
+                        control_code="41", status=SpStatus.OK, time=914
+                    ),
+                    result_type.SplitTime(
+                        control_code="43", status=SpStatus.OK, time=1100
+                    ),
                 ],
             ),
         },
@@ -824,10 +843,14 @@ def test_import_result_list_classes():
                     2020, 2, 9, 10, 6, 0, tzinfo=timezone.utc
                 ),
                 split_times=[
-                    result_type.SplitTime(control_code="41", status="OK", time=501),
-                    result_type.SplitTime(control_code="42", status="OK", time=720),
-                    result_type.SplitTime(control_code="41", status="Missing"),
-                    result_type.SplitTime(control_code="43", status="Missing"),
+                    result_type.SplitTime(
+                        control_code="41", status=SpStatus.OK, time=501
+                    ),
+                    result_type.SplitTime(
+                        control_code="42", status=SpStatus.OK, time=720
+                    ),
+                    result_type.SplitTime(control_code="41", status=SpStatus.MISSING),
+                    result_type.SplitTime(control_code="43", status=SpStatus.MISSING),
                 ],
             ),
         },
@@ -854,11 +877,13 @@ def test_import_result_list_classes():
                 ),
                 time=2001,
                 split_times=[
-                    result_type.SplitTime(control_code="31", status="OK", time=501),
-                    result_type.SplitTime(control_code="32", status="Missing"),
-                    result_type.SplitTime(control_code="31", status="Missing"),
                     result_type.SplitTime(
-                        control_code="33", status="Additional", time=1136
+                        control_code="31", status=SpStatus.OK, time=501
+                    ),
+                    result_type.SplitTime(control_code="32", status=SpStatus.MISSING),
+                    result_type.SplitTime(control_code="31", status=SpStatus.MISSING),
+                    result_type.SplitTime(
+                        control_code="33", status=SpStatus.ADDITIONAL, time=1136
                     ),
                 ],
             ),
@@ -1030,16 +1055,16 @@ def test_export_result_list_classes():
                                 time=1221,
                                 split_times=[
                                     result_type.SplitTime(
-                                        control_code="41", status="OK", time=301
+                                        control_code="41", status=SpStatus.OK, time=301
                                     ),
                                     result_type.SplitTime(
-                                        control_code="42", status="OK", time=526
+                                        control_code="42", status=SpStatus.OK, time=526
                                     ),
                                     result_type.SplitTime(
-                                        control_code="41", status="OK", time=914
+                                        control_code="41", status=SpStatus.OK, time=914
                                     ),
                                     result_type.SplitTime(
-                                        control_code="43", status="OK", time=1100
+                                        control_code="43", status=SpStatus.OK, time=1100
                                     ),
                                 ],
                             ),
@@ -1064,16 +1089,16 @@ def test_export_result_list_classes():
                                 ),
                                 split_times=[
                                     result_type.SplitTime(
-                                        control_code="41", status="OK", time=501
+                                        control_code="41", status=SpStatus.OK, time=501
                                     ),
                                     result_type.SplitTime(
-                                        control_code="42", status="OK", time=720
+                                        control_code="42", status=SpStatus.OK, time=720
                                     ),
                                     result_type.SplitTime(
-                                        control_code="41", status="Missing"
+                                        control_code="41", status=SpStatus.MISSING
                                     ),
                                     result_type.SplitTime(
-                                        control_code="43", status="Missing"
+                                        control_code="43", status=SpStatus.MISSING
                                     ),
                                 ],
                             ),
@@ -1118,17 +1143,21 @@ def test_export_result_list_classes():
                                 time=2001,
                                 split_times=[
                                     result_type.SplitTime(
-                                        control_code="31", status="OK", time=501
+                                        control_code="31",
+                                        status=SpStatus.OK,
+                                        time=501,
                                     ),
                                     result_type.SplitTime(
-                                        control_code="32", status="Missing"
+                                        control_code="32",
+                                        status=SpStatus.MISSING,
                                     ),
                                     result_type.SplitTime(
-                                        control_code="31", status="Missing"
+                                        control_code="31",
+                                        status=SpStatus.MISSING,
                                     ),
                                     result_type.SplitTime(
                                         control_code="33",
-                                        status="Additional",
+                                        status=SpStatus.ADDITIONAL,
                                         time=1136,
                                     ),
                                 ],

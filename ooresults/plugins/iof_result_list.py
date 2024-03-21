@@ -32,6 +32,7 @@ from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import SpStatus
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
@@ -163,8 +164,13 @@ def create_result_list(
                 )
             for s in result.split_times:
                 split_time = SPLITTIME(CONTROLCODE(s.control_code))
-                if s.status is not None and s.status != "OK":
-                    split_time.set("status", s.status)
+                if s.status is not None and s.status != SpStatus.OK:
+                    SPSTATUS = {
+                        SpStatus.OK: "OK",
+                        SpStatus.MISSING: "Missing",
+                        SpStatus.ADDITIONAL: "Additional",
+                    }
+                    split_time.set("status", SPSTATUS[s.status])
                 if s.time is not None:
                     split_time.append(TIME(str(s.time)))
                 res.append(split_time)
@@ -197,6 +203,13 @@ STATUS_MAP = {
     "DidNotStart": ResultStatus.DID_NOT_START,
     "DidNotEnter": ResultStatus.INACTIVE,
     "Cancelled": ResultStatus.INACTIVE,
+}
+
+
+SPSTATUS_MAP = {
+    "OK": SpStatus.OK,
+    "Missing": SpStatus.MISSING,
+    "Additional": SpStatus.ADDITIONAL,
 }
 
 
@@ -278,7 +291,7 @@ def parse_result_list(content: bytes) -> Tuple[Dict, List[Dict]]:
                     control_code=e_split_time.find(
                         "ControlCode", namespaces=namespaces
                     ).text,
-                    status=e_split_time.get("status", "OK"),
+                    status=SPSTATUS_MAP[e_split_time.get("status", "OK")],
                 )
                 e_time = e_split_time.find("Time", namespaces=namespaces)
                 if e_time is not None:

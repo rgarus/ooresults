@@ -29,6 +29,7 @@ from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import SpStatus
 from ooresults.pdf.pdf import PDF
 from ooresults.utils import globals
 
@@ -125,7 +126,7 @@ def create_pdf(
             [
                 t
                 for t in ranked_results[0].entry.result.split_times
-                if t.status != "Additional"
+                if t.status != SpStatus.ADDITIONAL
             ]
         ):
             if standard:
@@ -183,7 +184,9 @@ def create_pdf(
 
                     last_time = 0
                     for i in [
-                        t for t in self.result.split_times if t.status != "Additional"
+                        t
+                        for t in self.result.split_times
+                        if t.status != SpStatus.ADDITIONAL
                     ]:
                         if last_time is not None and i.time is not None:
                             split_time = format_splittime(time=int(i.time - last_time))
@@ -212,7 +215,9 @@ def create_pdf(
                     else:
                         yield "F", format_splittime(running_time), split_time
                     additional = [
-                        t for t in self.result.split_times if t.status == "Additional"
+                        t
+                        for t in self.result.split_times
+                        if t.status == SpStatus.ADDITIONAL
                     ]
                     if additional != []:
                         yield "", "", ""

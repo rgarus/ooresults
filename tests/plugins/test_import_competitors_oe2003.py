@@ -24,6 +24,7 @@ from ooresults.plugins.oe2003 import parse
 from ooresults.repo import result_type
 from ooresults.repo import start_type
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import SpStatus
 
 
 header = [
@@ -798,7 +799,7 @@ def test_split_time_without_punch():
                 status=ResultStatus.INACTIVE,
                 split_times=[
                     result_type.SplitTime(
-                        control_code="123", time=None, status="Missing"
+                        control_code="123", time=None, status=SpStatus.MISSING
                     ),
                 ],
             ),

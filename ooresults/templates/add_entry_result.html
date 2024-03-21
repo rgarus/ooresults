@@ -3,6 +3,16 @@ $def with (entry)
 $def format(value):
     $return value if value is not None else ''
 
+$def format_status(value):
+    $if value is None:
+        $return ""
+    $elif value == SpStatus.OK:
+        $return "OK"
+    $elif value == SpStatus.MISSING:
+        $return "Missing"
+    $elif value == SpStatus.ADDITIONAL:
+        $return "Additional"
+
 $def format_date(time):
     $if time is not None:
         $return time.strftime('%H:%M:%S')
@@ -123,7 +133,7 @@ $def format_diff_time(t):
                     $ i = 0
                     $for punch in entry.result.split_times:
                         <tr class="dt">
-                            $if punch.status in ('OK', 'Missing'):
+                            $if punch.status in (SpStatus.OK, SpStatus.MISSING):
                                 $ i += 1
                                 <td class="dt" style="text-align:right">$str(i)</td>
                             $else:
@@ -131,7 +141,7 @@ $def format_diff_time(t):
                             <td class="dt" style="text-align:right">$format(punch.control_code)</td>
                             <td class="dt" style="text-align:right">$format_date(punch.punch_time)</td>
                             <td class="dt" style="text-align:right">$minutes_seconds(punch.time)</td>
-                            <td class="dt">$format(punch.status)</td>
+                            <td class="dt">$format_status(punch.status)</td>
                         </tr>
                 </tbody>
         </table>
