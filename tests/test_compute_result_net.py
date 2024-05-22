@@ -55,21 +55,24 @@ def test_compute_result_status_ok():
     class_params = ClassParams(otype="net")
 
     result.compute_result(controls=controls, class_params=class_params)
-    assert result.start_time == s1
-    assert result.punched_start_time == s1
-    assert result.finish_time == f1
-    assert result.punched_finish_time == f1
-    assert result.time == int((f1 - s1).total_seconds())
-    assert result.status == ResultStatus.OK
-    assert len(result.split_times) == 3
-    assert result.split_times[0] == SplitTime(
-        control_code="103", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
-    )
-    assert result.split_times[1] == SplitTime(
-        control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.OK
-    )
-    assert result.split_times[2] == SplitTime(
-        control_code="101", punch_time=c3, time=t(s1, c3), status=SpStatus.OK
+    assert result == PersonRaceResult(
+        start_time=s1,
+        punched_start_time=s1,
+        finish_time=f1,
+        punched_finish_time=f1,
+        time=int((f1 - s1).total_seconds()),
+        status=ResultStatus.OK,
+        split_times=[
+            SplitTime(
+                control_code="103", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="101", punch_time=c3, time=t(s1, c3), status=SpStatus.OK
+            ),
+        ],
     )
 
 
@@ -93,24 +96,27 @@ def test_compute_result_status_mispunched():
     class_params = ClassParams(otype="net")
 
     result.compute_result(controls=controls, class_params=class_params)
-    assert result.start_time == s1
-    assert result.punched_start_time == s1
-    assert result.finish_time == f1
-    assert result.punched_finish_time == f1
-    assert result.time == int((f1 - s1).total_seconds())
-    assert result.status == ResultStatus.MISSING_PUNCH
-    assert len(result.split_times) == 4
-    assert result.split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
-    )
-    assert result.split_times[1] == SplitTime(
-        control_code="103", punch_time=c3, time=t(s1, c3), status=SpStatus.OK
-    )
-    assert result.split_times[2] == SplitTime(
-        control_code="102", punch_time=None, time=None, status=SpStatus.MISSING
-    )
-    assert result.split_times[3] == SplitTime(
-        control_code="104", punch_time=None, time=None, status=SpStatus.MISSING
+    assert result == PersonRaceResult(
+        start_time=s1,
+        punched_start_time=s1,
+        finish_time=f1,
+        punched_finish_time=f1,
+        time=int((f1 - s1).total_seconds()),
+        status=ResultStatus.MISSING_PUNCH,
+        split_times=[
+            SplitTime(
+                control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="103", punch_time=c3, time=t(s1, c3), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="102", punch_time=None, time=None, status=SpStatus.MISSING
+            ),
+            SplitTime(
+                control_code="104", punch_time=None, time=None, status=SpStatus.MISSING
+            ),
+        ],
     )
 
 
@@ -144,33 +150,108 @@ def test_compute_result_status_ok_with_additionals():
     class_params = ClassParams(otype="net")
 
     result.compute_result(controls=controls, class_params=class_params)
-    assert result.start_time == s1
-    assert result.punched_start_time == s1
-    assert result.finish_time == f1
-    assert result.punched_finish_time == f1
-    assert result.time == int((f1 - s1).total_seconds())
-    assert result.status == ResultStatus.OK
-    assert len(result.split_times) == 7
-    assert result.split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
+    assert result == PersonRaceResult(
+        start_time=s1,
+        punched_start_time=s1,
+        finish_time=f1,
+        punched_finish_time=f1,
+        time=int((f1 - s1).total_seconds()),
+        status=ResultStatus.OK,
+        split_times=[
+            SplitTime(
+                control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="105",
+                punch_time=c2,
+                time=t(s1, c2),
+                status=SpStatus.ADDITIONAL,
+            ),
+            SplitTime(
+                control_code="101",
+                punch_time=c3,
+                time=t(s1, c3),
+                status=SpStatus.ADDITIONAL,
+            ),
+            SplitTime(
+                control_code="103", punch_time=c4, time=t(s1, c4), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="102", punch_time=c5, time=t(s1, c5), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="101",
+                punch_time=c6,
+                time=t(s1, c6),
+                status=SpStatus.ADDITIONAL,
+            ),
+            SplitTime(
+                control_code="104",
+                punch_time=c7,
+                time=t(s1, c7),
+                status=SpStatus.ADDITIONAL,
+            ),
+        ],
     )
-    assert result.split_times[1] == SplitTime(
-        control_code="105", punch_time=c2, time=t(s1, c2), status=SpStatus.ADDITIONAL
+
+
+def test_compute_result_with_unknown_punch_times():
+    s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
+    c1 = SplitTime.NO_TIME
+    c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
+    c3 = SplitTime.NO_TIME
+    c4 = SplitTime.NO_TIME
+    f1 = datetime(2015, 1, 1, 12, 39, 15, tzinfo=timezone.utc)
+
+    controls = ["101", "102", "103"]
+    result = PersonRaceResult(
+        status=ResultStatus.INACTIVE,
+        punched_start_time=s1,
+        punched_finish_time=f1,
+        time=None,
+        split_times=[
+            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="104", punch_time=c3, status=SpStatus.ADDITIONAL),
+            SplitTime(control_code="103", punch_time=c4, status=SpStatus.ADDITIONAL),
+        ],
     )
-    assert result.split_times[2] == SplitTime(
-        control_code="101", punch_time=c3, time=t(s1, c3), status=SpStatus.ADDITIONAL
-    )
-    assert result.split_times[3] == SplitTime(
-        control_code="103", punch_time=c4, time=t(s1, c4), status=SpStatus.OK
-    )
-    assert result.split_times[4] == SplitTime(
-        control_code="102", punch_time=c5, time=t(s1, c5), status=SpStatus.OK
-    )
-    assert result.split_times[5] == SplitTime(
-        control_code="101", punch_time=c6, time=t(s1, c6), status=SpStatus.ADDITIONAL
-    )
-    assert result.split_times[6] == SplitTime(
-        control_code="104", punch_time=c7, time=t(s1, c7), status=SpStatus.ADDITIONAL
+    class_params = ClassParams(otype="net")
+
+    result.compute_result(controls=controls, class_params=class_params)
+    assert result == PersonRaceResult(
+        start_time=s1,
+        punched_start_time=s1,
+        finish_time=f1,
+        punched_finish_time=f1,
+        time=int((f1 - s1).total_seconds()),
+        status=ResultStatus.OK,
+        split_times=[
+            SplitTime(
+                control_code="101",
+                punch_time=c1,
+                time=None,
+                status=SpStatus.OK,
+            ),
+            SplitTime(
+                control_code="102",
+                punch_time=c2,
+                time=t(s1, c2),
+                status=SpStatus.OK,
+            ),
+            SplitTime(
+                control_code="104",
+                punch_time=c3,
+                time=None,
+                status=SpStatus.ADDITIONAL,
+            ),
+            SplitTime(
+                control_code="103",
+                punch_time=c4,
+                time=None,
+                status=SpStatus.OK,
+            ),
+        ],
     )
 
 
@@ -198,31 +279,40 @@ def test_compute_result_status_last_three_stations_missing():
     class_params = ClassParams(otype="net")
 
     result.compute_result(controls=controls, class_params=class_params)
-    assert result.start_time == s1
-    assert result.punched_start_time == s1
-    assert result.finish_time == f1
-    assert result.punched_finish_time == f1
-    assert result.time == int((f1 - s1).total_seconds())
-    assert result.status == ResultStatus.MISSING_PUNCH
-    assert len(result.split_times) == 7
-    assert result.split_times[0] == SplitTime(
-        control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
-    )
-    assert result.split_times[1] == SplitTime(
-        control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.OK
-    )
-    assert result.split_times[2] == SplitTime(
-        control_code="106", punch_time=c3, time=t(s1, c3), status=SpStatus.ADDITIONAL
-    )
-    assert result.split_times[3] == SplitTime(
-        control_code="107", punch_time=c4, time=t(s1, c4), status=SpStatus.ADDITIONAL
-    )
-    assert result.split_times[4] == SplitTime(
-        control_code="103", punch_time=None, time=None, status=SpStatus.MISSING
-    )
-    assert result.split_times[5] == SplitTime(
-        control_code="104", punch_time=None, time=None, status=SpStatus.MISSING
-    )
-    assert result.split_times[6] == SplitTime(
-        control_code="105", punch_time=None, time=None, status=SpStatus.MISSING
+    assert result == PersonRaceResult(
+        start_time=s1,
+        punched_start_time=s1,
+        finish_time=f1,
+        punched_finish_time=f1,
+        time=int((f1 - s1).total_seconds()),
+        status=ResultStatus.MISSING_PUNCH,
+        split_times=[
+            SplitTime(
+                control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.OK
+            ),
+            SplitTime(
+                control_code="106",
+                punch_time=c3,
+                time=t(s1, c3),
+                status=SpStatus.ADDITIONAL,
+            ),
+            SplitTime(
+                control_code="107",
+                punch_time=c4,
+                time=t(s1, c4),
+                status=SpStatus.ADDITIONAL,
+            ),
+            SplitTime(
+                control_code="103", punch_time=None, time=None, status=SpStatus.MISSING
+            ),
+            SplitTime(
+                control_code="104", punch_time=None, time=None, status=SpStatus.MISSING
+            ),
+            SplitTime(
+                control_code="105", punch_time=None, time=None, status=SpStatus.MISSING
+            ),
+        ],
     )

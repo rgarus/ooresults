@@ -32,6 +32,10 @@ import websockets
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.handler import model
 from ooresults.websocket_server.websocket_handler import WebSocketHandler
+from ooresults.repo.entry_type import EntryType
+from ooresults.repo.result_type import PersonRaceResult
+from ooresults.repo.result_type import SplitTime
+from ooresults.repo.result_type import SpStatus
 from ooresults.repo.result_type import ResultStatus
 
 
@@ -400,11 +404,47 @@ async def test_cardreader_card_read(
         assert json.loads(response)["status"] == "cardRead"
 
     # result is stored in database
+    ch = datetime.datetime.fromisoformat("2021-05-18T16:31:18+02:00")
+    s1 = datetime.datetime.fromisoformat("2021-05-18T16:31:19+02:00")
+    f1 = datetime.datetime.fromisoformat("2021-05-18T16:31:50+02:00")
+    c1 = datetime.datetime.fromisoformat("2021-05-18T16:31:25+02:00")
+    c2 = datetime.datetime.fromisoformat("2021-05-18T16:31:31+02:00")
+
     data = db.get_entries(event_id=event_id)
-    assert len(data) == 1
-    assert data[0].event_id == event_id
-    assert data[0].competitor_id is None
-    assert data[0].first_name is None
-    assert data[0].last_name is None
-    assert data[0].chip == "8084753"
-    assert data[0].result.status == ResultStatus.FINISHED
+    assert data == [
+        EntryType(
+            id=data[0].id,
+            event_id=event_id,
+            competitor_id=None,
+            first_name=None,
+            last_name=None,
+            chip="8084753",
+            result=PersonRaceResult(
+                status=ResultStatus.FINISHED,
+                start_time=s1,
+                finish_time=f1,
+                punched_check_time=ch,
+                punched_start_time=s1,
+                punched_finish_time=f1,
+                si_punched_start_time=s1,
+                si_punched_finish_time=f1,
+                time=31,
+                split_times=[
+                    SplitTime(
+                        control_code="141",
+                        punch_time=c1,
+                        si_punch_time=c1,
+                        time=6,
+                        status=SpStatus.ADDITIONAL,
+                    ),
+                    SplitTime(
+                        control_code="143",
+                        punch_time=c2,
+                        si_punch_time=c2,
+                        time=12,
+                        status=SpStatus.ADDITIONAL,
+                    ),
+                ],
+            ),
+        ),
+    ]

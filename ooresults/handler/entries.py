@@ -148,8 +148,8 @@ class Export:
         except EventNotFoundError:
             raise web.conflict("Event deleted")
         except:
-            logging.exception()
-            raise web.conflict("Internal server error")
+            logging.exception("Internal server error")
+            raise
 
         return content
 
@@ -308,3 +308,53 @@ class Delete:
         event_id = int(data.event_id) if data.event_id != "" else -1
         model.delete_entry(int(data.id))
         return update(event_id=event_id)
+
+
+class SplitTimes:
+    def POST(self):
+        data = web.input()
+        event_id = int(data.event_id) if data.event_id != "" else -1
+        return update(event_id=event_id)
+
+
+class EditPunch:
+    def POST(self):
+        """Change split times"""
+        data = web.input()
+        event_id = int(data.event_id) if data.event_id != "" else -1
+        entry_id = int(data.entry_id) if data.entry_id != "" else -1
+
+        if data.command not in ["entr_ep_del", "entr_ep_edit", "entr_ep_add"]:
+            raise RuntimeError
+
+        if data.selectedRow == "-1":
+            selected_row = "START"
+        elif data.selectedRow == "-2":
+            selected_row = "FINISH"
+        else:
+            selected_row = int(data.selectedRow)
+
+        punch_time = None
+        if data.command != "entr_ep_del" and data.punch_time != "":
+            punch_time = datetime.time.fromisoformat(data.punch_time)
+
+        try:
+            entry = model.edit_entry_result(
+                entry_id=entry_id,
+                event_id=event_id,
+                command=data.command,
+                control=data.control,
+                selected_row=selected_row,
+                punch_time=punch_time,
+            )
+        except EventNotFoundError:
+            raise web.conflict("Event deleted")
+        except KeyError:
+            raise web.conflict("Entry deleted")
+        except RuntimeError:
+            raise web.conflict("Course data changed")
+        except:
+            logging.exception("Internal server error")
+            raise
+
+        return render.add_entry_result(entry)

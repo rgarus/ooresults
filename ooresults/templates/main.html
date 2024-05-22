@@ -76,37 +76,44 @@ $:clubs_tab_content
 
 
 <script>
-    function updateDisplayedParams(root) {
+    function updateDisplayedParams(selected) {
         // Declare all variables
-        var i, nodes, element, selected;
-        
-        selected = document.querySelector('input'.concat('[name = "', root, '"]:checked')).value
+        var i, nodes, element, parent;
 
-        // Get all elements with class="params" and hide them
-        nodes = document.getElementsByClassName("params");
+        element = document.getElementById(selected);
+        parent = element.parentNode;
+
+        // Get all elements with class="params" below parent and hide them
+        nodes = parent.getElementsByClassName("params");
         for (i = 0; i < nodes.length; i++) {
             nodes[i].style.display = "none";
+            inputs = nodes[i].getElementsByTagName("input");
+            for (j = 0; j < inputs.length; j++) {
+                inputs[j].disabled = true;
+            }
         }
 
-        // Get all elements with class="required" below root"
+        // Get all elements with class="required" below parent
         // and set required attribute to false
-        element = document.getElementById(root);
-        required = element.getElementsByClassName("required");
+        required = parent.getElementsByClassName("required");
         for (i = 0; i < required.length; i++) {
             required[i].required = false;
         }
 
-        // Show the parameters
-        document.getElementById(selected).style.display = "block";
+        // Show the parameters below selected
+        element.style.display = "block";
+        inputs = element.getElementsByTagName("input");
+        for (j = 0; j < inputs.length; j++) {
+            inputs[j].disabled = false;
+        }
 
         // Get all elements with class="required" below selected
         // and set required attribute to true
-        element = document.getElementById(selected);
         required = element.getElementsByClassName("required");
         for (i = 0; i < required.length; i++) {
-            required[i].required= true;
+            required[i].required = true;
         }
-    } 
+    }
 
     function mark_label(node) {
         // find form element
@@ -116,9 +123,9 @@ $:clubs_tab_content
         }
         // find label element
         if (elem != null) {
-            label = elem.querySelector("label[for=" + node.name + "]");
+            label = elem.querySelector("label[for=" + node.id + "]");
             if (label != null) {
-                 label.style.color = "red";
+                label.style.color = "red";
             }
         }
     }

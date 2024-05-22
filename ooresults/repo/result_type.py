@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import dataclasses
 from datetime import datetime
+from datetime import timezone
 import enum
 from typing import List
 from typing import Optional
@@ -54,8 +55,11 @@ class SpStatus(enum.Enum):
 
 @dataclasses.dataclass
 class SplitTime:
+    NO_TIME = datetime(1970, 1, 1, tzinfo=timezone.utc)
+
     control_code: str
     punch_time: Optional[datetime] = None
+    si_punch_time: Optional[datetime] = None
     time: Optional[int] = None
     status: Optional[SpStatus] = None
     leg_voided: bool = False
@@ -64,7 +68,11 @@ class SplitTime:
         """
         set time as difference between start_time and punch_time
         """
-        if start_time is not None and self.punch_time is not None:
+        if start_time is None:
+            self.time = None
+        elif self.punch_time is None or self.punch_time == self.NO_TIME:
+            self.time = None
+        else:
             diff = self.punch_time.replace(microsecond=0) - start_time.replace(
                 microsecond=0
             )
@@ -121,6 +129,8 @@ class PersonRaceResult:
     punched_check_time: Optional[datetime] = None
     punched_start_time: Optional[datetime] = None
     punched_finish_time: Optional[datetime] = None
+    si_punched_start_time: Optional[datetime] = None
+    si_punched_finish_time: Optional[datetime] = None
     time: Optional[int] = None
     split_times: List[SplitTime] = dataclasses.field(default_factory=list)
     last_leg_voided: bool = False
@@ -160,11 +170,27 @@ class PersonRaceResult:
             ]
         )
 
+    def same_si_punches(self, other: PersonRaceResult) -> bool:
+        return (
+            self.si_punched_start_time == other.si_punched_start_time
+            and self.si_punched_finish_time == other.si_punched_finish_time
+            and [
+                (p.control_code, p.si_punch_time)
+                for p in self.split_times
+                if p.si_punch_time is not None
+            ]
+            == [
+                (p.control_code, p.si_punch_time)
+                for p in other.split_times
+                if p.si_punch_time is not None
+            ]
+        )
+
     def voided_legs(self) -> List[str]:
         voided_legs = []
         c1 = "S"
         for split_time in [
-            s for s in self.split_times if s.status != SpStatus.ADDITIONAL
+            s for s in self.split_times if s.status in [SpStatus.OK, SpStatus.MISSING]
         ]:
             c2 = split_time.control_code
             if split_time.leg_voided and f"{c1}-{c2}" not in voided_legs:
@@ -174,6 +200,15 @@ class PersonRaceResult:
         if self.last_leg_voided and f"{c1}-{c2}" not in voided_legs:
             voided_legs.append(f"{c1}-{c2}")
         return voided_legs
+
+    def reset(self) -> None:
+        self.status = ResultStatus.FINISHED
+        self.punched_start_time = self.si_punched_start_time
+        self.punched_finish_time = self.si_punched_finish_time
+        for s in self.split_times:
+            s.punch_time = s.si_punch_time
+            s.status = SpStatus.ADDITIONAL
+        self.split_times = [s for s in self.split_times if s.si_punch_time is not None]
 
     def compute_result(
         self,
@@ -204,7 +239,11 @@ class PersonRaceResult:
 
         # remove missing controls and reset results
         old_status = self.status
-        split_times = [s for s in self.split_times if s.status != SpStatus.MISSING]
+        split_times = [
+            s
+            for s in self.split_times
+            if s.punch_time is not None or s.si_punch_time is not None
+        ]
         self.time = None
         self.status = ResultStatus.INACTIVE
         self.extensions = {}
@@ -249,18 +288,26 @@ class PersonRaceResult:
             control_codes = controls.copy()
             self.split_times = split_times
             for p in self.split_times:
-                if p.control_code in control_codes:
+                if p.control_code in control_codes and p.punch_time is not None:
                     p.status = SpStatus.OK
-                    p.recalculate_time(start_time=self.start_time)
                     control_codes = [c for c in control_codes if c != p.control_code]
                 else:
-                    p.status = SpStatus.ADDITIONAL
-                    p.recalculate_time(start_time=self.start_time)
+                    if p.punch_time is not None:
+                        p.status = SpStatus.ADDITIONAL
+                    else:
+                        p.status = None
+                p.recalculate_time(start_time=self.start_time)
 
             for control_code in control_codes:
-                self.split_times.append(
-                    SplitTime(control_code=control_code, status=SpStatus.MISSING)
-                )
+                # reuse a removed split time as missing split time
+                for p in self.split_times:
+                    if control_code == p.control_code:
+                        p.status = SpStatus.MISSING
+                        break
+                else:
+                    self.split_times.append(
+                        SplitTime(control_code=control_code, status=SpStatus.MISSING)
+                    )
                 if class_params.penalty_controls is not None:
                     penalties_controls += class_params.penalty_controls
                 else:
@@ -272,29 +319,46 @@ class PersonRaceResult:
             control_codes = controls.copy()
             self.split_times = split_times
             for p in self.split_times:
-                if p.control_code in control_codes:
+                if p.control_code in control_codes and p.punch_time is not None:
                     p.status = SpStatus.OK
                     score_controls += 1
-                    p.recalculate_time(start_time=self.start_time)
                     control_codes = [c for c in control_codes if c != p.control_code]
                 else:
-                    p.status = SpStatus.ADDITIONAL
-                    p.recalculate_time(start_time=self.start_time)
+                    if p.punch_time is not None:
+                        p.status = SpStatus.ADDITIONAL
+                    else:
+                        p.status = None
+                p.recalculate_time(start_time=self.start_time)
 
             for control_code in control_codes:
-                self.split_times.append(
-                    SplitTime(control_code=control_code, status=SpStatus.MISSING)
-                )
+                # reuse a removed split time as missing split time
+                for p in self.split_times:
+                    if control_code == p.control_code:
+                        p.status = SpStatus.MISSING
+                        break
+                else:
+                    self.split_times.append(
+                        SplitTime(control_code=control_code, status=SpStatus.MISSING)
+                    )
 
         else:
             # controls must be visited in the correct order
             self.split_times = []
             for control in controls:
+                while split_times and split_times[0].punch_time is None:
+                    p0 = split_times.pop(0)
+                    p0.status = None
+                    p0.recalculate_time(start_time=self.start_time)
+                    self.split_times.append(p0)
+
                 for i, p in enumerate(split_times):
-                    if control == p.control_code:
+                    if control == p.control_code and p.punch_time is not None:
                         for k in range(i):
                             p0 = split_times.pop(0)
-                            p0.status = SpStatus.ADDITIONAL
+                            if p0.punch_time is not None:
+                                p0.status = SpStatus.ADDITIONAL
+                            else:
+                                p0.status = None
                             p0.recalculate_time(start_time=self.start_time)
                             self.split_times.append(p0)
                         p0 = split_times.pop(0)
@@ -303,16 +367,31 @@ class PersonRaceResult:
                         self.split_times.append(p0)
                         break
                 else:
-                    self.split_times.append(
-                        SplitTime(control_code=control, status=SpStatus.MISSING)
-                    )
+                    # reuse a removed split time as missing split time
+                    candidates = []
+                    for p in reversed(self.split_times):
+                        if p.status is None:
+                            candidates.append(p)
+                        else:
+                            break
+                    for p in reversed(candidates):
+                        if control == p.control_code:
+                            p.status = SpStatus.MISSING
+                            break
+                    else:
+                        self.split_times.append(
+                            SplitTime(control_code=control, status=SpStatus.MISSING)
+                        )
                     if class_params.penalty_controls is not None:
                         penalties_controls += class_params.penalty_controls
                     else:
                         mp = True
 
             for p in split_times:
-                p.status = SpStatus.ADDITIONAL
+                if p.punch_time is not None:
+                    p.status = SpStatus.ADDITIONAL
+                else:
+                    p.status = None
                 p.recalculate_time(start_time=self.start_time)
                 self.split_times.append(p)
 
@@ -358,7 +437,9 @@ class PersonRaceResult:
             # mark voided legs
             c1 = "S"
             for split_time in [
-                s for s in self.split_times if s.status != SpStatus.ADDITIONAL
+                s
+                for s in self.split_times
+                if s.status in (SpStatus.OK, SpStatus.MISSING)
             ]:
                 c2 = split_time.control_code
                 if (c1, c2) in class_params.voided_legs:
@@ -369,16 +450,32 @@ class PersonRaceResult:
                 self.last_leg_voided = True
 
             # subtract time of voided legs from running time
+            # for example (controls 101-102-103):
+            #
+            # voidedLeg = 101-102,         times 2:00-3:00-4:00 -> subtract 60 sec
+            # voidedLeg = 102-103,         times 2:00-3:00-4:00 -> subtract 60 sec
+            # voidedLeg = 101-102,102-103, times 2:00-3:00-4:00 -> subtract 120 sec
+            # voidedLeg = 101-102,         times 2:00-ok-4:00   -> not possible
+            # voidedLeg = 102-103,         times 2:00-ok-4:00   -> not possible
+            # voidedLeg = 101-102,102-103, times 2:00-ok-4:00   -> subtract 120 sec
+            # voidedLeg = 101-102,102-103, times ok-3:00-4:00   -> subtract 60 sec
+            #
             if self.time is not None:
                 t1 = 0
                 for split_time in [
-                    s for s in self.split_times if s.status != SpStatus.ADDITIONAL
+                    s
+                    for s in self.split_times
+                    if s.status in (SpStatus.OK, SpStatus.MISSING)
                 ]:
                     t2 = split_time.time
-                    if split_time.leg_voided and t2 is not None and t1 is not None:
-                        self.time -= t2 - t1
-                    t1 = t2
-                if self.last_leg_voided and t2 is not None:
+                    if split_time.leg_voided:
+                        if t2 is not None:
+                            if t1 is not None:
+                                self.time -= t2 - t1
+                            t1 = t2
+                    else:
+                        t1 = t2
+                if self.last_leg_voided and t1 is not None:
                     self.time -= (
                         int((self.finish_time - self.start_time).total_seconds()) - t1
                     )
@@ -407,7 +504,7 @@ class PersonRaceResult:
                 self.extensions["score"] = None
 
         else:
-            # modify status if running time is to high
+            # modify status if running time is too high
             if (
                 class_params.time_limit is not None
                 and class_params.penalty_overtime is None

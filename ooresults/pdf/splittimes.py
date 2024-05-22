@@ -18,7 +18,6 @@
 
 
 from datetime import datetime
-from typing import Dict
 from typing import List
 from typing import Tuple
 from typing import Optional
@@ -29,9 +28,99 @@ from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import SplitTime
 from ooresults.repo.result_type import SpStatus
 from ooresults.pdf.pdf import PDF
 from ooresults.utils import globals
+
+
+def format_result(result: PersonRaceResult, standard: bool):
+    def t(a: Optional[datetime], b: Optional[datetime]) -> Optional[int]:
+        if a is not None and b is not None:
+            diff = b.replace(microsecond=0) - a.replace(microsecond=0)
+            return int(diff.total_seconds())
+        else:
+            return None
+
+    def format_split_time(time: Optional[int]) -> str:
+        if time is not None:
+            return globals.minutes_seconds(time=time)
+        else:
+            return "-----"
+
+    if result.start_time is not None and result.finish_time is not None:
+        running_time = t(a=result.start_time, b=result.finish_time)
+    else:
+        running_time = result.extensions.get("running_time", result.time)
+
+    control_code = None
+    required = []
+    extra = []
+
+    for s in result.split_times:
+        if s.status == SpStatus.OK:
+            control_code = s.control_code
+            required.append(s)
+        elif s.status == SpStatus.MISSING:
+            required.append(s)
+        elif s.status == SpStatus.ADDITIONAL and s.control_code != control_code:
+            control_code = s.control_code
+            extra.append(s)
+
+    last_time = 0
+    for s in required:
+        if last_time is not None and s.time is not None:
+            split_time = format_split_time(time=int(s.time - last_time))
+            last_time = s.time
+        else:
+            split_time = "-----"
+
+        if standard:
+            if s.status == SpStatus.OK and s.time is None:
+                yield "ok", "", None
+            else:
+                if s.leg_voided and split_time != "-----":
+                    split_time = f"[{split_time}]"
+                yield format_split_time(s.time), split_time, None
+        else:
+            if s.status == SpStatus.OK and s.time is None:
+                yield f"#({s.control_code})", "ok", ""
+            else:
+                yield (
+                    f"#({s.control_code})",
+                    format_split_time(s.time),
+                    split_time,
+                )
+
+    if last_time is not None and running_time is not None:
+        split_time = format_split_time(time=int(running_time - last_time))
+    else:
+        split_time = "-----"
+    if standard:
+        if result.last_leg_voided and split_time != "-----":
+            split_time = "[" + split_time + "]"
+        if result.start_time is None and result.finish_time is not None:
+            yield "ok", "", None
+        else:
+            yield format_split_time(running_time), split_time, None
+    else:
+        if result.start_time is None and result.finish_time is not None:
+            yield "F", "ok", ""
+        else:
+            yield "F", format_split_time(running_time), split_time
+
+    if extra:
+        yield "", "", ""
+    for s in extra:
+        control = f"*({s.control_code})"
+        if result.start_time is None or s.punch_time == SplitTime.NO_TIME:
+            rel_time = "ok"
+        else:
+            rel_time = format_split_time(s.time)
+        if standard:
+            yield rel_time, control, None
+        else:
+            yield control, rel_time, ""
 
 
 def create_pdf(
@@ -44,7 +133,7 @@ def create_pdf(
     pdf.set_margin(margin=10)
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
-    nr_splittimes = 20 if landscape else 12
+    nr_split_times = 20 if landscape else 12
 
     def cell(
         pdf: PDF, w: int, h: Optional[int] = None, txt: str = "", align: str = "L"
@@ -58,12 +147,6 @@ def create_pdf(
             return globals.minutes_seconds(time=time)
         else:
             return pdf.MAP_STATUS[status]
-
-    def format_splittime(time: Optional[int]) -> str:
-        if time is not None:
-            return globals.minutes_seconds(time=time)
-        else:
-            return "-----"
 
     def pre(pdf: PDF, t1: str = "", t2: str = "", t3: str = "") -> None:
         pdf.set_font(style="B")
@@ -126,7 +209,7 @@ def create_pdf(
             [
                 t
                 for t in ranked_results[0].entry.result.split_times
-                if t.status != SpStatus.ADDITIONAL
+                if t.status in [SpStatus.OK, SpStatus.MISSING]
             ]
         ):
             if standard:
@@ -135,8 +218,8 @@ def create_pdf(
                 codes.append(f"{str(i+1)}")
         codes.append("F")
         for i, j in enumerate(codes):
-            if i % nr_splittimes == 0:
-                if i >= nr_splittimes:
+            if i % nr_split_times == 0:
+                if i >= nr_split_times:
                     pdf.ln()
                 pre(pdf=pdf)
             cell(pdf=pdf, w=10, h=None, txt=j, align="R")
@@ -149,83 +232,8 @@ def create_pdf(
             entry = ranked_result.entry
             result = entry.result
 
-            def get(d: Dict, key: str) -> str:
-                s = d.get(key, "")
-                return s if s is not None else ""
-
             def f(value: Union[Optional[int], Optional[str]]) -> str:
                 return str(value) if value is not None else ""
-
-            class Result:
-                def __init__(self, result: PersonRaceResult):
-                    self.result = result
-
-                def t(
-                    self, a: Optional[datetime], b: Optional[datetime]
-                ) -> Optional[int]:
-                    if a is not None and b is not None:
-                        diff = b.replace(microsecond=0) - a.replace(microsecond=0)
-                        return int(diff.total_seconds())
-                    else:
-                        return None
-
-                def next(self) -> str:
-                    if (
-                        self.result.start_time is not None
-                        and self.result.finish_time is not None
-                    ):
-                        running_time = self.t(
-                            a=self.result.start_time, b=self.result.finish_time
-                        )
-                    else:
-                        running_time = self.result.extensions.get(
-                            "running_time", self.result.time
-                        )
-
-                    last_time = 0
-                    for i in [
-                        t
-                        for t in self.result.split_times
-                        if t.status != SpStatus.ADDITIONAL
-                    ]:
-                        if last_time is not None and i.time is not None:
-                            split_time = format_splittime(time=int(i.time - last_time))
-                            last_time = i.time
-                        else:
-                            split_time = "-----"
-                        if standard:
-                            if i.leg_voided:
-                                split_time = "[" + split_time + "]"
-                            yield format_splittime(i.time), split_time, None
-                        else:
-                            yield f"#({i.control_code})", format_splittime(
-                                i.time
-                            ), split_time
-
-                    if last_time is not None and running_time is not None:
-                        split_time = format_splittime(
-                            time=int(running_time - last_time)
-                        )
-                    else:
-                        split_time = "-----"
-                    if standard:
-                        if self.result.last_leg_voided:
-                            split_time = "[" + split_time + "]"
-                        yield format_splittime(running_time), split_time, None
-                    else:
-                        yield "F", format_splittime(running_time), split_time
-                    additional = [
-                        t
-                        for t in self.result.split_times
-                        if t.status == SpStatus.ADDITIONAL
-                    ]
-                    if additional != []:
-                        yield "", "", ""
-                    for i in additional:
-                        if standard:
-                            yield format_splittime(i.time), f"*({i.control_code})", None
-                        else:
-                            yield f"*({i.control_code})", format_splittime(i.time), ""
 
             with pdf.unbreakable() as doc:
                 doc.set_font(family="Carlito", size=8)
@@ -236,10 +244,9 @@ def create_pdf(
                     doc.ln()
 
                 sp = 0
-                result_data = Result(result=result)
 
                 def print_line_1(sp: int, line_1: List[str]) -> None:
-                    if sp <= nr_splittimes:
+                    if sp <= nr_split_times:
                         running_time = result.extensions.get(
                             "running_time", result.time
                         )
@@ -260,7 +267,7 @@ def create_pdf(
                         cell(pdf=doc, w=10, h=None, txt=i, align="R")
 
                 def print_line_2(sp: int, line_2: List[str]) -> None:
-                    if sp <= nr_splittimes:
+                    if sp <= nr_split_times:
                         doc.ln()
                         # first line: rank, lastname+firstname, time, splittimes
                         pre(pdf=doc, t2=f(entry.club_name))
@@ -281,12 +288,12 @@ def create_pdf(
                 line_1 = []
                 line_2 = []
                 line_3 = []
-                for i, j, k in result_data.next():
+                for i, j, k in format_result(result=result, standard=standard):
                     line_1.append(i)
                     line_2.append(j)
                     line_3.append(k)
                     sp += 1
-                    if sp % nr_splittimes == 0:
+                    if sp % nr_split_times == 0:
                         print_line_1(sp=sp, line_1=line_1)
                         print_line_2(sp=sp, line_2=line_2)
                         if not standard:
@@ -294,7 +301,7 @@ def create_pdf(
                         line_1 = []
                         line_2 = []
                         line_3 = []
-                if line_1 != []:
+                if line_1:
                     print_line_1(sp=sp, line_1=line_1)
                     print_line_2(sp=sp, line_2=line_2)
                     if not standard:

@@ -23,13 +23,13 @@ $def with (classes_table)
       <form id="cls.import.form" class="form-container" onsubmit="cls_submitImport(); return false;">
         <p>Format</p>
         <div>
-          <input id="oo_1" name="cls_import" type="radio" value="cls.import.1"
-                 onchange="updateDisplayedParams('cls_import')" required checked/>
-          <label for="cls.import.1">IOF Interface Standard 3.0 Class List</label>
+          <input id="cls_radio_import_1" name="cls_import" type="radio" value="cls.import.1"
+                 onchange="updateDisplayedParams('cls_import_1')" required checked/>
+          <label for="cls_radio_import_1">IOF Interface Standard 3.0 Class List</label>
         </div>
         <p>Settings</p>
         <div id="cls_import">
-          <div id="cls.import.1" class="params">
+          <div id="cls_import_1" class="params">
             <table>
               <tr>
                 <th class="input-header"><label for="file1">File</label></th>
@@ -54,13 +54,13 @@ $def with (classes_table)
       <form id="cls.export.form" class="form-container" onsubmit="cls_submitExport(); return false;">
         <p>Format</p>
          <div>
-          <input id="oo_1" name="cls_export" type="radio" value="cls.export.1"
-                 onchange="updateDisplayedParams('cls_export')" required checked/>
-          <label for="cls.export.1">IOF Interface Standard 3.0 Class List</label>
+          <input id="cls_radio_export_1" name="cls_export" type="radio" value="cls.export.1"
+                 onchange="updateDisplayedParams('cls_export_1')" required checked/>
+          <label for="cls_radio_export_1">IOF Interface Standard 3.0 Class List</label>
         </div>
         <p>Settings</p>
         <div id="cls_export">
-          <div id="cls.export.1" class="params">
+          <div id="cls_export_1" class="params">
           </div>
         </div>
         <p></p>
@@ -105,13 +105,15 @@ $def with (classes_table)
     }
 
     function cls_myImport() {
-        document.getElementById('cls.importDialog').style.display='block';
-        updateDisplayedParams("cls_import");
+        document.getElementById('cls.importDialog').style.display = 'block';
+        document.getElementById('cls_radio_import_1').checked = true;
+        updateDisplayedParams("cls_import_1");
     }
 
     function cls_myExport() {
-        document.getElementById('cls.exportDialog').style.display='block';
-        updateDisplayedParams("cls_export");
+        document.getElementById('cls.exportDialog').style.display = 'block';
+        document.getElementById('cls_radio_export_1').checked = true;
+        updateDisplayedParams("cls_export_1");
     }
 
     function cls_myAdd() {

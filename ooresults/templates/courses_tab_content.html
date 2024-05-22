@@ -23,13 +23,13 @@ $def with (courses_table)
       <form id="cou.import.form" class="form-container" onsubmit="cou_submitImport(); return false;">
         <p>Format</p>
         <div>
-          <input id="oo_1" name="cou_import" type="radio" value="cou.import.1"
-                 onchange="updateDisplayedParams('cou_import')" required checked/>
-          <label for="cou.import.1">IOF Interface Standard 3.0 Course Data</label>
+          <input id="cou_radio_import_1" name="cou_import" type="radio" value="cou.import.1"
+                 onchange="updateDisplayedParams('cou_import_1')" required checked/>
+          <label for="cou_radio_import_1">IOF Interface Standard 3.0 Course Data</label>
         </div>
         <p>Settings</p>
         <div id="cou_import">
-          <div id="cou.import.1" class="params">
+          <div id="cou_import_1" class="params">
             <table>
               <tr>
                 <th class="input-header"><label for="file1">File</label></th>
@@ -54,13 +54,13 @@ $def with (courses_table)
       <form id="cou.export.form" class="form-container" onsubmit="cou_submitExport(); return false;">
         <p>Format</p>
          <div>
-          <input id="oo_1" name="cou_export" type="radio" value="cou.export.1"
-                 onchange="updateDisplayedParams('cou_export')" required checked/>
-          <label for="cou.export.1">IOF Interface Standard 3.0 Course Data</label>
+          <input id="cou_radio_export_1" name="cou_export" type="radio" value="cou.export.1"
+                 onchange="updateDisplayedParams('cou_export_1')" required checked/>
+          <label for="cou_radio_export_1">IOF Interface Standard 3.0 Course Data</label>
         </div>
         <p>Settings</p>
         <div id="cou_export">
-          <div id="cou.export.1" class="params">
+          <div id="cou_export_1" class="params">
           </div>
         </div>
         <p></p>
@@ -105,13 +105,15 @@ $def with (courses_table)
     }
 
     function cou_myImport() {
-        document.getElementById('cou.importDialog').style.display='block';
-        updateDisplayedParams("cou_import");
+        document.getElementById('cou.importDialog').style.display = 'block';
+        document.getElementById('cou_radio_import_1').checked = true;
+        updateDisplayedParams("cou_import_1");
     }
 
     function cou_myExport() {
-        document.getElementById('cou.exportDialog').style.display='block';
-        updateDisplayedParams("cou_export");
+        document.getElementById('cou.exportDialog').style.display = 'block';
+        document.getElementById('cou_radio_export_1').checked = true;
+        updateDisplayedParams("cou_export_1");
     }
 
     function cou_myAdd() {

@@ -18,37 +18,41 @@
 
 
 import asyncio
-import datetime
-import pathlib
 import copy
+import datetime
+import enum
 import json
-from typing import Optional
-from typing import List
+import pathlib
 from typing import Dict
+from typing import List
+from typing import Optional
 from typing import Tuple
+from typing import Union
 
 import iso8601
 import jsonschema
+import tzlocal
 
 from ooresults.handler import build_results
 from ooresults.handler.build_results import PersonSeriesResult
-from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.repo.repo import EventNotFoundError
-from ooresults.repo.repo import TransactionMode
+from ooresults.repo import result_type
+from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.class_type import ClassType
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo import result_type
-from ooresults.repo import start_type
 from ooresults.repo.club_type import ClubType
 from ooresults.repo.competitor_type import CompetitorType
 from ooresults.repo.course_type import CourseType
 from ooresults.repo.entry_type import EntryType
 from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
+from ooresults.repo.repo import EventNotFoundError
+from ooresults.repo.repo import TransactionMode
+from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.result_type import SpStatus
+from ooresults.repo.result_type import SplitTime
 from ooresults.repo.series_type import Settings
+from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.websocket_server.websocket_server import WebSocketServer
 
 
@@ -414,7 +418,8 @@ def get_entry(id: int) -> EntryType:
         return db.get_entry(id=id)
 
 
-def add_entry(
+def add_or_update_entry(
+    id: Optional[int],
     event_id: int,
     competitor_id: Optional[int],
     first_name: str,
@@ -428,84 +433,197 @@ def add_entry(
     fields: Dict[int, str],
     status: ResultStatus,
     start_time: Optional[datetime.datetime],
+    result_id: Optional[int],
 ) -> int:
+    #
+    # result_id == -1: remove result from entry (store as pseudy result)
+    #
+
     with db.transaction(mode=TransactionMode.IMMEDIATE):
-        return db.add_entry(
-            event_id=event_id,
-            competitor_id=competitor_id,
-            first_name=first_name,
-            last_name=last_name,
-            gender=gender,
+        if id is None:
+            id = db.add_entry(
+                event_id=event_id,
+                competitor_id=competitor_id,
+                first_name=first_name,
+                last_name=last_name,
+                gender=gender,
+                year=year,
+                class_id=class_id,
+                club_id=club_id,
+                not_competing=not_competing,
+                chip=chip,
+                fields=fields,
+                status=status,
+                start_time=start_time,
+            )
+            result = PersonRaceResult()
+        else:
+            entry = db.get_entry(id=id)
+            result = entry.result
+            if result_id is not None:
+                # store result as new entry
+                r = copy.deepcopy(result)
+                r.reset()
+                if r.has_punches():
+                    r.compute_result(controls=[], class_params=ClassParams())
+                    db.add_entry_result(
+                        event_id=entry.event_id,
+                        chip=entry.chip,
+                        result=r,
+                        start_time=None,
+                    )
+
+            db.update_entry(
+                id=id,
+                first_name=first_name,
+                last_name=last_name,
+                gender=gender,
+                year=year,
+                class_id=class_id,
+                club_id=club_id,
+                not_competing=not_competing,
+                chip=chip,
+                fields=fields,
+                status=status,
+                start_time=start_time,
+            )
+
+        # update entry result
+        if result_id == -1:
+            # result will be removed
+            result = PersonRaceResult()
+        elif result_id is not None:
+            # result will be replaced
+            e = db.get_entry(id=result_id)
+            chip = e.chip
+            result = e.result
+            db.delete_entry(id=result_id)
+
+        # compute new result
+        try:
+            class_ = db.get_class(id=class_id)
+            course_id = class_.course_id
+            class_params = class_.params
+            controls = db.get_course(id=course_id).controls
+        except KeyError:
+            class_params = ClassParams()
+            controls = []
+
+        result.compute_result(
+            controls=controls,
+            class_params=class_params,
+            start_time=start_time,
             year=year,
-            class_id=class_id,
-            club_id=club_id,
-            not_competing=not_competing,
-            chip=chip,
-            fields=fields,
-            status=status,
-            start_time=start_time,
+            gender=gender if gender != "" else None,
         )
-
-
-def update_entry(
-    id: int,
-    first_name: str,
-    last_name: str,
-    gender: str,
-    year: Optional[int],
-    class_id: int,
-    club_id: Optional[int],
-    not_competing: bool,
-    chip: str,
-    fields: Dict[int, str],
-    status: ResultStatus,
-    start_time: Optional[datetime.datetime],
-) -> None:
-    with db.transaction(mode=TransactionMode.IMMEDIATE):
-        db.update_entry(
-            id=id,
-            first_name=first_name,
-            last_name=last_name,
-            gender=gender,
-            year=year,
-            class_id=class_id,
-            club_id=club_id,
-            not_competing=not_competing,
-            chip=chip,
-            fields=fields,
-            status=status,
-            start_time=start_time,
-        )
-
-
-def add_entry_result(
-    event_id,
-    chip: str,
-    start_time: Optional[datetime.datetime],
-    result: result_type.PersonRaceResult,
-) -> None:
-    with db.transaction(mode=TransactionMode.IMMEDIATE):
-        db.add_entry_result(
-            event_id=event_id,
-            chip=chip,
-            start_time=start_time,
-            result=result,
-        )
-
-
-def update_entry_result(
-    id: int,
-    chip: str,
-    start_time: Optional[datetime.datetime],
-    result: result_type.PersonRaceResult,
-) -> None:
-    with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.update_entry_result(
             id=id,
             chip=chip,
-            start_time=start_time,
             result=result,
+            start_time=start_time,
         )
+        return id
+
+
+@enum.unique
+class EditEntryResultCommand(enum.Enum):
+    EDIT = enum.auto()
+    DELETE = enum.auto()
+    ADD_BEFORE = enum.auto()
+
+
+def edit_entry_result(
+    entry_id: int,
+    event_id: int,
+    command: str,
+    control: str,
+    selected_row: Union[int, str],
+    punch_time: Optional[datetime.time],
+) -> EntryType:
+    with db.transaction(mode=TransactionMode.IMMEDIATE):
+        event = db.get_event(id=event_id)
+        entry = db.get_entry(id=entry_id)
+        result = entry.result
+        split_times = result.split_times
+
+        if selected_row == "START":
+            # update changed start time
+            if punch_time is None:
+                result.punched_start_time = None
+            elif (
+                result.punched_start_time is None
+                or result.punched_start_time.time() != punch_time
+            ):
+                result.punched_start_time = datetime.datetime.combine(
+                    date=event.date,
+                    time=punch_time,
+                    tzinfo=tzlocal.get_localzone(),
+                )
+        elif selected_row == "FINISH":
+            # update changed finish time
+            if punch_time is None:
+                result.punched_finish_time = None
+            elif (
+                result.punched_finish_time is None
+                or result.punched_finish_time.time() != punch_time
+            ):
+                result.punched_finish_time = datetime.datetime.combine(
+                    date=event.date,
+                    time=punch_time,
+                    tzinfo=tzlocal.get_localzone(),
+                )
+        else:
+            if command == "entr_ep_del":
+                if split_times[selected_row].si_punch_time is None:
+                    # delete the row (punch not contained at SI card)
+                    split_times.pop(selected_row)
+                else:
+                    # delete the used punch time
+                    split_times[selected_row].punch_time = None
+            else:
+                if punch_time is None:
+                    used_t = result_type.SplitTime.NO_TIME
+                else:
+                    used_t = datetime.datetime.combine(
+                        date=event.date,
+                        time=punch_time,
+                        tzinfo=tzlocal.get_localzone(),
+                    )
+
+                if command == "entr_ep_edit":
+                    split_times[selected_row].punch_time = used_t
+                else:
+                    split_times.insert(
+                        selected_row,
+                        SplitTime(control_code=control, punch_time=used_t),
+                    )
+
+        # compute new result
+        try:
+            class_ = db.get_class(id=entry.class_id)
+            course_id = class_.course_id
+            class_params = class_.params
+            controls = db.get_course(id=course_id).controls
+        except KeyError:
+            class_params = ClassParams()
+            controls = []
+
+        result.compute_result(
+            controls=controls,
+            class_params=class_params,
+            start_time=entry.start.start_time,
+            year=int(entry.year) if entry.year is not None else None,
+            gender=entry.gender,
+        )
+
+        # store result
+        db.update_entry_result(
+            id=entry.id,
+            chip=entry.chip,
+            result=result,
+            start_time=entry.start.start_time,
+        )
+        return entry
 
 
 def delete_entries(event_id: int) -> None:
@@ -609,8 +727,10 @@ def parse_cardreader_log(item: Dict) -> result_type.CardReaderMessage:
             result.punched_check_time = iso8601.parse_date(item["checkTime"])
         if item.get("startTime", None) is not None:
             result.punched_start_time = iso8601.parse_date(item["startTime"])
+            result.si_punched_start_time = result.punched_start_time
         if item.get("finishTime", None) is not None:
             result.punched_finish_time = iso8601.parse_date(item["finishTime"])
+            result.si_punched_finish_time = result.punched_finish_time
         result.start_time = result.punched_start_time
         result.finish_time = result.punched_finish_time
         for p in item["punches"]:
@@ -618,6 +738,7 @@ def parse_cardreader_log(item: Dict) -> result_type.CardReaderMessage:
                 result_type.SplitTime(
                     control_code=p["controlCode"],
                     punch_time=iso8601.parse_date(p["punchTime"]),
+                    si_punch_time=iso8601.parse_date(p["punchTime"]),
                     status=SpStatus.ADDITIONAL,
                 )
             )
@@ -662,7 +783,7 @@ def store_cardreader_result(
 
             for entry in assigned_entries:
                 r = entry.result
-                if r is not None and r.same_punches(other=result):
+                if r is not None and r.same_si_punches(other=result):
                     # result exists and is assigned to a competitor => nothing to do
                     res = {
                         "entryTime": item.entry_time,
@@ -682,7 +803,7 @@ def store_cardreader_result(
                 # check if result is already read out
                 unassigned_entry = None
                 for entry in unassigned_entries:
-                    if entry.result.same_punches(other=result):
+                    if entry.result.same_si_punches(other=result):
                         unassigned_entry = entry
                         break
 
@@ -695,7 +816,7 @@ def store_cardreader_result(
                     and (
                         len(unassigned_entries) == 0
                         or len(unassigned_entries) == 1
-                        and unassigned_entries[0].result.same_punches(other=result)
+                        and unassigned_entries[0].result.same_si_punches(other=result)
                     )
                 ):
                     entry = assigned_entries[0]
@@ -773,163 +894,6 @@ def store_cardreader_result(
             res = {"eventId": event.id}
 
     return item.entry_type, event, res
-
-
-def add_or_update_entry(
-    id: Optional[int],
-    event_id: int,
-    competitor_id: Optional[int],
-    first_name: str,
-    last_name: str,
-    gender: str,
-    year: Optional[int],
-    class_id: int,
-    club_id: Optional[int],
-    not_competing: bool,
-    chip: str,
-    fields: Dict[int, str],
-    status: ResultStatus,
-    start_time: Optional[datetime.datetime],
-    result_id: Optional[int],
-) -> None:
-    #
-    # result_id == -1: remove result from entry (store as pseudy result)
-    #
-
-    with db.transaction(mode=TransactionMode.IMMEDIATE):
-
-        def store_result_as_new_entry(entry: EntryType) -> None:
-            result = entry.result
-            result.status = ResultStatus.FINISHED
-            result.split_times = [
-                s for s in result.split_times if s.status != SpStatus.MISSING
-            ]
-            for s in result.split_times:
-                s.status = SpStatus.ADDITIONAL
-                if result.start_time is None:
-                    s.time = None
-            db.add_entry_result(
-                event_id=entry.event_id,
-                chip=entry.chip,
-                result=result,
-                start_time=None,
-            )
-
-        if id is None:
-            id = db.add_entry(
-                event_id=event_id,
-                competitor_id=competitor_id,
-                first_name=first_name,
-                last_name=last_name,
-                gender=gender,
-                year=year,
-                class_id=class_id,
-                club_id=club_id,
-                not_competing=not_competing,
-                chip=chip,
-                fields=fields,
-                status=status,
-                start_time=start_time,
-            )
-            entry = EntryType(
-                id=id,
-                event_id=event_id,
-                competitor_id=competitor_id,
-                first_name=first_name,
-                last_name=last_name,
-                gender=gender,
-                year=year,
-                class_id=class_id,
-                class_name=None,
-                not_competing=not_competing,
-                chip=chip,
-                fields=fields,
-                result=result_type.PersonRaceResult(status=status),
-                start=start_type.PersonRaceStart(start_time=start_time),
-                club_id=club_id,
-                club_name=None,
-            )
-        else:
-            entry = db.get_entry(id=id)
-            if result_id is not None and entry.result.has_punches():
-                store_result_as_new_entry(entry=entry)
-
-            db.update_entry(
-                id=id,
-                first_name=first_name,
-                last_name=last_name,
-                gender=gender,
-                year=year,
-                class_id=class_id,
-                club_id=club_id,
-                not_competing=not_competing,
-                chip=chip,
-                fields=fields,
-                status=status,
-                start_time=start_time,
-            )
-            if result_id == -1:
-                # remove result
-                db.update_entry_result(
-                    id=id,
-                    chip=chip,
-                    result=result_type.PersonRaceResult(),
-                    start_time=start_time,
-                )
-
-        if result_id is not None and result_id != -1:
-            # compute new result
-            result_entry = db.get_entry(id=result_id)
-            try:
-                class_ = db.get_class(id=class_id)
-                course_id = class_.course_id
-                class_params = class_.params
-                controls = db.get_course(id=course_id).controls
-            except KeyError:
-                class_params = ClassParams()
-                controls = []
-
-            result_entry.result.compute_result(
-                controls=controls,
-                class_params=class_params,
-                start_time=start_time,
-                year=year,
-                gender=gender if gender != "" else None,
-            )
-            db.update_entry_result(
-                id=entry.id,
-                chip=result_entry.chip,
-                result=result_entry.result,
-                start_time=start_time,
-            )
-            db.delete_entry(id=result_entry.id)
-
-        elif class_id != entry.class_id or start_time != entry.start.start_time:
-            # compute new result
-            result_entry = db.get_entry(id=id)
-            if result_entry.result.has_punches() or result_entry.result.split_times:
-                try:
-                    class_ = db.get_class(id=class_id)
-                    course_id = class_.course_id
-                    class_params = class_.params
-                    controls = db.get_course(id=course_id).controls
-                except KeyError:
-                    class_params = ClassParams()
-                    controls = []
-
-                result_entry.result.compute_result(
-                    controls=controls,
-                    class_params=class_params,
-                    start_time=start_time,
-                    year=year,
-                    gender=gender if gender != "" else None,
-                )
-                db.update_entry_result(
-                    id=entry.id,
-                    chip=result_entry.chip,
-                    result=result_entry.result,
-                    start_time=start_time,
-                )
 
 
 def get_series_settings() -> Settings:

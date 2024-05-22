@@ -22,6 +22,7 @@ from typing import Optional
 from ooresults.repo.class_type import ClassParams
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
+from ooresults.repo.result_type import SplitTime
 from ooresults.repo.result_type import SpStatus
 from ooresults.repo.start_type import PersonRaceStart
 from ooresults.utils.rental_cards import format_card
@@ -56,6 +57,7 @@ t_globals = {
     "round": round,
     "ClassParams": ClassParams,
     "ResultStatus": ResultStatus,
+    "SplitTime": SplitTime,
     "SpStatus": SpStatus,
     "PersonRaceResult": PersonRaceResult,
     "PersonRaceStart": PersonRaceStart,

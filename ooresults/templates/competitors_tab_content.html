@@ -28,13 +28,13 @@ $def with (competitors_table)
       <form id="comp.import.form" class="form-container" onsubmit="comp_submitImport(); return false;">
         <p>Format</p>
         <div>
-          <input id="oo_1" name="comp_import" type="radio" value="comp.import.1"
-                 onchange="updateDisplayedParams('comp_import')" required checked/>
-          <label for="comp.import.1">IOF Interface Standard 3.0 Competitor List</label>
+          <input id="comp_radio_import_1" name="comp_import" type="radio" value="comp.import.1"
+                 onchange="updateDisplayedParams('comp_import_1')" required checked/>
+          <label for="comp_radio_import_1">IOF Interface Standard 3.0 Competitor List</label>
         </div>
         <p>Settings</p>
         <div id="comp_import">
-          <div id="comp.import.1" class="params">
+          <div id="comp_import_1" class="params">
             <table>
               <tr>
                 <th class="input-header"><label for="file1">File</label></th>
@@ -59,13 +59,13 @@ $def with (competitors_table)
       <form id="comp.export.form" class="form-container" onsubmit="comp_submitExport(); return false;">
         <p>Format</p>
         <div>
-          <input id="oo_1" name="comp_export" type="radio" value="comp.export.1"
-                 onchange="updateDisplayedParams('comp_export')" required checked/>
-          <label for="comp.export.1">IOF Interface Standard 3.0 Competitor List</label>
+          <input id="comp_radio_export_1" name="comp_export" type="radio" value="comp.export.1"
+                 onchange="updateDisplayedParams('comp_export_1')" required checked/>
+          <label for="comp_radio_export_1">IOF Interface Standard 3.0 Competitor List</label>
         </div>
         <p>Settings</p>
         <div id="comp_export">
-          <div id="comp.export.1" class="params">
+          <div id="comp_export_1" class="params">
           </div>
         </div>
         <p></p>
@@ -139,13 +139,15 @@ $def with (competitors_table)
     }
 
     function comp_myImport() {
-        document.getElementById('comp.importDialog').style.display='block';
-        updateDisplayedParams("comp_import");
+        document.getElementById('comp.importDialog').style.display = 'block';
+        document.getElementById('comp_radio_import_1').checked = true;
+        updateDisplayedParams("comp_import_1");
     }
 
     function comp_myExport() {
-        document.getElementById('comp.exportDialog').style.display='block';
-        updateDisplayedParams("comp_export");
+        document.getElementById('comp.exportDialog').style.display = 'block';
+        document.getElementById('comp_radio_export_1').checked = true;
+        updateDisplayedParams("comp_export_1");
     }
 
     function comp_myEdit() {

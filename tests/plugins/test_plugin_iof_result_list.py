@@ -17,9 +17,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import datetime
-from datetime import timezone
+from datetime import date
+from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 
 from ooresults.plugins import iof_result_list
 from ooresults.repo.class_params import ClassParams
@@ -91,10 +92,13 @@ def test_import_result_list():
   </ClassResult>
 </ResultList>
 """
+    s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+    f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
+
     event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
     assert event == {
         "name": "1. O-Cup 2020",
-        "date": datetime.date(year=2020, month=2, day=9),
+        "date": date(year=2020, month=2, day=9),
     }
     assert results == [
         {
@@ -107,35 +111,42 @@ def test_import_result_list():
             "year": 1972,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
-                start_time=datetime.datetime(
-                    2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
-                ),
-                finish_time=datetime.datetime(
-                    2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1))
-                ),
-                punched_start_time=datetime.datetime(
-                    2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
-                ),
-                punched_finish_time=datetime.datetime(
-                    2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1))
-                ),
+                start_time=s,
+                finish_time=f,
+                punched_start_time=s,
+                punched_finish_time=f,
                 status=ResultStatus.OK,
                 time=2001,
                 split_times=[
                     result_type.SplitTime(
-                        control_code="31", status=SpStatus.OK, time=501
+                        control_code="31",
+                        status=SpStatus.OK,
+                        punch_time=s + timedelta(seconds=501),
+                        time=501,
                     ),
                     result_type.SplitTime(
-                        control_code="32", status=SpStatus.OK, time=720
+                        control_code="32",
+                        status=SpStatus.OK,
+                        punch_time=s + timedelta(seconds=720),
+                        time=720,
                     ),
                     result_type.SplitTime(
-                        control_code="31", status=SpStatus.OK, time=818
+                        control_code="31",
+                        status=SpStatus.OK,
+                        punch_time=s + timedelta(seconds=818),
+                        time=818,
                     ),
                     result_type.SplitTime(
-                        control_code="33", status=SpStatus.OK, time=1136
+                        control_code="33",
+                        status=SpStatus.OK,
+                        punch_time=s + timedelta(seconds=1136),
+                        time=1136,
                     ),
                     result_type.SplitTime(
-                        control_code="31", status=SpStatus.OK, time=1593
+                        control_code="31",
+                        status=SpStatus.OK,
+                        punch_time=s + timedelta(seconds=1593),
+                        time=1593,
                     ),
                 ],
             ),
@@ -182,7 +193,7 @@ def test_import_result_list_not_competing():
     event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
     assert event == {
         "name": "1. O-Cup 2020",
-        "date": datetime.date(year=2020, month=2, day=9),
+        "date": date(year=2020, month=2, day=9),
     }
     assert results == [
         {
@@ -195,16 +206,16 @@ def test_import_result_list_not_competing():
             "year": 1972,
             "not_competing": True,
             "result": result_type.PersonRaceResult(
-                start_time=datetime.datetime(
+                start_time=datetime(
                     2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
                 ),
-                finish_time=datetime.datetime(
+                finish_time=datetime(
                     2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1))
                 ),
-                punched_start_time=datetime.datetime(
+                punched_start_time=datetime(
                     2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
                 ),
-                punched_finish_time=datetime.datetime(
+                punched_finish_time=datetime(
                     2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1))
                 ),
                 status=ResultStatus.OK,
@@ -276,7 +287,7 @@ def test_export_result_list():
         EventType(
             id=1,
             name="1. O-Cup 2020",
-            date=datetime.date(year=2020, month=2, day=9),
+            date=date(year=2020, month=2, day=9),
             key=None,
             publish=False,
             series=None,
@@ -312,7 +323,7 @@ def test_export_result_list():
                             year=1972,
                             not_competing=False,
                             result=result_type.PersonRaceResult(
-                                start_time=datetime.datetime(
+                                start_time=datetime(
                                     2020,
                                     2,
                                     9,
@@ -321,7 +332,7 @@ def test_export_result_list():
                                     0,
                                     tzinfo=timezone(timedelta(hours=1)),
                                 ),
-                                finish_time=datetime.datetime(
+                                finish_time=datetime(
                                     2020,
                                     2,
                                     9,
@@ -401,7 +412,7 @@ def test_export_result_list_not_competing():
         EventType(
             id=1,
             name="1. O-Cup 2020",
-            date=datetime.date(year=2020, month=2, day=9),
+            date=date(year=2020, month=2, day=9),
             key=None,
             publish=False,
             series=None,
@@ -437,7 +448,7 @@ def test_export_result_list_not_competing():
                             year=1972,
                             not_competing=True,
                             result=result_type.PersonRaceResult(
-                                start_time=datetime.datetime(
+                                start_time=datetime(
                                     2020,
                                     2,
                                     9,
@@ -446,7 +457,7 @@ def test_export_result_list_not_competing():
                                     0,
                                     tzinfo=timezone(timedelta(hours=1)),
                                 ),
-                                finish_time=datetime.datetime(
+                                finish_time=datetime(
                                     2020,
                                     2,
                                     9,
@@ -506,7 +517,7 @@ def test_import_result_list_with_start_time_but_not_started():
     event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
     assert event == {
         "name": "1. O-Cup 2020",
-        "date": datetime.date(year=2020, month=2, day=9),
+        "date": date(year=2020, month=2, day=9),
     }
     assert results == [
         {
@@ -522,7 +533,7 @@ def test_import_result_list_with_start_time_but_not_started():
                 status=ResultStatus.DID_NOT_START,
             ),
             "start": start_type.PersonRaceStart(
-                start_time=datetime.datetime(
+                start_time=datetime(
                     2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
                 ),
             ),
@@ -567,7 +578,7 @@ def test_export_result_list_with_start_time_but_not_started():
         EventType(
             id=1,
             name="1. O-Cup 2020",
-            date=datetime.date(year=2020, month=2, day=9),
+            date=date(year=2020, month=2, day=9),
             key=None,
             publish=False,
             series=None,
@@ -606,7 +617,7 @@ def test_export_result_list_with_start_time_but_not_started():
                                 status=ResultStatus.DID_NOT_START,
                             ),
                             start=start_type.PersonRaceStart(
-                                start_time=datetime.datetime(
+                                start_time=datetime(
                                     2020,
                                     2,
                                     9,
@@ -642,7 +653,7 @@ def test_import_result_list_without_class_result():
     event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
     assert event == {
         "name": "1. O-Cup 2020",
-        "date": datetime.date(year=2020, month=2, day=9),
+        "date": date(year=2020, month=2, day=9),
     }
     assert results == []
 
@@ -663,7 +674,7 @@ def test_export_result_list_without_class_result():
         EventType(
             id=1,
             name="1. O-Cup 2020",
-            date=datetime.date(year=2020, month=2, day=9),
+            date=date(year=2020, month=2, day=9),
             key=None,
             publish=False,
             series=None,
@@ -783,10 +794,16 @@ def test_import_result_list_classes():
   </ClassResult>
 </ResultList>
 """
+    s_am = datetime(2020, 2, 9, 10, 5, 0, tzinfo=timezone.utc)
+    f_am = datetime(2020, 2, 9, 10, 25, 21, tzinfo=timezone.utc)
+    s_bm = datetime(2020, 2, 9, 10, 6, 0, tzinfo=timezone.utc)
+    s_cm = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone.utc)
+    f_cm = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone.utc)
+
     event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
     assert event == {
         "name": "1. O-Cup 2020",
-        "date": datetime.date(year=2020, month=2, day=9),
+        "date": date(year=2020, month=2, day=9),
     }
     assert results == [
         {
@@ -800,29 +817,35 @@ def test_import_result_list_classes():
             "not_competing": False,
             "result": result_type.PersonRaceResult(
                 status=ResultStatus.OK,
-                start_time=datetime.datetime(2020, 2, 9, 10, 5, 0, tzinfo=timezone.utc),
-                finish_time=datetime.datetime(
-                    2020, 2, 9, 10, 25, 21, tzinfo=timezone.utc
-                ),
-                punched_start_time=datetime.datetime(
-                    2020, 2, 9, 10, 5, 0, tzinfo=timezone.utc
-                ),
-                punched_finish_time=datetime.datetime(
-                    2020, 2, 9, 10, 25, 21, tzinfo=timezone.utc
-                ),
+                start_time=s_am,
+                finish_time=f_am,
+                punched_start_time=s_am,
+                punched_finish_time=f_am,
                 time=1221,
                 split_times=[
                     result_type.SplitTime(
-                        control_code="41", status=SpStatus.OK, time=301
+                        control_code="41",
+                        status=SpStatus.OK,
+                        punch_time=s_am + timedelta(seconds=301),
+                        time=301,
                     ),
                     result_type.SplitTime(
-                        control_code="42", status=SpStatus.OK, time=526
+                        control_code="42",
+                        status=SpStatus.OK,
+                        punch_time=s_am + timedelta(seconds=526),
+                        time=526,
                     ),
                     result_type.SplitTime(
-                        control_code="41", status=SpStatus.OK, time=914
+                        control_code="41",
+                        status=SpStatus.OK,
+                        punch_time=s_am + timedelta(seconds=914),
+                        time=914,
                     ),
                     result_type.SplitTime(
-                        control_code="43", status=SpStatus.OK, time=1100
+                        control_code="43",
+                        status=SpStatus.OK,
+                        punch_time=s_am + timedelta(seconds=1100),
+                        time=1100,
                     ),
                 ],
             ),
@@ -838,16 +861,20 @@ def test_import_result_list_classes():
             "not_competing": False,
             "result": result_type.PersonRaceResult(
                 status=ResultStatus.DID_NOT_FINISH,
-                start_time=datetime.datetime(2020, 2, 9, 10, 6, 0, tzinfo=timezone.utc),
-                punched_start_time=datetime.datetime(
-                    2020, 2, 9, 10, 6, 0, tzinfo=timezone.utc
-                ),
+                start_time=s_bm,
+                punched_start_time=s_bm,
                 split_times=[
                     result_type.SplitTime(
-                        control_code="41", status=SpStatus.OK, time=501
+                        control_code="41",
+                        status=SpStatus.OK,
+                        punch_time=s_bm + timedelta(seconds=501),
+                        time=501,
                     ),
                     result_type.SplitTime(
-                        control_code="42", status=SpStatus.OK, time=720
+                        control_code="42",
+                        status=SpStatus.OK,
+                        punch_time=s_bm + timedelta(seconds=720),
+                        time=720,
                     ),
                     result_type.SplitTime(control_code="41", status=SpStatus.MISSING),
                     result_type.SplitTime(control_code="43", status=SpStatus.MISSING),
@@ -865,25 +892,25 @@ def test_import_result_list_classes():
             "not_competing": False,
             "result": result_type.PersonRaceResult(
                 status=ResultStatus.MISSING_PUNCH,
-                start_time=datetime.datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone.utc),
-                finish_time=datetime.datetime(
-                    2020, 2, 9, 10, 33, 21, tzinfo=timezone.utc
-                ),
-                punched_start_time=datetime.datetime(
-                    2020, 2, 9, 10, 0, 0, tzinfo=timezone.utc
-                ),
-                punched_finish_time=datetime.datetime(
-                    2020, 2, 9, 10, 33, 21, tzinfo=timezone.utc
-                ),
+                start_time=s_cm,
+                finish_time=f_cm,
+                punched_start_time=s_cm,
+                punched_finish_time=f_cm,
                 time=2001,
                 split_times=[
                     result_type.SplitTime(
-                        control_code="31", status=SpStatus.OK, time=501
+                        control_code="31",
+                        status=SpStatus.OK,
+                        punch_time=s_cm + timedelta(seconds=501),
+                        time=501,
                     ),
                     result_type.SplitTime(control_code="32", status=SpStatus.MISSING),
                     result_type.SplitTime(control_code="31", status=SpStatus.MISSING),
                     result_type.SplitTime(
-                        control_code="33", status=SpStatus.ADDITIONAL, time=1136
+                        control_code="33",
+                        status=SpStatus.ADDITIONAL,
+                        punch_time=s_cm + timedelta(seconds=1136),
+                        time=1136,
                     ),
                 ],
             ),
@@ -1014,7 +1041,7 @@ def test_export_result_list_classes():
         EventType(
             id=1,
             name="1. O-Cup 2020",
-            date=datetime.date(year=2020, month=2, day=9),
+            date=date(year=2020, month=2, day=9),
             key=None,
             publish=False,
             series=None,
@@ -1046,10 +1073,10 @@ def test_export_result_list_classes():
                             not_competing=False,
                             result=result_type.PersonRaceResult(
                                 status=ResultStatus.OK,
-                                start_time=datetime.datetime(
+                                start_time=datetime(
                                     2020, 2, 9, 10, 5, 0, tzinfo=timezone.utc
                                 ),
-                                finish_time=datetime.datetime(
+                                finish_time=datetime(
                                     2020, 2, 9, 10, 25, 21, tzinfo=timezone.utc
                                 ),
                                 time=1221,
@@ -1084,7 +1111,7 @@ def test_export_result_list_classes():
                             not_competing=False,
                             result=result_type.PersonRaceResult(
                                 status=ResultStatus.DID_NOT_FINISH,
-                                start_time=datetime.datetime(
+                                start_time=datetime(
                                     2020, 2, 9, 10, 6, 0, tzinfo=timezone.utc
                                 ),
                                 split_times=[
@@ -1134,10 +1161,10 @@ def test_export_result_list_classes():
                             chip="1234567",
                             result=result_type.PersonRaceResult(
                                 status=ResultStatus.MISSING_PUNCH,
-                                start_time=datetime.datetime(
+                                start_time=datetime(
                                     2020, 2, 9, 10, 0, 0, tzinfo=timezone.utc
                                 ),
-                                finish_time=datetime.datetime(
+                                finish_time=datetime(
                                     2020, 2, 9, 10, 33, 21, tzinfo=timezone.utc
                                 ),
                                 time=2001,
@@ -1165,6 +1192,431 @@ def test_export_result_list_classes():
                         ),
                         rank=None,
                         time_behind=None,
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert document == bytes(content, encoding="utf-8")
+
+
+def test_import_result_list_with_unknown_punch_times():
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+    <StartTime>
+      <Date>2020-02-09</Date>
+    </StartTime>
+  </Event>
+  <ClassResult>
+    <Class>
+      <Name>Bahn A - Lang</Name>
+    </Class>
+    <PersonResult>
+      <Person sex="F">
+        <Name>
+          <Family>Merkel</Family>
+          <Given>Angela</Given>
+        </Name>
+        <BirthDate>1972-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Kanzleramt</Name>
+      </Organisation>
+      <Result>
+        <StartTime>2020-02-09T10:00:00+01:00</StartTime>
+        <FinishTime>2020-02-09T10:33:21+01:00</FinishTime>
+        <Time>2001</Time>
+        <TimeBehind>0</TimeBehind>
+        <Position>1</Position>
+        <Status>OK</Status>
+        <SplitTime>
+          <ControlCode>31</ControlCode>
+          <Time>501</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>32</ControlCode>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>31</ControlCode>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>33</ControlCode>
+          <Time>1136</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>31</ControlCode>
+        </SplitTime>
+        <ControlCard punchingSystem="SI">1234567</ControlCard>
+      </Result>
+    </PersonResult>
+  </ClassResult>
+</ResultList>
+"""
+    s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+    f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
+
+    event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
+    assert event == {
+        "name": "1. O-Cup 2020",
+        "date": date(year=2020, month=2, day=9),
+    }
+    assert results == [
+        {
+            "first_name": "Angela",
+            "last_name": "Merkel",
+            "class_": "Bahn A - Lang",
+            "club": "OC Kanzleramt",
+            "chip": "1234567",
+            "gender": "F",
+            "year": 1972,
+            "not_competing": False,
+            "result": result_type.PersonRaceResult(
+                start_time=s,
+                finish_time=f,
+                punched_start_time=s,
+                punched_finish_time=f,
+                status=ResultStatus.OK,
+                time=2001,
+                split_times=[
+                    result_type.SplitTime(
+                        control_code="31",
+                        status=SpStatus.OK,
+                        punch_time=s + timedelta(seconds=501),
+                        time=501,
+                    ),
+                    result_type.SplitTime(
+                        control_code="32",
+                        status=SpStatus.OK,
+                        punch_time=result_type.SplitTime.NO_TIME,
+                        time=None,
+                    ),
+                    result_type.SplitTime(
+                        control_code="31",
+                        status=SpStatus.OK,
+                        punch_time=result_type.SplitTime.NO_TIME,
+                        time=None,
+                    ),
+                    result_type.SplitTime(
+                        control_code="33",
+                        status=SpStatus.OK,
+                        punch_time=s + timedelta(seconds=1136),
+                        time=1136,
+                    ),
+                    result_type.SplitTime(
+                        control_code="31",
+                        status=SpStatus.OK,
+                        punch_time=result_type.SplitTime.NO_TIME,
+                        time=None,
+                    ),
+                ],
+            ),
+        },
+    ]
+
+
+def test_export_result_list_with_unknown_punch_times():
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+    <StartTime>
+      <Date>2020-02-09</Date>
+    </StartTime>
+  </Event>
+  <ClassResult>
+    <Class>
+      <Name>Bahn A - Lang</Name>
+    </Class>
+    <PersonResult>
+      <Person sex="F">
+        <Name>
+          <Family>Merkel</Family>
+          <Given>Angela</Given>
+        </Name>
+        <BirthDate>1972-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Kanzleramt</Name>
+      </Organisation>
+      <Result>
+        <StartTime>2020-02-09T10:00:00+01:00</StartTime>
+        <FinishTime>2020-02-09T10:33:21+01:00</FinishTime>
+        <Time>2001</Time>
+        <TimeBehind>0</TimeBehind>
+        <Position>1</Position>
+        <Status>OK</Status>
+        <SplitTime>
+          <ControlCode>31</ControlCode>
+          <Time>501</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>32</ControlCode>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>31</ControlCode>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>33</ControlCode>
+          <Time>1136</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>31</ControlCode>
+        </SplitTime>
+        <ControlCard punchingSystem="SI">1234567</ControlCard>
+      </Result>
+    </PersonResult>
+  </ClassResult>
+</ResultList>
+"""
+    document = iof_result_list.create_result_list(
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
+        [
+            (
+                ClassInfoType(
+                    id=1,
+                    name="Bahn A - Lang",
+                    short_name=None,
+                    course_id=None,
+                    course_name=None,
+                    course_length=None,
+                    course_climb=None,
+                    number_of_controls=None,
+                    params=ClassParams(),
+                ),
+                [
+                    RankedEntryType(
+                        entry=EntryType(
+                            id=1,
+                            event_id=1,
+                            competitor_id=1,
+                            first_name="Angela",
+                            last_name="Merkel",
+                            class_id=1,
+                            class_name="Bahn A - Lang",
+                            club_id=1,
+                            club_name="OC Kanzleramt",
+                            chip="1234567",
+                            gender="F",
+                            year=1972,
+                            not_competing=False,
+                            result=result_type.PersonRaceResult(
+                                start_time=datetime(
+                                    2020,
+                                    2,
+                                    9,
+                                    10,
+                                    0,
+                                    0,
+                                    tzinfo=timezone(timedelta(hours=1)),
+                                ),
+                                finish_time=datetime(
+                                    2020,
+                                    2,
+                                    9,
+                                    10,
+                                    33,
+                                    21,
+                                    tzinfo=timezone(timedelta(hours=1)),
+                                ),
+                                status=ResultStatus.OK,
+                                time=2001,
+                                split_times=[
+                                    result_type.SplitTime(
+                                        control_code="31", status=SpStatus.OK, time=501
+                                    ),
+                                    result_type.SplitTime(
+                                        control_code="32", status=SpStatus.OK, time=None
+                                    ),
+                                    result_type.SplitTime(
+                                        control_code="31", status=SpStatus.OK, time=None
+                                    ),
+                                    result_type.SplitTime(
+                                        control_code="33", status=SpStatus.OK, time=1136
+                                    ),
+                                    result_type.SplitTime(
+                                        control_code="31", status=SpStatus.OK, time=None
+                                    ),
+                                ],
+                            ),
+                        ),
+                        rank=1,
+                        time_behind=0,
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert document == bytes(content, encoding="utf-8")
+
+
+def test_export_result_list_with_edited_punch_times():
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+    <StartTime>
+      <Date>2020-02-09</Date>
+    </StartTime>
+  </Event>
+  <ClassResult>
+    <Class>
+      <Name>Bahn A - Lang</Name>
+    </Class>
+    <PersonResult>
+      <Person sex="F">
+        <Name>
+          <Family>Merkel</Family>
+          <Given>Angela</Given>
+        </Name>
+        <BirthDate>1972-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Kanzleramt</Name>
+      </Organisation>
+      <Result>
+        <StartTime>2020-02-09T10:00:00+01:00</StartTime>
+        <FinishTime>2020-02-09T10:33:21+01:00</FinishTime>
+        <Time>2001</Time>
+        <TimeBehind>0</TimeBehind>
+        <Position>1</Position>
+        <Status>OK</Status>
+        <SplitTime>
+          <ControlCode>31</ControlCode>
+          <Time>501</Time>
+        </SplitTime>
+        <SplitTime status="Missing">
+          <ControlCode>32</ControlCode>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>31</ControlCode>
+        </SplitTime>
+        <SplitTime status="Additional">
+          <ControlCode>33</ControlCode>
+          <Time>1136</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>31</ControlCode>
+        </SplitTime>
+        <ControlCard punchingSystem="SI">1234567</ControlCard>
+      </Result>
+    </PersonResult>
+  </ClassResult>
+</ResultList>
+"""
+    document = iof_result_list.create_result_list(
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
+        [
+            (
+                ClassInfoType(
+                    id=1,
+                    name="Bahn A - Lang",
+                    short_name=None,
+                    course_id=None,
+                    course_name=None,
+                    course_length=None,
+                    course_climb=None,
+                    number_of_controls=None,
+                    params=ClassParams(),
+                ),
+                [
+                    RankedEntryType(
+                        entry=EntryType(
+                            id=1,
+                            event_id=1,
+                            competitor_id=1,
+                            first_name="Angela",
+                            last_name="Merkel",
+                            class_id=1,
+                            class_name="Bahn A - Lang",
+                            club_id=1,
+                            club_name="OC Kanzleramt",
+                            chip="1234567",
+                            gender="F",
+                            year=1972,
+                            not_competing=False,
+                            result=result_type.PersonRaceResult(
+                                start_time=datetime(
+                                    2020,
+                                    2,
+                                    9,
+                                    10,
+                                    0,
+                                    0,
+                                    tzinfo=timezone(timedelta(hours=1)),
+                                ),
+                                finish_time=datetime(
+                                    2020,
+                                    2,
+                                    9,
+                                    10,
+                                    33,
+                                    21,
+                                    tzinfo=timezone(timedelta(hours=1)),
+                                ),
+                                status=ResultStatus.OK,
+                                time=2001,
+                                split_times=[
+                                    result_type.SplitTime(
+                                        control_code="31",
+                                        status=SpStatus.OK,
+                                        time=501,
+                                    ),
+                                    result_type.SplitTime(
+                                        control_code="32",
+                                        status=SpStatus.MISSING,
+                                        time=None,
+                                    ),
+                                    result_type.SplitTime(
+                                        control_code="34",
+                                        status=None,
+                                        time=None,
+                                    ),
+                                    result_type.SplitTime(
+                                        control_code="31",
+                                        status=SpStatus.OK,
+                                        time=None,
+                                    ),
+                                    result_type.SplitTime(
+                                        control_code="33",
+                                        status=SpStatus.ADDITIONAL,
+                                        time=1136,
+                                    ),
+                                    result_type.SplitTime(
+                                        control_code="34",
+                                        status=None,
+                                        time=None,
+                                    ),
+                                    result_type.SplitTime(
+                                        control_code="31",
+                                        status=SpStatus.OK,
+                                        time=None,
+                                    ),
+                                ],
+                            ),
+                        ),
+                        rank=1,
+                        time_behind=0,
                     ),
                 ],
             ),

@@ -18,6 +18,7 @@
 
 
 import pathlib
+from datetime import timedelta
 from typing import List
 from typing import Dict
 from typing import Tuple
@@ -163,17 +164,18 @@ def create_result_list(
                     )
                 )
             for s in result.split_times:
-                split_time = SPLITTIME(CONTROLCODE(s.control_code))
-                if s.status is not None and s.status != SpStatus.OK:
-                    SPSTATUS = {
-                        SpStatus.OK: "OK",
-                        SpStatus.MISSING: "Missing",
-                        SpStatus.ADDITIONAL: "Additional",
-                    }
-                    split_time.set("status", SPSTATUS[s.status])
-                if s.time is not None:
-                    split_time.append(TIME(str(s.time)))
-                res.append(split_time)
+                if s.status is not None:
+                    split_time = SPLITTIME(CONTROLCODE(s.control_code))
+                    if s.status != SpStatus.OK:
+                        SPSTATUS = {
+                            SpStatus.OK: "OK",
+                            SpStatus.MISSING: "Missing",
+                            SpStatus.ADDITIONAL: "Additional",
+                        }
+                        split_time.set("status", SPSTATUS[s.status])
+                    if s.time is not None:
+                        split_time.append(TIME(str(s.time)))
+                    res.append(split_time)
             if entry.chip:
                 res.append(CONTROLCARD(entry.chip, punchingSystem="SI"))
             pr.append(res)
@@ -296,6 +298,12 @@ def parse_result_list(content: bytes) -> Tuple[Dict, List[Dict]]:
                 e_time = e_split_time.find("Time", namespaces=namespaces)
                 if e_time is not None:
                     split_time.time = int(e_time.text)
+                    if r["result"].punched_start_time:
+                        split_time.punch_time = r[
+                            "result"
+                        ].punched_start_time + timedelta(seconds=split_time.time)
+                elif split_time.status == SpStatus.OK:
+                    split_time.punch_time = result_type.SplitTime.NO_TIME
                 r["result"].split_times.append(split_time)
 
             result.append(r)

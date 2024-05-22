@@ -25,56 +25,56 @@ $def with (entries_table)
       <form id="entr.import.form" class="form-container" onsubmit="entr_submitImport(); return false;">
         <p>Format</p>
         <div>
-          <input id="oo_1" name="entr_import" type="radio" value="entr.import.1"
-                 onchange="updateDisplayedParams('entr_import')" required checked/>
-          <label for="entr.import.1">IOF Interface Standard 3.0 Entry List</label>
+          <input id="entr_radio_import_1" name="entr_import" type="radio" value="entr.import.1"
+                 onchange="updateDisplayedParams('entr_import_1')" required checked/>
+          <label for="entr_radio_import_1">IOF Interface Standard 3.0 Entry List</label>
         </div>
         <div>
-          <input id="oo_2" name="entr_import" type="radio" value="entr.import.2"
-                 onchange="updateDisplayedParams('entr_import')" required checked/>
-          <label for="entr.import.2">IOF Interface Standard 3.0 Result List</label>
+          <input id="entr_radio_import_2" name="entr_import" type="radio" value="entr.import.2"
+                 onchange="updateDisplayedParams('entr_import_2')" required/>
+          <label for="entr_radio_import_2">IOF Interface Standard 3.0 Result List</label>
         </div>
         <div>
-          <input id="oo_3" name="entr_import" type="radio" value="entr.import.3"
-                 onchange="updateDisplayedParams('entr_import')" required checked/>
-          <label for="entr.import.3">OE2003 csv, OE12 csv</label>
+          <input id="entr_radio_import_3" name="entr_import" type="radio" value="entr.import.3"
+                 onchange="updateDisplayedParams('entr_import_3')" required/>
+          <label for="entr_radio_import_3">OE2003 csv, OE12 csv</label>
         </div>
         $if EXPERIMENTAL:
           <div>
-            <input id="oo_4" name="entr_import" type="radio" value="entr.import.4"
-                   onchange="updateDisplayedParams('entr_import')" required/>
-            <label for="entr.import.4">Text</label>
+            <input id="entr_radio_import_4" name="entr_import" type="radio" value="entr.import.4"
+                   onchange="updateDisplayedParams('entr_import_4')" required/>
+            <label for="entr_radio_import_4">Text</label>
           </div>
         <p>Settings</p>
         <div id="entr_import">
-          <div id="entr.import.1" class="params">
+          <div id="entr_import_1" class="params">
             <table>
               <tr>
-                <th class="input-header"><label for="browse1">File</label></th>
+                <th class="input-header"><label for="file1">File</label></th>
                 <td><input id="file1" name="browse1" type="file" class="required" accept=".xml"/></td>
               </tr>
             </table>
           </div>
-          <div id="entr.import.2" class="params">
+          <div id="entr_import_2" class="params">
             <table>
               <tr>
-                <th class="input-header"><label for="browse2">File</label></th>
+                <th class="input-header"><label for="file2">File</label></th>
                 <td><input id="file2" name="browse2" type="file" class="required" accept=".xml"/></td>
               </tr>
             </table>
           </div>
-          <div id="entr.import.3" class="params">
+          <div id="entr_import_3" class="params">
             <table>
               <tr>
-                <th class="input-header"><label for="browse3">File</label></th>
+                <th class="input-header"><label for="file3">File</label></th>
                 <td><input id="file3" name="browse3" type="file" class="required" accept=".csv,.txt"/></td>
               </tr>
             </table>
           </div>
-          <div id="entr.import.4" class="params">
+          <div id="entr_import_4" class="params">
             <table>
               <tr>
-                <th class="input-header"><label for="browse4">File</label></th>
+                <th class="input-header"><label for="file4">File</label></th>
                 <td><input id="file4" name="browse4" type="file" class="required"/></td>
               </tr>
             </table>
@@ -96,34 +96,34 @@ $def with (entries_table)
       <form id="entr.export.form" class="form-container" onsubmit="entr_submitExport(); return false;">
         <p>Format</p>
         <div>
-          <input id="oo_1" name="entr_export" type="radio" value="entr.export.1"
-                 onchange="updateDisplayedParams('entr_export')" required checked/>
-          <label for="entr.export.1">IOF Interface Standard 3.0 Entry List</label>
+          <input id="entr_radio_export_1" name="entr_export" type="radio" value="entr.export.1"
+                 onchange="updateDisplayedParams('entr_export_1')" required checked/>
+          <label for="entr_radio_export_1">IOF Interface Standard 3.0 Entry List</label>
         </div>
         <div>
-          <input id="oo_2" name="entr_export" type="radio" value="entr.export.2"
-                 onchange="updateDisplayedParams('entr_export')" required checked/>
-          <label for="entr.export.2">IOF Interface Standard 3.0 Result List</label>
+          <input id="entr_radio_export_2" name="entr_export" type="radio" value="entr.export.2"
+                 onchange="updateDisplayedParams('entr_export_2')" required/>
+          <label for="entr_radio_export_2">IOF Interface Standard 3.0 Result List</label>
         </div>
         <div>
-          <input id="oo_3" name="entr_export" type="radio" value="entr.export.3"
-                 onchange="updateDisplayedParams('entr_export')" required checked/>
-          <label for="entr.export.3">OE2003 csv</label>
+          <input id="entr_radio_export_3" name="entr_export" type="radio" value="entr.export.3"
+                 onchange="updateDisplayedParams('entr_export_3')" required/>
+          <label for="entr_radio_export_3">OE2003 csv</label>
         </div>
         <div>
-          <input id="oo_4" name="entr_export" type="radio" value="entr.export.4"
-                 onchange="updateDisplayedParams('entr_export')" required checked/>
-          <label for="entr.export.4">OE12 csv</label>
+          <input id="entr_radio_export_4" name="entr_export" type="radio" value="entr.export.4"
+                 onchange="updateDisplayedParams('entr_export_4')" required/>
+          <label for="entr_radio_export_4">OE12 csv</label>
         </div>
         <p>Settings</p>
         <div id="entr_export">
-          <div id="entr.export.1" class="params">
+          <div id="entr_export_1" class="params">
           </div>
-          <div id="entr.export.2" class="params">
+          <div id="entr_export_2" class="params">
           </div>
-          <div id="entr.export.3" class="params">
+          <div id="entr_export_3" class="params">
           </div>
-          <div id="entr.export.4" class="params">
+          <div id="entr_export_4" class="params">
           </div>
         </div>
         <p></p>
@@ -201,13 +201,15 @@ $def with (entries_table)
     }
 
     function entr_myImport() {
-        document.getElementById('entr.importDialog').style.display='block';
-        updateDisplayedParams("entr_import");
+        document.getElementById('entr.importDialog').style.display = 'block';
+        document.getElementById('entr_radio_import_1').checked = true;
+        updateDisplayedParams("entr_import_1");
     }
 
     function entr_myExport() {
-        document.getElementById('entr.exportDialog').style.display='block';
-        updateDisplayedParams("entr_export");
+        document.getElementById('entr.exportDialog').style.display = 'block';
+        document.getElementById('entr_radio_export_1').checked = true;
+        updateDisplayedParams("entr_export_1");
     }
 
     function entr_myAdd() {
@@ -305,7 +307,8 @@ $def with (entries_table)
                 xhr.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         document.getElementById('entr.resultDialog').innerHTML = this.responseText;
-                        document.getElementById('entr.resultDialog').style.display='block'
+                        document.getElementById('entr.resultDialog').style.display = 'block';
+                        tUpdateRows();
                     }
                     if (this.readyState == 4 && this.status == 409) {
                         window.alert(this.responseText);
@@ -473,4 +476,251 @@ $def with (entries_table)
         document.getElementById('entr.myBtnResult').disabled = true;
     }
 
+    function tUpdateRows() {
+        row = document.getElementById('punched_start_time');
+        if (row != null) {
+            tStatusUpdate(row);
+            tBackgroundColorUpdate(row);
+        }
+        row = document.getElementById('punched_finish_time');
+        if (row != null) {
+            tStatusUpdate(row);
+            tBackgroundColorUpdate(row);
+        }
+        rows = document.getElementById('punched_split_times').getElementsByTagName("tr");
+        for (var j = 0; j < rows.length; j++) {
+            tStatusUpdate(rows[j]);
+            tBackgroundColorUpdate(rows[j]);
+        }
+    }
+
+    function tStatusUpdate(row) {
+        cells = row.getElementsByTagName("td");
+        if (cells[0].innerHTML == "") {
+            if (cells[3].innerHTML == "") {
+                cells[4].innerHTML = "Removed";
+            } else {
+                cells[4].innerHTML = "Additional";
+            }
+        } else {
+            if (cells[3].innerHTML == "") {
+                cells[4].innerHTML = "Missing";
+                cells[4].style.color = "red";
+            } else {
+                cells[4].innerHTML = "OK";
+                cells[4].style.color = "green";
+            }
+        }
+    }
+
+    function tBackgroundColorUpdate(row) {
+        cells = row.getElementsByTagName("td");
+        if (cells[2].innerHTML == cells[3].innerHTML) {
+            row.bgColor = "transparent";
+        }
+        else {
+            row.bgColor = "LightGrey";
+        }
+    }
+</script>
+
+
+<!-- The Modal -->
+<div class="modal" id="entr.editPunchDialog">
+    <!-- Modal content -->
+    <div class="modal-content" style="margin: 10% 10% 5%;">
+        <span class="close" onclick="document.getElementById('entr.editPunchDialog').style.display='none'">&times;</span>
+        <form id="entr.formPunchEdit" class="form-container" onsubmit="entr_submitPunchEdit(); return false;">
+            <p>Command</p>
+            <div id="div_edit_punch_edit">
+                <input id="entr_radio_ep_edit" name="command" type="radio" value="entr_ep_edit"
+                       onchange="updateDisplayedParams('entr_ep_edit')" required checked/>
+                <label for="entr_radio_ep_edit">Edit the selected punch</label>
+            </div>
+            <div id="div_edit_punch_del">
+                <input id="entr_radio_ep_del" name="command" type="radio" value="entr_ep_del"
+                       onchange="updateDisplayedParams('entr_ep_del')" required/>
+                <label for="entr_radio_ep_del">Remove the selected punch</label>
+            </div>
+            <div id="div_edit_punch_add">
+                <input id="entr_radio_ep_add" name="command" type="radio" value="entr_ep_add"
+                       onchange="updateDisplayedParams('entr_ep_add')" required/>
+                <label for="entr_radio_ep_add">Add an additional punch before the selected punch</label>
+            </div>
+            <p>Parameters</p>
+            <div id="edit_punch_command">
+                <div id="entr_ep_edit" class="params">
+                    <p>Leave time field blank if time is unknown</p>
+                    <table>
+                        <tr>
+                            <th class="input-header"><label for="punch_control_edit">Control</label></th>
+                            <td><input id="punch_control_edit" name="control" type="text" readonly value=""/></td>
+                        </tr>
+                        <tr>
+                            <th class="input-header"><label id="punch_time_edit_label" for="punch_time_edit">Time</label></th>
+                            <td><input id="punch_time_edit" name="punch_time" type="time" step="1" value="" oninput="mark_label1(this)"/></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="entr_ep_del" class="params">
+                    <table>
+                        <tr>
+                            <th class="input-header"><label for="punch_control_del">Control</label></th>
+                            <td><input id="punch_control_del" name="control" type="text" readonly value=""/></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="entr_ep_add" class="params">
+                    <p>Leave time field blank if time is unknown</p>
+                    <table>
+                        <tr>
+                            <th class="input-header"><label for="punch_control_add">Control *</label></th>
+                            <td><input id="punch_control_add" name="control" type="number" class="required" min="1" max="999" value="" oninput="mark_label1(this)"/></td>
+                        </tr>
+                        <tr>
+                            <th class="input-header"><label for="punch_time_add">Time</label></th>
+                            <td><input id="punch_time_add" name="punch_time" type="time" step="1" value="" oninput="mark_label1(this)"/></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <button type="submit" class="btn">Save</button>
+            <button type="button" class="btn cancel" onclick="document.getElementById('entr.editPunchDialog').style.display='none'">Cancel</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    var selectedRow = 0;
+
+    function entr_myPunchEdit(j) {
+        selectedRow = j;
+
+        if (j == -1) {
+            cells = document.getElementById("punched_start_time").cells;
+            document.getElementById('div_edit_punch_add').hidden = true;
+            document.getElementById('punch_time_edit').className = 'required';
+            document.getElementById('punch_time_edit_label').innerText = 'Time *';
+
+        } else if (j == -2) {
+            cells = document.getElementById("punched_finish_time").cells;
+            document.getElementById('div_edit_punch_add').hidden = true;
+            document.getElementById('punch_time_edit').className = 'required';
+            document.getElementById('punch_time_edit_label').innerText = 'Time *';
+
+        } else {
+            var tbody = document.getElementById("punched_split_times");
+            var cells = tbody.rows[j].cells;
+            document.getElementById('div_edit_punch_add').hidden = false;
+            document.getElementById('punch_time_edit').className = '';
+            document.getElementById('punch_time_edit').required = false;
+            document.getElementById('punch_time_edit_label').innerText = 'Time';
+        }
+
+        document.getElementById('entr_radio_ep_edit').checked = true;
+        document.getElementById('punch_control_edit').defaultValue = cells[1].innerHTML;
+        document.getElementById('punch_control_edit').value = cells[1].innerHTML;
+        document.getElementById('punch_control_del').defaultValue = cells[1].innerHTML;
+        document.getElementById('punch_control_del').value = cells[1].innerHTML;
+        document.getElementById('punch_control_add').defaultValue = "";
+        document.getElementById('punch_control_add').value = "";
+        document.getElementById('punch_time_add').defaultValue = "";
+        document.getElementById('punch_time_add').value = "";
+        document.getElementById('div_edit_punch_del').hidden = cells[3].innerText == "";
+
+        punch_time_edit = document.getElementById('punch_time_edit')
+        if (cells[3].innerText == "") {
+            punch_time_edit.defaultValue = cells[2].innerText;
+            punch_time_edit.value = cells[2].innerText;
+        } else if (cells[3].innerText == "Unknown") {
+            punch_time_edit.defaultValue = "";
+            punch_time_edit.value = "";
+        } else {
+            punch_time_edit.defaultValue = cells[3].innerText;
+            punch_time_edit.value = cells[3].innerText;
+        }
+
+        // Reset label color if dialog is already used and opened a second time
+        element = document.getElementById("edit_punch_command");
+        label = element.getElementsByTagName("label");
+        for (i = 0; i < label.length; i++) {
+            label[i].style.color = 'inherit';
+        }
+
+        updateDisplayedParams('entr_ep_edit');
+        document.getElementById('entr.editPunchDialog').style.display='block';
+    }
+
+    function mark_label1(node) {
+        // find form element
+        elem = node.parentElement;
+        while (elem != null && elem.tagName != "FORM") {
+            elem = elem.parentElement;
+        }
+        // find label element
+        if (elem != null) {
+            label = elem.querySelector("label[for=" + node.id + "]");
+            if (label != null) {
+                if (node.value == node.defaultValue) {
+                    label.style.color = "inherit";
+                } else {
+                    label.style.color = "red";
+                }
+            }
+        }
+    }
+
+    function entr_submitPunchEdit() {
+        var form = document.getElementById('entr.formPunchEdit');
+        var data = new FormData(form);
+        data.append('selectedRow', selectedRow);
+        data.append('event_id', window.event_id);
+        data.append('entry_id', document.getElementById('entr.spId').value);
+        e = document.getElementById('entr.result.punched_start_time')
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById('entr.resultDialog').innerHTML = this.responseText;
+                tUpdateRows();
+                document.getElementById('entr.editPunchDialog').style.display='none'
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
+        xhr.open("POST", "entry/editPunch", true);
+        xhr.send(data);
+    }
+
+    function entr_submitSplitTimes() {
+        var form = document.getElementById('entr.formSplitTimes');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                entr_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
+        xhr.open("POST", "entry/splitTimes", true);
+        xhr.send(data);
+    }
 </script>

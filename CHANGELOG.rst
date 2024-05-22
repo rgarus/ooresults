@@ -5,10 +5,16 @@ Changelog
 [Unreleased]
 ------------
 
+Added
+^^^^^
+
+- Result data (start time, finish time and split times) can be edited.
+
 Changed
 ^^^^^^^
 
 - Database schema updated to version 9.
+- Unnecessary additional punches in split time printouts removed.
 
 
 [0.2.9] - 2024-02-13
@@ -19,7 +25,7 @@ Fixed
 
 - Python TypeError exception when using Python 3.11 fixed, if a /si1 or /si2 pages is opened in a webbrowser.
 - Python TypeError exception when using Python 3.8 or 3.9 fixed when printing results or split times.
-- Course data (climb) not correctly included in the result and split time printouts
+- Course data (climb) not correctly included in the result and split time printouts.
 
 
 [0.2.8] - 2024-01-05

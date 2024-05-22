@@ -41,7 +41,6 @@ from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.result_type import SpStatus
 
-
 templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
 render = web.template.render(templates, globals=t_globals)
 
@@ -172,8 +171,10 @@ class WebSocketHandler:
                                 result.punched_check_time = parse_time(_time[0])
                             if _code[1] == "Start" and _time[1] != "":
                                 result.punched_start_time = parse_time(_time[1])
+                                result.si_punched_start_time = parse_time(_time[1])
                             if _code[-1] == "Finish" and _time[-1] != "":
                                 result.punched_finish_time = parse_time(_time[-1])
+                                result.si_punched_finish_time = parse_time(_time[-1])
 
                             result.start_time = result.punched_start_time
                             result.finish_time = result.punched_finish_time
@@ -183,6 +184,7 @@ class WebSocketHandler:
                                         result_type.SplitTime(
                                             control_code=_code[i],
                                             punch_time=parse_time(_time[i]),
+                                            si_punch_time=parse_time(_time[i]),
                                             status=SpStatus.ADDITIONAL,
                                         )
                                     )
