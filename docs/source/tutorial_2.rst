@@ -189,14 +189,29 @@ Dies erfolgt mit der Funktion "Edit entry ...".
    Eine Beschreibung der möglichen Zustände findet sich in Kapitel :ref:`entries`.
 
 
-Anzeige der Ergebnisse eines Läufers
-------------------------------------
+Anzeigen und Editieren der Ergebnisse eines Läufers
+---------------------------------------------------
 
 1. Selektieren des Läufers in der "Entries" Liste.
    Mit Hilfe der Filter-Funktion kann die Liste verkleinert werden.
 #. Anklicken der Funktion "Show result"
 
 .. image:: images/entries_result_1.png
+
+Sollte eine Kontrollstation nicht funktionieren und trotz ordnungsgemäßem Stempeln nicht
+auf der SI-Card des Läufers enthalten sein, ist wie folgt vorzugehen:
+
+1. Anklicken der Funktion "Edit" am Ende der Zeile des betreffenden Postens
+#. Eingabe der Stempelzeit (falls diese nicht bekannt ist bleibt das Feld leer)
+#. Bestätigen mit "Save"
+
+.. image:: images/entries_result_2.png
+
+Für die Ergebnisberechung wird die in Spalte "Used time" angezeigte Zeit verwendet.
+Zeilen, die editiert wurden, in denen also die von der SI-Card gelesene Zeit (Spalte "Card time")
+von der verwendeten Zeit (Spalte "Used time") abweicht, werden grau hinterlegt angezeigt.
+
+.. image:: images/entries_result_3_edited.png
 
 
 Verwendung des Selbsteinlesefensters
