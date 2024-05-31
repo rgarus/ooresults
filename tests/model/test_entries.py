@@ -378,7 +378,7 @@ def test_update_entry_remove_result_and_store_removed_result_without_edits(
         not_competing=False,
         chip="4711",
         fields={},
-        status=ResultStatus.OK,
+        status=ResultStatus.MISSING_PUNCH,
         start_time=None,
         result_id=-1,
     )
@@ -426,6 +426,172 @@ def test_update_entry_remove_result_and_store_removed_result_without_edits(
             chip="4711",
             fields={},
             result=PersonRaceResult(
+                split_times=[
+                    SplitTime(control_code="101", status=SpStatus.MISSING),
+                    SplitTime(control_code="102", status=SpStatus.MISSING),
+                    SplitTime(control_code="103", status=SpStatus.MISSING),
+                ],
+            ),
+            start=PersonRaceStart(),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+    ]
+
+
+def test_update_entry_remove_result_with_status_disqualified_do_not_change_status(
+    event_id: int,
+    class_1_id: int,
+    course_1_id: int,
+    club_id: int,
+    competitor_id: int,
+    entry_1: EntryType,
+):
+    id = model.add_or_update_entry(
+        id=entry_1.id,
+        event_id=event_id,
+        competitor_id=None,
+        first_name="Angela",
+        last_name="Merkel",
+        gender="F",
+        year=1957,
+        class_id=class_1_id,
+        club_id=club_id,
+        not_competing=False,
+        chip="4711",
+        fields={},
+        status=ResultStatus.DISQUALIFIED,
+        start_time=None,
+        result_id=-1,
+    )
+
+    entries = model.get_entries(event_id=event_id)
+    assert entries == [
+        EntryType(
+            id=entries[0].id,
+            event_id=event_id,
+            competitor_id=None,
+            first_name=None,
+            last_name=None,
+            chip="4711",
+            result=PersonRaceResult(
+                start_time=S1,
+                finish_time=None,
+                punched_start_time=S1,
+                punched_finish_time=None,
+                si_punched_start_time=S1,
+                si_punched_finish_time=None,
+                status=ResultStatus.FINISHED,
+                time=None,
+                split_times=[
+                    SplitTime(
+                        control_code="103",
+                        si_punch_time=C3,
+                        punch_time=C3,
+                        time=t(S1, C3),
+                        status=SpStatus.ADDITIONAL,
+                    ),
+                ],
+            ),
+        ),
+        EntryType(
+            id=id,
+            event_id=event_id,
+            competitor_id=competitor_id,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1957,
+            class_id=class_1_id,
+            class_name="Elite",
+            not_competing=False,
+            chip="4711",
+            fields={},
+            result=PersonRaceResult(
+                status=ResultStatus.DISQUALIFIED,
+                split_times=[
+                    SplitTime(control_code="101", status=SpStatus.MISSING),
+                    SplitTime(control_code="102", status=SpStatus.MISSING),
+                    SplitTime(control_code="103", status=SpStatus.MISSING),
+                ],
+            ),
+            start=PersonRaceStart(),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+    ]
+
+
+def test_update_entry_change_status_and_remove_result_stores_changed_status(
+    event_id: int,
+    class_1_id: int,
+    course_1_id: int,
+    club_id: int,
+    competitor_id: int,
+    entry_1: EntryType,
+):
+    id = model.add_or_update_entry(
+        id=entry_1.id,
+        event_id=event_id,
+        competitor_id=None,
+        first_name="Angela",
+        last_name="Merkel",
+        gender="F",
+        year=1957,
+        class_id=class_1_id,
+        club_id=club_id,
+        not_competing=False,
+        chip="4711",
+        fields={},
+        status=ResultStatus.DID_NOT_FINISH,
+        start_time=None,
+        result_id=-1,
+    )
+
+    entries = model.get_entries(event_id=event_id)
+    assert entries == [
+        EntryType(
+            id=entries[0].id,
+            event_id=event_id,
+            competitor_id=None,
+            first_name=None,
+            last_name=None,
+            chip="4711",
+            result=PersonRaceResult(
+                start_time=S1,
+                finish_time=None,
+                punched_start_time=S1,
+                punched_finish_time=None,
+                si_punched_start_time=S1,
+                si_punched_finish_time=None,
+                status=ResultStatus.FINISHED,
+                time=None,
+                split_times=[
+                    SplitTime(
+                        control_code="103",
+                        si_punch_time=C3,
+                        punch_time=C3,
+                        time=t(S1, C3),
+                        status=SpStatus.ADDITIONAL,
+                    ),
+                ],
+            ),
+        ),
+        EntryType(
+            id=id,
+            event_id=event_id,
+            competitor_id=competitor_id,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1957,
+            class_id=class_1_id,
+            class_name="Elite",
+            not_competing=False,
+            chip="4711",
+            fields={},
+            result=PersonRaceResult(
+                status=ResultStatus.DID_NOT_FINISH,
                 split_times=[
                     SplitTime(control_code="101", status=SpStatus.MISSING),
                     SplitTime(control_code="102", status=SpStatus.MISSING),
@@ -539,6 +705,85 @@ def test_update_entry_replace_result_and_store_replaced_result_without_edits(
                         time=t(S1, C3),
                         status=SpStatus.OK,
                     ),
+                ],
+            ),
+            start=PersonRaceStart(),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+    ]
+
+
+def test_update_entry_set_status_to_dns(
+    event_id: int,
+    class_1_id: int,
+    course_1_id: int,
+    club_id: int,
+    competitor_id: int,
+):
+    id = model.add_or_update_entry(
+        id=None,
+        event_id=event_id,
+        competitor_id=None,
+        first_name="Angela",
+        last_name="Merkel",
+        gender="F",
+        year=1957,
+        class_id=class_1_id,
+        club_id=club_id,
+        not_competing=False,
+        chip=None,
+        fields={},
+        status=ResultStatus.INACTIVE,
+        start_time=None,
+        result_id=None,
+    )
+    model.add_or_update_entry(
+        id=id,
+        event_id=event_id,
+        competitor_id=competitor_id,
+        first_name="Angela",
+        last_name="Merkel",
+        gender="F",
+        year=1957,
+        class_id=class_1_id,
+        club_id=club_id,
+        not_competing=False,
+        chip=None,
+        fields={},
+        status=ResultStatus.DID_NOT_START,
+        start_time=None,
+        result_id=None,
+    )
+
+    entries = model.get_entries(event_id=event_id)
+    assert entries == [
+        EntryType(
+            id=id,
+            event_id=event_id,
+            competitor_id=competitor_id,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1957,
+            class_id=class_1_id,
+            class_name="Elite",
+            not_competing=False,
+            chip=None,
+            fields={},
+            result=PersonRaceResult(
+                start_time=None,
+                finish_time=None,
+                punched_start_time=None,
+                punched_finish_time=None,
+                si_punched_start_time=None,
+                si_punched_finish_time=None,
+                status=ResultStatus.DID_NOT_START,
+                time=None,
+                split_times=[
+                    SplitTime(control_code="101", status=SpStatus.MISSING),
+                    SplitTime(control_code="102", status=SpStatus.MISSING),
+                    SplitTime(control_code="103", status=SpStatus.MISSING),
                 ],
             ),
             start=PersonRaceStart(),

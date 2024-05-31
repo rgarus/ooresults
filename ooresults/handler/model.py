@@ -488,6 +488,8 @@ def add_or_update_entry(
                 start_time=start_time,
             )
 
+        old_status = result.status
+
         # update entry result
         if result_id == -1:
             # result will be removed
@@ -498,6 +500,14 @@ def add_or_update_entry(
             chip = e.chip
             result = e.result
             db.delete_entry(id=result_id)
+
+        # update result status
+        if (
+            result_id != -1
+            or status != old_status
+            or status == ResultStatus.DISQUALIFIED
+        ):
+            result.status = status
 
         # compute new result
         try:

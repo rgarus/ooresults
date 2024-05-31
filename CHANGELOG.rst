@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Fixed
+^^^^^
+
+- Status value entered in "Add entry ..." or "Edit entry ..." was no longer used.
+
+
 [0.2.10] - 2024-05-24
 ---------------------
 
