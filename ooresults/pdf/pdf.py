@@ -29,6 +29,7 @@ from ooresults.repo.result_type import ResultStatus
 class PDF(FPDF):
     MAP_STATUS = {
         ResultStatus.INACTIVE: "",
+        ResultStatus.ACTIVE: "Started",
         ResultStatus.FINISHED: "Finished",
         ResultStatus.OK: "OK",
         ResultStatus.MISSING_PUNCH: "MP",

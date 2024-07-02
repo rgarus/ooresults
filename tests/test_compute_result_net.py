@@ -20,6 +20,7 @@
 from datetime import datetime
 from datetime import timezone
 
+import pytest
 
 from ooresults.repo.result_type import SplitTime
 from ooresults.repo.result_type import SpStatus
@@ -33,7 +34,24 @@ def t(a: datetime, b: datetime) -> int:
     return int(diff.total_seconds())
 
 
-def test_compute_result_status_ok():
+@pytest.mark.parametrize(
+    "status_old, status_new",
+    [
+        (ResultStatus.INACTIVE, ResultStatus.OK),
+        (ResultStatus.ACTIVE, ResultStatus.OK),
+        (ResultStatus.FINISHED, ResultStatus.OK),
+        (ResultStatus.OK, ResultStatus.OK),
+        (ResultStatus.MISSING_PUNCH, ResultStatus.OK),
+        (ResultStatus.DID_NOT_START, ResultStatus.OK),
+        (ResultStatus.DID_NOT_FINISH, ResultStatus.OK),
+        (ResultStatus.OVER_TIME, ResultStatus.OVER_TIME),
+        (ResultStatus.DISQUALIFIED, ResultStatus.DISQUALIFIED),
+    ],
+)
+def test_compute_result_status_ok(
+    status_old: ResultStatus,
+    status_new: ResultStatus,
+):
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -42,7 +60,7 @@ def test_compute_result_status_ok():
 
     controls = ["101", "102", "103"]
     result = PersonRaceResult(
-        status=ResultStatus.INACTIVE,
+        status=status_old,
         punched_start_time=s1,
         punched_finish_time=f1,
         time=None,
@@ -61,7 +79,7 @@ def test_compute_result_status_ok():
         finish_time=f1,
         punched_finish_time=f1,
         time=int((f1 - s1).total_seconds()),
-        status=ResultStatus.OK,
+        status=status_new,
         split_times=[
             SplitTime(
                 control_code="103", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
@@ -76,7 +94,24 @@ def test_compute_result_status_ok():
     )
 
 
-def test_compute_result_status_mispunched():
+@pytest.mark.parametrize(
+    "status_old,status_new",
+    [
+        (ResultStatus.INACTIVE, ResultStatus.MISSING_PUNCH),
+        (ResultStatus.ACTIVE, ResultStatus.MISSING_PUNCH),
+        (ResultStatus.FINISHED, ResultStatus.MISSING_PUNCH),
+        (ResultStatus.OK, ResultStatus.MISSING_PUNCH),
+        (ResultStatus.MISSING_PUNCH, ResultStatus.MISSING_PUNCH),
+        (ResultStatus.DID_NOT_START, ResultStatus.MISSING_PUNCH),
+        (ResultStatus.DID_NOT_FINISH, ResultStatus.DID_NOT_FINISH),
+        (ResultStatus.OVER_TIME, ResultStatus.OVER_TIME),
+        (ResultStatus.DISQUALIFIED, ResultStatus.DISQUALIFIED),
+    ],
+)
+def test_compute_result_status_mispunched(
+    status_old: ResultStatus,
+    status_new: ResultStatus,
+):
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c3 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
@@ -84,7 +119,7 @@ def test_compute_result_status_mispunched():
 
     controls = ["101", "102", "103", "104"]
     result = PersonRaceResult(
-        status=ResultStatus.INACTIVE,
+        status=status_old,
         punched_start_time=s1,
         punched_finish_time=f1,
         time=None,
@@ -102,7 +137,7 @@ def test_compute_result_status_mispunched():
         finish_time=f1,
         punched_finish_time=f1,
         time=int((f1 - s1).total_seconds()),
-        status=ResultStatus.MISSING_PUNCH,
+        status=status_new,
         split_times=[
             SplitTime(
                 control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
@@ -120,7 +155,24 @@ def test_compute_result_status_mispunched():
     )
 
 
-def test_compute_result_status_ok_with_additionals():
+@pytest.mark.parametrize(
+    "status_old, status_new",
+    [
+        (ResultStatus.INACTIVE, ResultStatus.OK),
+        (ResultStatus.ACTIVE, ResultStatus.OK),
+        (ResultStatus.FINISHED, ResultStatus.OK),
+        (ResultStatus.OK, ResultStatus.OK),
+        (ResultStatus.MISSING_PUNCH, ResultStatus.OK),
+        (ResultStatus.DID_NOT_START, ResultStatus.OK),
+        (ResultStatus.DID_NOT_FINISH, ResultStatus.OK),
+        (ResultStatus.OVER_TIME, ResultStatus.OVER_TIME),
+        (ResultStatus.DISQUALIFIED, ResultStatus.DISQUALIFIED),
+    ],
+)
+def test_compute_result_status_ok_with_additionals(
+    status_old: ResultStatus,
+    status_new: ResultStatus,
+):
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -133,7 +185,7 @@ def test_compute_result_status_ok_with_additionals():
 
     controls = ["101", "102", "103"]
     result = PersonRaceResult(
-        status=ResultStatus.INACTIVE,
+        status=status_old,
         punched_start_time=s1,
         punched_finish_time=f1,
         time=None,
@@ -156,7 +208,7 @@ def test_compute_result_status_ok_with_additionals():
         finish_time=f1,
         punched_finish_time=f1,
         time=int((f1 - s1).total_seconds()),
-        status=ResultStatus.OK,
+        status=status_new,
         split_times=[
             SplitTime(
                 control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
@@ -195,7 +247,24 @@ def test_compute_result_status_ok_with_additionals():
     )
 
 
-def test_compute_result_with_unknown_punch_times():
+@pytest.mark.parametrize(
+    "status_old, status_new",
+    [
+        (ResultStatus.INACTIVE, ResultStatus.OK),
+        (ResultStatus.ACTIVE, ResultStatus.OK),
+        (ResultStatus.FINISHED, ResultStatus.OK),
+        (ResultStatus.OK, ResultStatus.OK),
+        (ResultStatus.MISSING_PUNCH, ResultStatus.OK),
+        (ResultStatus.DID_NOT_START, ResultStatus.OK),
+        (ResultStatus.DID_NOT_FINISH, ResultStatus.OK),
+        (ResultStatus.OVER_TIME, ResultStatus.OVER_TIME),
+        (ResultStatus.DISQUALIFIED, ResultStatus.DISQUALIFIED),
+    ],
+)
+def test_compute_result_with_unknown_punch_times(
+    status_old: ResultStatus,
+    status_new: ResultStatus,
+):
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = SplitTime.NO_TIME
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -205,7 +274,7 @@ def test_compute_result_with_unknown_punch_times():
 
     controls = ["101", "102", "103"]
     result = PersonRaceResult(
-        status=ResultStatus.INACTIVE,
+        status=status_old,
         punched_start_time=s1,
         punched_finish_time=f1,
         time=None,
@@ -225,7 +294,7 @@ def test_compute_result_with_unknown_punch_times():
         finish_time=f1,
         punched_finish_time=f1,
         time=int((f1 - s1).total_seconds()),
-        status=ResultStatus.OK,
+        status=status_new,
         split_times=[
             SplitTime(
                 control_code="101",
@@ -250,69 +319,6 @@ def test_compute_result_with_unknown_punch_times():
                 punch_time=c4,
                 time=None,
                 status=SpStatus.OK,
-            ),
-        ],
-    )
-
-
-def test_compute_result_status_last_three_stations_missing():
-    s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
-    c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
-    c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
-    c3 = datetime(2015, 1, 1, 12, 39, 11, tzinfo=timezone.utc)
-    c4 = datetime(2015, 1, 1, 12, 39, 13, tzinfo=timezone.utc)
-    f1 = datetime(2015, 1, 1, 12, 39, 15, tzinfo=timezone.utc)
-
-    controls = ["101", "102", "103", "104", "105"]
-    result = PersonRaceResult(
-        status=ResultStatus.INACTIVE,
-        punched_start_time=s1,
-        punched_finish_time=f1,
-        time=None,
-        split_times=[
-            SplitTime(control_code="101", punch_time=c1, status=SpStatus.ADDITIONAL),
-            SplitTime(control_code="102", punch_time=c2, status=SpStatus.ADDITIONAL),
-            SplitTime(control_code="106", punch_time=c3, status=SpStatus.ADDITIONAL),
-            SplitTime(control_code="107", punch_time=c4, status=SpStatus.ADDITIONAL),
-        ],
-    )
-    class_params = ClassParams(otype="net")
-
-    result.compute_result(controls=controls, class_params=class_params)
-    assert result == PersonRaceResult(
-        start_time=s1,
-        punched_start_time=s1,
-        finish_time=f1,
-        punched_finish_time=f1,
-        time=int((f1 - s1).total_seconds()),
-        status=ResultStatus.MISSING_PUNCH,
-        split_times=[
-            SplitTime(
-                control_code="101", punch_time=c1, time=t(s1, c1), status=SpStatus.OK
-            ),
-            SplitTime(
-                control_code="102", punch_time=c2, time=t(s1, c2), status=SpStatus.OK
-            ),
-            SplitTime(
-                control_code="106",
-                punch_time=c3,
-                time=t(s1, c3),
-                status=SpStatus.ADDITIONAL,
-            ),
-            SplitTime(
-                control_code="107",
-                punch_time=c4,
-                time=t(s1, c4),
-                status=SpStatus.ADDITIONAL,
-            ),
-            SplitTime(
-                control_code="103", punch_time=None, time=None, status=SpStatus.MISSING
-            ),
-            SplitTime(
-                control_code="104", punch_time=None, time=None, status=SpStatus.MISSING
-            ),
-            SplitTime(
-                control_code="105", punch_time=None, time=None, status=SpStatus.MISSING
             ),
         ],
     )

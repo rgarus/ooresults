@@ -160,13 +160,14 @@ def create_pdf(
         class_, ranked_results = class_results
         standard = class_.params.otype == "standard"
 
-        # filter results - use only started entries
+        # filter results - use only finished entries
         ranked_results = [
             r
             for r in ranked_results
             if r.entry.result.status
             not in (
                 ResultStatus.INACTIVE,
+                ResultStatus.ACTIVE,
                 ResultStatus.DID_NOT_START,
             )
         ]

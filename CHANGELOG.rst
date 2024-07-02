@@ -5,6 +5,11 @@ Changelog
 [Unreleased]
 ------------
 
+Added
+^^^^^
+
+- Status "Started" added.
+
 Fixed
 ^^^^^
 

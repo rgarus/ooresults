@@ -86,6 +86,9 @@ class ResultStatus(enum.Enum):
         INACTIVE:
             Has not yet started.
 
+        ACTIVE:
+            Currently on course.
+
         FINISHED:
             Finished but not yet validated.
 
@@ -111,6 +114,7 @@ class ResultStatus(enum.Enum):
     """
 
     INACTIVE = 0
+    ACTIVE = 1
     FINISHED = 2
     OK = 3
     MISSING_PUNCH = 4
@@ -219,10 +223,12 @@ class PersonRaceResult:
         gender: Optional[str] = None,
     ) -> None:
         #
-        # If list of controls is empty and result is not inactive or finished, no compution is done.
-        # In all other cases a new result is computed, but:
+        # If list of controls is empty and result is not inactive. active or finished,
+        # no compution is done. In all other cases a new result is computed, but:
         #
         # - if old status is disqualified the new status is disqualified
+        # - if old status is overtime the new status is overtime
+        # - if olf status is didnotfinish and computed result is not ok the new status is didnotfinish
         # - if old status is inactive and no controls are punched the new status is inactive
         # - if old status is didnotstart and no controls are punched the new status is didnotstart
         # - if list of controls is empty and type is standard or net the new status is finished
@@ -233,6 +239,7 @@ class PersonRaceResult:
         # no compution is done
         if controls == [] and self.status not in [
             ResultStatus.INACTIVE,
+            ResultStatus.ACTIVE,
             ResultStatus.FINISHED,
         ]:
             return
@@ -277,7 +284,7 @@ class PersonRaceResult:
             else:
                 self.start_time = class_params.mass_start
 
-        mp = self.start_time is None
+        missing_punch = self.start_time is None
 
         # compute finish time
         self.finish_time = self.punched_finish_time
@@ -311,7 +318,7 @@ class PersonRaceResult:
                 if class_params.penalty_controls is not None:
                     penalties_controls += class_params.penalty_controls
                 else:
-                    mp = True
+                    missing_punch = True
 
         elif class_params.otype == "score":
             score_controls = 0
@@ -385,7 +392,7 @@ class PersonRaceResult:
                     if class_params.penalty_controls is not None:
                         penalties_controls += class_params.penalty_controls
                     else:
-                        mp = True
+                        missing_punch = True
 
             for p in split_times:
                 if p.punch_time is not None:
@@ -396,37 +403,22 @@ class PersonRaceResult:
                 self.split_times.append(p)
 
         # compute result status
-        # - if old status is disqualified the new status is disqualified
-        # - if old status is inactive and no controls are punched the new status is inactive
-        # - if old status is didnotstart and no controls are punched the new status is didnotstart
-        # - if list of controls is empty and type is standard or net the new status is finished
-        # - if list of controls is empty and type is score the new status is ok
-        if old_status == ResultStatus.DISQUALIFIED:
-            self.status = ResultStatus.DISQUALIFIED
-        elif old_status == ResultStatus.INACTIVE and not self.has_punches():
+        # - if no controls are punched the new status is inactive
+        # - if list of controls is empty the new status is finished
+        # - if controls punched but no finish time the new status is did_not_finish
+        # - if run time greater time limit the new status is overtime
+        # - if controls punched but some missing the new status is missing_punch
+
+        if not self.has_punches():
             self.status = ResultStatus.INACTIVE
-        elif old_status == ResultStatus.DID_NOT_START and not self.has_punches():
-            self.status = ResultStatus.DID_NOT_START
-        elif controls == [] and class_params.otype != "score":
+        elif controls == []:
             self.status = ResultStatus.FINISHED
         elif self.finish_time is None:
             self.status = ResultStatus.DID_NOT_FINISH
+        elif missing_punch:
+            self.status = ResultStatus.MISSING_PUNCH
         else:
-            # result status is DidNotFinish if the last three stations are missing
-            missing = 0
-            for p in reversed(self.split_times):
-                if p.status == SpStatus.OK:
-                    break
-                elif p.status == SpStatus.MISSING:
-                    missing += 1
-            if (
-                class_params.otype == "standard"
-                and class_params.penalty_overtime is None
-                and missing >= 3
-            ):
-                self.status = ResultStatus.DID_NOT_FINISH
-            else:
-                self.status = ResultStatus.MISSING_PUNCH if mp else ResultStatus.OK
+            self.status = ResultStatus.OK
 
         # compute running time
         if self.start_time is not None and self.finish_time is not None:
@@ -546,6 +538,37 @@ class PersonRaceResult:
                 if class_params.apply_handicap_rule and self.time is not None:
                     self.extensions["factor"] = handicap_factor
                     self.time = int(handicap_factor * self.time)
+
+        # update result status
+        # - disqualified always
+        # - over_time always
+        # - did_not_finish only if computed status is not ok or over_time
+        # - did_not_start only if computed status is not ok, over_time, missing_punch, did_not_finish or finished
+        # - inactive only if computed status is not ok, over_time, missing_punch, did_not_finish or finished
+        # - active only if computed status is not ok, over_time, missing_punch, did_not_finish or finished
+
+        if old_status in (
+            ResultStatus.DISQUALIFIED,
+            ResultStatus.OVER_TIME,
+        ):
+            self.status = old_status
+        elif old_status == ResultStatus.DID_NOT_FINISH and self.status not in (
+            ResultStatus.OK,
+            ResultStatus.OVER_TIME,
+        ):
+            self.status = old_status
+        elif old_status in (
+            ResultStatus.DID_NOT_START,
+            ResultStatus.INACTIVE,
+            ResultStatus.ACTIVE,
+        ) and self.status not in (
+            ResultStatus.OK,
+            ResultStatus.OVER_TIME,
+            ResultStatus.MISSING_PUNCH,
+            ResultStatus.DID_NOT_FINISH,
+            ResultStatus.FINISHED,
+        ):
+            self.status = old_status
 
 
 @dataclasses.dataclass

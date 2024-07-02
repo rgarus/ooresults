@@ -110,6 +110,7 @@ def create(entries: List[EntryType], class_list: List[ClassInfoType]) -> bytes:
 
     STATUS_MAP = {
         ResultStatus.INACTIVE: "",
+        ResultStatus.ACTIVE: "",
         ResultStatus.FINISHED: "",
         ResultStatus.OK: "0",
         ResultStatus.MISSING_PUNCH: "3",

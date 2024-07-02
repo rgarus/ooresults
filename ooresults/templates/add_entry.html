@@ -132,7 +132,7 @@ $else:
                     $for status in list(ResultStatus):
                         $if status == result.status:
                             <option value="$status.value" selected>$MAP_STATUS[status]</option>
-                        $elif has_no_result or status not in (ResultStatus.INACTIVE, ResultStatus.DID_NOT_START):
+                        $elif has_no_result or status not in (ResultStatus.INACTIVE, ResultStatus.ACTIVE, ResultStatus.DID_NOT_START):
                             <option value="$status.value">$MAP_STATUS[status]</option>
                     </select>
                 </td>

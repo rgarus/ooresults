@@ -153,6 +153,7 @@ def create_result_list(
                     STATUS(
                         {
                             ResultStatus.INACTIVE: "Inactive",
+                            ResultStatus.ACTIVE: "Active",
                             ResultStatus.OK: "OK",
                             ResultStatus.MISSING_PUNCH: "MissingPunch",
                             ResultStatus.DID_NOT_START: "DidNotStart",
@@ -195,7 +196,7 @@ STATUS_MAP = {
     "MissingPunch": ResultStatus.MISSING_PUNCH,
     "Disqualified": ResultStatus.DISQUALIFIED,
     "DidNotFinish": ResultStatus.DID_NOT_FINISH,
-    "Active": ResultStatus.INACTIVE,
+    "Active": ResultStatus.ACTIVE,
     "Inactive": ResultStatus.INACTIVE,
     "OverTime": ResultStatus.OVER_TIME,
     "SportingWithdrawal": ResultStatus.DID_NOT_FINISH,

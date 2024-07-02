@@ -170,23 +170,25 @@ def test_add_entry_for_add(
     assert input_start_time.attrib["value"] == ""
 
     option_status = html.findall(".//select[@name='status']/option")
-    assert len(option_status) == 8
+    assert len(option_status) == 9
     assert option_status[0].attrib == {"value": "0", "selected": "selected"}
     assert option_status[0].text is None
-    assert option_status[1].attrib == {"value": "2"}
-    assert option_status[1].text == "Finished"
-    assert option_status[2].attrib == {"value": "3"}
-    assert option_status[2].text == "OK"
-    assert option_status[3].attrib == {"value": "4"}
-    assert option_status[3].text == "MP"
-    assert option_status[4].attrib == {"value": "5"}
-    assert option_status[4].text == "DNS"
-    assert option_status[5].attrib == {"value": "6"}
-    assert option_status[5].text == "DNF"
-    assert option_status[6].attrib == {"value": "7"}
-    assert option_status[6].text == "OTL"
-    assert option_status[7].attrib == {"value": "8"}
-    assert option_status[7].text == "DSQ"
+    assert option_status[1].attrib == {"value": "1"}
+    assert option_status[1].text == "Started"
+    assert option_status[2].attrib == {"value": "2"}
+    assert option_status[2].text == "Finished"
+    assert option_status[3].attrib == {"value": "3"}
+    assert option_status[3].text == "OK"
+    assert option_status[4].attrib == {"value": "4"}
+    assert option_status[4].text == "MP"
+    assert option_status[5].attrib == {"value": "5"}
+    assert option_status[5].text == "DNS"
+    assert option_status[6].attrib == {"value": "6"}
+    assert option_status[6].text == "DNF"
+    assert option_status[7].attrib == {"value": "7"}
+    assert option_status[7].text == "OTL"
+    assert option_status[8].attrib == {"value": "8"}
+    assert option_status[8].text == "DSQ"
 
     assert html.findall(".//select[@name='result']/option") == []
 
@@ -278,23 +280,25 @@ def test_add_entry_for_edit_without_results(
     assert input_start_time.attrib["value"] == "18:43:33"
 
     option_status = html.findall(".//select[@name='status']/option")
-    assert len(option_status) == 8
+    assert len(option_status) == 9
     assert option_status[0].attrib == {"value": "0"}
     assert option_status[0].text is None
-    assert option_status[1].attrib == {"value": "2"}
-    assert option_status[1].text == "Finished"
-    assert option_status[2].attrib == {"value": "3"}
-    assert option_status[2].text == "OK"
-    assert option_status[3].attrib == {"value": "4"}
-    assert option_status[3].text == "MP"
-    assert option_status[4].attrib == {"value": "5", "selected": "selected"}
-    assert option_status[4].text == "DNS"
-    assert option_status[5].attrib == {"value": "6"}
-    assert option_status[5].text == "DNF"
-    assert option_status[6].attrib == {"value": "7"}
-    assert option_status[6].text == "OTL"
-    assert option_status[7].attrib == {"value": "8"}
-    assert option_status[7].text == "DSQ"
+    assert option_status[1].attrib == {"value": "1"}
+    assert option_status[1].text == "Started"
+    assert option_status[2].attrib == {"value": "2"}
+    assert option_status[2].text == "Finished"
+    assert option_status[3].attrib == {"value": "3"}
+    assert option_status[3].text == "OK"
+    assert option_status[4].attrib == {"value": "4"}
+    assert option_status[4].text == "MP"
+    assert option_status[5].attrib == {"value": "5", "selected": "selected"}
+    assert option_status[5].text == "DNS"
+    assert option_status[6].attrib == {"value": "6"}
+    assert option_status[6].text == "DNF"
+    assert option_status[7].attrib == {"value": "7"}
+    assert option_status[7].text == "OTL"
+    assert option_status[8].attrib == {"value": "8"}
+    assert option_status[8].text == "DSQ"
 
     assert html.findall(".//select[@name='result']/option") == []
 
@@ -519,22 +523,24 @@ def test_add_entry_for_edit_with_additional_fields(
     assert input_start_time.attrib["value"] == ""
 
     option_status = html.findall(".//select[@name='status']/option")
-    assert len(option_status) == 8
+    assert len(option_status) == 9
     assert option_status[0].attrib == {"value": "0", "selected": "selected"}
     assert option_status[0].text is None
-    assert option_status[1].attrib == {"value": "2"}
-    assert option_status[1].text == "Finished"
-    assert option_status[2].attrib == {"value": "3"}
-    assert option_status[2].text == "OK"
-    assert option_status[3].attrib == {"value": "4"}
-    assert option_status[3].text == "MP"
-    assert option_status[4].attrib == {"value": "5"}
-    assert option_status[4].text == "DNS"
-    assert option_status[5].attrib == {"value": "6"}
-    assert option_status[5].text == "DNF"
-    assert option_status[6].attrib == {"value": "7"}
-    assert option_status[6].text == "OTL"
-    assert option_status[7].attrib == {"value": "8"}
-    assert option_status[7].text == "DSQ"
+    assert option_status[1].attrib == {"value": "1"}
+    assert option_status[1].text == "Started"
+    assert option_status[2].attrib == {"value": "2"}
+    assert option_status[2].text == "Finished"
+    assert option_status[3].attrib == {"value": "3"}
+    assert option_status[3].text == "OK"
+    assert option_status[4].attrib == {"value": "4"}
+    assert option_status[4].text == "MP"
+    assert option_status[5].attrib == {"value": "5"}
+    assert option_status[5].text == "DNS"
+    assert option_status[6].attrib == {"value": "6"}
+    assert option_status[6].text == "DNF"
+    assert option_status[7].attrib == {"value": "7"}
+    assert option_status[7].text == "OTL"
+    assert option_status[8].attrib == {"value": "8"}
+    assert option_status[8].text == "DSQ"
 
     assert html.findall(".//select[@name='result']/option") == []

@@ -30,6 +30,7 @@ from ooresults.utils.rental_cards import format_card
 
 MAP_STATUS = {
     ResultStatus.INACTIVE: "",
+    ResultStatus.ACTIVE: "Started",
     ResultStatus.FINISHED: "Finished",
     ResultStatus.OK: "OK",
     ResultStatus.MISSING_PUNCH: "MP",

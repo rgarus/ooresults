@@ -76,6 +76,10 @@ def build_results(
                     (ResultStatus.DISQUALIFIED, True): 9,
                     (ResultStatus.DID_NOT_START, False): 10,
                     (ResultStatus.DID_NOT_START, True): 11,
+                    (ResultStatus.FINISHED, False): 12,
+                    (ResultStatus.FINISHED, True): 13,
+                    (ResultStatus.ACTIVE, False): 14,
+                    (ResultStatus.ACTIVE, True): 15,
                 }
                 return mapping.get((e.result.status, e.not_competing), 99)
 
