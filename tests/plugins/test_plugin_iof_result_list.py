@@ -115,6 +115,8 @@ def test_import_result_list():
                 finish_time=f,
                 punched_start_time=s,
                 punched_finish_time=f,
+                si_punched_start_time=s,
+                si_punched_finish_time=f,
                 status=ResultStatus.OK,
                 time=2001,
                 split_times=[
@@ -122,30 +124,35 @@ def test_import_result_list():
                         control_code="31",
                         status=SpStatus.OK,
                         punch_time=s + timedelta(seconds=501),
+                        si_punch_time=s + timedelta(seconds=501),
                         time=501,
                     ),
                     result_type.SplitTime(
                         control_code="32",
                         status=SpStatus.OK,
                         punch_time=s + timedelta(seconds=720),
+                        si_punch_time=s + timedelta(seconds=720),
                         time=720,
                     ),
                     result_type.SplitTime(
                         control_code="31",
                         status=SpStatus.OK,
                         punch_time=s + timedelta(seconds=818),
+                        si_punch_time=s + timedelta(seconds=818),
                         time=818,
                     ),
                     result_type.SplitTime(
                         control_code="33",
                         status=SpStatus.OK,
                         punch_time=s + timedelta(seconds=1136),
+                        si_punch_time=s + timedelta(seconds=1136),
                         time=1136,
                     ),
                     result_type.SplitTime(
                         control_code="31",
                         status=SpStatus.OK,
                         punch_time=s + timedelta(seconds=1593),
+                        si_punch_time=s + timedelta(seconds=1593),
                         time=1593,
                     ),
                 ],
@@ -190,6 +197,9 @@ def test_import_result_list_not_competing():
   </ClassResult>
 </ResultList>
 """
+    s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+    f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
+
     event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
     assert event == {
         "name": "1. O-Cup 2020",
@@ -206,18 +216,12 @@ def test_import_result_list_not_competing():
             "year": 1972,
             "not_competing": True,
             "result": result_type.PersonRaceResult(
-                start_time=datetime(
-                    2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
-                ),
-                finish_time=datetime(
-                    2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1))
-                ),
-                punched_start_time=datetime(
-                    2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
-                ),
-                punched_finish_time=datetime(
-                    2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1))
-                ),
+                start_time=s,
+                finish_time=f,
+                punched_start_time=s,
+                punched_finish_time=f,
+                si_punched_start_time=s,
+                si_punched_finish_time=f,
                 status=ResultStatus.OK,
                 time=2001,
             ),
@@ -283,6 +287,9 @@ def test_export_result_list():
   </ClassResult>
 </ResultList>
 """
+    s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+    f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
+
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -323,24 +330,8 @@ def test_export_result_list():
                             year=1972,
                             not_competing=False,
                             result=result_type.PersonRaceResult(
-                                start_time=datetime(
-                                    2020,
-                                    2,
-                                    9,
-                                    10,
-                                    0,
-                                    0,
-                                    tzinfo=timezone(timedelta(hours=1)),
-                                ),
-                                finish_time=datetime(
-                                    2020,
-                                    2,
-                                    9,
-                                    10,
-                                    33,
-                                    21,
-                                    tzinfo=timezone(timedelta(hours=1)),
-                                ),
+                                start_time=s,
+                                finish_time=f,
                                 status=ResultStatus.OK,
                                 time=2001,
                                 split_times=[
@@ -408,6 +399,9 @@ def test_export_result_list_not_competing():
   </ClassResult>
 </ResultList>
 """
+    s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+    f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
+
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -448,24 +442,8 @@ def test_export_result_list_not_competing():
                             year=1972,
                             not_competing=True,
                             result=result_type.PersonRaceResult(
-                                start_time=datetime(
-                                    2020,
-                                    2,
-                                    9,
-                                    10,
-                                    0,
-                                    0,
-                                    tzinfo=timezone(timedelta(hours=1)),
-                                ),
-                                finish_time=datetime(
-                                    2020,
-                                    2,
-                                    9,
-                                    10,
-                                    33,
-                                    21,
-                                    tzinfo=timezone(timedelta(hours=1)),
-                                ),
+                                start_time=s,
+                                finish_time=f,
                                 status=ResultStatus.OK,
                                 time=2001,
                             ),
@@ -480,7 +458,7 @@ def test_export_result_list_not_competing():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_import_result_list_with_start_time_but_not_started():
+def test_import_result_list_with_start_time_but_not_finished():
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -514,6 +492,8 @@ def test_import_result_list_with_start_time_but_not_started():
   </ClassResult>
 </ResultList>
 """
+    s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+
     event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
     assert event == {
         "name": "1. O-Cup 2020",
@@ -533,9 +513,7 @@ def test_import_result_list_with_start_time_but_not_started():
                 status=ResultStatus.DID_NOT_START,
             ),
             "start": start_type.PersonRaceStart(
-                start_time=datetime(
-                    2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))
-                ),
+                start_time=s,
             ),
         },
     ]
@@ -574,6 +552,8 @@ def test_export_result_list_with_start_time_but_not_started():
   </ClassResult>
 </ResultList>
 """
+    s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -617,15 +597,7 @@ def test_export_result_list_with_start_time_but_not_started():
                                 status=ResultStatus.DID_NOT_START,
                             ),
                             start=start_type.PersonRaceStart(
-                                start_time=datetime(
-                                    2020,
-                                    2,
-                                    9,
-                                    10,
-                                    0,
-                                    0,
-                                    tzinfo=timezone(timedelta(hours=1)),
-                                ),
+                                start_time=s,
                             ),
                         ),
                         rank=None,
@@ -821,30 +793,36 @@ def test_import_result_list_classes():
                 finish_time=f_am,
                 punched_start_time=s_am,
                 punched_finish_time=f_am,
+                si_punched_start_time=s_am,
+                si_punched_finish_time=f_am,
                 time=1221,
                 split_times=[
                     result_type.SplitTime(
                         control_code="41",
                         status=SpStatus.OK,
                         punch_time=s_am + timedelta(seconds=301),
+                        si_punch_time=s_am + timedelta(seconds=301),
                         time=301,
                     ),
                     result_type.SplitTime(
                         control_code="42",
                         status=SpStatus.OK,
                         punch_time=s_am + timedelta(seconds=526),
+                        si_punch_time=s_am + timedelta(seconds=526),
                         time=526,
                     ),
                     result_type.SplitTime(
                         control_code="41",
                         status=SpStatus.OK,
                         punch_time=s_am + timedelta(seconds=914),
+                        si_punch_time=s_am + timedelta(seconds=914),
                         time=914,
                     ),
                     result_type.SplitTime(
                         control_code="43",
                         status=SpStatus.OK,
                         punch_time=s_am + timedelta(seconds=1100),
+                        si_punch_time=s_am + timedelta(seconds=1100),
                         time=1100,
                     ),
                 ],
@@ -863,17 +841,20 @@ def test_import_result_list_classes():
                 status=ResultStatus.DID_NOT_FINISH,
                 start_time=s_bm,
                 punched_start_time=s_bm,
+                si_punched_start_time=s_bm,
                 split_times=[
                     result_type.SplitTime(
                         control_code="41",
                         status=SpStatus.OK,
                         punch_time=s_bm + timedelta(seconds=501),
+                        si_punch_time=s_bm + timedelta(seconds=501),
                         time=501,
                     ),
                     result_type.SplitTime(
                         control_code="42",
                         status=SpStatus.OK,
                         punch_time=s_bm + timedelta(seconds=720),
+                        si_punch_time=s_bm + timedelta(seconds=720),
                         time=720,
                     ),
                     result_type.SplitTime(control_code="41", status=SpStatus.MISSING),
@@ -896,12 +877,15 @@ def test_import_result_list_classes():
                 finish_time=f_cm,
                 punched_start_time=s_cm,
                 punched_finish_time=f_cm,
+                si_punched_start_time=s_cm,
+                si_punched_finish_time=f_cm,
                 time=2001,
                 split_times=[
                     result_type.SplitTime(
                         control_code="31",
                         status=SpStatus.OK,
                         punch_time=s_cm + timedelta(seconds=501),
+                        si_punch_time=s_cm + timedelta(seconds=501),
                         time=501,
                     ),
                     result_type.SplitTime(control_code="32", status=SpStatus.MISSING),
@@ -910,6 +894,7 @@ def test_import_result_list_classes():
                         control_code="33",
                         status=SpStatus.ADDITIONAL,
                         punch_time=s_cm + timedelta(seconds=1136),
+                        si_punch_time=s_cm + timedelta(seconds=1136),
                         time=1136,
                     ),
                 ],
@@ -1278,6 +1263,8 @@ def test_import_result_list_with_unknown_punch_times():
                 finish_time=f,
                 punched_start_time=s,
                 punched_finish_time=f,
+                si_punched_start_time=s,
+                si_punched_finish_time=f,
                 status=ResultStatus.OK,
                 time=2001,
                 split_times=[
@@ -1285,6 +1272,7 @@ def test_import_result_list_with_unknown_punch_times():
                         control_code="31",
                         status=SpStatus.OK,
                         punch_time=s + timedelta(seconds=501),
+                        si_punch_time=s + timedelta(seconds=501),
                         time=501,
                     ),
                     result_type.SplitTime(
@@ -1303,6 +1291,7 @@ def test_import_result_list_with_unknown_punch_times():
                         control_code="33",
                         status=SpStatus.OK,
                         punch_time=s + timedelta(seconds=1136),
+                        si_punch_time=s + timedelta(seconds=1136),
                         time=1136,
                     ),
                     result_type.SplitTime(
@@ -1372,6 +1361,9 @@ def test_export_result_list_with_unknown_punch_times():
   </ClassResult>
 </ResultList>
 """
+    s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+    f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
+
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -1412,24 +1404,8 @@ def test_export_result_list_with_unknown_punch_times():
                             year=1972,
                             not_competing=False,
                             result=result_type.PersonRaceResult(
-                                start_time=datetime(
-                                    2020,
-                                    2,
-                                    9,
-                                    10,
-                                    0,
-                                    0,
-                                    tzinfo=timezone(timedelta(hours=1)),
-                                ),
-                                finish_time=datetime(
-                                    2020,
-                                    2,
-                                    9,
-                                    10,
-                                    33,
-                                    21,
-                                    tzinfo=timezone(timedelta(hours=1)),
-                                ),
+                                start_time=s,
+                                finish_time=f,
                                 status=ResultStatus.OK,
                                 time=2001,
                                 split_times=[
@@ -1516,6 +1492,9 @@ def test_export_result_list_with_edited_punch_times():
   </ClassResult>
 </ResultList>
 """
+    s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+    f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
+
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -1556,24 +1535,8 @@ def test_export_result_list_with_edited_punch_times():
                             year=1972,
                             not_competing=False,
                             result=result_type.PersonRaceResult(
-                                start_time=datetime(
-                                    2020,
-                                    2,
-                                    9,
-                                    10,
-                                    0,
-                                    0,
-                                    tzinfo=timezone(timedelta(hours=1)),
-                                ),
-                                finish_time=datetime(
-                                    2020,
-                                    2,
-                                    9,
-                                    10,
-                                    33,
-                                    21,
-                                    tzinfo=timezone(timedelta(hours=1)),
-                                ),
+                                start_time=s,
+                                finish_time=f,
                                 status=ResultStatus.OK,
                                 time=2001,
                                 split_times=[

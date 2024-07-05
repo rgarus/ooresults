@@ -272,6 +272,7 @@ def parse_result_list(content: bytes) -> Tuple[Dict, List[Dict]]:
             if e_start_time is not None:
                 if r["result"].status in [
                     ResultStatus.INACTIVE,
+                    ResultStatus.ACTIVE,
                     ResultStatus.DID_NOT_START,
                 ]:
                     r["start"] = start_type.PersonRaceStart(
@@ -280,10 +281,12 @@ def parse_result_list(content: bytes) -> Tuple[Dict, List[Dict]]:
                 else:
                     r["result"].start_time = iso8601.parse_date(e_start_time.text)
                     r["result"].punched_start_time = r["result"].start_time
+                    r["result"].si_punched_start_time = r["result"].start_time
             e_finish_time = e_result.find("FinishTime", namespaces=namespaces)
             if e_finish_time is not None:
                 r["result"].finish_time = iso8601.parse_date(e_finish_time.text)
                 r["result"].punched_finish_time = r["result"].finish_time
+                r["result"].si_punched_finish_time = r["result"].finish_time
             e_time = e_result.find("Time", namespaces=namespaces)
             if e_time is not None:
                 r["result"].time = int(e_time.text)
@@ -299,10 +302,10 @@ def parse_result_list(content: bytes) -> Tuple[Dict, List[Dict]]:
                 e_time = e_split_time.find("Time", namespaces=namespaces)
                 if e_time is not None:
                     split_time.time = int(e_time.text)
-                    if r["result"].punched_start_time:
-                        split_time.punch_time = r[
-                            "result"
-                        ].punched_start_time + timedelta(seconds=split_time.time)
+                    if r["result"].start_time:
+                        t = r["result"].start_time + timedelta(seconds=split_time.time)
+                        split_time.punch_time = t
+                        split_time.si_punch_time = t
                 elif split_time.status == SpStatus.OK:
                     split_time.punch_time = result_type.SplitTime.NO_TIME
                 r["result"].split_times.append(split_time)
