@@ -52,7 +52,7 @@ class Add:
                     club_id=int(data.club_id) if data.club_id != "" else None,
                     gender=data.gender,
                     year=int(data.year) if data.year != "" else None,
-                    chip=data.chip,
+                    chip=data.chip.strip(),
                 )
             else:
                 model.update_competitor(
@@ -62,7 +62,7 @@ class Add:
                     club_id=int(data.club_id) if data.club_id != "" else None,
                     gender=data.gender,
                     year=int(data.year) if data.year != "" else None,
-                    chip=data.chip,
+                    chip=data.chip.strip(),
                 )
         except ConstraintError as e:
             raise web.conflict(str(e))

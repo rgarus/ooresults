@@ -200,7 +200,7 @@ class Add:
                 class_id=int(data.class_id),
                 club_id=int(data.club_id) if data.club_id != "" else None,
                 not_competing="not_competing" in data and data.not_competing == "true",
-                chip=data.chip,
+                chip=data.chip.strip(),
                 fields=fields,
                 status=ResultStatus(int(data.status)),
                 start_time=entered_start_time,
