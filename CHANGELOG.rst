@@ -13,6 +13,7 @@ Added
 Changed
 ^^^^^^^
 
+- Database schema updated to version 11.
 - Times of an IOF ResultList are imported both as punch times and as si punch times.
 
 Fixed
