@@ -103,6 +103,10 @@ Start
 Status
 
    Es gibt folgende Zustände:
+   
+   - **Started (started)**
+   
+     Der Läufer ist gestartet, hat seine SPORTident Card aber noch nicht ausgelesen.
 
    - **OK (ok)**:
    
@@ -125,7 +129,7 @@ Status
      Mögliche Ursachen:
     
      1. Der Läufer hat den Lauf abgebrochen ohne "Ziel" zu stempeln,
-     #. Der Läufer hat "Ziel" gestempelt, aber nicht die letzten drei Kontrollstationen.
+     #. Der Läufer hat "Ziel" gestempelt, der Status wurde aber manuell auf DNF geändert.
 
    - **OTL (over time limit)**:
    
