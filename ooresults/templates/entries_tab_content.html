@@ -108,12 +108,17 @@ $def with (entries_table)
         <div>
           <input id="entr_radio_export_3" name="entr_export" type="radio" value="entr.export.3"
                  onchange="updateDisplayedParams('entr_export_3')" required/>
-          <label for="entr_radio_export_3">OE2003 csv</label>
+          <label for="entr_radio_export_3">Result List for Splitsbrowser</label>
         </div>
         <div>
           <input id="entr_radio_export_4" name="entr_export" type="radio" value="entr.export.4"
                  onchange="updateDisplayedParams('entr_export_4')" required/>
-          <label for="entr_radio_export_4">OE12 csv</label>
+          <label for="entr_radio_export_4">OE2003 csv</label>
+        </div>
+        <div>
+          <input id="entr_radio_export_5" name="entr_export" type="radio" value="entr.export.5"
+                 onchange="updateDisplayedParams('entr_export_5')" required/>
+          <label for="entr_radio_export_5">OE12 csv</label>
         </div>
         <p>Settings</p>
         <div id="entr_export">
@@ -124,6 +129,8 @@ $def with (entries_table)
           <div id="entr_export_3" class="params">
           </div>
           <div id="entr_export_4" class="params">
+          </div>
+          <div id="entr_export_5" class="params">
           </div>
         </div>
         <p></p>
@@ -385,10 +392,13 @@ $def with (entries_table)
             filename = "ResultList.xml";
         }
         if (selected == "entr.export.3") {
+            filename = "Splitsbrowser-ResultList.xml";
+        }
+        if (selected == "entr.export.4") {
             filename = "entries.csv";
             mimetype = "text/csv";
         }
-        if (selected == "entr.export.4") {
+        if (selected == "entr.export.5") {
             filename = "entries.csv";
             mimetype = "text/csv";
         }

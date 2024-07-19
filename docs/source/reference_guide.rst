@@ -140,6 +140,44 @@ Status
      Der Läufer wurde disqualifiziert.
 
 
+Funktionen
+~~~~~~~~~~
+
+
+Export ...
+""""""""""
+
+
+Mit "Export ..." können die Daten eines Wettkampfes in folgenden Formaten exportiert werden:
+
+- **IOF Interface Standard 3.0 Entry List**
+
+  Export die Teilnehmerdaten in IOF XML 3.0 Format, siehe `IOF Data Standard 3.0 <https://orienteering.sport/iof/it/data-standard-3-0/>`_.
+
+- **IOF Interface Standard 3.0 Result List**
+
+  Exportiert die Ergebnisdaten in IOF XML 3.0 Format, siehe `IOF Data Standard 3.0 <https://orienteering.sport/iof/it/data-standard-3-0/>`_.
+
+- **Result List für Splitsbrowser**
+
+  Exportiert die Ergebnisdaten in IOF XML 3.0 Format, verwendet als Ergebnis aber die reinen Laufzeiten.
+  Zeitgutschriften (z.B. bei Verwendung eines Handicap-Faktors) oder Strafzeiten werden nicht berücksichtigt.
+  Sollte verwendet werden, wenn Zeitgutschriften beim Import in Splitsbrowser Software
+  wie `WinSplits <http://obasen.orientering.se/winsplits>`_ Probleme bereiten.
+  
+- **OE2003 csv**
+
+  Exportiert die Teilnehmer- oder Ergebnisdaten im OE2003 CSV-Format,
+  so dass sie von der OE2003 SportSoftware importiert werden können.
+  Enthält keine Zwischenzeiten.
+
+- **OE12 csv**
+
+  Exportiert die Teilnehmer- oder Ergebnisdaten im OE12 CSV-Format,
+  so dass sie von der OE12 Software importiert werden können.
+  Enthält keine Zwischenzeiten.
+
+
 .. _classes:
 
 Classes

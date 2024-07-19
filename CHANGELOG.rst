@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Added
+^^^^^
+
+- Added export of an IOF XML ResultList based on runtimes for import into Splitsbrowser software when time credits cause problems.
+
+
 [0.2.11] - 2024-07-10
 ---------------------
 

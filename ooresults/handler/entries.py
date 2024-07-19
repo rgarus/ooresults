@@ -137,10 +137,15 @@ class Export:
                 event, class_results = model.event_class_results(event_id=event_id)
                 content = iof_result_list.create_result_list(event, class_results)
             elif data.entr_export == "entr.export.3":
+                event, class_results = model.results_for_splitsbrowser(
+                    event_id=event_id
+                )
+                content = iof_result_list.create_result_list(event, class_results)
+            elif data.entr_export == "entr.export.4":
                 class_list = model.get_classes(event_id=event_id)
                 entry_list = model.get_entries(event_id=event_id)
                 content = oe2003.create(entry_list, class_list)
-            elif data.entr_export == "entr.export.4":
+            elif data.entr_export == "entr.export.5":
                 class_list = model.get_classes(event_id=event_id)
                 entry_list = model.get_entries(event_id=event_id)
                 content = oe12.create(entry_list, class_list)

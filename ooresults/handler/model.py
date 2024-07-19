@@ -931,6 +931,40 @@ def event_class_results(
     return event, class_results
 
 
+def results_for_splitsbrowser(
+    event_id: int,
+) -> Tuple[EventType, List[Tuple[ClassInfoType, List[RankedEntryType]]]]:
+    with db.transaction():
+        event = db.get_event(id=event_id)
+        classes = db.get_classes(event_id=event_id)
+        entries = copy.deepcopy(db.get_entries(event_id=event_id))
+
+    # filter entries - use only finished entries
+    entries = [
+        e
+        for e in entries
+        if e.result.status
+        not in (
+            ResultStatus.INACTIVE,
+            ResultStatus.ACTIVE,
+            ResultStatus.DID_NOT_START,
+        )
+    ]
+
+    # compute result time without handicap factor, penalties or credits
+    for e in entries:
+        if e.result.start_time is not None and e.result.finish_time is not None:
+            e.result.time = int(
+                (e.result.finish_time - e.result.start_time).total_seconds()
+            )
+
+    class_results = build_results.build_results(
+        class_infos=classes,
+        entries=entries,
+    )
+    return event, class_results
+
+
 def create_event_list(events: List[EventType]) -> List[EventType]:
     # filter list
     e_list = [e for e in events if e.series is not None]
