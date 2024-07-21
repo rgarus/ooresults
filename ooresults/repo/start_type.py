@@ -18,10 +18,44 @@
 
 
 import dataclasses
+import json
 from datetime import datetime
 from typing import Optional
+
+
+def to_isoformat(value: Optional[datetime]) -> Optional[str]:
+    if value is not None:
+        return value.isoformat()
+    else:
+        return None
+
+
+def from_isoformat(value: Optional[str]) -> Optional[datetime]:
+    if value:
+        return datetime.fromisoformat(value)
+    else:
+        return None
 
 
 @dataclasses.dataclass
 class PersonRaceStart:
     start_time: Optional[datetime] = None
+
+    @classmethod
+    def from_dict(cls, o: dict):
+        return PersonRaceStart(
+            start_time=from_isoformat(value=o.get("startTime")),
+        )
+
+    @classmethod
+    def from_json(cls, json_data: str):
+        return PersonRaceStart.from_dict(o=json.loads(json_data))
+
+    def to_dict(self) -> dict:
+        d = {}
+        if self.start_time is not None:
+            d["startTime"] = to_isoformat(self.start_time)
+        return d
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), separators=(",", ":"))

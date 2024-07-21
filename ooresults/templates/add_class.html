@@ -19,7 +19,7 @@ $def format_int(value):
 $def format_voided_legs(legs):
     $ s = []
     $for i in legs:
-        $s.append(i[0] + '-' + i[1])
+        $s.append(i.control_1 + '-' + i.control_2)
     $return ', '.join(s)
 
 

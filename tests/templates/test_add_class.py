@@ -28,6 +28,7 @@ from lxml import etree
 
 import ooresults
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_params import VoidedLeg
 from ooresults.repo.class_type import ClassType
 from ooresults.repo.course_type import CourseType
 from ooresults.utils.globals import t_globals
@@ -147,7 +148,7 @@ def test_add_class_for_edit(render, courses):
             penalty_controls=240,
             penalty_overtime=180,
             apply_handicap_rule=True,
-            voided_legs=[("113", "115"), ("114", "126")],
+            voided_legs=[VoidedLeg("113", "115"), VoidedLeg("114", "126")],
         ),
     )
     html = etree.HTML(str(render.add_class(class_, courses)))

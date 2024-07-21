@@ -17,11 +17,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import io
-import sys
+import json
 import copy
 import logging
-import pickle
 import sqlite3
 import datetime
 from typing import Dict
@@ -52,19 +50,6 @@ from ooresults.repo.event_type import EventType
 from ooresults.repo import result_type
 from ooresults.repo import series_type
 from ooresults.repo import start_type
-
-
-class UnpicklerZoneInfo(pickle.Unpickler):
-    def find_class(self, module: str, name: str):
-        if name == "ZoneInfo":
-            if sys.version_info.major >= 3 and sys.version_info.minor >= 9:
-                if module == "backports.zoneinfo":
-                    module = "zoneinfo"
-            else:
-                if module == "zoneinfo":
-                    module = "backports.zoneinfo"
-
-        return pickle.Unpickler.find_class(self, module, name)
 
 
 class SqliteRepo(Repo):
@@ -208,7 +193,7 @@ class SqliteRepo(Repo):
         for c in values:
             number_of_controls = None
             if c["controls"] is not None:
-                controls = UnpicklerZoneInfo(io.BytesIO(c["controls"])).load()
+                controls = json.loads(c["controls"])
                 number_of_controls = len(controls)
             classes.append(
                 ClassInfoType(
@@ -220,7 +205,7 @@ class SqliteRepo(Repo):
                     course_length=c["course_length"],
                     course_climb=c["course_climb"],
                     number_of_controls=number_of_controls,
-                    params=UnpicklerZoneInfo(io.BytesIO(c["params"])).load(),
+                    params=ClassParams.from_json(json_data=c["params"]),
                 )
             )
         return classes
@@ -235,7 +220,7 @@ class SqliteRepo(Repo):
                 name=c.name,
                 short_name=c.short_name,
                 course_id=c.course_id,
-                params=UnpicklerZoneInfo(io.BytesIO(c.params)).load(),
+                params=ClassParams.from_json(json_data=c["params"]),
             )
         else:
             raise KeyError
@@ -258,7 +243,7 @@ class SqliteRepo(Repo):
                 name=name,
                 short_name=short_name,
                 course_id=course_id,
-                params=pickle.dumps(params),
+                params=params.to_json(),
             )
         except sqlite3.IntegrityError:
             raise ConstraintError("Class already exist")
@@ -278,7 +263,7 @@ class SqliteRepo(Repo):
                 name=name,
                 short_name=short_name,
                 course_id=course_id,
-                params=pickle.dumps(params),
+                params=params.to_json(),
             )
             if nr_of_rows == 0:
                 raise KeyError
@@ -312,7 +297,7 @@ class SqliteRepo(Repo):
                     name=c.name,
                     length=c.length,
                     climb=c.climb,
-                    controls=UnpicklerZoneInfo(io.BytesIO(c.controls)).load(),
+                    controls=json.loads(c.controls),
                 )
             )
         return courses
@@ -327,7 +312,7 @@ class SqliteRepo(Repo):
                 name=c.name,
                 length=c.length,
                 climb=c.climb,
-                controls=UnpicklerZoneInfo(io.BytesIO(c.controls)).load(),
+                controls=json.loads(c.controls),
             )
         else:
             raise KeyError
@@ -350,7 +335,7 @@ class SqliteRepo(Repo):
                 name=name,
                 length=length,
                 climb=climb,
-                controls=pickle.dumps(controls),
+                controls=json.dumps(controls),
             )
         except sqlite3.IntegrityError:
             raise ConstraintError("Course already exist")
@@ -370,7 +355,7 @@ class SqliteRepo(Repo):
                 name=name,
                 length=length,
                 climb=climb,
-                controls=pickle.dumps(controls),
+                controls=json.dumps(controls),
             )
             if nr_of_rows == 0:
                 raise KeyError
@@ -663,6 +648,8 @@ class SqliteRepo(Repo):
 
         entries = []
         for c in values:
+            fields = {int(key): value for key, value in json.loads(c.fields).items()}
+
             entries.append(
                 EntryType(
                     id=c["id"],
@@ -676,9 +663,9 @@ class SqliteRepo(Repo):
                     class_name=c["class_name"],
                     not_competing=bool(c.not_competing),
                     chip=c["chip"],
-                    fields=UnpicklerZoneInfo(io.BytesIO(c.fields)).load(),
-                    result=UnpicklerZoneInfo(io.BytesIO(c.result)).load(),
-                    start=UnpicklerZoneInfo(io.BytesIO(c.start)).load(),
+                    fields=fields,
+                    result=result_type.PersonRaceResult.from_json(json_data=c.result),
+                    start=start_type.PersonRaceStart.from_json(json_data=c.start),
                     club_id=c["club_id"],
                     club_name=c["club_name"],
                 )
@@ -718,6 +705,8 @@ class SqliteRepo(Repo):
 
         if values:
             c = values[0]
+            fields = {int(key): value for key, value in json.loads(c.fields).items()}
+
             return EntryType(
                 id=c["id"],
                 event_id=c["event_id"],
@@ -730,9 +719,9 @@ class SqliteRepo(Repo):
                 class_name=c["class_name"],
                 not_competing=bool(c.not_competing),
                 chip=c["chip"],
-                fields=UnpicklerZoneInfo(io.BytesIO(c.fields)).load(),
-                result=UnpicklerZoneInfo(io.BytesIO(c.result)).load(),
-                start=UnpicklerZoneInfo(io.BytesIO(c.start)).load(),
+                fields=fields,
+                result=result_type.PersonRaceResult.from_json(json_data=c.result),
+                start=start_type.PersonRaceStart.from_json(json_data=c.start),
                 club_id=c["club_id"],
                 club_name=c["club_name"],
             )
@@ -776,6 +765,8 @@ class SqliteRepo(Repo):
 
         if values:
             c = values[0]
+            fields = {int(key): value for key, value in json.loads(c.fields).items()}
+
             return EntryType(
                 id=c["id"],
                 event_id=c["event_id"],
@@ -788,9 +779,9 @@ class SqliteRepo(Repo):
                 class_name=c["class_name"],
                 not_competing=bool(c.not_competing),
                 chip=c["chip"],
-                fields=UnpicklerZoneInfo(io.BytesIO(c.fields)).load(),
-                result=UnpicklerZoneInfo(io.BytesIO(c.result)).load(),
-                start=UnpicklerZoneInfo(io.BytesIO(c.start)).load(),
+                fields=fields,
+                result=result_type.PersonRaceResult.from_json(json_data=c.result),
+                start=start_type.PersonRaceStart.from_json(json_data=c.start),
                 club_id=c["club_id"],
                 club_name=c["club_name"],
             )
@@ -858,10 +849,10 @@ class SqliteRepo(Repo):
                 class_id=class_id,
                 club_id=club_id,
                 not_competing=not_competing,
-                result=pickle.dumps(result_type.PersonRaceResult(status=status)),
-                start=pickle.dumps(start_type.PersonRaceStart(start_time=start_time)),
+                result=result_type.PersonRaceResult(status=status).to_json(),
+                start=start_type.PersonRaceStart(start_time=start_time).to_json(),
                 chip=chip,
-                fields=pickle.dumps(fields),
+                fields=json.dumps(fields),
             )
         except sqlite3.IntegrityError:
             raise ConstraintError("Competitor already registered for this event")
@@ -884,10 +875,10 @@ class SqliteRepo(Repo):
                 class_id=None,
                 club_id=None,
                 not_competing=False,
-                result=pickle.dumps(result),
-                start=pickle.dumps(start_type.PersonRaceStart(start_time=start_time)),
+                result=result.to_json(),
+                start=start_type.PersonRaceStart(start_time=start_time).to_json(),
                 chip=chip,
-                fields=pickle.dumps({}),
+                fields=json.dumps({}),
             )
         except sqlite3.IntegrityError:
             raise ConstraintError("Competitor already registered for this event")
@@ -930,9 +921,9 @@ class SqliteRepo(Repo):
             club_id=club_id,
             not_competing=not_competing,
             chip=chip,
-            fields=pickle.dumps(fields),
-            result=pickle.dumps(result),
-            start=pickle.dumps(start),
+            fields=json.dumps(fields),
+            result=result.to_json(),
+            start=start.to_json(),
         )
 
     def update_entry_result(
@@ -949,8 +940,8 @@ class SqliteRepo(Repo):
             "entries",
             where="id=" + web.db.sqlquote(id),
             chip=chip,
-            result=pickle.dumps(result),
-            start=pickle.dumps(start),
+            result=result.to_json(),
+            start=start.to_json(),
         )
 
     def delete_entries(self, event_id: int) -> None:
@@ -1063,9 +1054,9 @@ class SqliteRepo(Repo):
                     if "not_competing" in c
                     else entry.not_competing,
                     chip=c["chip"] if "chip" in c else entry.chip,
-                    fields=pickle.dumps(fields),
-                    result=pickle.dumps(result),
-                    start=pickle.dumps(start),
+                    fields=json.dumps(fields),
+                    result=result.to_json(),
+                    start=start.to_json(),
                 )
             except KeyError:
                 if "result" in c:
@@ -1086,9 +1077,9 @@ class SqliteRepo(Repo):
                         if "not_competing" in c
                         else False,
                         "chip": c["chip"] if "chip" in c else "",
-                        "fields": pickle.dumps(c["fields"] if "fields" in c else {}),
-                        "result": pickle.dumps(result),
-                        "start": pickle.dumps(start),
+                        "fields": json.dumps(c["fields"] if "fields" in c else {}),
+                        "result": result.to_json(),
+                        "start": start.to_json(),
                     }
                 )
 
@@ -1121,7 +1112,7 @@ class SqliteRepo(Repo):
                     key=e.key,
                     publish=bool(e.publish),
                     series=e.series,
-                    fields=UnpicklerZoneInfo(io.BytesIO(e.fields)).load(),
+                    fields=json.loads(e.fields),
                 )
             )
         return events
@@ -1137,7 +1128,7 @@ class SqliteRepo(Repo):
                 key=e.key,
                 publish=bool(e.publish),
                 series=e.series,
-                fields=UnpicklerZoneInfo(io.BytesIO(e.fields)).load(),
+                fields=json.loads(e.fields),
             )
         else:
             raise EventNotFoundError
@@ -1159,7 +1150,7 @@ class SqliteRepo(Repo):
                 key=key,
                 publish=publish,
                 series=series,
-                fields=pickle.dumps(fields),
+                fields=json.dumps(fields),
             )
 
         except sqlite3.IntegrityError:
@@ -1184,7 +1175,7 @@ class SqliteRepo(Repo):
                 key=key,
                 publish=publish,
                 series=series,
-                fields=pickle.dumps(fields),
+                fields=json.dumps(fields),
             )
             if nr_of_rows == 0:
                 raise KeyError

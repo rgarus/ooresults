@@ -29,6 +29,7 @@ from ooresults.repo.result_type import SpStatus
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_params import VoidedLeg
 
 
 def t(a: datetime, b: datetime) -> int:
@@ -549,7 +550,7 @@ def test_compute_result_first_leg_voided():
             SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
-    class_params = ClassParams(otype="standard", voided_legs=[("S", "101")])
+    class_params = ClassParams(otype="standard", voided_legs=[VoidedLeg("S", "101")])
 
     result.compute_result(controls=controls, class_params=class_params)
     assert result == PersonRaceResult(
@@ -605,7 +606,7 @@ def test_compute_result_last_leg_voided():
             SplitTime(control_code="103", punch_time=c3, status=SpStatus.ADDITIONAL),
         ],
     )
-    class_params = ClassParams(otype="standard", voided_legs=[("103", "F")])
+    class_params = ClassParams(otype="standard", voided_legs=[VoidedLeg("103", "F")])
 
     result.compute_result(controls=controls, class_params=class_params)
     assert result == PersonRaceResult(
@@ -662,7 +663,7 @@ def test_compute_result_several_legs_voided():
         ],
     )
     class_params = ClassParams(
-        otype="standard", voided_legs=[("101", "102"), ("102", "103")]
+        otype="standard", voided_legs=[VoidedLeg("101", "102"), VoidedLeg("102", "103")]
     )
 
     result.compute_result(controls=controls, class_params=class_params)
@@ -720,7 +721,7 @@ def test_compute_result_legs_voided_with_unknown_punch_times_can_not_always_be_s
         ],
     )
     class_params = ClassParams(
-        otype="standard", voided_legs=[("101", "102"), ("102", "103")]
+        otype="standard", voided_legs=[VoidedLeg("101", "102"), VoidedLeg("102", "103")]
     )
 
     result.compute_result(controls=controls, class_params=class_params)
@@ -778,7 +779,7 @@ def test_compute_result_legs_voided_with_unknown_punch_times_can_not_always_be_s
         ],
     )
     class_params = ClassParams(
-        otype="standard", voided_legs=[("101", "102"), ("102", "103")]
+        otype="standard", voided_legs=[VoidedLeg("101", "102"), VoidedLeg("102", "103")]
     )
 
     result.compute_result(controls=controls, class_params=class_params)
@@ -836,7 +837,7 @@ def test_compute_result_legs_voided_with_unknown_punch_times_are_substracted_if_
         ],
     )
     class_params = ClassParams(
-        otype="standard", voided_legs=[("101", "102"), ("102", "103")]
+        otype="standard", voided_legs=[VoidedLeg("101", "102"), VoidedLeg("102", "103")]
     )
 
     result.compute_result(controls=controls, class_params=class_params)

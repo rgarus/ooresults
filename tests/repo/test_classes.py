@@ -26,6 +26,7 @@ from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.class_type import ClassType
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_params import VoidedLeg
 from ooresults.repo.result_type import ResultStatus
 
 
@@ -227,7 +228,16 @@ def test_update_first_added_class(db, event_1_id, course_1_id, class_1_id, class
         name="Class 3",
         short_name="C 3",
         course_id=course_1_id,
-        params=ClassParams(),
+        params=ClassParams(
+            time_limit=900,
+            penalty_controls=180,
+            penalty_overtime=30,
+            apply_handicap_rule=True,
+            voided_legs=[
+                VoidedLeg(control_1="120", control_2="132"),
+                VoidedLeg(control_1="217", control_2="216"),
+            ],
+        ),
     )
     c = db.get_classes(event_id=event_1_id)
     assert len(c) == 2
@@ -253,7 +263,16 @@ def test_update_first_added_class(db, event_1_id, course_1_id, class_1_id, class
         course_length=None,
         course_climb=None,
         number_of_controls=0,
-        params=ClassParams(),
+        params=ClassParams(
+            time_limit=900,
+            penalty_controls=180,
+            penalty_overtime=30,
+            apply_handicap_rule=True,
+            voided_legs=[
+                VoidedLeg(control_1="120", control_2="132"),
+                VoidedLeg(control_1="217", control_2="216"),
+            ],
+        ),
     )
 
 

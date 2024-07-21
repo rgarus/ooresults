@@ -30,6 +30,7 @@ from ooresults.repo.repo import ClassUsedError
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.class_params import ClassParams
+from ooresults.repo.class_params import VoidedLeg
 from ooresults.plugins import iof_class_list
 from ooresults.utils.globals import t_globals
 
@@ -147,10 +148,13 @@ class Add:
             # there should be two controls separated by '-'
             controls = v.split("-")
             if len(controls) == 2:
-                if (controls[0].strip(), controls[1].strip()) not in params.voided_legs:
-                    params.voided_legs.append(
-                        (controls[0].strip(), controls[1].strip())
-                    )
+                voided_leg = VoidedLeg(
+                    control_1=controls[0].strip(),
+                    control_2=controls[1].strip(),
+                )
+                if voided_leg not in params.voided_legs:
+                    params.voided_legs.append(voided_leg)
+
             else:
                 raise web.conflict(
                     'Format of voided legs incorrect, use "c1-c2, c3-c4, ..."'
