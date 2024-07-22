@@ -23,28 +23,16 @@ import dataclasses
 from datetime import datetime
 from datetime import timezone
 import enum
-import json
 from typing import List
 from typing import Optional
 from typing import Dict
 
+import caseconverter
+import fastclasses_json
+
 from ooresults.handler import handicap
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_params import VoidedLeg
-
-
-def to_isoformat(value: Optional[datetime]) -> Optional[str]:
-    if value is not None:
-        return value.isoformat()
-    else:
-        return None
-
-
-def from_isoformat(value: Optional[str]) -> Optional[datetime]:
-    if value:
-        return datetime.fromisoformat(value)
-    else:
-        return None
 
 
 class SpStatus(enum.Enum):
@@ -69,6 +57,7 @@ class SpStatus(enum.Enum):
     ADDITIONAL = 2
 
 
+@fastclasses_json.dataclass_json(field_name_transform=caseconverter.camelcase)
 @dataclasses.dataclass
 class SplitTime:
     NO_TIME = datetime(1970, 1, 1, tzinfo=timezone.utc)
@@ -79,42 +68,6 @@ class SplitTime:
     time: Optional[int] = None
     status: Optional[SpStatus] = None
     leg_voided: bool = False
-
-    @classmethod
-    def from_dict(cls, o: dict):
-        status = o.get("status")
-        if status is not None:
-            status = SpStatus(status)
-
-        return SplitTime(
-            control_code=o["controlCode"],
-            punch_time=from_isoformat(value=o.get("punchTime")),
-            si_punch_time=from_isoformat(value=o.get("siPunchTime")),
-            time=o.get("time"),
-            status=status,
-            leg_voided=o["legVoided"],
-        )
-
-    @classmethod
-    def from_json(cls, json_data: str):
-        return SplitTime.from_dict(o=json.loads(json_data))
-
-    def to_dict(self) -> dict:
-        d = {}
-        d["controlCode"] = self.control_code
-        if self.punch_time is not None:
-            d["punchTime"] = to_isoformat(self.punch_time)
-        if self.si_punch_time is not None:
-            d["siPunchTime"] = to_isoformat(self.si_punch_time)
-        if self.time is not None:
-            d["time"] = self.time
-        if self.status is not None:
-            d["status"] = self.status.value
-        d["legVoided"] = self.leg_voided
-        return d
-
-    def to_json(self) -> str:
-        return json.dumps(self.to_dict(), separators=(",", ":"))
 
     def recalculate_time(self, start_time: Optional[datetime]) -> None:
         """
@@ -176,6 +129,7 @@ class ResultStatus(enum.Enum):
     DISQUALIFIED = 8
 
 
+@fastclasses_json.dataclass_json(field_name_transform=caseconverter.camelcase)
 @dataclasses.dataclass
 class PersonRaceResult:
     status: ResultStatus = ResultStatus.INACTIVE
@@ -202,66 +156,6 @@ class PersonRaceResult:
     #   score_overtime: float    -- score points to subtract for exceeding the time limit
     #   score: float             -- total score points (score_controls - score_overtime)
     #
-
-    @classmethod
-    def from_dict(cls, o: dict):
-        split_times = []
-        for split_time in o["splitTimes"]:
-            split_times.append(SplitTime.from_dict(o=split_time))
-
-        return PersonRaceResult(
-            status=ResultStatus(o["status"]),
-            start_time=from_isoformat(o.get("startTime")),
-            finish_time=from_isoformat(o.get("finishTime")),
-            punched_clear_time=from_isoformat(o.get("punchedClearTime")),
-            punched_check_time=from_isoformat(o.get("punchedCheckTime")),
-            punched_start_time=from_isoformat(o.get("punchedStartTime")),
-            punched_finish_time=from_isoformat(o.get("punchedFinishTime")),
-            si_punched_start_time=from_isoformat(o.get("siPunchedStartTime")),
-            si_punched_finish_time=from_isoformat(o.get("siPunchedFinishTime")),
-            time=o.get("time"),
-            split_times=split_times,
-            last_leg_voided=o["lastLegVoided"],
-            extensions=o["extensions"],
-        )
-
-    @classmethod
-    def from_json(cls, json_data: str):
-        return PersonRaceResult.from_dict(o=json.loads(json_data))
-
-    def to_dict(self) -> dict:
-        split_times = []
-        for split_time in self.split_times:
-            split_times.append(split_time.to_dict())
-
-        d = {}
-        d["status"] = self.status.value
-        if self.start_time is not None:
-            d["startTime"] = to_isoformat(self.start_time)
-        if self.finish_time is not None:
-            d["finishTime"] = to_isoformat(self.finish_time)
-        if self.punched_clear_time is not None:
-            d["punchedClearTime"] = to_isoformat(self.punched_clear_time)
-        if self.punched_check_time is not None:
-            d["punchedCheckTime"] = to_isoformat(self.punched_check_time)
-        if self.punched_start_time is not None:
-            d["punchedStartTime"] = to_isoformat(self.punched_start_time)
-        if self.punched_finish_time is not None:
-            d["punchedFinishTime"] = to_isoformat(self.punched_finish_time)
-        if self.si_punched_start_time is not None:
-            d["siPunchedStartTime"] = to_isoformat(self.si_punched_start_time)
-        if self.si_punched_finish_time is not None:
-            d["siPunchedFinishTime"] = to_isoformat(self.si_punched_finish_time)
-        if self.time is not None:
-            d["time"] = self.time
-
-        d["splitTimes"] = split_times
-        d["lastLegVoided"] = self.last_leg_voided
-        d["extensions"] = self.extensions
-        return d
-
-    def to_json(self) -> str:
-        return json.dumps(self.to_dict(), separators=(",", ":"))
 
     def has_punches(self) -> bool:
         return (

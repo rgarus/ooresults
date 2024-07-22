@@ -38,6 +38,8 @@ dependencies = [
     "tzlocal",
     "unidecode",
     "pyOpenSSL",
+    "case-converter",
+    "fastclasses-json",
 ]
 
 [project.optional-dependencies]
