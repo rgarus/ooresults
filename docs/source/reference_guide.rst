@@ -144,6 +144,37 @@ Funktionen
 ~~~~~~~~~~
 
 
+Import ...
+""""""""""
+
+
+Mit "Import ..." können die Daten eines Wettkampfes in folgenden Formaten importiert werden:
+
+- **IOF Interface Standard 3.0 Entry List**
+
+  Importiert die Teilnehmerdaten einer EntryList des IOF XML 3.0 Formats, siehe `IOF Data Standard 3.0 <https://orienteering.sport/iof/it/data-standard-3-0/>`_.
+
+- **IOF Interface Standard 3.0 Result List**
+
+  Importiert die Ergebnisdaten einer ResultList des IOF XML 3.0 Formats, siehe `IOF Data Standard 3.0 <https://orienteering.sport/iof/it/data-standard-3-0/>`_.
+
+- **OE2003 csv, OE12 csv**
+
+  Importiert die Teilnehmer- oder Ergebnisdaten im SportSoftware OE2003 oder OE12 CSV-Format.
+  Kann verwendet werden, um Teilnehmerdaten eines Wettkampfes von http://orienteeringonline.net zu übernehmen.
+
+
+.. warning::
+
+   Vorname, Zuname und Kategorie eines Teilnehmers sind Pflichtfelder.
+   Ist in den zu importierenden Daten bei einem der Einträge eines dieser Felder leer, können die Daten nicht importiert werden.
+
+.. warning::
+
+   In ooresults kann ein Teilnehmer nur einmal für einen Wettkampf eingetragen werden.
+   Enthalten die zu importierenden Daten mehrere Einträge mit gleichem Vor- und Zunamen, können die Daten nicht importiert werden.
+
+
 Export ...
 """"""""""
 
@@ -152,15 +183,15 @@ Mit "Export ..." können die Daten eines Wettkampfes in folgenden Formaten expor
 
 - **IOF Interface Standard 3.0 Entry List**
 
-  Export die Teilnehmerdaten in IOF XML 3.0 Format, siehe `IOF Data Standard 3.0 <https://orienteering.sport/iof/it/data-standard-3-0/>`_.
+  Exportiert die Teilnehmerdaten als EntryList im IOF XML 3.0 Format, siehe `IOF Data Standard 3.0 <https://orienteering.sport/iof/it/data-standard-3-0/>`_.
 
 - **IOF Interface Standard 3.0 Result List**
 
-  Exportiert die Ergebnisdaten in IOF XML 3.0 Format, siehe `IOF Data Standard 3.0 <https://orienteering.sport/iof/it/data-standard-3-0/>`_.
+  Exportiert die Ergebnisdaten als ResultList im IOF XML 3.0 Format, siehe `IOF Data Standard 3.0 <https://orienteering.sport/iof/it/data-standard-3-0/>`_.
 
-- **Result List für Splitsbrowser**
+- **Result List for Splitsbrowser**
 
-  Exportiert die Ergebnisdaten in IOF XML 3.0 Format, verwendet als Ergebnis aber die reinen Laufzeiten.
+  Exportiert die Ergebnisdaten als ResultList im IOF XML 3.0 Format, verwendet als Ergebnis aber die reinen Laufzeiten.
   Zeitgutschriften (z.B. bei Verwendung eines Handicap-Faktors) oder Strafzeiten werden nicht berücksichtigt.
   Sollte verwendet werden, wenn Zeitgutschriften beim Import in Splitsbrowser Software
   wie `WinSplits <http://obasen.orientering.se/winsplits>`_ Probleme bereiten.
