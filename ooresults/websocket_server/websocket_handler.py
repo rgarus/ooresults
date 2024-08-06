@@ -50,14 +50,13 @@ class WebSocketHandler:
         self.demo_reader = demo_reader
         self.connections = {}
         self.messages = []
-        self.cardreader_status = {}
+        self.cardreader_status = {}  # type: Dict[int: str]
         self.executor = ThreadPoolExecutor(max_workers=2)
 
         #
         # Cardreader status:
         #
-        # offline
-        # online
+        # readerOffline
         # readerDisconnected
         # readerConnected
         # cardInserted
@@ -89,7 +88,7 @@ class WebSocketHandler:
         status = (
             self.cardreader_status[event.id]
             if event and event.id in self.cardreader_status
-            else "offline"
+            else "readerOffline"
         )
         path, event_id, event_key = self.connections[conn]
         if path == "/si2":

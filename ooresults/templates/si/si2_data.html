@@ -16,11 +16,11 @@ $code
             return '#ffff00'  # yellow
 
     def format_cardreader_status(status: str) -> str:
-        if status is None or status == 'offline':
+        if status is None or status == 'readerOffline':
             return '<p style="color:red;">Card reader offline</p>'
         elif status in ['readerConnected', 'cardRead', 'cardRemoved']:
             return '<p style="color:green;">Card reader connected</p>'
-        elif status in ['online', 'readerDisconnected']:
+        elif status == 'readerDisconnected':
             return '<p style="color:red;">Card reader disconnected</p>'
         elif status == 'cardInserted':
             return '<p style="color:green;">Reading card</p>'

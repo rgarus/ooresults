@@ -27,7 +27,7 @@ $def with (id, key)
             };
 
             var timer = null;
-            var status = 'unknown';
+            var status = 'offline';
             var data = '';
             
             function message () {
@@ -35,19 +35,21 @@ $def with (id, key)
                 var color = 'black';
 
                 switch (status) {
+                    case 'offline':
+                        text = 'Offline';
+                        color = 'red';
+                        break;
                     case 'noAccess':
                         text = 'No access rights';
                         color = 'red';
                         break;
-                    case 'offline':
+                    case 'online':
+                        text = 'Online';
+                        break;
+                    case 'readerOffline':
                         text = 'Card reader offline';
                         color = 'red';
                         break;
-                    case 'unknown':
-                        text = 'Offline';
-                        color = 'red';
-                        break;
-                    case 'online':
                     case 'readerDisconnected':
                         text = 'Card reader disconnected';
                         color = 'red';
@@ -72,13 +74,13 @@ $def with (id, key)
 
                 ws.onopen = function(event) {
                     ws.send($:('"' + str(id) + ',' + str(key) + '"'))
-                    status = 'offline';
+                    status = 'online';
                     message();
                     tp = setTimeout(function() {ping()}, 10000);
                 };
                 ws.onclose = function(event) {
                     if (status != 'noAccess') {
-                        status = 'unknown';
+                        status = 'offline';
                         message();
                         // Try to reconnect in 5 seconds
                         ws = null;

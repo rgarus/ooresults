@@ -143,7 +143,7 @@ async def test_reader_status_received_if_event_and_key_found(
     async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},local")
         response = await si1_client.recv()
-        assert json.loads(response) == {"status": "offline", "data": ""}
+        assert json.loads(response) == {"status": "readerOffline", "data": ""}
         await si1_client.close()
 
 
@@ -178,7 +178,7 @@ async def test_cardreader_event_key_found_and_reader_disconnected(
     async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},local")
         response = await si1_client.recv()
-        assert json.loads(response) == {"status": "offline", "data": ""}
+        assert json.loads(response) == {"status": "readerOffline", "data": ""}
 
         async with websockets.connect(
             uri="ws://localhost:8081/cardreader",
@@ -204,7 +204,7 @@ async def test_cardreader_event_key_found_and_reader_disconnected(
 
         # si1_client receives cardreader offline message
         response = await si1_client.recv()
-        assert json.loads(response) == {"status": "offline", "data": ""}
+        assert json.loads(response) == {"status": "readerOffline", "data": ""}
 
         await si1_client.close()
 
