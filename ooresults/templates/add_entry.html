@@ -50,20 +50,20 @@ $else:
         <input id="entr.addCompId" name="competitor_id" type="text" value="$competitor_id" hidden/>
         <table id="entr.addFormTable">
             <tr>
-                <th class="input-header"><label for="first_name">First name *</label></th>
-                <td><input id="first_name" name="first_name" type="text" value="$first_name" onchange="mark_label(this)" required/>
+                <th class="input-header"><label for="ent_firstName">First name *</label></th>
+                <td><input id="ent_firstName" name="first_name" type="text" value="$first_name" oninput="mark_label(this)" required/>
                     $if not id:
                         <button type="button" id="entr.myBtnCompetitors" onclick="entr_myCompetitors()">Competitors ...</button>
                 </td>
             </tr>
             <tr>
-                <th class="input-header"><label for="last_name">Last name *</label></th>
-                <td><input id="last_name" name="last_name" type="text" value="$last_name" onchange="mark_label(this)" required/></td>
+                <th class="input-header"><label for="ent_lastName">Last name *</label></th>
+                <td><input id="ent_lastName" name="last_name" type="text" value="$last_name" oninput="mark_label(this)" required/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="gender">Gender</label></th>
+                <th class="input-header"><label for="ent_gender">Gender</label></th>
                 <td>
-                    <select id="gender" name="gender" onchange="mark_label(this)">
+                    <select id="ent_gender" name="gender" oninput="mark_label(this)">
                     $for g in ['', 'F', 'M']:
                         $if g == gender:
                             <option value="$g" selected>$g</option>
@@ -73,19 +73,20 @@ $else:
                 </td>
             </tr>
             <tr>
-                <th class="input-header"><label for="year">Year</label></th>
-                <td><input id="year" name="year" type="number" min="1900" max="2099"
-                           value="$year" onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="ent_year">Year</label></th>
+                <td><input id="ent_year" name="year" type="number" min="1900" max="2099"
+                           value="$year" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 $ readonly = "readonly" if [r for r in results if r['key'] == -1] else ""
-                <th class="input-header"><label for="chip">Chip</label></th>
-                <td><input id="chip" name="chip" type="text" value="$chip" onchange="mark_label(this)" $readonly/></td>
+                $ disabled = "disabled" if [r for r in results if r['key'] == -1] else ""
+                <th class="input-header"><label for="ent_chip" $disabled>Chip</label></th>
+                <td><input id="ent_chip" name="chip" type="text" value="$chip" oninput="mark_label(this)" $readonly/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="club_id">Club</label></th>
+                <th class="input-header"><label for="ent_clubId">Club</label></th>
                 <td>
-                    <select id="club_id" name="club_id" onchange="mark_label(this)">
+                    <select id="ent_clubId" name="club_id" oninput="mark_label(this)">
                     $if club_id is None:
                         <option value="" selected></option>
                     $else:
@@ -99,9 +100,9 @@ $else:
                 </td>
             </tr>
             <tr>
-                <th class="input-header"><label for="class_id">Class *</label></th>
+                <th class="input-header"><label for="ent_classId">Class *</label></th>
                 <td>
-                    <select id="class_id" name="class_id" onchange="mark_label(this)" required>
+                    <select id="ent_classId" name="class_id" oninput="mark_label(this)" required>
                     $for class_ in classes:
                         $if class_.id == class_id:
                             <option value="$class_.id" selected>$class_.name</option>
@@ -113,22 +114,22 @@ $else:
             $for i in range(len(event_fields)):
                 $ name = 'f' + str(i)
                 <tr>
-                    <th class="input-header"><label for="$name">$(event_fields[i])</label></th>
-                    <td><input id="$name" name="$name" type="text" value="$fields.get(i, '')" onchange="mark_label(this)"/></td>
+                    <th class="input-header"><label for="entf_$name">$(event_fields[i])</label></th>
+                    <td><input id="entf_$name" name="$name" type="text" value="$fields.get(i, '')" oninput="mark_label(this)"/></td>
                 </tr>
             <tr>
-                <th class="input-header"><label for="not_competing">Not competing</label></th>
-                <td><input id="not_competing" name="not_competing" type="checkbox" value="true" onchange="mark_label(this)" $('checked' if not_competing else '')/></td>
+                <th class="input-header"><label for="ent_notCompeting">Not competing</label></th>
+                <td><input id="ent_notCompeting" name="not_competing" type="checkbox" value="true" oninput="mark_label(this)" $('checked' if not_competing else '')/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="start_time">Start time</label></th>
-                <td><input id="start_time" name="start_time" type="time" step="1" value="$(format_date(start.start_time))" onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="ent_startTime">Start time</label></th>
+                <td><input id="ent_startTime" name="start_time" type="time" step="1" value="$(format_date(start.start_time))" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="status">Status</label></th>
+                <th class="input-header"><label for="ent_status">Status</label></th>
                 <td>
                     $ has_no_result = [r for r in results if r['key'] == -1] == []
-                    <select id="status" name="status" onchange="mark_label(this)">
+                    <select id="ent_status" name="status" oninput="mark_label(this)">
                     $for status in list(ResultStatus):
                         $if status == result.status:
                             <option value="$status.value" selected>$MAP_STATUS[status]</option>
@@ -139,9 +140,9 @@ $else:
             </tr>
             $if results != []:
                 <tr>
-                    <th class="input-header"><label for="result">Result</label></th>
+                    <th class="input-header"><label for="ent_result">Result</label></th>
                     <td>
-                        <select id="result" name="result" onchange="mark_label(this)">
+                        <select id="ent_result" name="result" oninput="mark_label(this)">
                             <option value="" selected></option>
                             $for r in results:
                                 <option value="$str(r['key'])">$r['value']</option>

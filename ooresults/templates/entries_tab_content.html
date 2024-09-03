@@ -184,12 +184,12 @@ $def with (entries_table)
 
     function entr_comp_save() {
         document.getElementById('entr.addCompId').value = entr_comp_selected.id;
-        document.getElementById('first_name').value = entr_comp_selected.getElementsByTagName('TD')[0].innerHTML;
-        document.getElementById('last_name').value = entr_comp_selected.getElementsByTagName('TD')[1].innerHTML;
-        document.getElementById('gender').value = entr_comp_selected.getElementsByTagName('TD')[2].innerHTML;
-        document.getElementById('year').value = entr_comp_selected.getElementsByTagName('TD')[3].innerHTML;
-        document.getElementById('chip').value = entr_comp_selected.getElementsByTagName('TD')[4].innerHTML;
-        document.getElementById('club_id').value = entr_comp_selected.getElementsByTagName('TD')[6].innerHTML;
+        document.getElementById('ent_firstName').value = entr_comp_selected.getElementsByTagName('TD')[0].innerHTML;
+        document.getElementById('ent_lastName').value = entr_comp_selected.getElementsByTagName('TD')[1].innerHTML;
+        document.getElementById('ent_gender').value = entr_comp_selected.getElementsByTagName('TD')[2].innerHTML;
+        document.getElementById('ent_year').value = entr_comp_selected.getElementsByTagName('TD')[3].innerHTML;
+        document.getElementById('ent_chip').value = entr_comp_selected.getElementsByTagName('TD')[4].innerHTML;
+        document.getElementById('ent_clubId').value = entr_comp_selected.getElementsByTagName('TD')[6].innerHTML;
         document.getElementById('entr.competitorsDialog').style.display = 'none';
     }
 
@@ -563,19 +563,19 @@ $def with (entries_table)
                     <p>Leave time field blank if time is unknown</p>
                     <table>
                         <tr>
-                            <th class="input-header"><label for="punch_control_edit">Control</label></th>
+                            <th class="input-header"><label for="punch_control_edit" disabled>Control</label></th>
                             <td><input id="punch_control_edit" name="control" type="text" readonly value=""/></td>
                         </tr>
                         <tr>
                             <th class="input-header"><label id="punch_time_edit_label" for="punch_time_edit">Time</label></th>
-                            <td><input id="punch_time_edit" name="punch_time" type="time" step="1" value="" oninput="mark_label1(this)"/></td>
+                            <td><input id="punch_time_edit" name="punch_time" type="time" step="1" value="" oninput="mark_label(this)"/></td>
                         </tr>
                     </table>
                 </div>
                 <div id="entr_ep_del" class="params">
                     <table>
                         <tr>
-                            <th class="input-header"><label for="punch_control_del">Control</label></th>
+                            <th class="input-header"><label for="punch_control_del" disabled>Control</label></th>
                             <td><input id="punch_control_del" name="control" type="text" readonly value=""/></td>
                         </tr>
                     </table>
@@ -585,11 +585,11 @@ $def with (entries_table)
                     <table>
                         <tr>
                             <th class="input-header"><label for="punch_control_add">Control *</label></th>
-                            <td><input id="punch_control_add" name="control" type="number" class="required" min="1" max="999" value="" oninput="mark_label1(this)"/></td>
+                            <td><input id="punch_control_add" name="control" type="number" class="required" min="1" max="999" value="" oninput="mark_label(this)"/></td>
                         </tr>
                         <tr>
                             <th class="input-header"><label for="punch_time_add">Time</label></th>
-                            <td><input id="punch_time_add" name="punch_time" type="time" step="1" value="" oninput="mark_label1(this)"/></td>
+                            <td><input id="punch_time_add" name="punch_time" type="time" step="1" value="" oninput="mark_label(this)"/></td>
                         </tr>
                     </table>
                 </div>
@@ -662,25 +662,6 @@ $def with (entries_table)
 
         updateDisplayedParams('entr_ep_edit');
         document.getElementById('entr.editPunchDialog').style.display='block';
-    }
-
-    function mark_label1(node) {
-        // find form element
-        elem = node.parentElement;
-        while (elem != null && elem.tagName != "FORM") {
-            elem = elem.parentElement;
-        }
-        // find label element
-        if (elem != null) {
-            label = elem.querySelector("label[for=" + node.id + "]");
-            if (label != null) {
-                if (node.value == node.defaultValue) {
-                    label.style.color = "inherit";
-                } else {
-                    label.style.color = "red";
-                }
-            }
-        }
     }
 
     function entr_submitPunchEdit() {

@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+
+- Marking changed elements of 'Add' or 'Edit' windows improved.
+
+
 [0.3.0] - 2024-07-26
 --------------------
 

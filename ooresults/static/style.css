@@ -65,3 +65,7 @@ table.dt, th.dt, td.dt {
   text-align: left;
   padding-right: 10px;
 }
+
+label[disabled] {
+  opacity: 0.4;
+}

@@ -125,7 +125,19 @@ $:clubs_tab_content
         if (elem != null) {
             label = elem.querySelector("label[for=" + node.id + "]");
             if (label != null) {
-                label.style.color = "red";
+                if (node.tagName == "SELECT") {
+                    notChanged = node.options[node.selectedIndex].defaultSelected;
+                } else if (node.type == "checkbox") {
+                    notChanged = node.checked == node.defaultChecked;
+                } else {
+                    notChanged = node.value == node.defaultValue;
+                }
+
+                if (notChanged) {
+                    label.style.color = "inherit";
+                } else {
+                    label.style.color = "red";
+                }
             }
         }
     }

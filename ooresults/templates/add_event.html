@@ -7,21 +7,21 @@ $def with (event)
         <input id="evnt.addId" name="id" type="text" value="$(event.id if event else '')" hidden/>
         <table id="evnt.addFormTable">
             <tr>
-                <th class="input-header"><label for="name">Name *</label></th>
-                <td><input name="name" type="text" value="$(event.name if event else '')" required onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="eve_name">Name *</label></th>
+                <td><input id="eve_name" name="name" type="text" value="$(event.name if event else '')" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="date">Date *</label></th>
-                <td><input name="date" type="date" min="2000-01-01" max="2099-12-31" value="$(event.date.isoformat() if event else '')" required onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="eve_date">Date *</label></th>
+                <td><input id="eve_date" name="date" type="date" min="2000-01-01" max="2099-12-31" value="$(event.date.isoformat() if event else '')" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="key">Key</label></th>
-                <td><input name="key" type="text" value="$(event.key if event and event.key else '')" onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="eve_key">Key</label></th>
+                <td><input id="eve_key" name="key" type="text" value="$(event.key if event and event.key else '')" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="publish">Publish</label></th>
+                <th class="input-header"><label for="eve_publish">Publish</label></th>
                 <td>
-                    <select id="publish" name="publish" onchange="mark_label(this)">
+                    <select id="eve_publish" name="publish" oninput="mark_label(this)">
                     $for publish in ['no', 'yes']:
                         $if publish == ('yes' if event and event.publish else 'no'):
                             <option value="$publish" selected>$publish</option>
@@ -31,12 +31,12 @@ $def with (event)
                 </td>
             </tr>
             <tr>
-                <th class="input-header"><label for="series">Series</label></th>
-                <td><input name="series" type="text" value="$(event.series if event and event.series else '')" onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="eve_series">Series</label></th>
+                <td><input id="eve_series" name="series" type="text" value="$(event.series if event and event.series else '')" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="fields">Fields</label></th>
-                <td><input name="fields" type="text" value="$(', '.join(event.fields) if event and event.fields else '')" onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="eve_fields">Fields</label></th>
+                <td><input id="eve_fields" name="fields" type="text" value="$(', '.join(event.fields) if event and event.fields else '')" oninput="mark_label(this)"/></td>
             </tr>
         </table>
         <p></p>

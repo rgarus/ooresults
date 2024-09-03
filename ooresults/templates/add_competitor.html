@@ -26,17 +26,17 @@ $else:
         <input id="comp.addId" name="id" type="text" value="$id" hidden/>
         <table id="comp.addFormTable">
             <tr>
-                <th class="input-header"><label for="first_name">First name *</label></th>
-                <td><input id="first_name" name="first_name" type="text" value="$first_name" required onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="com_firstName">First name *</label></th>
+                <td><input id="com_firstName" name="first_name" type="text" value="$first_name" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="last_name">Last name *</label></th>
-                <td><input id="last_name" name="last_name" type="text" value="$last_name" required onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="com_lastName">Last name *</label></th>
+                <td><input id="com_lastName" name="last_name" type="text" value="$last_name" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="gender">Gender</label></th>
+                <th class="input-header"><label for="com_gender">Gender</label></th>
                 <td>
-                    <select id="gender" name="gender" onchange="mark_label(this)">
+                    <select id="com_gender" name="gender" oninput="mark_label(this)">
                     $for value in ['', 'F', 'M']:
                         $if value == gender:
                             <option value="$value" selected>$value</option>
@@ -46,18 +46,18 @@ $else:
                 </td>
             </tr>
             <tr>
-                <th class="input-header"><label for="year">Year</label></th>
-                <td><input id="year" name="year" type="number" min="1900" max="2099"
-                           value="$year" onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="com_year">Year</label></th>
+                <td><input id="com_year" name="year" type="number" min="1900" max="2099"
+                           value="$year" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="chip">Chip</label></th>
-                <td><input id="chip" name="chip" type="text" value="$chip" onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="com_chip">Chip</label></th>
+                <td><input id="com_chip" name="chip" type="text" value="$chip" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="club_id">Club</label></th>
+                <th class="input-header"><label for="com_clubId">Club</label></th>
                 <td>
-                    <select id="club_id" name="club_id" onchange="mark_label(this)">
+                    <select id="com_clubId" name="club_id" oninput="mark_label(this)">
                     $if club_id is None:
                         <option value="" selected></option>
                     $else:

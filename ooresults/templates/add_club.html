@@ -15,8 +15,8 @@ $else:
         <input id="clb.addId" name="id" type="text" value="$id" hidden/>
         <table id="clb.addFormTable">
             <tr>
-                <th class="input-header"><label for="name">Name *</label></th>
-                <td><input name="name" type="text" value="$name" required onchange="mark_label(this)"/></td>
+                <th class="input-header"><label for="clb_name">Name *</label></th>
+                <td><input id="clb_name" name="name" type="text" value="$name" required oninput="mark_label(this)"/></td>
             </tr>
         </table>
         <p></p>
