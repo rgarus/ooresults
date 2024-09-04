@@ -403,7 +403,7 @@ def import_competitors(competitors) -> None:
         db.import_competitors(competitors)
 
 
-def import_entries(event_id: int, entries) -> None:
+def import_entries(event_id: int, entries: List[Dict]) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.import_entries(event_id=event_id, entries=entries)
 

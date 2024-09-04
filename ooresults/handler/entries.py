@@ -73,7 +73,7 @@ class Import:
                 _, entries = iof_entry_list.parse_entry_list(data.browse1)
                 model.import_entries(event_id=event_id, entries=entries)
             elif data.entr_import == "entr.import.2":
-                _, entries = iof_result_list.parse_result_list(data.browse2)
+                _, entries, _ = iof_result_list.parse_result_list(data.browse2)
                 model.import_entries(event_id=event_id, entries=entries)
             elif data.entr_import == "entr.import.3":
                 event = model.get_event(id=event_id)

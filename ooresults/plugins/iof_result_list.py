@@ -19,9 +19,11 @@
 
 import pathlib
 from datetime import timedelta
+from enum import Enum
 from typing import List
 from typing import Dict
 from typing import Tuple
+from typing import Optional
 
 from lxml import etree
 from lxml.builder import ElementMaker
@@ -44,8 +46,28 @@ iof_namespace = "http://www.orienteering.org/datastandard/3.0"
 namespaces = {None: iof_namespace}
 
 
+class ResultListStatus(Enum):
+    """
+    Complete:
+        The result list is complete, i.e. all competitors are included.
+        Used for official results after the event.
+    Delta:
+        The result list only contains changes since last list.
+        Used for frequent exchange of results.
+    Snapshot:
+        The result list is a snapshot of the current standings.
+        Used while the event is under way.
+    """
+
+    COMPLETE = "Complete"
+    DELTA = "Delta"
+    SNAPSHOT = "Snapshot"
+
+
 def create_result_list(
-    event: EventType, class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]]
+    event: EventType,
+    class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
+    status: Optional[ResultListStatus] = None,
 ) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
@@ -81,6 +103,8 @@ def create_result_list(
         iofVersion="3.0",
         creator="ooresults (https://pypi.org/project/ooresults)",
     )
+    if status is not None:
+        root.attrib["status"] = status.value
 
     e_event = EVENT()
     e_event.append(NAME(event.name))
@@ -216,12 +240,18 @@ SPSTATUS_MAP = {
 }
 
 
-def parse_result_list(content: bytes) -> Tuple[Dict, List[Dict]]:
+def parse_result_list(
+    content: bytes,
+) -> Tuple[Dict, List[Dict], Optional[ResultListStatus]]:
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
     if not root.tag == "{" + iof_namespace + "}ResultList":
         raise RuntimeError("Root element is " + root.tag + " but should be ResultList")
+
+    result_list_status = root.attrib.get("status", None)
+    if result_list_status is not None:
+        result_list_status = ResultListStatus(result_list_status)
 
     event = {}
     event["name"] = root.find("Event/Name", namespaces=namespaces).text
@@ -312,4 +342,4 @@ def parse_result_list(content: bytes) -> Tuple[Dict, List[Dict]]:
 
             result.append(r)
 
-    return event, result
+    return event, result, result_list_status

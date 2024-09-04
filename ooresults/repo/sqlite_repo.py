@@ -950,7 +950,7 @@ class SqliteRepo(Repo):
     def delete_entry(self, id: int) -> None:
         self.db.delete("entries", where="id=" + web.db.sqlquote(id))
 
-    def import_entries(self, event_id: int, entries: Dict) -> None:
+    def import_entries(self, event_id: int, entries: List[Dict]) -> None:
         # check if the event still exists
         self.get_event(id=event_id)
 

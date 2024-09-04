@@ -22,7 +22,10 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 
+import pytest
+
 from ooresults.plugins import iof_result_list
+from ooresults.plugins.iof_result_list import ResultListStatus
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo import result_type
@@ -95,7 +98,10 @@ def test_import_result_list():
     s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
+    event, results, status = iof_result_list.parse_result_list(
+        bytes(content, encoding="utf-8")
+    )
+    assert status is None
     assert event == {
         "name": "1. O-Cup 2020",
         "date": date(year=2020, month=2, day=9),
@@ -200,7 +206,10 @@ def test_import_result_list_not_competing():
     s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
+    event, results, status = iof_result_list.parse_result_list(
+        bytes(content, encoding="utf-8")
+    )
+    assert status is None
     assert event == {
         "name": "1. O-Cup 2020",
         "date": date(year=2020, month=2, day=9),
@@ -494,7 +503,10 @@ def test_import_result_list_with_start_time_but_not_finished():
 """
     s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
 
-    event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
+    event, results, status = iof_result_list.parse_result_list(
+        bytes(content, encoding="utf-8")
+    )
+    assert status is None
     assert event == {
         "name": "1. O-Cup 2020",
         "date": date(year=2020, month=2, day=9),
@@ -622,7 +634,10 @@ def test_import_result_list_without_class_result():
   </Event>
 </ResultList>
 """
-    event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
+    event, results, status = iof_result_list.parse_result_list(
+        bytes(content, encoding="utf-8")
+    )
+    assert status is None
     assert event == {
         "name": "1. O-Cup 2020",
         "date": date(year=2020, month=2, day=9),
@@ -772,7 +787,10 @@ def test_import_result_list_classes():
     s_cm = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone.utc)
     f_cm = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone.utc)
 
-    event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
+    event, results, status = iof_result_list.parse_result_list(
+        bytes(content, encoding="utf-8")
+    )
+    assert status is None
     assert event == {
         "name": "1. O-Cup 2020",
         "date": date(year=2020, month=2, day=9),
@@ -1243,7 +1261,10 @@ def test_import_result_list_with_unknown_punch_times():
     s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    event, results = iof_result_list.parse_result_list(bytes(content, encoding="utf-8"))
+    event, results, status = iof_result_list.parse_result_list(
+        bytes(content, encoding="utf-8")
+    )
+    assert status is None
     assert event == {
         "name": "1. O-Cup 2020",
         "date": date(year=2020, month=2, day=9),
@@ -1584,5 +1605,78 @@ def test_export_result_list_with_edited_punch_times():
                 ],
             ),
         ],
+    )
+    assert document == bytes(content, encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "status, status_xml",
+    [
+        (ResultListStatus.COMPLETE, 'status="Complete"'),
+        (ResultListStatus.DELTA, 'status="Delta"'),
+        (ResultListStatus.SNAPSHOT, 'status="Snapshot"'),
+    ],
+)
+def test_import_result_list_with_status_attribute(
+    status: ResultListStatus, status_xml: str
+):
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" {attr}>
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+    <StartTime>
+      <Date>2020-02-09</Date>
+    </StartTime>
+  </Event>
+</ResultList>
+"""
+    content = content.replace("{attr}", status_xml)
+
+    event, results, _status = iof_result_list.parse_result_list(
+        bytes(content, encoding="utf-8")
+    )
+    assert _status == status
+    assert event == {
+        "name": "1. O-Cup 2020",
+        "date": date(year=2020, month=2, day=9),
+    }
+    assert results == []
+
+
+@pytest.mark.parametrize(
+    "status, status_xml",
+    [
+        (ResultListStatus.COMPLETE, 'status="Complete"'),
+        (ResultListStatus.DELTA, 'status="Delta"'),
+        (ResultListStatus.SNAPSHOT, 'status="Snapshot"'),
+    ],
+)
+def test_export_result_list_with_status_comp(status: ResultListStatus, status_xml: str):
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)" {attr}>
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+    <StartTime>
+      <Date>2020-02-09</Date>
+    </StartTime>
+  </Event>
+</ResultList>
+"""
+    content = content.replace("{attr}", status_xml)
+
+    document = iof_result_list.create_result_list(
+        event=EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
+        class_results=[],
+        status=status,
     )
     assert document == bytes(content, encoding="utf-8")

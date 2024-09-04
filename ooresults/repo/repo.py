@@ -207,7 +207,7 @@ class Repo:
     def delete_entry(self, id):
         raise NotImplementedError
 
-    def import_entries(self, event_id, results):
+    def import_entries(self, event_id: int, entries: List[Dict]) -> None:
         raise NotImplementedError
 
     def get_entries(self, event_id):
