@@ -75,7 +75,6 @@ class Transaction:
         return self
 
     def __exit__(self, exctype, excvalue, traceback):
-        print(exctype, excvalue)
         if exctype is not None:
             self.db.rollback()
         else:
