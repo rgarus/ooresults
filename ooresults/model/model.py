@@ -33,8 +33,8 @@ import iso8601
 import jsonschema
 import tzlocal
 
-from ooresults.handler import build_results
-from ooresults.handler.build_results import PersonSeriesResult
+from ooresults.model import build_results
+from ooresults.model.build_results import PersonSeriesResult
 from ooresults.repo import result_type
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassInfoType

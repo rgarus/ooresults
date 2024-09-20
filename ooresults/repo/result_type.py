@@ -30,7 +30,7 @@ from typing import Dict
 import caseconverter
 import fastclasses_json
 
-from ooresults.handler import handicap
+from ooresults.model import handicap
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_params import VoidedLeg
 

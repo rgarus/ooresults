@@ -24,7 +24,7 @@ from typing import Tuple
 
 import web
 
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.repo.repo import EventNotFoundError
 import ooresults.pdf.result
 import ooresults.pdf.splittimes

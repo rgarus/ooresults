@@ -32,7 +32,7 @@ from ooresults.repo.entry_type import RankedEntryType
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
-from ooresults.handler import model
+from ooresults.model import model
 
 
 @pytest.fixture

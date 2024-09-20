@@ -21,7 +21,7 @@ import pathlib
 
 import web
 
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.utils.globals import t_globals
 
 

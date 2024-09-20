@@ -23,7 +23,7 @@ import pathlib
 
 import web
 
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import ConstraintError
 from ooresults.utils.globals import t_globals

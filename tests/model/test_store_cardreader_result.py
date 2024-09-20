@@ -32,8 +32,7 @@ from ooresults.repo.result_type import SplitTime
 from ooresults.repo.result_type import SpStatus
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import ResultStatus
-from ooresults.handler import model
-
+from ooresults.model import model
 
 entry_time = datetime.datetime(2015, 1, 1, 13, 38, 59, tzinfo=datetime.timezone.utc)
 s1 = datetime.datetime(2015, 1, 1, 12, 38, 59, tzinfo=datetime.timezone.utc)

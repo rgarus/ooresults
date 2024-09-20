@@ -23,7 +23,7 @@ from datetime import timezone
 
 import pytest
 
-from ooresults.handler import handicap
+from ooresults.model import handicap
 from ooresults.repo.result_type import SplitTime
 from ooresults.repo.result_type import SpStatus
 from ooresults.repo.result_type import PersonRaceResult

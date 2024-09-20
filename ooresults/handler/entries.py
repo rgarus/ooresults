@@ -27,7 +27,7 @@ from typing import Optional
 import tzlocal
 import web
 
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.plugins.imports.entries import text
 from ooresults.plugins import oe12
 from ooresults.plugins import oe2003

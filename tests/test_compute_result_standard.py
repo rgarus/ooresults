@@ -17,13 +17,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import copy
 from datetime import datetime
 from datetime import timezone
 
 import pytest
 
-from ooresults.handler import handicap
 from ooresults.repo.result_type import SplitTime
 from ooresults.repo.result_type import SpStatus
 from ooresults.repo.result_type import PersonRaceResult

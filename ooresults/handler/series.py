@@ -24,7 +24,7 @@ import io
 import web
 import clevercsv as csv
 
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.repo import series_type
 import ooresults.pdf.series
 from ooresults.utils.globals import t_globals

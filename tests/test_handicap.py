@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from ooresults.handler import handicap
+from ooresults.model import handicap
 
 
 def test_female_without_year():

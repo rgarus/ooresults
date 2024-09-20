@@ -30,7 +30,7 @@ import pytest_asyncio
 import websockets
 
 from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.websocket_server.websocket_handler import WebSocketHandler
 from ooresults.repo.entry_type import EntryType
 from ooresults.repo.result_type import PersonRaceResult
@@ -61,13 +61,12 @@ def event_id(db: SqliteRepo) -> int:
 class WebSocketServer(threading.Thread):
     def __init__(
         self,
-        handler: WebSocketHandler,
         host: str = "0.0.0.0",
         port: int = 8081,
     ):
         super().__init__()
         self.daemon = True
-        self.handler = handler
+        self.handler = WebSocketHandler()
         self.host = host
         self.port = port
         self.server = None
@@ -92,10 +91,7 @@ class WebSocketServer(threading.Thread):
 
 @pytest.fixture
 def websocket_server():
-    websocket_handler = WebSocketHandler()
-    model.websocket_server = WebSocketServer(
-        handler=websocket_handler,
-    )
+    model.websocket_server = WebSocketServer()
     model.websocket_server.start()
     yield model.websocket_server
     future = asyncio.run_coroutine_threadsafe(

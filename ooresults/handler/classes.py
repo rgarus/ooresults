@@ -25,7 +25,7 @@ from typing import Optional
 import tzlocal
 import web
 
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.repo.repo import ClassUsedError
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import ConstraintError

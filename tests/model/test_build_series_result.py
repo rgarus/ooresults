@@ -23,7 +23,7 @@ from decimal import Decimal
 
 import pytest
 
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassType

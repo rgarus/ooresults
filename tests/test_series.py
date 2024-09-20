@@ -21,8 +21,7 @@ from decimal import Decimal
 
 import pytest
 
-from ooresults.handler import build_results
-from ooresults.handler import model
+from ooresults.model import model, build_results
 from ooresults.repo import series_type
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassInfoType

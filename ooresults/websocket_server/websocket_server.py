@@ -29,7 +29,7 @@ from ooresults.websocket_server.websocket_handler import WebSocketHandler
 class WebSocketServer(threading.Thread):
     def __init__(
         self,
-        handler: WebSocketHandler,
+        demo_reader: bool = False,
         host: str = "0.0.0.0",
         port: int = 8081,
         ssl_cert=None,
@@ -37,7 +37,8 @@ class WebSocketServer(threading.Thread):
     ):
         super().__init__()
         self.daemon = True
-        self.handler = handler
+        self.demo_reader = demo_reader
+        self.handler = WebSocketHandler(demo_reader=demo_reader)
         self.host = host
         self.port = port
         self.ssl_cert = ssl_cert

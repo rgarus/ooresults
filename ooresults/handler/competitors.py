@@ -22,7 +22,7 @@ import pathlib
 
 import web
 
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.plugins import iof_competitor_list
 from ooresults.repo.repo import CompetitorUsedError
 from ooresults.repo.repo import ConstraintError

@@ -30,23 +30,13 @@ import web
 from cheroot.server import HTTPServer
 from cheroot.ssl.builtin import BuiltinSSLAdapter
 
-import ooresults.handler.competitors
-import ooresults.handler.classes
-import ooresults.handler.courses
-import ooresults.handler.clubs
-import ooresults.handler.series
-import ooresults.handler.results
-import ooresults.handler.entries
-import ooresults.handler.events
-import ooresults.handler.demo_reader
 from ooresults import configuration
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.handler import results
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.user import Users
 from ooresults.utils import rental_cards
 from ooresults.utils.globals import t_globals
-from ooresults.websocket_server.websocket_handler import WebSocketHandler
 from ooresults.websocket_server.websocket_server import WebSocketServer
 
 
@@ -118,8 +108,8 @@ class Static:
             file = pathlib.Path(__file__).parent / "static" / filename
             with open(file, "r") as f:
                 return f.read()
-        except:
-            web.application.notfound()  # file not found
+        except FileNotFoundError:
+            raise web.notfound()  # file not found
 
 
 def my_processor(handler):
@@ -254,9 +244,9 @@ def main() -> Optional[int]:
         "/series/csvResult",
         "ooresults.handler.series.CsvResult",
         "/si1",
-        "ooresults.websocket_server.si.Si1",
+        "ooresults.handler.si.Si1",
         "/si2",
-        "ooresults.websocket_server.si.Si2",
+        "ooresults.handler.si.Si2",
     )
 
     parser = argparse.ArgumentParser()
@@ -316,15 +306,16 @@ def main() -> Optional[int]:
 
     try:
         app.add_processor(my_processor)
-        websocket_handler = WebSocketHandler(demo_reader=config.demo_reader)
         try:
             model.websocket_server = WebSocketServer(
-                handler=websocket_handler,
+                demo_reader=config.demo_reader,
                 ssl_cert=config.ssl_cert,
                 ssl_key=config.ssl_key,
             )
         except:
-            model.websocket_server = WebSocketServer(handler=websocket_handler)
+            model.websocket_server = WebSocketServer(
+                demo_reader=config.demo_reader,
+            )
         model.websocket_server.start()
         logging.info("Webserver started")
         app.run()

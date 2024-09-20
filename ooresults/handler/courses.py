@@ -22,7 +22,7 @@ import pathlib
 
 import web
 
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.repo.repo import CourseUsedError
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import ConstraintError

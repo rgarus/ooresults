@@ -31,7 +31,7 @@ from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.result_type import PersonRaceResult
 from ooresults.repo.result_type import SplitTime
 from ooresults.repo.result_type import SpStatus
-from ooresults.handler import model
+from ooresults.model import model
 
 
 @pytest.fixture

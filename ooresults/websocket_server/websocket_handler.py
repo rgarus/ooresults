@@ -34,7 +34,7 @@ from websockets.legacy.server import WebSocketServerProtocol
 import web
 
 from ooresults.utils.globals import t_globals
-from ooresults.handler import model
+from ooresults.model import model
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo import result_type
 from ooresults.repo.event_type import EventType
@@ -108,12 +108,12 @@ class WebSocketHandler:
         except websockets.ConnectionClosed:
             pass
 
-    async def handler(self, websocket: WebSocketServerProtocol, path: str) -> None:
-        addr = f"addr: {websocket.remote_address}, path: {path}"
+    async def handler(self, websocket: WebSocketServerProtocol) -> None:
+        addr = f"addr: {websocket.remote_address}, path: {websocket.path}"
         print(f"WEBSOCKET CONNECTED, {addr}")
         print("websocket.request_headers:", websocket.request_headers)
 
-        if path == "/demo":
+        if websocket.path == "/demo":
             event = None
             try:
                 if self.demo_reader:
@@ -234,7 +234,7 @@ class WebSocketHandler:
                         del self.cardreader_status[event.id]
                     await self.send_to_all(event=copy.deepcopy(event), message={})
 
-        elif path == "/cardreader":
+        elif websocket.path == "/cardreader":
             event = None
             event_key = websocket.request_headers.get("X-Event-Key", "")
             try:
@@ -304,7 +304,7 @@ class WebSocketHandler:
 
         else:
             try:
-                if path in ("/si1", "/si2"):
+                if websocket.path in ("/si1", "/si2"):
                     data = await websocket.recv()
                     event_id, event_key = data.split(",")
 
@@ -314,7 +314,11 @@ class WebSocketHandler:
                     )
                     for e in events:
                         if str(e.id) == event_id and e.key == event_key:
-                            self.connections[websocket] = (path, event_id, event_key)
+                            self.connections[websocket] = (
+                                websocket.path,
+                                event_id,
+                                event_key,
+                            )
                             await self.send(conn=websocket, event=e, message={})
                             async for message in websocket:
                                 # workaround to detect lost websocket connection in the browser

@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from ooresults.handler import build_results
+from ooresults.model import build_results
 from ooresults.repo.class_type import ClassInfoType
 from ooresults.repo.entry_type import EntryType
 from ooresults.repo.entry_type import RankedEntryType
