@@ -46,8 +46,9 @@ render = web.template.render(templates, globals=t_globals)
 
 
 class WebSocketHandler:
-    def __init__(self, demo_reader: bool = False):
+    def __init__(self, demo_reader: bool = False, import_stream: bool = False):
         self.demo_reader = demo_reader
+        self.import_stream = import_stream
         self.connections = {}
         self.messages = []
         self.cardreader_status = {}  # type: Dict[int: str]
@@ -113,7 +114,39 @@ class WebSocketHandler:
         print(f"WEBSOCKET CONNECTED, {addr}")
         print("websocket.request_headers:", websocket.request_headers)
 
-        if websocket.path == "/demo":
+        if websocket.path == "/import":
+            event_key = websocket.request_headers.get("X-Event-Key", "")
+            try:
+                if self.import_stream:
+                    async for message in websocket:
+                        try:
+                            data = bz2.decompress(message)
+                        except:
+                            data = message
+
+                        await asyncio.get_event_loop().run_in_executor(
+                            executor=self.executor,
+                            func=functools.partial(
+                                model.import_iof_result_list,
+                                event_key=event_key,
+                                content=data,
+                            ),
+                        )
+                        await websocket.send(json.dumps({"result": "ok"}))
+
+            except websockets.ConnectionClosed:
+                pass
+            except EventNotFoundError as e:
+                logging.exception(e)
+                await websocket.send(json.dumps({"result": "eventNotFound"}))
+            except Exception as e:
+                logging.exception(e)
+                await websocket.send(json.dumps({"result": "error"}))
+            finally:
+                await websocket.close()
+                print(f"WEBSOCKET CLOSED, {addr}")
+
+        elif websocket.path == "/demo":
             event = None
             try:
                 if self.demo_reader:

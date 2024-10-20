@@ -1,0 +1,14 @@
+{
+    "title": "streaming result",
+    "type": "object",
+    "properties": {
+        "result": {
+            "type": "string",
+            "enum" : ["ok", "eventNotFound", "error"],
+            "description": "answer from the streaming server to the streaming client"
+        }
+    },
+    "required": [
+        "result"
+    ]
+}

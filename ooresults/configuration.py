@@ -33,12 +33,14 @@ class Config:
         #  ssl_cert = cert/cert.pem
         #  ssl_key = cert/privkey.pem
         #  demo_reader = off
+        #  import_stream = off
         #
 
         self.config_file = path / "config.ini"
         self.ssl_cert = pathlib.Path.home() / ".ooresults" / "cert" / "cert.pem"
         self.ssl_key = pathlib.Path.home() / ".ooresults" / "cert" / "privkey.pem"
         self.demo_reader = False
+        self.import_stream = False
 
         config = configparser.ConfigParser()
         if self.config_file.exists():
@@ -48,6 +50,7 @@ class Config:
                 "ssl_cert": "",
                 "ssl_key": "",
                 "demo_reader": "off",
+                "import_stream": "off",
             }
             config["Cardreader"] = {
                 "host": "127.0.0.1",
@@ -77,6 +80,15 @@ class Config:
         except ValueError:
             raise RuntimeError(
                 "Allowed values for 'demo_reader' are 'true', 'false', 'on', 'off', 'yes', 'no'"
+            )
+
+        try:
+            self.import_stream = config.getboolean(
+                "Server", "import_stream", fallback=False
+            )
+        except ValueError:
+            raise RuntimeError(
+                "Allowed values for 'import_stream' are 'true', 'false', 'on', 'off', 'yes', 'no'"
             )
 
         # create cert files for localhost if files not exist

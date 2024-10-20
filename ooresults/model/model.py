@@ -35,6 +35,8 @@ import tzlocal
 
 from ooresults.model import build_results
 from ooresults.model.build_results import PersonSeriesResult
+from ooresults.plugins import iof_result_list
+from ooresults.plugins.iof_result_list import ResultListStatus
 from ooresults.repo import result_type
 from ooresults.repo.class_params import ClassParams
 from ooresults.repo.class_type import ClassInfoType
@@ -1005,3 +1007,26 @@ def build_series_result() -> (
         events,
         ranked_classes,
     )
+
+
+def import_iof_result_list(event_key: str, content: bytes) -> None:
+    #
+    # 1. Find event corresponding to event_key
+    # 2. Decode IOF xml data
+    # 3. Delete all entries of the event
+    # 4. Delete all classes of the event
+    # 5. Import entries
+    #
+    with db.transaction(mode=TransactionMode.IMMEDIATE):
+        for e in db.get_events():
+            if event_key != "" and e.key == event_key:
+                event = e
+                break
+        else:
+            raise EventNotFoundError(f'Event for key "{event_key}" not found')
+
+        _, entries, status = iof_result_list.parse_result_list(content)
+        if status != ResultListStatus.DELTA:
+            db.delete_entries(event_id=event.id)
+            db.delete_classes(event_id=event.id)
+        db.import_entries(event_id=event.id, entries=entries)

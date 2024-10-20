@@ -38,6 +38,7 @@ def test_configuration_create_default_config_if_not_exists():
             assert c.ssl_cert == home / ".ooresults" / "cert" / "cert.pem"
             assert c.ssl_key == home / ".ooresults" / "cert" / "privkey.pem"
             assert c.demo_reader is False
+            assert c.import_stream is False
 
             assert c.ssl_cert.exists()
             assert c.ssl_key.exists()
@@ -58,6 +59,7 @@ def test_configuration_cert_files_are_created_in_home():
                 assert c.ssl_cert == home / ".ooresults" / "cert" / "cert.pem"
                 assert c.ssl_key == home / ".ooresults" / "cert" / "privkey.pem"
                 assert c.demo_reader is False
+                assert c.import_stream is False
 
                 assert c.ssl_cert.exists()
                 assert c.ssl_key.exists()
@@ -168,6 +170,22 @@ def test_configuration_demo_reader_default_is_false():
             assert c.demo_reader is False
 
 
+def test_configuration_import_stream_default_is_false():
+    with tempfile.TemporaryDirectory() as td:
+        home = pathlib.Path(td)
+
+        def my_home() -> pathlib.Path:
+            return home
+
+        with patch.object(pathlib.Path, "home", my_home):
+            config_file = home / "config.ini"
+            with open(config_file, "w") as f:
+                f.write("[Server]\n")
+
+            c = configuration.Config(path=home)
+            assert c.import_stream is False
+
+
 def test_configuration_config_file_is_read_if_exists_1():
     with tempfile.TemporaryDirectory() as td:
         home = pathlib.Path(td)
@@ -179,10 +197,12 @@ def test_configuration_config_file_is_read_if_exists_1():
             config_file = home / "config.ini"
             with open(config_file, "w") as f:
                 f.write("[Server]\n")
-                f.write("demo_reader = off")
+                f.write("demo_reader = off\n")
+                f.write("import_stream = on\n")
 
             c = configuration.Config(path=home)
             assert c.demo_reader is False
+            assert c.import_stream is True
 
 
 def test_configuration_config_file_is_read_if_exists_2():
@@ -196,7 +216,9 @@ def test_configuration_config_file_is_read_if_exists_2():
             config_file = home / "config.ini"
             with open(config_file, "w") as f:
                 f.write("[Server]\n")
-                f.write("demo_reader = on")
+                f.write("demo_reader = on\n")
+                f.write("import_stream = off\n")
 
             c = configuration.Config(path=home)
             assert c.demo_reader is True
+            assert c.import_stream is False

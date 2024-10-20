@@ -30,6 +30,7 @@ class WebSocketServer(threading.Thread):
     def __init__(
         self,
         demo_reader: bool = False,
+        import_stream: bool = False,
         host: str = "0.0.0.0",
         port: int = 8081,
         ssl_cert=None,
@@ -38,7 +39,10 @@ class WebSocketServer(threading.Thread):
         super().__init__()
         self.daemon = True
         self.demo_reader = demo_reader
-        self.handler = WebSocketHandler(demo_reader=demo_reader)
+        self.import_stream = import_stream
+        self.handler = WebSocketHandler(
+            demo_reader=demo_reader, import_stream=import_stream
+        )
         self.host = host
         self.port = port
         self.ssl_cert = ssl_cert
