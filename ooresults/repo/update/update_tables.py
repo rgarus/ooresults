@@ -24,9 +24,10 @@ from ooresults.repo.update import update_009
 from ooresults.repo.update import update_010
 from ooresults.repo.update import update_011
 from ooresults.repo.update import update_012
+from ooresults.repo.update import update_013
 
 
-VERSION = 12
+VERSION = 13
 
 
 def update_tables(db, path: str = "ooresults.sqlite") -> None:
@@ -68,6 +69,9 @@ def update_tables(db, path: str = "ooresults.sqlite") -> None:
             if version <= 11:
                 logging.info("Update DB to version 12 ...")
                 update_012.update(path=path)
+            if version <= 12:
+                logging.info("Update DB to version 13 ...")
+                update_013.update(path=path)
 
             logging.info(f"DB updated to version {VERSION}")
         else:

@@ -117,7 +117,10 @@ class SqliteRepo(Repo):
                 "key TEXT UNIQUE,"
                 "publish BOOL NOT NULL,"
                 "series TEXT,"
-                "fields BLOB NOT NULL"
+                "fields BLOB NOT NULL,"
+                "streaming_address TEXT,"
+                "streaming_key TEXT,"
+                "streaming_enabled BOOL"
                 ");"
             )
             self.db.query(
@@ -1098,12 +1101,19 @@ class SqliteRepo(Repo):
             "events.key,"
             "events.publish,"
             "events.series,"
-            "events.fields "
+            "events.fields,"
+            "events.streaming_address,"
+            "events.streaming_key,"
+            "events.streaming_enabled "
             "FROM events "
             "ORDER BY events.name ASC;"
         )
         events = []
         for e in values:
+            streaming_enabled = None
+            if e.streaming_enabled is not None:
+                streaming_enabled = bool(e.streaming_enabled)
+
             events.append(
                 EventType(
                     id=e.id,
@@ -1113,6 +1123,9 @@ class SqliteRepo(Repo):
                     publish=bool(e.publish),
                     series=e.series,
                     fields=json.loads(e.fields),
+                    streaming_address=e.streaming_address,
+                    streaming_key=e.streaming_key,
+                    streaming_enabled=streaming_enabled,
                 )
             )
         return events
@@ -1121,6 +1134,10 @@ class SqliteRepo(Repo):
         values = self.db.where("events", id=id)
         if values:
             e = values[0]
+            streaming_enabled = None
+            if e.streaming_enabled is not None:
+                streaming_enabled = bool(e.streaming_enabled)
+
             return EventType(
                 id=e.id,
                 name=e.name,
@@ -1129,6 +1146,9 @@ class SqliteRepo(Repo):
                 publish=bool(e.publish),
                 series=e.series,
                 fields=json.loads(e.fields),
+                streaming_address=e.streaming_address,
+                streaming_key=e.streaming_key,
+                streaming_enabled=streaming_enabled,
             )
         else:
             raise EventNotFoundError
@@ -1141,6 +1161,9 @@ class SqliteRepo(Repo):
         publish: bool,
         series: Optional[str],
         fields: List[str],
+        streaming_address: Optional[str] = None,
+        streaming_key: Optional[str] = None,
+        streaming_enabled: Optional[bool] = None,
     ) -> int:
         try:
             return self.db.insert(
@@ -1151,6 +1174,9 @@ class SqliteRepo(Repo):
                 publish=publish,
                 series=series,
                 fields=json.dumps(fields),
+                streaming_address=streaming_address,
+                streaming_key=streaming_key,
+                streaming_enabled=streaming_enabled,
             )
 
         except sqlite3.IntegrityError:
@@ -1165,6 +1191,9 @@ class SqliteRepo(Repo):
         publish: bool,
         series: Optional[str],
         fields: List[str],
+        streaming_address: Optional[str] = None,
+        streaming_key: Optional[str] = None,
+        streaming_enabled: Optional[bool] = None,
     ) -> None:
         try:
             nr_of_rows = self.db.update(
@@ -1176,6 +1205,9 @@ class SqliteRepo(Repo):
                 publish=publish,
                 series=series,
                 fields=json.dumps(fields),
+                streaming_address=streaming_address,
+                streaming_key=streaming_key,
+                streaming_enabled=streaming_enabled,
             )
             if nr_of_rows == 0:
                 raise KeyError

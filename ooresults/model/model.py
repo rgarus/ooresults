@@ -665,16 +665,40 @@ def add_event(
     publish: bool,
     series: Optional[str],
     fields: List[str],
+    streaming_address: Optional[str] = None,
+    streaming_key: Optional[str] = None,
+    streaming_enabled: Optional[bool] = None,
 ) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
-        db.add_event(
+        id = db.add_event(
             name=name,
             date=date,
             key=key,
             publish=publish,
             series=series,
             fields=fields,
+            streaming_address=streaming_address,
+            streaming_key=streaming_key,
+            streaming_enabled=streaming_enabled,
         )
+    future = asyncio.run_coroutine_threadsafe(
+        coro=websocket_server.update_event(
+            event=EventType(
+                id=id,
+                name=name,
+                date=date,
+                key=key,
+                publish=publish,
+                series=series,
+                fields=fields,
+                streaming_address=streaming_address,
+                streaming_key=streaming_key,
+                streaming_enabled=streaming_enabled,
+            )
+        ),
+        loop=websocket_server.loop,
+    )
+    future.result()
 
 
 def update_event(
@@ -685,6 +709,9 @@ def update_event(
     publish: bool,
     series: Optional[str],
     fields: List[str],
+    streaming_address: Optional[str] = None,
+    streaming_key: Optional[str] = None,
+    streaming_enabled: Optional[bool] = None,
 ) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.update_event(
@@ -695,10 +722,13 @@ def update_event(
             publish=publish,
             series=series,
             fields=fields,
+            streaming_address=streaming_address,
+            streaming_key=streaming_key,
+            streaming_enabled=streaming_enabled,
         )
 
     future = asyncio.run_coroutine_threadsafe(
-        coro=websocket_server.handler.update_event(
+        coro=websocket_server.update_event(
             event=EventType(
                 id=id,
                 name=name,
@@ -707,6 +737,9 @@ def update_event(
                 publish=publish,
                 series=series,
                 fields=fields,
+                streaming_address=streaming_address,
+                streaming_key=streaming_key,
+                streaming_enabled=streaming_enabled,
             )
         ),
         loop=websocket_server.loop,

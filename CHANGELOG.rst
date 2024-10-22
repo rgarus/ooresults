@@ -5,9 +5,15 @@ Changelog
 [Unreleased]
 ------------
 
+Added
+^^^^^
+
+- Streaming of results between two ooresults server added.
+
 Changed
 ^^^^^^^
 
+- Database schema updated to version 13.
 - Marking changed elements of 'Add' or 'Edit' windows improved.
 
 

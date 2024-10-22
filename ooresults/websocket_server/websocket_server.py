@@ -20,10 +20,13 @@
 import asyncio
 import threading
 import ssl
+from typing import Optional
 
 import websockets
 
+from ooresults.websocket_server.streaming import Streaming
 from ooresults.websocket_server.websocket_handler import WebSocketHandler
+from ooresults.repo.event_type import EventType
 
 
 class WebSocketServer(threading.Thread):
@@ -40,9 +43,8 @@ class WebSocketServer(threading.Thread):
         self.daemon = True
         self.demo_reader = demo_reader
         self.import_stream = import_stream
-        self.handler = WebSocketHandler(
-            demo_reader=demo_reader, import_stream=import_stream
-        )
+        self.handler: Optional[WebSocketHandler] = None
+        self.streaming: Optional[Streaming] = None
         self.host = host
         self.port = port
         self.ssl_cert = ssl_cert
@@ -58,6 +60,11 @@ class WebSocketServer(threading.Thread):
 
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop=self.loop)
+
+        self.streaming = Streaming(loop=self.loop)
+        self.handler = WebSocketHandler(
+            demo_reader=self.demo_reader, import_stream=self.import_stream
+        )
         start_server = websockets.serve(
             self.handler.handler, self.host, self.port, loop=self.loop, ssl=ssl_context
         )
@@ -67,4 +74,9 @@ class WebSocketServer(threading.Thread):
         else:
             print(f"wss://{self.host}:{str(self.port)}")
         self.loop.run_forever()
-        print("thread finished")
+
+    async def update_event(self, event: EventType) -> None:
+        if self.handler:
+            await self.handler.update_event(event=event)
+        if self.streaming:
+            await self.streaming.update_event(event=event)

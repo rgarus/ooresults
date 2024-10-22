@@ -1,4 +1,4 @@
-$def with (status, event, messages)
+$def with (status, stream_status, event, messages)
 
 $code
     def format(time: int) -> str:
@@ -14,16 +14,6 @@ $code
             return '#ff7070'  # red
         else:
             return '#ffff00'  # yellow
-
-    def format_cardreader_status(status: str) -> str:
-        if status is None or status == 'readerOffline':
-            return '<p style="color:red;">Card reader offline</p>'
-        elif status in ['readerConnected', 'cardRead', 'cardRemoved']:
-            return '<p style="color:green;">Card reader connected</p>'
-        elif status == 'readerDisconnected':
-            return '<p style="color:red;">Card reader disconnected</p>'
-        elif status == 'cardInserted':
-            return '<p style="color:green;">Reading card</p>'
 
     def missing(status: str, missing_controls) -> str:
         if status == ResultStatus.OK:
@@ -97,4 +87,39 @@ $code
 
 <p></p>
 
-<div>$:format_cardreader_status(status)</div>
+<div>
+    <table style="text-align: left">
+        $if status is None or status == 'readerOffline':
+            <tr style="color:red;">
+                <th style="padding-right: 10px">Card reader status:</th>
+                <td>Offline</td>
+            </tr>
+        $elif status in ['readerConnected', 'cardRead', 'cardRemoved']:
+            <tr style="color:green;">
+                <th style="padding-right: 10px">Card reader status:</th>
+                <td>Connected</td>
+            </tr>
+        $elif status == 'readerDisconnected':
+            <tr style="color:red;">
+                <th style="padding-right: 10px">Card reader status:</th>
+                <td>Disconnected</td>
+            </tr>
+        $elif status == 'cardInserted':
+            <tr style="color:green;">
+                <th style="padding-right: 10px">Card reader status:</th>
+                <td>Reading card</td>
+            </tr>
+
+        $if stream_status is not None:
+            $if streaming_status_ok(stream_status):
+                <tr style="color:green;">
+                    <th style="padding-right: 10px">Stream status:</th>
+                    <td>$STREAMING_STATUS[stream_status]</td>
+                </tr>
+            $else:
+                <tr style="color:red;">
+                    <th style="padding-right: 10px">Stream status:</th>
+                    <td>$STREAMING_STATUS[stream_status]</td>
+                </tr>
+    </table>
+</div>

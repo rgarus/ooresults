@@ -31,6 +31,7 @@ import websockets
 
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.model import model
+from ooresults.websocket_server.streaming import Streaming
 from ooresults.websocket_server.websocket_handler import WebSocketHandler
 from ooresults.repo.entry_type import EntryType
 from ooresults.repo.result_type import PersonRaceResult
@@ -61,12 +62,15 @@ def event_id(db: SqliteRepo) -> int:
 class WebSocketServer(threading.Thread):
     def __init__(
         self,
+        barrier: threading.Barrier,
         host: str = "0.0.0.0",
         port: int = 8081,
     ):
         super().__init__()
+        self.barrier = barrier
         self.daemon = True
-        self.handler = WebSocketHandler()
+        self.handler = None
+        self.streaming = None
         self.host = host
         self.port = port
         self.server = None
@@ -75,6 +79,9 @@ class WebSocketServer(threading.Thread):
     def run(self):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop=self.loop)
+        self.handler = WebSocketHandler()
+        self.streaming = Streaming(loop=self.loop)
+
         self.server = self.loop.run_until_complete(
             websockets.serve(
                 ws_handler=self.handler.handler,
@@ -82,6 +89,7 @@ class WebSocketServer(threading.Thread):
                 port=self.port,
             ),
         )
+        self.barrier.wait()
         self.loop.run_forever()
 
     async def close(self):
@@ -91,8 +99,10 @@ class WebSocketServer(threading.Thread):
 
 @pytest.fixture
 def websocket_server():
-    model.websocket_server = WebSocketServer()
+    barrier = threading.Barrier(parties=2)
+    model.websocket_server = WebSocketServer(barrier=barrier)
     model.websocket_server.start()
+    barrier.wait()
     yield model.websocket_server
     future = asyncio.run_coroutine_threadsafe(
         coro=model.websocket_server.close(),

@@ -26,6 +26,7 @@ from ooresults.repo.result_type import SplitTime
 from ooresults.repo.result_type import SpStatus
 from ooresults.repo.start_type import PersonRaceStart
 from ooresults.utils.rental_cards import format_card
+from ooresults.websocket_server import streaming_status
 
 
 MAP_STATUS = {
@@ -40,6 +41,13 @@ MAP_STATUS = {
     ResultStatus.DISQUALIFIED: "DSQ",
 }
 
+STREAMING_STATUS = {
+    streaming_status.Status.SERVER_NOT_REACHABLE: "Server not reachble",
+    streaming_status.Status.ACCESS_DENIED: "Access denied",
+    streaming_status.Status.EVENT_NOT_FOUND: "Event not found",
+    streaming_status.Status.ERROR: "Error",
+    streaming_status.Status.OK: "Ok",
+}
 
 EXPERIMENTAL = False
 
@@ -53,6 +61,10 @@ def minutes_seconds(time: Optional[int]) -> str:
         return "-{:d}:{:02d}".format(abs(time) // 60, abs(time) % 60)
 
 
+def streaming_status_ok(status: streaming_status.Status) -> bool:
+    return status == streaming_status.Status.OK
+
+
 t_globals = {
     "str": str,
     "round": round,
@@ -63,6 +75,8 @@ t_globals = {
     "PersonRaceResult": PersonRaceResult,
     "PersonRaceStart": PersonRaceStart,
     "MAP_STATUS": MAP_STATUS,
+    "STREAMING_STATUS": STREAMING_STATUS,
+    "streaming_status_ok": streaming_status_ok,
     "EXPERIMENTAL": EXPERIMENTAL,
     "minutes_seconds": minutes_seconds,
     "format_card": format_card,

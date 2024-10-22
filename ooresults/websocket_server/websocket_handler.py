@@ -40,6 +40,7 @@ from ooresults.repo import result_type
 from ooresults.repo.event_type import EventType
 from ooresults.repo.result_type import ResultStatus
 from ooresults.repo.result_type import SpStatus
+from ooresults.websocket_server import streaming_status
 
 templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
 render = web.template.render(templates, globals=t_globals)
@@ -53,6 +54,7 @@ class WebSocketHandler:
         self.messages = []
         self.cardreader_status = {}  # type: Dict[int: str]
         self.executor = ThreadPoolExecutor(max_workers=2)
+        streaming_status.status.register(awaitable=self.update_event)
 
         #
         # Cardreader status:
@@ -93,7 +95,9 @@ class WebSocketHandler:
         )
         path, event_id, event_key = self.connections[conn]
         if path == "/si2":
-            data = render.si.si2_data(status, event, self.messages)
+            stream_status = streaming_status.status.get(id=event.id)
+            print("stream_status:", stream_status)
+            data = render.si.si2_data(status, stream_status, event, self.messages)
         else:
             if status != "cardRead":
                 data = message.get("controlCard", "")

@@ -51,6 +51,12 @@ class Add:
         try:
             fields = data.fields.split(",") if data.fields != "" else []
             fields = [f.strip() for f in fields]
+            streaming_enabled = None
+            if data.streaming_address and data.streaming_key:
+                streaming_enabled = (
+                    "streaming_enabled" in data and data.streaming_enabled == "true"
+                )
+
             if data.id == "":
                 model.add_event(
                     name=data.name,
@@ -59,6 +65,9 @@ class Add:
                     publish=data.publish == "yes",
                     series=data.series if data.series != "" else None,
                     fields=fields,
+                    streaming_address=data.streaming_address,
+                    streaming_key=data.streaming_key,
+                    streaming_enabled=streaming_enabled,
                 )
             else:
                 model.update_event(
@@ -69,6 +78,9 @@ class Add:
                     publish=data.publish == "yes",
                     series=data.series if data.series != "" else None,
                     fields=fields,
+                    streaming_address=data.streaming_address,
+                    streaming_key=data.streaming_key,
+                    streaming_enabled=streaming_enabled,
                 )
         except KeyError:
             raise web.conflict("Event deleted")

@@ -31,6 +31,18 @@ $def with (event)
                 </td>
             </tr>
             <tr>
+                <th class="input-header"><label for="eve_streamingAddress">Streaming address</label></th>
+                <td><input id="eve_streamingAddress" name="streaming_address" type="text" value="$(event.streaming_address if event and event.streaming_address else '')" oninput="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="eve_streamingKey">Streaming key</label></th>
+                <td><input id="eve_streamingKey" name="streaming_key" type="text" value="$(event.streaming_key if event and event.streaming_key else '')" oninput="mark_label(this)"/></td>
+            </tr>
+            <tr>
+                <th class="input-header"><label for="eve_streamingEnabled">Streaming enabled</label></th>
+                <td><input id="eve_streamingEnabled" name="streaming_enabled" type="checkbox" value="true" oninput="mark_label(this)" $('checked' if event and event.streaming_enabled else '')/></td>
+            </tr>
+            <tr>
                 <th class="input-header"><label for="eve_series">Series</label></th>
                 <td><input id="eve_series" name="series" type="text" value="$(event.series if event and event.series else '')" oninput="mark_label(this)"/></td>
             </tr>

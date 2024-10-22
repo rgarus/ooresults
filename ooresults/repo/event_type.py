@@ -32,3 +32,6 @@ class EventType:
     publish: bool
     series: Optional[str]
     fields: List[str]
+    streaming_address: Optional[str] = None
+    streaming_key: Optional[str] = None
+    streaming_enabled: Optional[bool] = None

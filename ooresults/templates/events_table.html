@@ -1,5 +1,14 @@
 $def with (events)
 
+$def streaming_enabled(enabled):
+    $if enabled is None:
+        $return ""
+    $elif enabled:
+        $return "enabled"
+    $else:
+        $return "disabled"
+
+
 <div id="evnt.event">
     <table style="text-align: left">
         <tr>
@@ -25,6 +34,7 @@ $def with (events)
             <th class="dt">Date</th>
             <th class="dt">Key</th>
             <th class="dt">Publish</th>
+            <th class="dt">Streaming</th>
             <th class="dt">Series</th>
             <th class="dt">Fields</th>
         </tr>
@@ -36,6 +46,7 @@ $def with (events)
             <td class="dt">$event.date.isoformat()</td>
             <td class="dt">$('***' if event.key is not None else '')</td>
             <td class="dt">$('yes' if event.publish else 'no')</td>
+            <td class="dt">$streaming_enabled(event.streaming_enabled)</td>
             <td class="dt">$(event.series if event.series is not None else '')</td>
             <td class="dt">$', '.join(event.fields)</td>
         </tr>
