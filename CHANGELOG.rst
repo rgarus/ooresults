@@ -2,13 +2,13 @@ Changelog
 =========
 
 
-[Unreleased]
-------------
+[0.3.1] - 2024-10-24
+--------------------
 
 Added
 ^^^^^
 
-- Streaming of results between two ooresults server added.
+- Added streaming of results between two ooresults servers.
 
 Changed
 ^^^^^^^
