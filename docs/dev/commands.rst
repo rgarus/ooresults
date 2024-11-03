@@ -32,7 +32,7 @@ Installing the software in editable mode
    <venv>/bin/python -m pip install -e .[test]
 
 
-      
+
 Formating the Python source code
 --------------------------------
 
@@ -41,9 +41,7 @@ Formating the Python source code
    python -m pip install black
    
    cd <git-local>
-   python -m black ooresults
-   python -m black tests
-   python -m black webtests
+   python -m black .
 
 
 
@@ -64,7 +62,7 @@ The software should be tested for the following Python versions:
    <venv>/bin/python -m pytest tests
    <venv>/bin/python -m pytest webtests
 
-   
+
 
 Building the documentation
 --------------------------
@@ -83,10 +81,10 @@ Building the documentation
    PROJECT=dev make html
    PROJECT=dev makr latexpdf
 
-   
+
 
 Building an ooresults release
-----------------------------
+-----------------------------
 
 Edit and change the version number in the following files
 
@@ -104,7 +102,8 @@ Build the release
    
    cd <git-local>
    <venv-build>/bin/python -m build
-   
+
+
 
 Publishing the release
 ----------------------
