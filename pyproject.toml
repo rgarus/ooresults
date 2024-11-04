@@ -44,8 +44,9 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "pytest",
-    "pytest-asyncio",
+    "pytest >= 8.3.3",
+    "pytest-asyncio >= 0.24.0",
+    "selenium >= 4.26.1",
 ]
 
 [project.scripts]
