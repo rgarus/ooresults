@@ -24,7 +24,6 @@ import functools
 import json
 import logging
 import ssl
-import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
 
@@ -61,10 +60,8 @@ class Streaming:
             ):
                 task = self.tasks[event.id]
                 task.cancel()
-                try:
-                    await task
-                except asyncio.CancelledError:
-                    pass
+                del self.events[event.id]
+                del self.tasks[event.id]
 
         if event.id not in self.tasks and event.streaming_enabled:
             e = copy.deepcopy(event)
@@ -143,12 +140,16 @@ class Streaming:
 
                             try:
                                 await websocket.send(data)
-                                answer = await asyncio.wait_for(websocket.recv(), 10)
+                                answer = await asyncio.wait_for(websocket.recv(), 30)
 
                                 answer = json.loads(answer)
-                                result = answer.get("result", "error")
-                            except (asyncio.TimeoutError, json.decoder.JSONDecodeError):
-                                result = "error"
+                                result = answer["result"]
+                            except asyncio.TimeoutError:
+                                wait_time = 15
+                                break
+                            except (json.decoder.JSONDecodeError, KeyError):
+                                wait_time = 45
+                                break
 
                             if result == "ok":
                                 await streaming_status.status.set(
@@ -160,11 +161,12 @@ class Streaming:
                                     event=act_event,
                                     status=streaming_status.Status.EVENT_NOT_FOUND,
                                 )
-                                await asyncio.sleep(delay=30)
+                                wait_time = 45
                                 break
                             else:
                                 sent_event = None
                                 sent_class_results = None
+                                wait_time = 45
                                 await streaming_status.status.set(
                                     event=act_event,
                                     status=streaming_status.Status.ERROR,
@@ -183,7 +185,13 @@ class Streaming:
                                 status=streaming_status.Status.ERROR,
                             )
 
-                    except (EventNotFoundError, asyncio.CancelledError):
+                    except EventNotFoundError:
+                        raise
+                    except websockets.WebSocketException:
+                        wait_time = 30
+                        break
+                    except asyncio.CancelledError:
+                        wait_time = 0
                         raise
                     except Exception:
                         logging.exception(msg="", exc_info=True, stack_info=True)
@@ -204,6 +212,10 @@ class Streaming:
         except Exception:
             logging.exception(msg="", exc_info=True, stack_info=True)
         finally:
-            del self.events[event.id]
-            del self.tasks[event.id]
+            if (
+                event.id in self.tasks
+                and self.tasks[event.id] == asyncio.current_task()
+            ):
+                del self.events[event.id]
+                del self.tasks[event.id]
             await streaming_status.status.delete(event=event)

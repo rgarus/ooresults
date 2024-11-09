@@ -25,6 +25,7 @@ import datetime
 import logging
 import bz2
 import functools
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
 
@@ -123,6 +124,7 @@ class WebSocketHandler:
             try:
                 if self.import_stream:
                     async for message in websocket:
+                        t1 = time.time()
                         try:
                             data = bz2.decompress(message)
                         except:
@@ -137,11 +139,14 @@ class WebSocketHandler:
                             ),
                         )
                         await websocket.send(json.dumps({"result": "ok"}))
+                        t2 = time.time()
+                        logging.info(
+                            f"Importing result, {websocket.remote_address[0]}, {len(message)}, {t2 - t1:.3f}"
+                        )
 
             except websockets.ConnectionClosed:
                 pass
-            except EventNotFoundError as e:
-                logging.exception(e)
+            except EventNotFoundError:
                 await websocket.send(json.dumps({"result": "eventNotFound"}))
             except Exception as e:
                 logging.exception(e)

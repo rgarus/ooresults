@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Fixed
+^^^^^
+
+- Wait time of 15 seconds removed, if an edit event dialog is saved with streaming set to "disabled".
+
+
 [0.3.1] - 2024-10-24
 --------------------
 
