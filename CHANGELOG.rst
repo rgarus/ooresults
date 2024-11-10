@@ -5,6 +5,11 @@ Changelog
 [Unreleased]
 ------------
 
+Changed
+^^^^^^^
+
+- The performance of the ooresults homepage has been improved to use ooresults as a live results server.
+
 Fixed
 ^^^^^
 

@@ -24,6 +24,7 @@ import base64
 import pathlib
 import sys
 import sqlite3
+import time
 from typing import Optional
 
 import web
@@ -32,7 +33,7 @@ from cheroot.ssl.builtin import BuiltinSSLAdapter
 
 from ooresults import configuration
 from ooresults.model import model
-from ooresults.handler import results
+from ooresults.handler import cached_result
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.user import Users
 from ooresults.utils import rental_cards
@@ -51,12 +52,13 @@ render = web.template.render(templates, globals=t_globals)
 
 class Root:
     def GET(self):
+        t1 = time.time()
         events = model.get_events()
         for event in events:
             if event.publish:
-                event, class_results = model.event_class_results(event_id=event.id)
-                columns = results.build_columns(class_results)
-                results_table = render.results_table(event, class_results, columns)
+                results_table = cached_result.get_cached_data(event_id=event.id)
+                t2 = time.time()
+                logging.info(f"Requesting result, {web.ctx['ip']}, {t2 - t1:.3f}")
                 return render.root(results_table)
         else:
             return render.root(None)

@@ -33,6 +33,7 @@ import iso8601
 import jsonschema
 import tzlocal
 
+from ooresults.handler import cached_result
 from ooresults.model import build_results
 from ooresults.model.build_results import PersonSeriesResult
 from ooresults.plugins import iof_result_list
@@ -104,6 +105,8 @@ def import_classes(event_id: int, classes: List[Dict]) -> None:
                     params=ClassParams(),
                 )
 
+    cached_result.clear_cache(event_id=event_id)
+
 
 def add_class(
     event_id: int,
@@ -145,7 +148,7 @@ def update_class(
             db.get_event(id=event_id)
             raise
 
-        # update results of the competitors belonging to the modified class
+        # update results of the entries belonging to the modified class
         try:
             class_params = params
             controls = db.get_course(id=course_id).controls
@@ -169,6 +172,8 @@ def update_class(
                     result=entry.result,
                     start_time=entry.start.start_time,
                 )
+
+    cached_result.clear_cache(event_id=event_id)
 
 
 def delete_classes(event_id: int) -> None:
@@ -260,6 +265,8 @@ def import_courses(
                             params=ClassParams(),
                         )
 
+    cached_result.clear_cache(event_id=event_id)
+
 
 def add_course(
     event_id: int,
@@ -324,6 +331,8 @@ def update_course(
                     )
                     break
 
+    cached_result.clear_cache(event_id=event_id)
+
 
 def delete_courses(event_id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
@@ -353,6 +362,8 @@ def add_club(name) -> None:
 def update_club(id, name) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.update_club(id=id, name=name)
+
+    cached_result.clear_cache()
 
 
 def delete_club(id) -> None:
@@ -394,6 +405,8 @@ def update_competitor(id, first_name, last_name, club_id, gender, year, chip):
             chip=chip,
         )
 
+    cached_result.clear_cache()
+
 
 def delete_competitor(id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
@@ -404,10 +417,14 @@ def import_competitors(competitors) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.import_competitors(competitors)
 
+    cached_result.clear_cache()
+
 
 def import_entries(event_id: int, entries: List[Dict]) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.import_entries(event_id=event_id, entries=entries)
+
+    cached_result.clear_cache(event_id=event_id)
 
 
 def get_entries(event_id: int) -> List[EntryType]:
@@ -534,7 +551,9 @@ def add_or_update_entry(
             result=result,
             start_time=start_time,
         )
-        return id
+
+    cached_result.clear_cache(event_id=event_id, entry_id=id)
+    return id
 
 
 @enum.unique
@@ -635,17 +654,22 @@ def edit_entry_result(
             result=result,
             start_time=entry.start.start_time,
         )
-        return entry
+
+    cached_result.clear_cache(event_id=event_id, entry_id=entry_id)
+    return entry
 
 
 def delete_entries(event_id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_entries(event_id=event_id)
 
+    cached_result.clear_cache(event_id=event_id)
+
 
 def delete_entry(id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         db.delete_entry(id=id)
+    cached_result.clear_cache()
 
 
 def get_events() -> List[EventType]:
@@ -746,6 +770,8 @@ def update_event(
     )
     future.result()
 
+    cached_result.clear_cache(event_id=id)
+
 
 def delete_event(id: int) -> None:
     with db.transaction(mode=TransactionMode.IMMEDIATE):
@@ -753,6 +779,8 @@ def delete_event(id: int) -> None:
         db.delete_classes(event_id=id)
         db.delete_courses(event_id=id)
         db.delete_event(id)
+
+    cached_result.clear_cache(event_id=id)
 
 
 def parse_cardreader_log(item: Dict) -> result_type.CardReaderMessage:
@@ -900,6 +928,7 @@ def store_cardreader_result(
                         "error": None,
                         "missingControls": missing_controls(result=result),
                     }
+                    cached_result.clear_cache(event_id=event.id, entry_id=entry.id)
 
                     # if there is an unassigned entry with the same result, delete it
                     if unassigned_entries == [unassigned_entry]:
@@ -1050,6 +1079,7 @@ def import_iof_result_list(event_key: str, content: bytes) -> None:
     # 4. Delete all classes of the event
     # 5. Import entries
     #
+    event: Optional[EventType] = None
     with db.transaction(mode=TransactionMode.IMMEDIATE):
         for e in db.get_events():
             if event_key != "" and e.key == event_key:
@@ -1063,3 +1093,6 @@ def import_iof_result_list(event_key: str, content: bytes) -> None:
             db.delete_entries(event_id=event.id)
             db.delete_classes(event_id=event.id)
         db.import_entries(event_id=event.id, entries=entries)
+
+    if event:
+        cached_result.clear_cache(event_id=event.id)
