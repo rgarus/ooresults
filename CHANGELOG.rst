@@ -13,7 +13,8 @@ Changed
 Fixed
 ^^^^^
 
-- Wait time of 15 seconds removed, if an edit event dialog is saved with streaming set to "disabled".
+- Wait time of 15 seconds removed when an edit event dialog is saved with streaming set to "disabled".
+- Fixed layout error in pdf outputs when classes without entries exist.
 
 
 [0.3.1] - 2024-10-24

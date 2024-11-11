@@ -87,9 +87,8 @@ def create_pdf(
             txt = "{:.2f}".format(points)
         cell(w=width, h=None, txt=txt, align="R")
 
-    for i, class_results in enumerate(results):
-        class_, ranked_results = class_results
-
+    first_class = True
+    for class_, ranked_results in results:
         if not include_dns:
             # filter results - use only started entries
             ranked_results = [
@@ -106,7 +105,9 @@ def create_pdf(
         if not ranked_results:
             continue
 
-        if i > 0:
+        if first_class:
+            first_class = False
+        else:
             # insert a page break if there is not enough space left on the
             # page for the class header, the table header and two table rows
             if pdf.will_page_break(height=33):

@@ -156,8 +156,8 @@ def create_pdf(
         cell(pdf=pdf, w=12, h=None, txt=t3, align="R")
         pdf.set_font(style="")
 
-    for i, class_results in enumerate(results):
-        class_, ranked_results = class_results
+    first_class = True
+    for class_, ranked_results in results:
         standard = class_.params.otype == "standard"
 
         # filter results - use only finished entries
@@ -176,7 +176,9 @@ def create_pdf(
         if not ranked_results:
             continue
 
-        if i > 0:
+        if first_class:
+            first_class = False
+        else:
             # insert a page break if there is not enough space left on the
             # page for the class header, the table header and two table rows
             if pdf.will_page_break(height=22):
