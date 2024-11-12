@@ -50,11 +50,11 @@ Es bedeuten:
 
    Ist der Eintrag demo_reader on, kann unter der Adresse https://localhost:8080/demo
    ein Seite aufgerufen werden, mit der das Auslesen einer SiCards simuliert werden kann,
-   siehe 
+   siehe Abschnitt :ref:`demo_cardreader`.
 
    .. note::
 
-      Aussicherheitsgründen sollte demo_reader nur zum Kennenlernen der Software auf "on"
+      Aus Sicherheitsgründen sollte demo_reader nur zum Kennenlernen der Software auf "on"
       und sonst auf "off" gesetzt werden.
 
 

@@ -238,6 +238,8 @@ wendet sich der Läufer zur Korrektur ebenfalls ans Wettkampfzentrum.
    so wird der erste Wettkampf der "Events" Liste mit einem Schlüssel verwendet.
  
 
+.. _demo_cardreader:
+
 Demo-CardReader
 ---------------
 
