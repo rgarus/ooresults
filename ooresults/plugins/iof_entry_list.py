@@ -111,7 +111,7 @@ def parse_entry_list(content: bytes) -> Tuple[Dict, List[Dict]]:
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
     if not root.tag == "{" + iof_namespace + "}EntryList":
-        raise RuntimeError("Root element is " + root.tag + " but should be ResultList")
+        raise RuntimeError("Root element is " + root.tag + " but should be EntryList")
 
     event = {}
     event["name"] = root.find("Event/Name", namespaces=namespaces).text
