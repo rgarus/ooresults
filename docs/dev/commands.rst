@@ -88,9 +88,10 @@ Building an ooresults release
 
 Edit and change the version number in the following files
 
-- <git-local>/docs/source/conf.py
-- <git-local>/.readthedocs.yaml
+- <git-local>/docs/conf.py
 - <git-local>/pyproject.toml
+- <git-local>/CHANGELOG.rst
+
 
 
 Build the release
@@ -108,16 +109,18 @@ Build the release
 Publishing the release
 ----------------------
 
-For uploading to https://pypi.org use (during upload use __token__ as username):
+For uploading the build results to https://pypi.org use (during upload use __token__ as username):
 
 .. code-block::
 
+   cd <git-local>
    <venv-build>/bin/python -m twine check dist/*
    <venv-build>/bin/python -m twine upload dist/*
    
-For uploading to https://test.pypi.org use (during upload use __token__ as username):
+For uploading the build results to https://test.pypi.org use (during upload use __token__ as username):
 
 .. code-block::
 
+   cd <git-local>
    <venv-build>/bin/python -m twine check dist/*
    <venv-build>/bin/python -m twine --repository testpypi upload dist/*

@@ -30,7 +30,7 @@ from multiproject.utils import get_project
 
 copyright = "2022, rgarus"
 author = "rgarus"
-release = "0.3.1"
+release = "0.3.2"
 
 
 # -- General configuration ---------------------------------------------------
