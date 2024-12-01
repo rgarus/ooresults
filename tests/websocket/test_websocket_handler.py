@@ -83,7 +83,7 @@ class WebSocketServer(threading.Thread):
         self.streaming = Streaming(loop=self.loop)
 
         self.server = self.loop.run_until_complete(
-            websockets.serve(
+            websockets.legacy.server.serve(
                 ws_handler=self.handler.handler,
                 host=self.host,
                 port=self.port,
@@ -116,7 +116,7 @@ async def test_no_access_if_event_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
+    async with websockets.legacy.client.connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send("xxx,local")
         response = await si1_client.recv()
         assert response == "__no_access__"
@@ -131,7 +131,7 @@ async def test_no_access_if_key_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async with websockets.connect("ws://localhost:8081/si1") as si1_client:
+    async with websockets.legacy.client.connect("ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},xxx")
         response = await si1_client.recv()
         assert response == "__no_access__"
@@ -146,7 +146,7 @@ async def test_reader_status_received_if_event_and_key_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
+    async with websockets.legacy.client.connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},local")
         response = await si1_client.recv()
         assert json.loads(response) == {"status": "readerOffline", "data": ""}
@@ -158,7 +158,7 @@ async def test_cardreader_event_key_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async with websockets.connect(
+    async with websockets.legacy.client.connect(
         uri="ws://localhost:8081/cardreader",
         extra_headers={"X-Event-Key": "xxx"},
     ) as reader:
@@ -181,12 +181,12 @@ async def test_cardreader_event_key_found_and_reader_disconnected(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
+    async with websockets.legacy.client.connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},local")
         response = await si1_client.recv()
         assert json.loads(response) == {"status": "readerOffline", "data": ""}
 
-        async with websockets.connect(
+        async with websockets.legacy.client.connect(
             uri="ws://localhost:8081/cardreader",
             extra_headers={"X-Event-Key": "local"},
         ) as reader:
@@ -220,7 +220,7 @@ async def reader(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    client = await websockets.connect(
+    client = await websockets.legacy.client.connect(
         uri="ws://localhost:8081/cardreader",
         extra_headers={"X-Event-Key": "local"},
     )
@@ -246,7 +246,7 @@ async def si1_clients(
     reader: websockets.WebSocketClientProtocol,
     websocket_server: WebSocketServer,
 ):
-    connect = websockets.connect(uri="ws://localhost:8081/si1")
+    connect = websockets.legacy.client.connect(uri="ws://localhost:8081/si1")
     async with connect as c1, connect as c2, connect as c3, connect as c4:
         si1_clients = [c1, c2, c3, c4]
         for c in si1_clients:
