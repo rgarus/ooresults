@@ -120,7 +120,7 @@ class WebSocketServer(threading.Thread):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop=self.loop)
         self.server = self.loop.run_until_complete(
-            websockets.serve(
+            websockets.legacy.server.serve(
                 ws_handler=self.handler.handler,
                 host=self.host,
                 port=self.port,
@@ -161,7 +161,7 @@ async def test_live_server_event_key_not_found(
   </Event>
 </ResultList>
 """
-    async with websockets.connect(
+    async with websockets.legacy.client.connect(
         uri="ws://localhost:8081/import",
         extra_headers={"X-Event-Key": "xxx"},
     ) as client:
@@ -192,7 +192,7 @@ async def test_live_server_event_key_found_but_parse_error_in_result_list(
   </Event>
 </ResultList>
 """
-    async with websockets.connect(
+    async with websockets.legacy.client.connect(
         uri="ws://localhost:8081/import",
         extra_headers={"X-Event-Key": "local"},
     ) as client:
@@ -224,7 +224,7 @@ async def test_live_server_event_key_found(
   </Event>
 </ResultList>
 """
-    async with websockets.connect(
+    async with websockets.legacy.client.connect(
         uri="ws://localhost:8081/import",
         extra_headers={"X-Event-Key": "local"},
     ) as client:
@@ -277,7 +277,7 @@ async def test_live_server_import_result_list_snapshot(
     s = datetime.datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime.datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    async with websockets.connect(
+    async with websockets.legacy.client.connect(
         uri="ws://localhost:8081/import",
         extra_headers={"X-Event-Key": "local"},
     ) as client:
@@ -400,7 +400,7 @@ async def test_live_server_import_result_list_delta(
     s = datetime.datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime.datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    async with websockets.connect(
+    async with websockets.legacy.client.connect(
         uri="ws://localhost:8081/import",
         extra_headers={"X-Event-Key": "local"},
     ) as client:

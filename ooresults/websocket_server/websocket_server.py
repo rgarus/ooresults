@@ -65,7 +65,7 @@ class WebSocketServer(threading.Thread):
         self.handler = WebSocketHandler(
             demo_reader=self.demo_reader, import_stream=self.import_stream
         )
-        start_server = websockets.serve(
+        start_server = websockets.legacy.server.serve(
             self.handler.handler, self.host, self.port, loop=self.loop, ssl=ssl_context
         )
         self.loop.run_until_complete(start_server)
