@@ -24,8 +24,10 @@ from typing import Any
 from typing import List
 
 import pytest
-import websockets
-from websockets import WebSocketClientProtocol
+import websockets.exceptions
+from websockets.asyncio.client import connect
+from websockets.asyncio.client import ClientConnection
+from websockets.protocol import State
 
 import ooresults
 from ooresults.model import model
@@ -104,8 +106,8 @@ def mock_sleep(event_loop):
 @pytest.fixture
 def mock_connect():
     with mock.patch(
-        target="websockets.connect",
-        spec=websockets.connect,
+        target="ooresults.websocket_server.streaming.connect",
+        spec=connect,
         spec_set=True,
         new=mock.AsyncMock(),
     ) as m:
@@ -184,14 +186,13 @@ def check_calls(parent: mock.MagicMock, calls: List[C]):
 def value_calls(parent: mock.MagicMock, calls: List[C]):
     for i, c in enumerate(calls):
         if c.name == "mock_connect":
-            if c.value == WebSocketClientProtocol:
+            if c.value == ClientConnection:
                 parent.mock_connect.side_effect = None
                 parent.mock_connect.return_value = mock.create_autospec(
-                    spec=WebSocketClientProtocol, spec_set=True
+                    spec=ClientConnection, spec_set=True
                 )
                 parent.attach_mock(parent.mock_connect.return_value, "mock_ws")
-                parent.mock_connect.return_value.closed = False
-                # parent.mock_ws.closed = mock.PropertyMock(return_value=False)
+                parent.mock_connect.return_value.state = State.OPEN
             else:
                 parent.mock_connect.side_effect = c.value
 
@@ -215,7 +216,7 @@ async def test_if_streaming_is_disabled_then_connect_is_not_called_after_softwar
 
     mock_get_events.return_value = [event]
     mock_connect.return_value = mock.create_autospec(
-        spec=websockets.WebSocketClientProtocol, spec_set=True
+        spec=ClientConnection, spec_set=True
     )
 
     s = streaming.Streaming(loop=loop)
@@ -241,7 +242,7 @@ async def test_if_streaming_is_enabled_then_connect_is_called_until_connected(
     # sleep(10)
     # connect -> OSError
     # sleep(10)
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event(3), []
     # send
     # recv -> '{"result": "ok"}'
@@ -281,8 +282,8 @@ async def test_if_streaming_is_enabled_then_connect_is_called_until_connected(
 
     check_calls(parent=parent, calls=calls)
     c1 = [
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -319,12 +320,12 @@ async def test_if_answer_is_event_not_found_then_reconnect_after_45_sec(
     # call order of mocked objects in Streaming.stream()
     #
     # get_events -> [event]
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "eventNotFound"}'
     # sleep(45)
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "eventNotFound"}'
@@ -333,8 +334,8 @@ async def test_if_answer_is_event_not_found_then_reconnect_after_45_sec(
     calls = [
         # get_events -> [event]
         C(name="mock_get_events", value=[event]),
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -354,8 +355,8 @@ async def test_if_answer_is_event_not_found_then_reconnect_after_45_sec(
 
     check_calls(parent=parent, calls=calls)
     c1 = [
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -390,12 +391,12 @@ async def test_if_no_answer_then_reconnect_after_45_sec(
     # call order of mocked objects in Streaming.stream()
     #
     # get_events -> [event]
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> TimeoutError'
     # sleep(15)
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> TimeoutError'
@@ -404,8 +405,8 @@ async def test_if_no_answer_then_reconnect_after_45_sec(
     calls = [
         # get_events -> [event]
         C(name="mock_get_events", value=[event]),
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -425,8 +426,8 @@ async def test_if_no_answer_then_reconnect_after_45_sec(
 
     check_calls(parent=parent, calls=calls)
     c1 = [
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -461,12 +462,12 @@ async def test_if_unexpected_answer_then_reconnect_after_45_sec(
     # call order of mocked objects in Streaming.stream()
     #
     # get_events -> [event]
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '???'
     # sleep(45)
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '???'
@@ -475,8 +476,8 @@ async def test_if_unexpected_answer_then_reconnect_after_45_sec(
     calls = [
         # get_events -> [event]
         C(name="mock_get_events", value=[event]),
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -496,8 +497,8 @@ async def test_if_unexpected_answer_then_reconnect_after_45_sec(
 
     check_calls(parent=parent, calls=calls)
     c1 = [
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -532,7 +533,7 @@ async def test_if_answer_is_error_then_repeat_sending_actual_result_after_30_sec
     # call order of mocked objects in Streaming.stream()
     #
     # get_events -> [event]
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "error"}'
@@ -547,8 +548,8 @@ async def test_if_answer_is_error_then_repeat_sending_actual_result_after_30_sec
     calls = [
         # get_events -> [event]
         C(name="mock_get_events", value=[event]),
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -570,7 +571,6 @@ async def test_if_answer_is_error_then_repeat_sending_actual_result_after_30_sec
 
     check_calls(parent=parent, calls=calls)
     c1 = [
-        # C(name="mock_ws.closed.__bool__"),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -608,7 +608,7 @@ async def test_if_answer_is_ok_then_repeat_sending_different_results_every_30_se
     # call order of mocked objects in Streaming.stream()
     #
     # get_events -> [event]
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
@@ -623,8 +623,8 @@ async def test_if_answer_is_ok_then_repeat_sending_different_results_every_30_se
     calls = [
         # get_events -> [event]
         C(name="mock_get_events", value=[event]),
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -687,7 +687,7 @@ async def test_if_answer_is_ok_then_do_not_send_the_same_result_again(
     # call order of mocked objects in Streaming.stream()
     #
     # get_events -> [event]
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
@@ -705,8 +705,8 @@ async def test_if_answer_is_ok_then_do_not_send_the_same_result_again(
     calls = [
         # get_events -> [event]
         C(name="mock_get_events", value=[event]),
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -785,13 +785,13 @@ async def test_if_answer_is_ok_and_connection_closed_then_reconnect_after_30_sec
     # call order of mocked objects in Streaming.stream()
     #
     # get_events -> [event]
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
     # recv -> WebSocketException
     # sleep(30)
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
@@ -801,8 +801,8 @@ async def test_if_answer_is_ok_and_connection_closed_then_reconnect_after_30_sec
     calls = [
         # get_events -> [event]
         C(name="mock_get_events", value=[event]),
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -810,7 +810,7 @@ async def test_if_answer_is_ok_and_connection_closed_then_reconnect_after_30_sec
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
         # recv -> WebSocketException
-        C(name="mock_ws.recv", value=websockets.WebSocketException),
+        C(name="mock_ws.recv", value=websockets.exceptions.WebSocketException),
         # sleep(30)
         C(name="mock_sleep", kwargs={"delay": 30}),
     ]
@@ -824,8 +824,8 @@ async def test_if_answer_is_ok_and_connection_closed_then_reconnect_after_30_sec
 
     check_calls(parent=parent, calls=calls)
     c1 = [
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -862,7 +862,7 @@ async def test_if_stream_parameters_are_changed_then_reconnect(
     # call order of mocked objects in Streaming.stream()
     #
     # get_events -> [event]
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
@@ -871,7 +871,7 @@ async def test_if_stream_parameters_are_changed_then_reconnect(
     #
     # await s.update_event(event=event)
     #
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
@@ -881,8 +881,8 @@ async def test_if_stream_parameters_are_changed_then_reconnect(
     calls = [
         # get_events -> [event]
         C(name="mock_get_events", value=[event]),
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -905,8 +905,8 @@ async def test_if_stream_parameters_are_changed_then_reconnect(
 
     check_calls(parent=parent, calls=calls)
     c1 = [
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -947,7 +947,7 @@ async def test_if_stream_is_disabled_then_results_are_no_longer_send(
     # call order of mocked objects in Streaming.stream()
     #
     # get_events -> [event]
-    # connect -> WebSocketClientProtocol()
+    # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
@@ -959,8 +959,8 @@ async def test_if_stream_is_disabled_then_results_are_no_longer_send(
     calls = [
         # get_events -> [event]
         C(name="mock_get_events", value=[event]),
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
@@ -1045,8 +1045,8 @@ async def test_if_stream_is_enabled_then_connect_to_server(
 
     check_calls(parent=parent, calls=calls)
     c1 = [
-        # connect -> WebSocketClientProtocol()
-        C(name="mock_connect", value=WebSocketClientProtocol),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
         # event_class_results -> event, []
         C(name="mock_event_class_results", value=(event, [])),
         # send

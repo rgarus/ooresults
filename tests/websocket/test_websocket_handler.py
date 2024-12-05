@@ -27,11 +27,13 @@ from typing import List
 
 import pytest
 import pytest_asyncio
-import websockets
+import websockets.exceptions
+from websockets.asyncio.client import ClientConnection
+from websockets.asyncio.client import connect
+from websockets.asyncio.server import serve
 
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.model import model
-from ooresults.websocket_server.streaming import Streaming
 from ooresults.websocket_server.websocket_handler import WebSocketHandler
 from ooresults.repo.entry_type import EntryType
 from ooresults.repo.result_type import PersonRaceResult
@@ -80,17 +82,16 @@ class WebSocketServer(threading.Thread):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop=self.loop)
         self.handler = WebSocketHandler()
-        self.streaming = Streaming(loop=self.loop)
+        self.loop.create_task(self.start_server())
+        self.loop.run_forever()
 
-        self.server = self.loop.run_until_complete(
-            websockets.serve(
-                ws_handler=self.handler.handler,
-                host=self.host,
-                port=self.port,
-            ),
+    async def start_server(self) -> None:
+        self.server = await serve(
+            handler=self.handler.handler,
+            host=self.host,
+            port=self.port,
         )
         self.barrier.wait()
-        self.loop.run_forever()
 
     async def close(self):
         self.server.close()
@@ -116,13 +117,13 @@ async def test_no_access_if_event_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
+    async with connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send("xxx,local")
         response = await si1_client.recv()
         assert response == "__no_access__"
 
         # websocket is closed by the server
-        with pytest.raises(websockets.ConnectionClosedOK):
+        with pytest.raises(websockets.exceptions.ConnectionClosedOK):
             await si1_client.recv()
 
 
@@ -131,13 +132,13 @@ async def test_no_access_if_key_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async with websockets.connect("ws://localhost:8081/si1") as si1_client:
+    async with connect("ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},xxx")
         response = await si1_client.recv()
         assert response == "__no_access__"
 
         # websocket is closed by the server
-        with pytest.raises(websockets.ConnectionClosedOK):
+        with pytest.raises(websockets.exceptions.ConnectionClosedOK):
             await si1_client.recv()
 
 
@@ -146,7 +147,7 @@ async def test_reader_status_received_if_event_and_key_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
+    async with connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},local")
         response = await si1_client.recv()
         assert json.loads(response) == {"status": "readerOffline", "data": ""}
@@ -158,9 +159,9 @@ async def test_cardreader_event_key_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async with websockets.connect(
+    async with connect(
         uri="ws://localhost:8081/cardreader",
-        extra_headers={"X-Event-Key": "xxx"},
+        additional_headers={"X-Event-Key": "xxx"},
     ) as reader:
         # send a cardreader state message
         item = {
@@ -172,7 +173,7 @@ async def test_cardreader_event_key_not_found(
         assert response == 'Event for key "xxx" not found'
 
         # websocket is closed by the server
-        with pytest.raises(websockets.ConnectionClosedOK):
+        with pytest.raises(websockets.exceptions.ConnectionClosedOK):
             await reader.recv()
 
 
@@ -181,14 +182,14 @@ async def test_cardreader_event_key_found_and_reader_disconnected(
     event_id: int,
     websocket_server: WebSocketServer,
 ):
-    async with websockets.connect(uri="ws://localhost:8081/si1") as si1_client:
+    async with connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},local")
         response = await si1_client.recv()
         assert json.loads(response) == {"status": "readerOffline", "data": ""}
 
-        async with websockets.connect(
+        async with connect(
             uri="ws://localhost:8081/cardreader",
-            extra_headers={"X-Event-Key": "local"},
+            additional_headers={"X-Event-Key": "local"},
         ) as reader:
             # send a cardreader state message
             item = {
@@ -219,10 +220,10 @@ async def test_cardreader_event_key_found_and_reader_disconnected(
 async def reader(
     event_id: int,
     websocket_server: WebSocketServer,
-):
-    client = await websockets.connect(
+) -> ClientConnection:
+    client = await connect(
         uri="ws://localhost:8081/cardreader",
-        extra_headers={"X-Event-Key": "local"},
+        additional_headers={"X-Event-Key": "local"},
     )
     item = {
         "entryType": "readerDisconnected",
@@ -243,11 +244,14 @@ async def reader(
 @pytest_asyncio.fixture
 async def si1_clients(
     event_id: int,
-    reader: websockets.WebSocketClientProtocol,
+    reader: ClientConnection,
     websocket_server: WebSocketServer,
 ):
-    connect = websockets.connect(uri="ws://localhost:8081/si1")
-    async with connect as c1, connect as c2, connect as c3, connect as c4:
+    connect_1 = connect(uri="ws://localhost:8081/si1")
+    connect_2 = connect(uri="ws://localhost:8081/si1")
+    connect_3 = connect(uri="ws://localhost:8081/si1")
+    connect_4 = connect(uri="ws://localhost:8081/si1")
+    async with connect_1 as c1, connect_2 as c2, connect_3 as c3, connect_4 as c4:
         si1_clients = [c1, c2, c3, c4]
         for c in si1_clients:
             await c.send(f"{event_id},local")
@@ -262,8 +266,8 @@ async def si1_clients(
 @pytest.mark.asyncio
 async def test_cardreader_reader_connected(
     event_id: int,
-    reader: websockets.WebSocketClientProtocol,
-    si1_clients: List[websockets.WebSocketClientProtocol],
+    reader: ClientConnection,
+    si1_clients: List[ClientConnection],
     websocket_server: WebSocketServer,
 ):
     item = {
@@ -288,8 +292,8 @@ async def test_cardreader_reader_connected(
 @pytest.mark.asyncio
 async def test_cardreader_reader_disconnected(
     event_id: int,
-    reader: websockets.WebSocketClientProtocol,
-    si1_clients: List[websockets.WebSocketClientProtocol],
+    reader: ClientConnection,
+    si1_clients: List[ClientConnection],
     websocket_server: WebSocketServer,
 ):
     item = {
@@ -314,8 +318,8 @@ async def test_cardreader_reader_disconnected(
 @pytest.mark.asyncio
 async def test_cardreader_card_inserted(
     event_id: int,
-    reader: websockets.WebSocketClientProtocol,
-    si1_clients: List[websockets.WebSocketClientProtocol],
+    reader: ClientConnection,
+    si1_clients: List[ClientConnection],
     websocket_server: WebSocketServer,
 ):
     item = {
@@ -342,8 +346,8 @@ async def test_cardreader_card_inserted(
 @pytest.mark.asyncio
 async def test_cardreader_card_removed(
     event_id: int,
-    reader: websockets.WebSocketClientProtocol,
-    si1_clients: List[websockets.WebSocketClientProtocol],
+    reader: ClientConnection,
+    si1_clients: List[ClientConnection],
     websocket_server: WebSocketServer,
 ):
     item = {
@@ -369,8 +373,8 @@ async def test_cardreader_card_removed(
 async def test_cardreader_card_read(
     db,
     event_id: int,
-    reader: websockets.WebSocketClientProtocol,
-    si1_clients: List[websockets.WebSocketClientProtocol],
+    reader: ClientConnection,
+    si1_clients: List[ClientConnection],
     websocket_server: WebSocketServer,
 ):
     item = {

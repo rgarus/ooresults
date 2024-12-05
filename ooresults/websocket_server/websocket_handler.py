@@ -28,11 +28,13 @@ import functools
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
+from typing import Tuple
 
 import tzlocal
-import websockets
-from websockets.legacy.server import WebSocketServerProtocol
 import web
+import websockets.exceptions
+from websockets.asyncio.server import ServerConnection
+from websockets.protocol import State
 
 from ooresults.utils.globals import t_globals
 from ooresults.model import model
@@ -51,7 +53,7 @@ class WebSocketHandler:
     def __init__(self, demo_reader: bool = False, import_stream: bool = False):
         self.demo_reader = demo_reader
         self.import_stream = import_stream
-        self.connections = {}
+        self.connections: Dict[ServerConnection, Tuple[str, int, str]] = {}
         self.messages = []
         self.cardreader_status = {}  # type: Dict[int: str]
         self.executor = ThreadPoolExecutor(max_workers=2)
@@ -87,7 +89,7 @@ class WebSocketHandler:
                 await self.send(conn=conn, event=copy.deepcopy(event), message=message)
 
     async def send(
-        self, conn: WebSocketServerProtocol, event: EventType, message: Dict
+        self, conn: ServerConnection, event: EventType, message: Dict
     ) -> None:
         status = (
             self.cardreader_status[event.id]
@@ -111,19 +113,28 @@ class WebSocketHandler:
             data = json.dumps({"status": status, "data": str(data)})
         try:
             await conn.send(str(data))
-        except websockets.ConnectionClosed:
+        except websockets.exceptions.ConnectionClosed:
             pass
 
-    async def handler(self, websocket: WebSocketServerProtocol) -> None:
-        addr = f"addr: {websocket.remote_address}, path: {websocket.path}"
+    async def handler(self, websocket: ServerConnection) -> None:
+        addr = f"addr: {websocket.remote_address}, path: {websocket.request.path}"
         print(f"WEBSOCKET CONNECTED, {addr}")
-        print("websocket.request_headers:", websocket.request_headers)
+        print("websocket.request.headers:", websocket.request.headers)
 
-        if websocket.path == "/import":
-            event_key = websocket.request_headers.get("X-Event-Key", "")
+        if websocket.request.path == "/import":
+            event_key = websocket.request.headers.get("X-Event-Key", "")
             try:
                 if self.import_stream:
-                    async for message in websocket:
+                    # workaround for
+                    # https://github.com/python-websockets/websockets/issues/1527
+                    while websocket.state not in (State.CLOSING, State.CLOSED):
+                        try:
+                            message = await asyncio.wait_for(
+                                websocket.recv(), timeout=30
+                            )
+                        except asyncio.TimeoutError:
+                            continue
+
                         t1 = time.time()
                         try:
                             data = bz2.decompress(message)
@@ -144,7 +155,7 @@ class WebSocketHandler:
                             f"Importing result, {websocket.remote_address[0]}, {len(message)}, {t2 - t1:.3f}"
                         )
 
-            except websockets.ConnectionClosed:
+            except websockets.exceptions.ConnectionClosed:
                 pass
             except EventNotFoundError:
                 await websocket.send(json.dumps({"result": "eventNotFound"}))
@@ -155,11 +166,20 @@ class WebSocketHandler:
                 await websocket.close()
                 print(f"WEBSOCKET CLOSED, {addr}")
 
-        elif websocket.path == "/demo":
+        elif websocket.request.path == "/demo":
             event = None
             try:
                 if self.demo_reader:
-                    async for message in websocket:
+                    # workaround for
+                    # https://github.com/python-websockets/websockets/issues/1527
+                    while websocket.state not in (State.CLOSING, State.CLOSED):
+                        try:
+                            message = await asyncio.wait_for(
+                                websocket.recv(), timeout=30
+                            )
+                        except asyncio.TimeoutError:
+                            continue
+
                         # workaround to detect lost websocket connection in the browser
                         # see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
                         if message == "__ping__":
@@ -264,7 +284,7 @@ class WebSocketHandler:
                                 res["status"] = res["status"].name
                             print(res)
 
-            except websockets.ConnectionClosed:
+            except websockets.exceptions.ConnectionClosed:
                 pass
             except Exception as e:
                 logging.exception(e)
@@ -276,12 +296,19 @@ class WebSocketHandler:
                         del self.cardreader_status[event.id]
                     await self.send_to_all(event=copy.deepcopy(event), message={})
 
-        elif websocket.path == "/cardreader":
+        elif websocket.request.path == "/cardreader":
             event = None
-            event_key = websocket.request_headers.get("X-Event-Key", "")
+            event_key = websocket.request.headers.get("X-Event-Key", "")
+            print(">>>>>>>>>>> cardreader", event_key)
             try:
-                print(">>>>>>>>>>> cardreader", event_key)
-                async for message in websocket:
+                # workaround for
+                # https://github.com/python-websockets/websockets/issues/1527
+                while websocket.state not in (State.CLOSING, State.CLOSED):
+                    try:
+                        message = await asyncio.wait_for(websocket.recv(), timeout=30)
+                    except asyncio.TimeoutError:
+                        continue
+
                     try:
                         data = bz2.decompress(message)
                     except:
@@ -331,7 +358,7 @@ class WebSocketHandler:
                     print(res)
                     await websocket.send(json.dumps(res))
 
-            except websockets.ConnectionClosed:
+            except websockets.exceptions.ConnectionClosed:
                 pass
             except Exception as e:
                 logging.exception(e)
@@ -346,7 +373,7 @@ class WebSocketHandler:
 
         else:
             try:
-                if websocket.path in ("/si1", "/si2"):
+                if websocket.request.path in ("/si1", "/si2"):
                     data = await websocket.recv()
                     event_id, event_key = data.split(",")
 
@@ -357,12 +384,22 @@ class WebSocketHandler:
                     for e in events:
                         if str(e.id) == event_id and e.key == event_key:
                             self.connections[websocket] = (
-                                websocket.path,
+                                websocket.request.path,
                                 event_id,
                                 event_key,
                             )
                             await self.send(conn=websocket, event=e, message={})
-                            async for message in websocket:
+
+                            # workaround for
+                            # https://github.com/python-websockets/websockets/issues/1527
+                            while websocket.state not in (State.CLOSING, State.CLOSED):
+                                try:
+                                    message = await asyncio.wait_for(
+                                        websocket.recv(), timeout=30
+                                    )
+                                except asyncio.TimeoutError:
+                                    continue
+
                                 # workaround to detect lost websocket connection in the browser
                                 # see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
                                 if message == "__ping__":
@@ -372,7 +409,7 @@ class WebSocketHandler:
                                     break
                     else:
                         await websocket.send("__no_access__")
-            except websockets.ConnectionClosed:
+            except websockets.exceptions.ConnectionClosed:
                 pass
             finally:
                 if websocket in self.connections:

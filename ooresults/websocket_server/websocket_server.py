@@ -22,7 +22,7 @@ import threading
 import ssl
 from typing import Optional
 
-import websockets
+from websockets.asyncio.server import serve
 
 from ooresults.websocket_server.streaming import Streaming
 from ooresults.websocket_server.websocket_handler import WebSocketHandler
@@ -65,15 +65,20 @@ class WebSocketServer(threading.Thread):
         self.handler = WebSocketHandler(
             demo_reader=self.demo_reader, import_stream=self.import_stream
         )
-        start_server = websockets.serve(
-            self.handler.handler, self.host, self.port, loop=self.loop, ssl=ssl_context
+        self.loop.create_task(self.start_server(ssl_context=ssl_context))
+        self.loop.run_forever()
+
+    async def start_server(self, ssl_context: Optional[ssl.SSLContext] = None) -> None:
+        await serve(
+            handler=self.handler.handler,
+            host=self.host,
+            port=self.port,
+            ssl=ssl_context,
         )
-        self.loop.run_until_complete(start_server)
         if ssl_context is None:
             print(f"ws://{self.host}:{str(self.port)}")
         else:
             print(f"wss://{self.host}:{str(self.port)}")
-        self.loop.run_forever()
 
     async def update_event(self, event: EventType) -> None:
         if self.handler:

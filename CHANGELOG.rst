@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Fixed
+^^^^^
+
+- ooresults.server startup error when using the Python package websockets >= 14.0 fixed.
+
+
 [0.3.2] - 2024-11-14
 --------------------
 

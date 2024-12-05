@@ -27,7 +27,9 @@ import ssl
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
 
-import websockets
+import websockets.exceptions
+from websockets.asyncio.client import connect
+from websockets.protocol import State
 
 from ooresults.model import model
 from ooresults.plugins import iof_result_list
@@ -90,10 +92,10 @@ class Streaming:
                 websocket = None
                 while websocket is None:
                     try:
-                        websocket = await websockets.connect(
+                        websocket = await connect(
                             uri=uri,
                             ssl=ssl_context,
-                            extra_headers=headers,
+                            additional_headers=headers,
                         )
                         break
                     except asyncio.CancelledError:
@@ -187,7 +189,7 @@ class Streaming:
 
                     except EventNotFoundError:
                         raise
-                    except websockets.WebSocketException:
+                    except websockets.exceptions.WebSocketException:
                         wait_time = 30
                         break
                     except asyncio.CancelledError:
@@ -202,7 +204,10 @@ class Streaming:
                                 status=streaming_status.Status.ACCESS_DENIED,
                             )
                         await asyncio.sleep(delay=wait_time)
-                        if websocket.closed:
+
+                        # check State.CLOSING due to
+                        # https://github.com/python-websockets/websockets/issues/1527
+                        if websocket.state in (State.CLOSING, State.CLOSED):
                             break
 
         except asyncio.CancelledError:
