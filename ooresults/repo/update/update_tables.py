@@ -19,11 +19,6 @@
 
 import logging
 
-from ooresults.repo.update import update_008
-from ooresults.repo.update import update_009
-from ooresults.repo.update import update_010
-from ooresults.repo.update import update_011
-from ooresults.repo.update import update_012
 from ooresults.repo.update import update_013
 
 
@@ -50,25 +45,10 @@ def update_tables(db, path: str = "ooresults.sqlite") -> None:
         elif version < VERSION:
             t.rollback()
 
-            if version <= 6:
-                raise RuntimeError(
-                    f"DB version to low - version = {version}, but must be at least 7"
-                )
-            if version <= 7:
-                logging.info("Update DB to version 8 ...")
-                update_008.update(path=path)
-            if version <= 8:
-                logging.info("Update DB to version 9 ...")
-                update_009.update(path=path)
-            if version <= 9:
-                logging.info("Update DB to version 10 ...")
-                update_010.update(path=path)
-            if version <= 10:
-                logging.info("Update DB to version 11 ...")
-                update_011.update(path=path)
             if version <= 11:
-                logging.info("Update DB to version 12 ...")
-                update_012.update(path=path)
+                raise RuntimeError(
+                    f"DB version to low - version = {version}, but must be at least 12"
+                )
             if version <= 12:
                 logging.info("Update DB to version 13 ...")
                 update_013.update(path=path)

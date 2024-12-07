@@ -5,6 +5,17 @@ Changelog
 [Unreleased]
 ------------
 
+.. warning::
+
+   Due to the changed minimum database schema version a direct update from ooresults 0.2.x to 0.4.0 or higher with an existing database is not possible.
+   Please update first to a ooresults version 0.3.x, start the ooresults-server to update the database schema, and update then to ooresults 0.4.0 or higher.
+
+
+Changed
+^^^^^^^
+
+- Minimum database schema version has been changed to 12.
+
 Fixed
 ^^^^^
 
