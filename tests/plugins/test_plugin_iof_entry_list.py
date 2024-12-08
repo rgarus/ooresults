@@ -19,11 +19,10 @@
 
 import datetime
 
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.event_type import EventType
+from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.plugins import iof_entry_list
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.event_type import EventType
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.start_type import PersonRaceStart
 
 
 def test_import_entry_list_with_one_entry():

@@ -19,17 +19,17 @@
 
 from datetime import datetime
 from typing import List
-from typing import Tuple
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.entry_type import RankedEntryType
-from ooresults.repo.event_type import EventType
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import SplitTime
-from ooresults.repo.result_type import SpStatus
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import RankedEntryType
+from ooresults.otypes.event_type import EventType
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SplitTime
+from ooresults.otypes.result_type import SpStatus
 from ooresults.pdf.pdf import PDF
 from ooresults.utils import globals
 

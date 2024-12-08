@@ -24,12 +24,12 @@ from typing import Tuple
 
 import web
 
-from ooresults.model import model
-from ooresults.repo.repo import EventNotFoundError
 import ooresults.pdf.result
 import ooresults.pdf.splittimes
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.entry_type import RankedEntryType
+from ooresults.model import model
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import RankedEntryType
+from ooresults.repo.repo import EventNotFoundError
 from ooresults.utils.globals import t_globals
 
 

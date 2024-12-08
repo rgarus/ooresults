@@ -24,7 +24,7 @@ import web
 from lxml import etree
 
 import ooresults
-from ooresults.repo.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.utils.globals import t_globals
 
 

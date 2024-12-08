@@ -19,8 +19,8 @@
 
 import pytest
 
+from ooresults.otypes.series_type import Settings
 from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.repo.series_type import Settings
 
 
 @pytest.fixture

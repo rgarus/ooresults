@@ -19,11 +19,11 @@
 
 import threading
 from enum import Enum
+from typing import Awaitable
 from typing import Dict
 from typing import Optional
-from typing import Awaitable
 
-from ooresults.repo.event_type import EventType
+from ooresults.otypes.event_type import EventType
 
 
 class Status(Enum):

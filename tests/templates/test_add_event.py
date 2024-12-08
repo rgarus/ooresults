@@ -25,7 +25,7 @@ import web
 from lxml import etree
 
 import ooresults
-from ooresults.repo.event_type import EventType
+from ooresults.otypes.event_type import EventType
 from ooresults.utils.globals import t_globals
 
 

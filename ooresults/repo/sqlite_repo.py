@@ -17,11 +17,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import json
 import copy
+import datetime
+import json
 import logging
 import sqlite3
-import datetime
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -29,27 +29,27 @@ from typing import Optional
 import web
 import web.db
 
-from ooresults.repo.repo import Repo
+from ooresults.otypes import result_type
+from ooresults.otypes import series_type
+from ooresults.otypes import start_type
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.class_type import ClassType
+from ooresults.otypes.club_type import ClubType
+from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.course_type import CourseType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.event_type import EventType
 from ooresults.repo.repo import ClassUsedError
-from ooresults.repo.repo import CourseUsedError
 from ooresults.repo.repo import ClubUsedError
 from ooresults.repo.repo import CompetitorUsedError
-from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import ConstraintError
+from ooresults.repo.repo import CourseUsedError
+from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import OperationalError
+from ooresults.repo.repo import Repo
 from ooresults.repo.repo import TransactionMode
 from ooresults.repo.update import update_tables
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.class_type import ClassType
-from ooresults.repo.club_type import ClubType
-from ooresults.repo.competitor_type import CompetitorType
-from ooresults.repo.course_type import CourseType
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.event_type import EventType
-from ooresults.repo import result_type
-from ooresults.repo import series_type
-from ooresults.repo import start_type
 
 
 class SqliteRepo(Repo):

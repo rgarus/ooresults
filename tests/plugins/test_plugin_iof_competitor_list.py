@@ -17,8 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.plugins import iof_competitor_list
-from ooresults.repo.competitor_type import CompetitorType
 
 
 def test_import_name():

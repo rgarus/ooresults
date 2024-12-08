@@ -22,11 +22,11 @@ from datetime import timezone
 
 import pytest
 
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SplitTime
+from ooresults.otypes.result_type import SpStatus
 from ooresults.pdf.splittimes import format_result
-from ooresults.repo.result_type import SplitTime
-from ooresults.repo.result_type import SpStatus
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import ResultStatus
 
 
 def t(a: datetime, b: datetime) -> int:

@@ -24,7 +24,7 @@ import web
 from lxml import etree
 
 import ooresults
-from ooresults.repo.series_type import Settings
+from ooresults.otypes.series_type import Settings
 from ooresults.utils.globals import t_globals
 
 

@@ -24,17 +24,17 @@ from datetime import timezone
 
 import pytest
 
+from ooresults.otypes import result_type
+from ooresults.otypes import start_type
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.entry_type import RankedEntryType
+from ooresults.otypes.event_type import EventType
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SpStatus
 from ooresults.plugins import iof_result_list
 from ooresults.plugins.iof_result_list import ResultListStatus
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo import result_type
-from ooresults.repo import start_type
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.entry_type import RankedEntryType
-from ooresults.repo.event_type import EventType
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import SpStatus
 
 
 def test_import_result_list():

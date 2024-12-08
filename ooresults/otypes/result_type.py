@@ -20,19 +20,19 @@
 from __future__ import annotations
 
 import dataclasses
+import enum
 from datetime import datetime
 from datetime import timezone
-import enum
+from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Dict
 
 import caseconverter
 import fastclasses_json
 
-from ooresults.model import handicap
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_params import VoidedLeg
+from ooresults.otypes import handicap
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_params import VoidedLeg
 
 
 class SpStatus(enum.Enum):

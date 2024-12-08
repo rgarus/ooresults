@@ -17,9 +17,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
 from ooresults.plugins import iof_class_list
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassInfoType
 
 
 def test_import_class_list():

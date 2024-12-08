@@ -19,14 +19,13 @@
 
 import io
 from typing import List
-from typing import Dict
 
 import clevercsv as csv
 from unidecode import unidecode
 
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.result_type import ResultStatus
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.result_type import ResultStatus
 
 
 def cp1252(value: str) -> str:

@@ -17,15 +17,15 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-from typing import Tuple
 from typing import Any
+from typing import List
 from typing import Optional
+from typing import Tuple
 
+from ooresults.otypes.event_type import EventType
+from ooresults.otypes.series_type import PersonSeriesResult
+from ooresults.otypes.series_type import Settings
 from ooresults.pdf.pdf import PDF
-from ooresults.repo.event_type import EventType
-from ooresults.repo.series_type import Settings
-from ooresults.repo.series_type import PersonSeriesResult
 
 
 def create_pdf(

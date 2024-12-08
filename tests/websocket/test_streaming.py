@@ -19,24 +19,24 @@
 
 import asyncio
 import datetime
-from unittest import mock
 from typing import Any
 from typing import List
+from unittest import mock
 
 import pytest
 import websockets.exceptions
-from websockets.asyncio.client import connect
 from websockets.asyncio.client import ClientConnection
+from websockets.asyncio.client import connect
 from websockets.protocol import State
 
 import ooresults
 from ooresults.model import model
-from ooresults.repo.event_type import EventType
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassInfoType
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.event_type import EventType
 from ooresults.websocket_server import streaming
-from ooresults.websocket_server.streaming_status import Status
 from ooresults.websocket_server import streaming_status
+from ooresults.websocket_server.streaming_status import Status
 
 
 @pytest.fixture

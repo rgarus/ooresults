@@ -18,11 +18,11 @@
 
 
 import asyncio
+import bz2
 import datetime
+import json
 import tempfile
 import threading
-import json
-import bz2
 from typing import List
 
 import pytest
@@ -32,14 +32,14 @@ from websockets.asyncio.client import ClientConnection
 from websockets.asyncio.client import connect
 from websockets.asyncio.server import serve
 
-from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.model import model
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SplitTime
+from ooresults.otypes.result_type import SpStatus
+from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.websocket_server.websocket_handler import WebSocketHandler
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import SplitTime
-from ooresults.repo.result_type import SpStatus
-from ooresults.repo.result_type import ResultStatus
 
 
 @pytest.fixture

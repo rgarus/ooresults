@@ -24,7 +24,7 @@ import web
 from lxml import etree
 
 import ooresults
-from ooresults.repo.club_type import ClubType
+from ooresults.otypes.club_type import ClubType
 from ooresults.utils.globals import t_globals
 
 

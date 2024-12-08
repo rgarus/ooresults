@@ -22,17 +22,18 @@ import datetime
 
 import pytest
 
+from ooresults.model import model
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.result_type import CardReaderMessage
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SplitTime
+from ooresults.otypes.result_type import SpStatus
+from ooresults.otypes.start_type import PersonRaceStart
 from ooresults.repo import repo
 from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.start_type import PersonRaceStart
-from ooresults.repo.result_type import CardReaderMessage
-from ooresults.repo.result_type import SplitTime
-from ooresults.repo.result_type import SpStatus
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import ResultStatus
-from ooresults.model import model
+
 
 entry_time = datetime.datetime(2015, 1, 1, 13, 38, 59, tzinfo=datetime.timezone.utc)
 s1 = datetime.datetime(2015, 1, 1, 12, 38, 59, tzinfo=datetime.timezone.utc)

@@ -24,8 +24,8 @@ from typing import Dict
 
 from pytest import fixture
 
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_params import VoidedLeg
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_params import VoidedLeg
 
 
 @fixture

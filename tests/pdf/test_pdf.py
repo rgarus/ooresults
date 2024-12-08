@@ -21,9 +21,9 @@ from typing import Optional
 
 import pytest
 
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.class_type import ClassParams
 from ooresults.pdf.pdf import PDF
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.class_type import ClassParams
 
 
 testdata = [

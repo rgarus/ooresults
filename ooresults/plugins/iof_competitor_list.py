@@ -18,13 +18,13 @@
 
 
 import pathlib
-from typing import List
 from typing import Dict
+from typing import List
 
 from lxml import etree
 from lxml.builder import ElementMaker
 
-from ooresults.repo.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import CompetitorType
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"

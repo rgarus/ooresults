@@ -76,3 +76,11 @@ packages = [
     "ooresults.utils",
     "ooresults.websocket_server",
 ]
+
+[tool.isort]
+profile = "black"
+force_single_line = "true"
+lines_after_imports = 2
+
+
+

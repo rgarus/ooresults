@@ -21,10 +21,10 @@ import datetime
 
 import pytest
 
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.course_type import CourseType
 from ooresults.repo import repo
 from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.course_type import CourseType
 
 
 @pytest.fixture

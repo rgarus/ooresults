@@ -18,20 +18,20 @@
 
 
 import datetime
-import pathlib
 import logging
+import pathlib
 from typing import Optional
 
 import tzlocal
 import web
 
 from ooresults.model import model
-from ooresults.repo.repo import ClassUsedError
-from ooresults.repo.repo import EventNotFoundError
-from ooresults.repo.repo import ConstraintError
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_params import VoidedLeg
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_params import VoidedLeg
 from ooresults.plugins import iof_class_list
+from ooresults.repo.repo import ClassUsedError
+from ooresults.repo.repo import ConstraintError
+from ooresults.repo.repo import EventNotFoundError
 from ooresults.utils.globals import t_globals
 
 

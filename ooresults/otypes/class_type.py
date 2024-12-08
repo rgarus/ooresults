@@ -18,36 +18,29 @@
 
 
 import dataclasses
-from dataclasses import field
-from typing import Dict
 from typing import Optional
 
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.start_type import PersonRaceStart
+from ooresults.otypes.class_params import ClassParams
 
 
 @dataclasses.dataclass
-class EntryType:
+class ClassType:
     id: int
     event_id: int
-    competitor_id: Optional[int]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    gender: Optional[str] = None
-    year: Optional[int] = None
-    class_id: Optional[int] = None
-    class_name: Optional[str] = None
-    not_competing: bool = False
-    chip: Optional[str] = None
-    fields: Dict[int, str] = field(default_factory=lambda: {})
-    result: PersonRaceResult = field(default_factory=lambda: PersonRaceResult())
-    start: PersonRaceStart = field(default_factory=lambda: PersonRaceStart())
-    club_id: Optional[int] = None
-    club_name: Optional[str] = None
+    name: str
+    short_name: Optional[str]
+    course_id: Optional[int]
+    params: ClassParams
 
 
 @dataclasses.dataclass
-class RankedEntryType:
-    entry: EntryType
-    rank: Optional[int] = None
-    time_behind: Optional[int] = None
+class ClassInfoType:
+    id: int
+    name: str
+    short_name: Optional[str]
+    course_id: Optional[int]
+    course_name: Optional[str]
+    course_length: Optional[int]
+    course_climb: Optional[int]
+    number_of_controls: Optional[int]
+    params: ClassParams

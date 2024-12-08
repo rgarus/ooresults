@@ -19,12 +19,12 @@
 
 import datetime
 
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
 from ooresults.plugins import oe12
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import ResultStatus
 
 
 header = (

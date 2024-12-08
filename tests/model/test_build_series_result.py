@@ -24,17 +24,17 @@ from decimal import Decimal
 import pytest
 
 from ooresults.model import model
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassType
+from ooresults.otypes.course_type import CourseType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.event_type import EventType
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.series_type import PersonSeriesResult
+from ooresults.otypes.series_type import Points
+from ooresults.otypes.series_type import Settings
 from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassType
-from ooresults.repo.course_type import CourseType
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.event_type import EventType
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.series_type import Settings
-from ooresults.repo.series_type import PersonSeriesResult
-from ooresults.repo.series_type import Points
 
 
 @pytest.fixture

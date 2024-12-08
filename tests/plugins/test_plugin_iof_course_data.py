@@ -19,11 +19,11 @@
 
 import datetime
 
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.course_type import CourseType
+from ooresults.otypes.event_type import EventType
 from ooresults.plugins import iof_course_data
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.course_type import CourseType
-from ooresults.repo.event_type import EventType
 
 
 def test_import_course_data():

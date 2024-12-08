@@ -24,7 +24,7 @@ import web
 from lxml import etree
 
 import ooresults
-from ooresults.repo.course_type import CourseType
+from ooresults.otypes.course_type import CourseType
 from ooresults.utils.globals import t_globals
 
 

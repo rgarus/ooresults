@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from ooresults.repo import result_type
+from ooresults.otypes import result_type
 
 
 def parse(content: bytes):

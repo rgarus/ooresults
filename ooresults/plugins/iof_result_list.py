@@ -20,22 +20,22 @@
 import pathlib
 from datetime import timedelta
 from enum import Enum
-from typing import List
 from typing import Dict
-from typing import Tuple
+from typing import List
 from typing import Optional
+from typing import Tuple
 
+import iso8601
 from lxml import etree
 from lxml.builder import ElementMaker
-import iso8601
 
-from ooresults.repo import result_type
-from ooresults.repo import start_type
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.entry_type import RankedEntryType
-from ooresults.repo.event_type import EventType
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import SpStatus
+from ooresults.otypes import result_type
+from ooresults.otypes import start_type
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import RankedEntryType
+from ooresults.otypes.event_type import EventType
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SpStatus
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"

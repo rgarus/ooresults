@@ -32,8 +32,8 @@ from websockets.asyncio.client import connect
 from websockets.protocol import State
 
 from ooresults.model import model
+from ooresults.otypes.event_type import EventType
 from ooresults.plugins import iof_result_list
-from ooresults.repo.event_type import EventType
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.websocket_server import streaming_status
 

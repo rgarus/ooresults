@@ -18,15 +18,15 @@
 
 
 import asyncio
-import threading
 import ssl
+import threading
 from typing import Optional
 
 from websockets.asyncio.server import serve
 
+from ooresults.otypes.event_type import EventType
 from ooresults.websocket_server.streaming import Streaming
 from ooresults.websocket_server.websocket_handler import WebSocketHandler
-from ooresults.repo.event_type import EventType
 
 
 class WebSocketServer(threading.Thread):

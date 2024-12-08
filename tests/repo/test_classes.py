@@ -21,13 +21,13 @@ import datetime
 
 import pytest
 
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_params import VoidedLeg
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.class_type import ClassType
+from ooresults.otypes.result_type import ResultStatus
 from ooresults.repo import repo
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.class_type import ClassType
 from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_params import VoidedLeg
-from ooresults.repo.result_type import ResultStatus
 
 
 @pytest.fixture

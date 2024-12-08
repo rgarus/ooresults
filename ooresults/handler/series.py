@@ -17,16 +17,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import io
 import logging
 import pathlib
-import io
 
-import web
 import clevercsv as csv
+import web
 
-from ooresults.model import model
-from ooresults.repo import series_type
 import ooresults.pdf.series
+from ooresults.model import model
+from ooresults.otypes import series_type
 from ooresults.utils.globals import t_globals
 
 

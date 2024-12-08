@@ -18,17 +18,17 @@
 
 
 import pathlib
-from typing import List
 from typing import Dict
+from typing import List
 from typing import Tuple
 
 import iso8601
 from lxml import etree
 from lxml.builder import ElementMaker
 
-from ooresults.repo import result_type
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.event_type import EventType
+from ooresults.otypes import result_type
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.event_type import EventType
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"

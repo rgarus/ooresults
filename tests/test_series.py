@@ -21,17 +21,18 @@ from decimal import Decimal
 
 import pytest
 
-from ooresults.model import model, build_results
-from ooresults.repo import series_type
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.entry_type import RankedEntryType
-from ooresults.repo.event_type import EventType
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.series_type import PersonSeriesResult
-from ooresults.repo.series_type import Points
+from ooresults.model import build_results
+from ooresults.model import model
+from ooresults.otypes import series_type
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.entry_type import RankedEntryType
+from ooresults.otypes.event_type import EventType
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.series_type import PersonSeriesResult
+from ooresults.otypes.series_type import Points
 
 
 @pytest.fixture

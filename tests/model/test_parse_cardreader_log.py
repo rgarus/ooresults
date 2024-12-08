@@ -20,15 +20,15 @@
 from datetime import datetime
 from datetime import timezone
 
-import pytest
 import jsonschema
+import pytest
 
-from ooresults.repo.result_type import CardReaderMessage
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import SplitTime
-from ooresults.repo.result_type import SpStatus
-from ooresults.repo.result_type import ResultStatus
 from ooresults.model import model
+from ooresults.otypes.result_type import CardReaderMessage
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SplitTime
+from ooresults.otypes.result_type import SpStatus
 
 
 def test_parse_with_start_time_and_with_finish_time():

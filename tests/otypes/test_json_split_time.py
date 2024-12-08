@@ -24,8 +24,8 @@ from typing import Dict
 
 from pytest import fixture
 
-from ooresults.repo.result_type import SplitTime
-from ooresults.repo.result_type import SpStatus
+from ooresults.otypes.result_type import SplitTime
+from ooresults.otypes.result_type import SpStatus
 
 
 @fixture

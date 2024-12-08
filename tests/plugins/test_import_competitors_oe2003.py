@@ -20,11 +20,11 @@
 from datetime import datetime
 from datetime import timezone
 
+from ooresults.otypes import result_type
+from ooresults.otypes import start_type
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SpStatus
 from ooresults.plugins.oe2003 import parse
-from ooresults.repo import result_type
-from ooresults.repo import start_type
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import SpStatus
 
 
 header = [

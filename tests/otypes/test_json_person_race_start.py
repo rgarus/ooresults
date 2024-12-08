@@ -24,7 +24,7 @@ from typing import Dict
 
 from pytest import fixture
 
-from ooresults.repo.start_type import PersonRaceStart
+from ooresults.otypes.start_type import PersonRaceStart
 
 
 @fixture

@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from ooresults.repo.event_type import EventType
+from ooresults.otypes.event_type import EventType
 from ooresults.websocket_server.streaming_status import Status
 from ooresults.websocket_server.streaming_status import StreamingStatus
 

@@ -27,10 +27,10 @@ import web
 from lxml import etree
 
 import ooresults
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_params import VoidedLeg
-from ooresults.repo.class_type import ClassType
-from ooresults.repo.course_type import CourseType
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_params import VoidedLeg
+from ooresults.otypes.class_type import ClassType
+from ooresults.otypes.course_type import CourseType
 from ooresults.utils.globals import t_globals
 
 

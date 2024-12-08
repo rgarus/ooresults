@@ -21,9 +21,9 @@ import datetime
 
 import pytest
 
+from ooresults.otypes.event_type import EventType
 from ooresults.repo import repo
 from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.repo.event_type import EventType
 
 
 D_2021_03_02 = datetime.date(year=2021, month=3, day=2)

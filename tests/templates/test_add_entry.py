@@ -19,25 +19,25 @@
 
 import pathlib
 from datetime import datetime
-from datetime import timezone
 from datetime import timedelta
-from typing import List
+from datetime import timezone
 from typing import Dict
+from typing import List
 
 import pytest
 import web
 from lxml import etree
 
 import ooresults
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassType
-from ooresults.repo.club_type import ClubType
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import SplitTime
-from ooresults.repo.result_type import SpStatus
-from ooresults.repo.start_type import PersonRaceStart
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassType
+from ooresults.otypes.club_type import ClubType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SplitTime
+from ooresults.otypes.result_type import SpStatus
+from ooresults.otypes.start_type import PersonRaceStart
 from ooresults.utils.globals import t_globals
 
 

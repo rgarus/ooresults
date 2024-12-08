@@ -19,14 +19,14 @@
 
 import datetime
 from enum import Enum
-from typing import Optional
 from typing import Dict
 from typing import List
+from typing import Optional
 
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.event_type import EventType
-from ooresults.repo import result_type
-from ooresults.repo import series_type
+from ooresults.otypes import result_type
+from ooresults.otypes import series_type
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.event_type import EventType
 
 
 class ClassUsedError(RuntimeError):

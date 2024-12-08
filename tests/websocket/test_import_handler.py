@@ -18,12 +18,12 @@
 
 
 import asyncio
+import bz2
 import datetime
+import json
 import pathlib
 import tempfile
 import threading
-import json
-import bz2
 from datetime import timedelta
 from datetime import timezone
 
@@ -34,16 +34,16 @@ from websockets.asyncio.client import connect
 from websockets.asyncio.server import serve
 
 import ooresults
-from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.model import model
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.start_type import PersonRaceStart
+from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.websocket_server.websocket_handler import WebSocketHandler
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.competitor_type import CompetitorType
-from ooresults.repo.start_type import PersonRaceStart
 
 
 data_path = (

@@ -24,10 +24,10 @@ from typing import Dict
 
 from pytest import fixture
 
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import SplitTime
-from ooresults.repo.result_type import SpStatus
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SplitTime
+from ooresults.otypes.result_type import SpStatus
 
 
 tzinfo_1 = timezone(timedelta(hours=1))

@@ -23,16 +23,16 @@ from datetime import timezone
 
 import pytest
 
+from ooresults.otypes import result_type
+from ooresults.otypes import start_type
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.club_type import ClubType
+from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SpStatus
 from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.club_type import ClubType
-from ooresults.repo.competitor_type import CompetitorType
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo import result_type
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import SpStatus
-from ooresults.repo import start_type
 
 
 S1 = datetime.datetime(2021, 8, 19, 18, 43, 33, tzinfo=timezone(timedelta(hours=2)))

@@ -20,18 +20,18 @@
 import io
 from datetime import datetime
 from datetime import timedelta
-from typing import List
 from typing import Dict
+from typing import List
 
 import clevercsv as csv
 from unidecode import unidecode
 
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo import result_type
-from ooresults.repo import start_type
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import SpStatus
+from ooresults.otypes import result_type
+from ooresults.otypes import start_type
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SpStatus
 
 
 def cp1252(value: str) -> str:

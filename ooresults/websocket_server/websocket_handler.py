@@ -18,13 +18,13 @@
 
 
 import asyncio
-import copy
-import json
-import pathlib
-import datetime
-import logging
 import bz2
+import copy
+import datetime
 import functools
+import json
+import logging
+import pathlib
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
@@ -36,14 +36,15 @@ import websockets.exceptions
 from websockets.asyncio.server import ServerConnection
 from websockets.protocol import State
 
-from ooresults.utils.globals import t_globals
 from ooresults.model import model
+from ooresults.otypes import result_type
+from ooresults.otypes.event_type import EventType
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SpStatus
 from ooresults.repo.repo import EventNotFoundError
-from ooresults.repo import result_type
-from ooresults.repo.event_type import EventType
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import SpStatus
+from ooresults.utils.globals import t_globals
 from ooresults.websocket_server import streaming_status
+
 
 templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
 render = web.template.render(templates, globals=t_globals)

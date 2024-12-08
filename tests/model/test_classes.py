@@ -23,15 +23,15 @@ from datetime import timezone
 
 import pytest
 
-from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.result_type import SplitTime
-from ooresults.repo.result_type import SpStatus
 from ooresults.model import model
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.result_type import SplitTime
+from ooresults.otypes.result_type import SpStatus
+from ooresults.repo.sqlite_repo import SqliteRepo
 
 
 @pytest.fixture

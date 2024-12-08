@@ -15,32 +15,3 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-
-import dataclasses
-from typing import Optional
-
-from ooresults.repo.class_params import ClassParams
-
-
-@dataclasses.dataclass
-class ClassType:
-    id: int
-    event_id: int
-    name: str
-    short_name: Optional[str]
-    course_id: Optional[int]
-    params: ClassParams
-
-
-@dataclasses.dataclass
-class ClassInfoType:
-    id: int
-    name: str
-    short_name: Optional[str]
-    course_id: Optional[int]
-    course_name: Optional[str]
-    course_length: Optional[int]
-    course_climb: Optional[int]
-    number_of_controls: Optional[int]
-    params: ClassParams

@@ -22,8 +22,8 @@ from datetime import datetime
 
 from fpdf import FPDF
 
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.result_type import ResultStatus
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.result_type import ResultStatus
 
 
 class PDF(FPDF):

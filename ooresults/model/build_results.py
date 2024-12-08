@@ -18,19 +18,19 @@
 
 
 from decimal import Decimal
-from typing import List
 from typing import Dict
-from typing import Tuple
+from typing import List
 from typing import Optional
+from typing import Tuple
 
-from ooresults.repo import series_type
-from ooresults.repo.class_type import ClassInfoType
-from ooresults.repo.entry_type import EntryType
-from ooresults.repo.entry_type import RankedEntryType
-from ooresults.repo.result_type import ResultStatus
-from ooresults.repo.result_type import PersonRaceResult
-from ooresults.repo.series_type import PersonSeriesResult
-from ooresults.repo.series_type import Points
+from ooresults.otypes import series_type
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.entry_type import RankedEntryType
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.series_type import PersonSeriesResult
+from ooresults.otypes.series_type import Points
 
 
 def build_results(

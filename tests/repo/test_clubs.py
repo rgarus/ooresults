@@ -21,11 +21,11 @@ import datetime
 
 import pytest
 
+from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.club_type import ClubType
+from ooresults.otypes.result_type import ResultStatus
 from ooresults.repo import repo
 from ooresults.repo.sqlite_repo import SqliteRepo
-from ooresults.repo.class_params import ClassParams
-from ooresults.repo.club_type import ClubType
-from ooresults.repo.result_type import ResultStatus
 
 
 @pytest.fixture
