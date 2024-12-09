@@ -53,7 +53,7 @@ class Table:
             raise RuntimeError("Row not found")
 
     def select_row(self, i: int) -> None:
-        self._table().find_elements(By.XPATH, f".//tbody//tr[{i}]//td[0]").click()
+        self._table().find_elements(By.XPATH, f".//tbody//tr[{i}]//td")[0].click()
 
     def selected_row(self) -> Optional[int]:
         for i, row in enumerate(self._table().find_elments(By.XPATH, ".//tbody//tr")):

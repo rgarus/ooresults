@@ -55,6 +55,16 @@ def test_add_event_for_add(render):
     assert options_publish[1].attrib == {"value": "yes"}
     assert options_publish[1].text == "yes"
 
+    input_streaming_address = html.find(".//input[@name='streaming_address']")
+    assert input_streaming_address.attrib["value"] == ""
+
+    input_streaming_key = html.find(".//input[@name='streaming_key']")
+    assert input_streaming_key.attrib["value"] == ""
+
+    input_streaming_enabled = html.find(".//input[@name='streaming_enabled']")
+    assert input_streaming_enabled.attrib["value"] == "true"
+    assert "checked" not in input_streaming_enabled.attrib
+
     input_series = html.find(".//input[@name='series']")
     assert input_series.attrib["value"] == ""
 
@@ -75,6 +85,9 @@ def test_add_event_for_edit(render):
         publish=True,
         series="Run 1",
         fields=["Start number", "Region"],
+        streaming_address="localhost:8081",
+        streaming_key="abcde",
+        streaming_enabled=True,
     )
     html = etree.HTML(str(render.add_event(event)))
 
@@ -93,6 +106,16 @@ def test_add_event_for_edit(render):
     assert options_publish[0].text == "no"
     assert options_publish[1].attrib == {"value": "yes", "selected": "selected"}
     assert options_publish[1].text == "yes"
+
+    input_streaming_address = html.find(".//input[@name='streaming_address']")
+    assert input_streaming_address.attrib["value"] == "localhost:8081"
+
+    input_streaming_key = html.find(".//input[@name='streaming_key']")
+    assert input_streaming_key.attrib["value"] == "abcde"
+
+    input_streaming_enabled = html.find(".//input[@name='streaming_enabled']")
+    assert input_streaming_enabled.attrib["value"] == "true"
+    assert "checked" in input_streaming_enabled.attrib
 
     input_series = html.find(".//input[@name='series']")
     assert input_series.attrib["value"] == "Run 1"
