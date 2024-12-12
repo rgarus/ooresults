@@ -17,21 +17,29 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-class Button:
-    def __init__(self, button):
-        self.button = button
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
+
+class TextControl:
+    def __init__(self, page: webdriver.Remote, id: str):
+        self.page = page
+        self.elem = page.find_element(By.ID, id)
 
     def is_disabled(self) -> bool:
-        return self.button.get_attribute("disabled") == "true"
+        return self.elem.get_attribute("disabled") == "true"
 
     def is_enabled(self) -> bool:
         return not self.is_disabled()
 
-    def click(self) -> None:
-        if self.is_enabled():
-            self.button.click()
-        else:
-            raise RuntimeError("Button is disabled")
+    def get_text(self) -> str:
+        return self.elem.get_attribute("value")
 
-    def text(self) -> str:
-        return self.button.text
+    def set_text(self, text: str) -> None:
+        if self.is_enabled():
+            self.elem.send_keys(Keys.CONTROL + "a")
+            self.elem.send_keys(Keys.DELETE)
+            self.elem.send_keys(text)
+        else:
+            raise RuntimeError("Text control is disabled")

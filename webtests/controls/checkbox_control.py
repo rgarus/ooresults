@@ -17,36 +17,33 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from webtests.controls.button_control import ButtonControl
 
-
-class Action(ButtonControl):
-    pass
-
-
-class Actions:
+class CheckboxControl:
     def __init__(self, page: webdriver.Remote, id: str):
         self.page = page
-        self.id = id
+        self.elem = page.find_element(By.ID, id)
 
-    def actions(self) -> List[Action]:
-        elem = self.page.find_element(By.ID, self.id)
-        return [Action(b) for b in elem.find_elements(By.XPATH, "button")]
+    def is_disabled(self) -> bool:
+        return self.elem.get_attribute("disabled") == "true"
 
-    def texts(self) -> List[str]:
-        texts = []
-        for action in self.actions():
-            texts.append(action.text())
-        return texts
+    def is_enabled(self) -> bool:
+        return not self.is_disabled()
 
-    def action(self, text: str) -> Action:
-        for action in self.actions():
-            if action.text() == text:
-                return action
+    def is_checked(self) -> bool:
+        return self.elem.get_attribute("checked") == "true"
+
+    def click(self) -> None:
+        if self.is_enabled():
+            self.elem.click()
         else:
-            raise RuntimeError("Action not found")
+            raise RuntimeError("Checkbox control is disabled")
+
+    def set_state(self, checked: bool) -> None:
+        if self.is_enabled():
+            if self.is_checked() != checked:
+                self.elem.click()
+        else:
+            raise RuntimeError("Checkbox control is disabled")

@@ -19,20 +19,45 @@
 
 import pytest
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 
-from webtests.pageobjects.actions import Actions
-from webtests.pageobjects.events import AddEventDialog
-from webtests.pageobjects.table import Table
+from webtests.pageobjects.events import EventPage
 from webtests.pageobjects.tabs import Tabs
 
 
-def test_all_actions_displayed(page: webdriver.Firefox):
+@pytest.fixture
+def event_page(page: webdriver.Remote) -> EventPage:
     tabs = Tabs(page=page)
     tabs.tab(text="Events").click()
+    return EventPage(page=page)
 
-    actions = Actions(page=page, id="eve_actions")
-    assert actions.texts() == [
+
+@pytest.fixture
+def delete_events(event_page: EventPage):
+    event_page.delete_events()
+
+
+@pytest.fixture
+def event(event_page, delete_events) -> None:
+    dialog = event_page.actions.add_event()
+    dialog.enter_values(
+        name="Test-Lauf heute",
+        date="2023-12-28",
+        key="local-key",
+        publish="yes",
+        series="Serie",
+        fields=["a", "b"],
+        streaming_address="localhost:8081",
+        streaming_key="abcde",
+        streaming_enabled=True,
+    )
+    dialog.submit()
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_columns() == 7
+
+
+def test_all_actions_displayed(event_page: EventPage):
+    assert event_page.actions.texts() == [
         "Reload",
         "Add event ...",
         "Edit event ...",
@@ -40,13 +65,25 @@ def test_all_actions_displayed(page: webdriver.Firefox):
     ]
 
 
-def test_table_header(page: webdriver.Firefox):
-    tabs = Tabs(page=page)
-    tabs.tab(text="Events").click()
+def test_some_actions_disabled_if_no_row_is_selected(event_page, event):
+    assert event_page.actions.action("Reload").is_enabled()
+    assert event_page.actions.action("Add event ...").is_enabled()
+    assert event_page.actions.action("Edit event ...").is_disabled()
+    assert event_page.actions.action("Delete event").is_disabled()
 
-    table = Table(page=page, xpath="//table[@id='evnt.table']")
-    assert table.nr_of_columns() == 7
-    assert table.headers() == [
+
+def test_all_actions_enabled_if_a_row_is_selected(event_page, event):
+    event_page.table.select_row(i=1)
+
+    assert event_page.actions.action("Reload").is_enabled()
+    assert event_page.actions.action("Add event ...").is_enabled()
+    assert event_page.actions.action("Edit event ...").is_enabled()
+    assert event_page.actions.action("Delete event").is_enabled()
+
+
+def test_table_header(event_page: EventPage):
+    assert event_page.table.nr_of_columns() == 7
+    assert event_page.table.headers() == [
         "Name",
         "Date",
         "Key",
@@ -57,28 +94,8 @@ def test_table_header(page: webdriver.Firefox):
     ]
 
 
-@pytest.fixture
-def delete_events(page: webdriver.Firefox):
-    Tabs(page=page).tab(text="Events").click()
-    table = Table(page=page, xpath="//table[@id='evnt.table']")
-    for i in range(table.nr_of_rows()):
-        table.select_row(1)
-
-        actions = Actions(page=page, id="eve_actions")
-        actions.action(text="Delete event").click()
-
-        elem = page.find_element(By.ID, "evnt.formDelete")
-        elem.find_element(By.XPATH, "button[@type='submit']").click()
-
-
-def test_add_event_with_required_data(page, delete_events):
-    tabs = Tabs(page=page)
-    tabs.tab(text="Events").click()
-
-    actions = Actions(page=page, id="eve_actions")
-    actions.action(text="Add event ...").click()
-
-    dialog = AddEventDialog(page=page)
+def test_add_event_with_required_data(event_page, delete_events):
+    dialog = event_page.actions.add_event()
     dialog.check_values(
         name="",
         date="",
@@ -103,12 +120,11 @@ def test_add_event_with_required_data(page, delete_events):
     )
     dialog.submit()
 
-    # number of rows
-    table = Table(page=page, xpath="//table[@id='evnt.table']")
-    assert table.nr_of_rows() == 1
-    assert table.nr_of_columns() == 7
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_columns() == 7
 
-    assert table.row(i=1) == [
+    assert event_page.table.row(i=1) == [
         "Test-Lauf heute",
         "2023-12-28",
         "",
@@ -119,14 +135,8 @@ def test_add_event_with_required_data(page, delete_events):
     ]
 
 
-def test_add_event_with_all_data(page, delete_events):
-    tabs = Tabs(page=page)
-    tabs.tab(text="Events").click()
-
-    actions = Actions(page=page, id="eve_actions")
-    actions.action(text="Add event ...").click()
-
-    dialog = AddEventDialog(page=page)
+def test_add_event_with_all_data(event_page, delete_events):
+    dialog = event_page.actions.add_event()
     dialog.check_values(
         name="",
         date="",
@@ -151,12 +161,11 @@ def test_add_event_with_all_data(page, delete_events):
     )
     dialog.submit()
 
-    # number of rows
-    table = Table(page=page, xpath="//table[@id='evnt.table']")
-    assert table.nr_of_rows() == 1
-    assert table.nr_of_columns() == 7
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_columns() == 7
 
-    assert table.row(i=1) == [
+    assert event_page.table.row(i=1) == [
         "Test-Lauf heute",
         "2023-12-28",
         "***",
@@ -167,48 +176,10 @@ def test_add_event_with_all_data(page, delete_events):
     ]
 
 
-def test_edit_event(page, delete_events):
-    tabs = Tabs(page=page)
-    tabs.tab(text="Events").click()
+def test_edit_event(event_page, event):
+    event_page.table.select_row(1)
 
-    actions = Actions(page=page, id="eve_actions")
-    actions.action(text="Add event ...").click()
-
-    dialog = AddEventDialog(page=page)
-    dialog.enter_values(
-        name="Test-Lauf heute",
-        date="2023-12-28",
-        key="local-key",
-        publish="yes",
-        series="Serie",
-        fields=["a", "b"],
-        streaming_address="localhost:8081",
-        streaming_key="abcde",
-        streaming_enabled=True,
-    )
-    dialog.submit()
-
-    # number of rows
-    table = Table(page=page, xpath="//table[@id='evnt.table']")
-    assert table.nr_of_rows() == 1
-    assert table.nr_of_columns() == 7
-
-    assert table.row(i=1) == [
-        "Test-Lauf heute",
-        "2023-12-28",
-        "***",
-        "yes",
-        "enabled",
-        "Serie",
-        "a, b",
-    ]
-
-    table.select_row(1)
-
-    actions = Actions(page=page, id="eve_actions")
-    actions.action(text="Edit event ...").click()
-
-    dialog = AddEventDialog(page=page)
+    dialog = event_page.actions.edit_event()
     dialog.check_values(
         name="Test-Lauf heute",
         date="2023-12-28",
@@ -233,12 +204,11 @@ def test_edit_event(page, delete_events):
     )
     dialog.submit()
 
-    # number of rows
-    table = Table(page=page, xpath="//table[@id='evnt.table']")
-    assert table.nr_of_rows() == 1
-    assert table.nr_of_columns() == 7
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_columns() == 7
 
-    assert table.row(i=1) == [
+    assert event_page.table.row(i=1) == [
         "Test-Lauf morgen",
         "2023-12-29",
         "***",
@@ -249,69 +219,31 @@ def test_edit_event(page, delete_events):
     ]
 
 
-def test_delete_event(page, delete_events):
-    tabs = Tabs(page=page)
-    tabs.tab(text="Events").click()
+def test_delete_event(event_page, event):
+    event_page.table.select_row(1)
+    event_page.actions.delete_event().ok()
 
-    actions = Actions(page=page, id="eve_actions")
-    actions.action(text="Add event ...").click()
-
-    dialog = AddEventDialog(page=page)
-    dialog.enter_values(
-        name="Test-Lauf heute",
-        date="2023-12-28",
-        key="local-key",
-        publish="yes",
-        series="Serie",
-        fields=["a", "b"],
-        streaming_address="localhost:8081",
-        streaming_key="abcde",
-        streaming_enabled=True,
-    )
-    dialog.submit()
-
-    # number of rows
-    table = Table(page=page, xpath="//table[@id='evnt.table']")
-    assert table.nr_of_rows() == 1
-    assert table.nr_of_columns() == 7
-
-    table.select_row(1)
-
-    actions = Actions(page=page, id="eve_actions")
-    actions.action(text="Delete event").click()
-
-    elem = page.find_element(By.ID, "evnt.formDelete")
-    elem.find_element(By.XPATH, "button[@type='submit']").click()
-
-    assert table.nr_of_rows() == 0
-    assert table.nr_of_columns() == 7
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 0
+    assert event_page.table.nr_of_columns() == 7
 
 
-def test_add_two_events(page, delete_events):
-    tabs = Tabs(page=page)
-    tabs.tab(text="Events").click()
-
-    actions = Actions(page=page, id="eve_actions")
-    actions.action(text="Add event ...").click()
-
-    dialog = AddEventDialog(page=page)
+def test_add_several_events(event_page, event):
+    dialog = event_page.actions.add_event()
     dialog.enter_values(
         name="Test-Lauf 1",
-        date="2023-12-28",
-        key="local-key",
-        publish="yes",
+        date="2023-12-29",
+        key=None,
+        publish="no",
         series="Serie",
-        fields=["a", "b"],
-        streaming_address="localhost:8081",
-        streaming_key="abcde",
-        streaming_enabled=True,
+        fields=["c", "d"],
+        streaming_address=None,
+        streaming_key=None,
+        streaming_enabled=None,
     )
     dialog.submit()
 
-    actions = Actions(page=page, id="eve_actions")
-    actions.action(text="Add event ...").click()
-
-    dialog = AddEventDialog(page=page)
+    dialog = event_page.actions.add_event()
     dialog.enter_values(
         name="Test-Lauf 2",
         date="2023-12-29",
@@ -325,21 +257,20 @@ def test_add_two_events(page, delete_events):
     )
     dialog.submit()
 
-    # number of rows
-    table = Table(page=page, xpath="//table[@id='evnt.table']")
-    assert table.nr_of_rows() == 2
-    assert table.nr_of_columns() == 7
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 3
+    assert event_page.table.nr_of_columns() == 7
 
-    assert table.row(i=1) == [
+    assert event_page.table.row(i=1) == [
         "Test-Lauf 1",
-        "2023-12-28",
-        "***",
-        "yes",
-        "enabled",
+        "2023-12-29",
+        "",
+        "no",
+        "",
         "Serie",
-        "a, b",
+        "c, d",
     ]
-    assert table.row(i=2) == [
+    assert event_page.table.row(i=2) == [
         "Test-Lauf 2",
         "2023-12-29",
         "***",
@@ -347,4 +278,13 @@ def test_add_two_events(page, delete_events):
         "enabled",
         "Serie",
         "e, f",
+    ]
+    assert event_page.table.row(i=3) == [
+        "Test-Lauf heute",
+        "2023-12-28",
+        "***",
+        "yes",
+        "enabled",
+        "Serie",
+        "a, b",
     ]

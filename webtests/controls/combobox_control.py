@@ -17,36 +17,27 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-
-from webtests.controls.button_control import ButtonControl
-
-
-class Action(ButtonControl):
-    pass
+from selenium.webdriver.support.ui import Select
 
 
-class Actions:
+class ComboboxControl:
     def __init__(self, page: webdriver.Remote, id: str):
         self.page = page
-        self.id = id
+        self.elem = page.find_element(By.ID, id)
 
-    def actions(self) -> List[Action]:
-        elem = self.page.find_element(By.ID, self.id)
-        return [Action(b) for b in elem.find_elements(By.XPATH, "button")]
+    def is_disabled(self) -> bool:
+        return self.elem.get_attribute("disabled") == "true"
 
-    def texts(self) -> List[str]:
-        texts = []
-        for action in self.actions():
-            texts.append(action.text())
-        return texts
+    def is_enabled(self) -> bool:
+        return not self.is_disabled()
 
-    def action(self, text: str) -> Action:
-        for action in self.actions():
-            if action.text() == text:
-                return action
+    def select_by_text(self, text: str) -> None:
+        if self.is_enabled():
+            Select(self.elem).select_by_visible_text(text)
         else:
-            raise RuntimeError("Action not found")
+            raise RuntimeError("Combobox control is disabled")
+
+    def selected_text(self) -> str:
+        return Select(self.elem).first_selected_option.text

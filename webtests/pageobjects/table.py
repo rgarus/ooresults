@@ -20,11 +20,12 @@
 from typing import List
 from typing import Optional
 
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 
 class Table:
-    def __init__(self, page, xpath: str):
+    def __init__(self, page: webdriver.Remote, xpath: str):
         self.page = page
         self.xpath = xpath
 
@@ -56,7 +57,7 @@ class Table:
         self._table().find_elements(By.XPATH, f".//tbody//tr[{i}]//td")[0].click()
 
     def selected_row(self) -> Optional[int]:
-        for i, row in enumerate(self._table().find_elments(By.XPATH, ".//tbody//tr")):
+        for i, row in enumerate(self._table().find_elements(By.XPATH, ".//tbody//tr")):
             if row.value_of_css_property("background-color") == "rgb(165, 42, 42)":
                 return i + 1
         else:

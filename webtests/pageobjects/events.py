@@ -22,12 +22,17 @@ from typing import Optional
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
+
+from webtests.controls.checkbox_control import CheckboxControl
+from webtests.controls.combobox_control import ComboboxControl
+from webtests.controls.date_control import DateControl
+from webtests.controls.text_control import TextControl
+from webtests.pageobjects.actions import Actions
+from webtests.pageobjects.table import Table
 
 
 class AddEventDialog:
-    def __init__(self, page: webdriver.Firefox):
+    def __init__(self, page: webdriver.Remote):
         self.page = page
 
     def check_values(
@@ -42,31 +47,28 @@ class AddEventDialog:
         streaming_key: str,
         streaming_enabled: bool,
     ):
-        assert name == self.page.find_element(By.ID, "eve_name").get_attribute("value")
-        assert date == self.page.find_element(By.ID, "eve_date").get_attribute("value")
-        assert key == self.page.find_element(By.ID, "eve_key").get_attribute("value")
-        select = Select(self.page.find_element(By.ID, "eve_publish"))
-        assert publish == select.first_selected_option.text
-        assert series == self.page.find_element(By.ID, "eve_series").get_attribute(
-            "value"
+        assert name == TextControl(page=self.page, id="eve_name").get_text()
+        assert date == DateControl(page=self.page, id="eve_date").get_date()
+        assert key == TextControl(page=self.page, id="eve_key").get_text()
+        assert (
+            publish == ComboboxControl(page=self.page, id="eve_publish").selected_text()
         )
-        assert ", ".join(fields) == self.page.find_element(
-            By.ID, "eve_fields"
-        ).get_attribute("value")
-        assert streaming_address == self.page.find_element(
-            By.ID, "eve_streamingAddress"
-        ).get_attribute("value")
-        assert streaming_key == self.page.find_element(
-            By.ID, "eve_streamingKey"
-        ).get_attribute("value")
-        checked = (
-            self.page.find_element(By.ID, "eve_streamingEnabled").get_attribute(
-                "checked"
-            )
-            == "true"
+        assert series == TextControl(page=self.page, id="eve_series").get_text()
+        assert (
+            ", ".join(fields) == TextControl(page=self.page, id="eve_fields").get_text()
         )
-        print("####", streaming_enabled, checked)
-        assert streaming_enabled == checked
+        assert (
+            streaming_address
+            == TextControl(page=self.page, id="eve_streamingAddress").get_text()
+        )
+        assert (
+            streaming_key
+            == TextControl(page=self.page, id="eve_streamingKey").get_text()
+        )
+        assert (
+            streaming_enabled
+            == CheckboxControl(page=self.page, id="eve_streamingEnabled").is_checked()
+        )
 
     def enter_values(
         self,
@@ -81,51 +83,33 @@ class AddEventDialog:
         streaming_enabled: Optional[bool] = None,
     ):
         if name is not None:
-            elem = self.page.find_element(By.ID, "eve_name")
-            elem.send_keys(Keys.CONTROL + "a")
-            elem.send_keys(Keys.DELETE)
-            elem.send_keys(name)
+            TextControl(page=self.page, id="eve_name").set_text(text=name)
         if date is not None:
-            self.page.execute_script(
-                f"document.getElementById('eve_date').value = '{date}'"
-            )
+            DateControl(page=self.page, id="eve_date").set_date(date=date)
         if key is not None:
-            elem = self.page.find_element(By.ID, "eve_key")
-            elem.send_keys(Keys.CONTROL + "a")
-            elem.send_keys(Keys.DELETE)
-            elem.send_keys(key)
+            TextControl(page=self.page, id="eve_key").set_text(text=key)
         if publish is not None:
-            select = Select(self.page.find_element(By.ID, "eve_publish"))
-            select.select_by_visible_text(publish)
-        if series is not None:
-            elem = self.page.find_element(By.ID, "eve_series")
-            elem.send_keys(Keys.CONTROL + "a")
-            elem.send_keys(Keys.DELETE)
-            elem.send_keys(series)
-        if fields is not None:
-            elem = self.page.find_element(By.ID, "eve_fields")
-            elem.send_keys(Keys.CONTROL + "a")
-            elem.send_keys(Keys.DELETE)
-            elem.send_keys(", ".join(fields))
-        if streaming_address is not None:
-            elem = self.page.find_element(By.ID, "eve_streamingAddress")
-            elem.send_keys(Keys.CONTROL + "a")
-            elem.send_keys(Keys.DELETE)
-            elem.send_keys(streaming_address)
-        if streaming_key is not None:
-            elem = self.page.find_element(By.ID, "eve_streamingKey")
-            elem.send_keys(Keys.CONTROL + "a")
-            elem.send_keys(Keys.DELETE)
-            elem.send_keys(streaming_key)
-        if streaming_enabled is not None:
-            checked = (
-                self.page.find_element(By.ID, "eve_streamingEnabled").get_attribute(
-                    "checked"
-                )
-                == "true"
+            ComboboxControl(page=self.page, id="eve_publish").select_by_text(
+                text=publish
             )
-            if streaming_enabled != checked:
-                self.page.find_element(By.ID, "eve_streamingEnabled").click()
+        if series is not None:
+            TextControl(page=self.page, id="eve_series").set_text(text=series)
+        if fields is not None:
+            TextControl(page=self.page, id="eve_fields").set_text(
+                text=", ".join(fields)
+            )
+        if streaming_address is not None:
+            TextControl(page=self.page, id="eve_streamingAddress").set_text(
+                text=streaming_address
+            )
+        if streaming_key is not None:
+            TextControl(page=self.page, id="eve_streamingKey").set_text(
+                text=streaming_key
+            )
+        if streaming_enabled is not None:
+            CheckboxControl(page=self.page, id="eve_streamingEnabled").set_state(
+                checked=streaming_enabled
+            )
 
     def submit(self):
         elem = self.page.find_element(By.ID, "evnt.formAdd")
@@ -136,3 +120,53 @@ class AddEventDialog:
         elem = self.page.find_element(By.ID, "evnt.formAdd")
         elem = elem.find_element(By.XPATH, "button[@type='cancel']")
         elem.click()
+
+
+class DeleteEventDialog:
+    def __init__(self, page: webdriver.Remote):
+        self.page = page
+
+    def ok(self) -> None:
+        elem = self.page.find_element(By.ID, "evnt.formDelete")
+        elem.find_element(By.XPATH, "button[@type='submit']").click()
+
+    def cancel(self) -> None:
+        elem = self.page.find_element(By.ID, "evnt.formDelete")
+        elem.find_element(By.XPATH, "button[@type='cancel']").click()
+
+
+class EventPage:
+    def __init__(self, page: webdriver.Remote):
+        self.page = page
+        self.actions = EventActions(page=page)
+        self.table = EventTable(page=page)
+
+    def delete_events(self):
+        for i in range(self.table.nr_of_rows()):
+            self.table.select_row(1)
+            self.actions.delete_event().ok()
+
+
+class EventActions(Actions):
+    def __init__(self, page: webdriver.Remote):
+        super().__init__(page=page, id="eve_actions")
+
+    def reload(self) -> None:
+        self.action(text="Reload").click()
+
+    def add_event(self) -> AddEventDialog:
+        self.action(text="Add event ...").click()
+        return AddEventDialog(page=self.page)
+
+    def edit_event(self) -> AddEventDialog:
+        self.action(text="Edit event ...").click()
+        return AddEventDialog(page=self.page)
+
+    def delete_event(self) -> DeleteEventDialog:
+        self.action(text="Delete event").click()
+        return DeleteEventDialog(page=self.page)
+
+
+class EventTable(Table):
+    def __init__(self, page: webdriver.Remote):
+        super().__init__(page=page, xpath="//table[@id='evnt.table']")

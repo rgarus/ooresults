@@ -19,18 +19,19 @@
 
 from typing import List
 
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from webtests.controls.button import Button
+from webtests.controls.button_control import ButtonControl
 
 
-class Tab(Button):
+class Tab(ButtonControl):
     def is_selected(self) -> bool:
-        return self.button.value_of_css_property("font-weight") >= 700
+        return int(self.elem.value_of_css_property("font-weight")) >= 700
 
 
 class Tabs:
-    def __init__(self, page):
+    def __init__(self, page: webdriver.Remote):
         self.page = page
 
     def tabs(self) -> List[Tab]:
