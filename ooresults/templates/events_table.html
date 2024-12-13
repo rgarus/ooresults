@@ -24,7 +24,7 @@ $def streaming_enabled(enabled):
 
 <p/>
 
-<input oninput="w3.filterHTML('#events_tbody', 'tr', this.value)" placeholder="Search ...">
+<input id="eve_filter" oninput="w3.filterHTML('#events_tbody', 'tr', this.value)" placeholder="Search ...">
 <p/>
 
 <table class="dt" id="evnt.table" onclick="evnt_highlight(event)">

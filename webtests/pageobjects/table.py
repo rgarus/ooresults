@@ -33,7 +33,8 @@ class Table:
         return self.page.find_element(By.XPATH, self.xpath)
 
     def nr_of_rows(self) -> int:
-        return len(self._table().find_elements(By.XPATH, ".//tbody//tr"))
+        rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
+        return len([row for row in rows if row.is_displayed()])
 
     def nr_of_columns(self) -> int:
         return len(self._table().find_elements(By.XPATH, ".//thead//tr//th"))
@@ -45,8 +46,11 @@ class Table:
         return headers
 
     def row(self, i: int) -> List[str]:
+        rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
+        rows = [row for row in rows if row.is_displayed()]
+
         content = []
-        for cell in self._table().find_elements(By.XPATH, f".//tbody//tr[{i}]//td"):
+        for cell in rows[i - 1].find_elements(By.XPATH, ".//td"):
             content.append(cell.text)
         if content:
             return content
@@ -54,10 +58,15 @@ class Table:
             raise RuntimeError("Row not found")
 
     def select_row(self, i: int) -> None:
-        self._table().find_elements(By.XPATH, f".//tbody//tr[{i}]//td")[0].click()
+        rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
+        rows = [row for row in rows if row.is_displayed()]
+        rows[i - 1].find_elements(By.XPATH, ".//td")[0].click()
 
     def selected_row(self) -> Optional[int]:
-        for i, row in enumerate(self._table().find_elements(By.XPATH, ".//tbody//tr")):
+        rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
+        rows = [row for row in rows if row.is_displayed()]
+
+        for i, row in enumerate(rows):
             if row.value_of_css_property("background-color") == "rgb(165, 42, 42)":
                 return i + 1
         else:

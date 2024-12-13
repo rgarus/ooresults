@@ -141,6 +141,15 @@ class EventPage:
         self.actions = EventActions(page=page)
         self.table = EventTable(page=page)
 
+    def filter(self) -> TextControl:
+        return TextControl(page=self.page, id="eve_filter")
+
+    def get_event_name(self) -> str:
+        return self.page.find_element(By.ID, "evnt.event_name").text
+
+    def get_event_date(self) -> str:
+        return self.page.find_element(By.ID, "evnt.event_date").text
+
     def delete_events(self):
         for i in range(self.table.nr_of_rows()):
             self.table.select_row(1)

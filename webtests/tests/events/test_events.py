@@ -22,6 +22,7 @@ from selenium import webdriver
 
 from webtests.pageobjects.events import EventPage
 from webtests.pageobjects.tabs import Tabs
+from webtests.tests.conftest import post
 
 
 @pytest.fixture
@@ -176,6 +177,53 @@ def test_add_event_with_all_data(event_page, delete_events):
     ]
 
 
+def test_if_no_event_is_selected_and_a_new_event_is_added_then_no_event_is_selected(
+    event_page, event
+):
+    assert event_page.get_event_name() == ""
+    assert event_page.get_event_date() == ""
+
+    dialog = event_page.actions.add_event()
+    dialog.enter_values(
+        name="Test-Lauf 1",
+        date="2023-12-29",
+        key=None,
+        publish="no",
+        series="Serie",
+        fields=["c", "d"],
+        streaming_address=None,
+        streaming_key=None,
+        streaming_enabled=None,
+    )
+    dialog.submit()
+
+    assert event_page.get_event_name() == ""
+    assert event_page.get_event_date() == ""
+
+
+def test_adding_a_new_event_does_not_change_selected_event(event_page, event):
+    event_page.table.select_row(i=1)
+    assert event_page.get_event_name() == "Test-Lauf heute"
+    assert event_page.get_event_date() == "2023-12-28"
+
+    dialog = event_page.actions.add_event()
+    dialog.enter_values(
+        name="Test-Lauf 1",
+        date="2023-12-29",
+        key=None,
+        publish="no",
+        series="Serie",
+        fields=["c", "d"],
+        streaming_address=None,
+        streaming_key=None,
+        streaming_enabled=None,
+    )
+    dialog.submit()
+
+    assert event_page.get_event_name() == "Test-Lauf heute"
+    assert event_page.get_event_date() == "2023-12-28"
+
+
 def test_edit_event(event_page, event):
     event_page.table.select_row(1)
 
@@ -219,9 +267,16 @@ def test_edit_event(event_page, event):
     ]
 
 
-def test_delete_event(event_page, event):
+def test_if_an_event_is_deleted_no_event_is_selected(event_page, event):
+    # select event
     event_page.table.select_row(1)
+    assert event_page.get_event_name() == "Test-Lauf heute"
+    assert event_page.get_event_date() == "2023-12-28"
+
+    # delete event
     event_page.actions.delete_event().ok()
+    assert event_page.get_event_name() == ""
+    assert event_page.get_event_date() == ""
 
     # check number of rows
     assert event_page.table.nr_of_rows() == 0
@@ -287,4 +342,113 @@ def test_add_several_events(event_page, event):
         "enabled",
         "Serie",
         "a, b",
+    ]
+
+
+def test_if_filter_is_set_then_only_matching_rows_are_displayed(event_page, event):
+    dialog = event_page.actions.add_event()
+    dialog.enter_values(
+        name="Test-Lauf 1",
+        date="2023-12-29",
+        key=None,
+        publish="no",
+        series="Serie",
+        fields=["c", "d"],
+        streaming_address=None,
+        streaming_key=None,
+        streaming_enabled=None,
+    )
+    dialog.submit()
+
+    dialog = event_page.actions.add_event()
+    dialog.enter_values(
+        name="Test-Lauf 2",
+        date="2023-12-29",
+        key="local",
+        publish="no",
+        series="Serie",
+        fields=["e", "f"],
+        streaming_address="myhost:8081",
+        streaming_key="secret-key",
+        streaming_enabled=True,
+    )
+    dialog.submit()
+
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 3
+    assert event_page.table.nr_of_columns() == 7
+
+    event_page.filter().set_text("heute")
+
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_columns() == 7
+
+    assert event_page.table.row(i=1) == [
+        "Test-Lauf heute",
+        "2023-12-28",
+        "***",
+        "yes",
+        "enabled",
+        "Serie",
+        "a, b",
+    ]
+
+
+def test_if_an_event_is_added_by_another_user_then_it_is_displayed_after_reload(
+    event_page, event
+):
+    post(
+        url="https://127.0.0.1:8080/event/add",
+        data={
+            "id": "",
+            "name": "XXX Event",
+            "date": "2024-05-17",
+            "key": "",
+            "publish": "no",
+            "series": "",
+            "fields": "",
+            "streaming_address": "",
+            "streaming_key": "",
+            "streaming_enabled": "false",
+        },
+    )
+
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_columns() == 7
+
+    assert event_page.table.row(i=1) == [
+        "Test-Lauf heute",
+        "2023-12-28",
+        "***",
+        "yes",
+        "enabled",
+        "Serie",
+        "a, b",
+    ]
+
+    event_page.actions.reload()
+
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 2
+    assert event_page.table.nr_of_columns() == 7
+
+    assert event_page.table.row(i=1) == [
+        "Test-Lauf heute",
+        "2023-12-28",
+        "***",
+        "yes",
+        "enabled",
+        "Serie",
+        "a, b",
+    ]
+    assert event_page.table.row(i=2) == [
+        "XXX Event",
+        "2024-05-17",
+        "",
+        "no",
+        "",
+        "",
+        "",
     ]

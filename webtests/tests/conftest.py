@@ -20,8 +20,11 @@
 import subprocess
 import sys
 import tempfile
+from typing import Dict
 
 import pytest
+import requests
+import urllib3
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
@@ -44,3 +47,15 @@ def page(ooresults_server) -> webdriver.Firefox:
     elem.click()
     yield driver
     driver.quit()
+
+
+def post(url: str, data: Dict[str, str]):
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    r = requests.post(
+        url=url,
+        auth=("admin", "admin"),
+        verify=False,
+        data=data,
+    )
+    assert r.status_code == 200
