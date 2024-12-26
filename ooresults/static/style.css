@@ -14,7 +14,7 @@ table.dt, th.dt, td.dt {
   position: sticky;
   top: 0px;
   width=100%;
-  background-color: #f1f1f1;
+  background-color: Canvas;
   padding: 10px 12px 10px 12px;
 }
 
