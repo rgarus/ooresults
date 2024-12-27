@@ -23,18 +23,18 @@ $def f(value) -> str:
     <table style="text-align: left">
         <tr>
             <th style="padding-right: 10px">Event name:</th>
-            <td>$(event.name if event is not None else '')</td>
+            <td id="entr.event_name">$(event.name if event is not None else '')</td>
         </tr>
         <tr>
             <th style="padding-right: 10px">Event date:</th>
-            <td>$(event.date.isoformat() if event is not None else '')</td>
+            <td id="entr.event_date">$(event.date.isoformat() if event is not None else '')</td>
         </tr>
     </table>
 </div>
 
 <p/>
 
-<input oninput="w3.filterHTML('#entries_tbody', 'tr', this.value)" placeholder="Search ...">
+<input id="entr.filter" oninput="w3.filterHTML('#entries_tbody', 'tr', this.value)" placeholder="Search ...">
 <p/>
 
 <div>
