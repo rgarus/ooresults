@@ -151,8 +151,8 @@ class EventPage:
         return self.page.find_element(By.ID, "evnt.event_date").text
 
     def delete_events(self):
-        for i in range(self.table.nr_of_rows()):
-            self.table.select_row(1)
+        for i in range(self.table.nr_of_rows() - 1):
+            self.table.select_row(2)
             self.actions.delete_event().ok()
 
 

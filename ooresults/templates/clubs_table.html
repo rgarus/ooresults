@@ -1,19 +1,24 @@
 $def with (clubs)
 
-<input id="club.filter" oninput="w3.filterHTML('#clubs_tbody', 'tr', this.value)" placeholder="Search ...">
+<input id="club.filter" oninput="filter_table('clb.table, 'tr', this.value)" placeholder="Search ...">
 <p/>
 
-<table class="dt" id="clb.table" onclick="clb_highlight(event)">
+<table class="dte" id="clb.table" onclick="clb_highlight(event)">
     <thead>
-        <tr class="dt">
-            <th class="dt">Name</th>
+        <tr id="club.theader" class="dth">
+            <th class="dth">Name</th>
         </tr>
     </thead>
     <tbody id="clubs_tbody">
-    $for club in clubs:
-        <tr class="dt" id="$club.id">
-            <td class="dt">$club.name</td>
-        </tr> 
+        $if clubs:
+            $ name = "Clubs&nbsp;&nbsp;(" + str(len(clubs)) + ")"
+            <tr class="dte h1">
+                <th class="dte h1" colspan="99">$:name</th>
+            </tr>
+            $for club in clubs:
+                <tr class="dte" id="$club.id">
+                    <td class="dte">$club.name</td>
+                </tr>
     </tbody>
 </table>
 

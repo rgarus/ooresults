@@ -8,8 +8,13 @@ Changelog
 .. warning::
 
    Due to the changed minimum database schema version a direct update from ooresults 0.2.x to 0.4.0 or higher with an existing database is not possible.
-   Please update first to a ooresults version 0.3.x, start the ooresults-server to update the database schema, and update then to ooresults 0.4.0 or higher.
+   Please update to version 0.3.x of ooresults first, start the ooresults-server to update the database schema, and update then to ooresults 0.4.0 or higher.
 
+
+Added
+^^^^^
+
+- Display of entry data grouped by "Entries", "Classes" and "Clubs" added.
 
 Changed
 ^^^^^^^

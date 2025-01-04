@@ -24,32 +24,37 @@ $def streaming_enabled(enabled):
 
 <p/>
 
-<input id="eve_filter" oninput="w3.filterHTML('#events_tbody', 'tr', this.value)" placeholder="Search ...">
+<input id="eve_filter" oninput="filter_table('evnt.table', 'tr', this.value)" placeholder="Search ...">
 <p/>
 
-<table class="dt" id="evnt.table" onclick="evnt_highlight(event)">
+<table class="dte" id="evnt.table" onclick="evnt_highlight(event)">
     <thead>
-        <tr class="dt">
-            <th class="dt">Name</th>
-            <th class="dt">Date</th>
-            <th class="dt">Key</th>
-            <th class="dt">Publish</th>
-            <th class="dt">Streaming</th>
-            <th class="dt">Series</th>
-            <th class="dt">Fields</th>
+        <tr id="evnt.theader" class="dth">
+            <th class="dth">Name</th>
+            <th class="dth">Date</th>
+            <th class="dth">Key</th>
+            <th class="dth">Publish</th>
+            <th class="dth">Streaming</th>
+            <th class="dth">Series</th>
+            <th class="dth">Fields</th>
         </tr>
     </thead>
     <tbody id="events_tbody">
-    $for event in events:
-        <tr class="dt" id="$event.id">
-            <td class="dt">$event.name</td>
-            <td class="dt">$event.date.isoformat()</td>
-            <td class="dt">$('***' if event.key is not None else '')</td>
-            <td class="dt">$('yes' if event.publish else 'no')</td>
-            <td class="dt">$streaming_enabled(event.streaming_enabled)</td>
-            <td class="dt">$(event.series if event.series is not None else '')</td>
-            <td class="dt">$', '.join(event.fields)</td>
-        </tr>
+        $if events:
+            $ name = "Events&nbsp;&nbsp;(" + str(len(events)) + ")"
+            <tr class="dte h1">
+                <th class="dte h1" colspan="99">$:name</th>
+            </tr>
+            $for event in events:
+                <tr class="dte" id="$event.id">
+                    <td class="dte">$event.name</td>
+                    <td class="dte">$event.date.isoformat()</td>
+                    <td class="dte">$('***' if event.key is not None else '')</td>
+                    <td class="dte">$('yes' if event.publish else 'no')</td>
+                    <td class="dte">$streaming_enabled(event.streaming_enabled)</td>
+                    <td class="dte">$(event.series if event.series is not None else '')</td>
+                    <td class="dte">$', '.join(event.fields)</td>
+                </tr>
     </tbody>
 </table>
 

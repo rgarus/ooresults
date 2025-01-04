@@ -50,7 +50,7 @@ class Table:
         rows = [row for row in rows if row.is_displayed()]
 
         content = []
-        for cell in rows[i - 1].find_elements(By.XPATH, ".//td"):
+        for cell in rows[i - 1].find_elements(By.XPATH, ".//th | .//td"):
             content.append(cell.text)
         if content:
             return content

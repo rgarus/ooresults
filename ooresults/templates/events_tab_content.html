@@ -186,6 +186,14 @@ $def with (events_table)
         xhr.send();
     }
 
+    function set_even_table_header_top() {
+        h = document.getElementById('eve_actions').offsetHeight;
+        document.getElementById('evnt.theader').style.top = h - 1;
+
+    }
+
+    new ResizeObserver(set_even_table_header_top).observe(document.getElementById('eve_actions'));
+
     function evnt_updateTable(content) {
         // Get all elements with class="modal" and hide them
         modal = document.getElementsByClassName("modal");
@@ -196,6 +204,7 @@ $def with (events_table)
         document.getElementById('evnt.results').innerHTML = content;
         document.getElementById('evnt.myBtnEdit').disabled = true;
         document.getElementById('evnt.myBtnDelete').disabled = true;
+        set_even_table_header_top();
         document.getElementById('tab.entries').disabled = true;
         document.getElementById('tab.classes').disabled = true;
         document.getElementById('tab.courses').disabled = true;
@@ -222,7 +231,7 @@ $def with (events_table)
             }
         }
         if (evnt_selected == null) {
-            window.event_id = '';
+            window.event_id = null;
         }
     }
 

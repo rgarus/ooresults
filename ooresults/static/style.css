@@ -4,6 +4,43 @@ table.dt, th.dt, td.dt {
   padding: 5px;
 }
 
+table.dte {
+  border: 1px solid black;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+tr.dth {
+  position:sticky;
+  background-color: Canvas
+}
+
+th.dth {
+  border: 1px solid black;
+  border-left: none;
+  border-collapse: separate;
+  border-spacing: 0;
+  padding: 5px;
+}
+
+th.dte, td.dte {
+  border: 1px solid black;
+  border-left: none;
+  border-top: none;
+  border-collapse: separate;
+  border-spacing: 0;
+  padding: 5px;
+}
+
+th.h1 {
+  padding-left: 25px;
+  text-align: left;
+  background-color: #D6EEEE;
+}
+
 .selected {
     background-color: brown;
     color: #FFF;

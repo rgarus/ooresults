@@ -1,4 +1,4 @@
-$def with (event, entries)
+$def with (event, view, view_entries_list)
 
 
 $def format_time(time):
@@ -34,48 +34,66 @@ $def f(value) -> str:
 
 <p/>
 
-<input id="entr.filter" oninput="w3.filterHTML('#entries_tbody', 'tr', this.value)" placeholder="Search ...">
+<input id="entr.filter" oninput="filter_table('entr.table', 'tr', this.value)" placeholder="Search ...">
+<label for="entr.view">&nbsp;&nbsp;&nbsp;&nbsp;View:&nbsp;&nbsp;</label>
+<select id="entr.view" onchange="entr_reload_view(this)">
+    <option value="entries" selected>Entries</option>
+    <option value="classes">Classes</option>
+    <option value="clubs">Clubs</option>
+</select>
+
 <p/>
 
 <div>
-    <table class="dt" id="entr.table" onclick="entr_highlight(event)">
+    <table class="dte" id="entr.table" onclick="entr_highlight(event)">
         <thead>
-            <tr class="dt">
-                <th class="dt">First name</th>
-                <th class="dt">Last name</th>
-                <th class="dt">Gender</th>
-                <th class="dt">Year</th>
-                <th class="dt">Chip</th>
-                <th class="dt">Club</th>
-                <th class="dt">Class</th>
-                <th class="dt">&nbsp;&nbsp;NC&nbsp;&nbsp;</th>
+            <tr id="entr.theader" class="dth">
+                <th class="dth">First name</th>
+                <th class="dth">Last name</th>
+                <th class="dth">Gender</th>
+                <th class="dth">Year</th>
+                <th class="dth">Chip</th>
+                $if view != "clubs":
+                    <th class="dth">Club</th>
+                $if view != "classes":
+                    <th class="dth">Class</th>
+                <th class="dth">&nbsp;&nbsp;NC&nbsp;&nbsp;</th>
                 $if event is not None:
                     $for field in event.fields:
-                        <th class="dt">$field</th>
-                <th class="dt">Start</th>
-                <th class="dt">Time</th>
-                <th class="dt">Status</th>
+                        <th class="dth">$field</th>
+                <th class="dth">Start</th>
+                <th class="dth">Time</th>
+                <th class="dth">Status</th>
             </tr>
         </thead>
-        <tbody id="entries_tbody">
-        $for entry in entries:
-            <tr class="dt" id="$entry.id">
-                <td class="dt">$f(entry.first_name)</td>
-                <td class="dt" id="entr_table_lastname">$f(entry.last_name)</td>
-                <td class="dt">$f(entry.gender)</td>
-                <td class="dt">$f(entry.year)</td>
-                <td class="dt" style="text-align:right">$format_card(entry.chip)</td>
-                <td class="dt">$f(entry.club_name)</td>
-                <td class="dt">$f(entry.class_name)</td>
-                <td class="dt" style="text-align: center;">$('X' if entry.not_competing else '')</td>
-                $if event is not None:
-                    $for i in range(len(event.fields)):
-                        <td class="dt">$entry.fields.get(i, '')</td>
-                <td class="dt" style="text-align:right">$(format_date(entry.start.start_time))</td>
-                <td class="dt" style="text-align:right">$(format_time(entry.result.extensions.get('running_time', entry.result.time)))</td>
-                <td class="dt">$MAP_STATUS[entry.result.status]</td>
-            </tr> 
+        <tbody>
+            $ t = {"entries": "Entries", "classes": "Unassigned results", "clubs": "Individuals/No club"}
+            $for group_name, entries in view_entries_list:
+                $if entries:
+                    $ name = group_name if group_name is not None else t[view]
+                    $ name = name + "&nbsp;&nbsp;(" + str(len(entries)) + ")"
+                    <tr class="dte h1">
+                        <th class="dte h1" colspan="99">$:name</th>
+                    </tr>
+                    $for entry in entries:
+                        <tr class="dte" id="$entry.id">
+                            <td class="dte">$f(entry.first_name)</td>
+                            <td class="dte" id="entr_table_lastname">$f(entry.last_name)</td>
+                            <td class="dte">$f(entry.gender)</td>
+                            <td class="dte">$f(entry.year)</td>
+                            <td class="dte" style="text-align:right;">$format_card(entry.chip)</td>
+                            $if view != "clubs":
+                                <td class="dte">$f(entry.club_name)</td>
+                            $if view != "classes":
+                                <td class="dte">$f(entry.class_name)</td>
+                            <td class="dte" style="text-align: center;">$('X' if entry.not_competing else '')</td>
+                            $if event is not None:
+                                $for i in range(len(event.fields)):
+                                    <td class="dte">$entry.fields.get(i, '')</td>
+                            <td class="dte" style="text-align:right;">$(format_date(entry.start.start_time))</td>
+                            <td class="dte" style="text-align:right;">$(format_time(entry.result.extensions.get('running_time', entry.result.time)))</td>
+                            <td class="dte">$MAP_STATUS[entry.result.status]</td>
+                        </tr>
         </tbody>
     </table>
 </div>
-

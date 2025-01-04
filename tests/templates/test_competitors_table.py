@@ -46,7 +46,7 @@ def rows(table: etree.Element) -> List[List[str]]:
     rows = []
     for row in table.findall(path=".//tbody//tr"):
         content = []
-        for cell in row.findall(path=".//td"):
+        for cell in row.xpath(_path=".//th | .//td"):
             content.append(cell.text)
         rows.append(content)
     return rows
@@ -115,6 +115,9 @@ def test_competitors_table_with_several_competitors(render):
         "Club",
     ]
     assert rows(table) == [
+        [
+            "Competitors\xa0\xa0(3)",
+        ],
         [
             "Barbara",
             "Merkel",

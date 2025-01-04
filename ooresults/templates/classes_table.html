@@ -38,41 +38,46 @@ $def format_voided_legs(legs):
 
 <p/>
 
-<input id="clas.filter" oninput="w3.filterHTML('#classes_tbody', 'tr', this.value)" placeholder="Search ...">
+<input id="clas.filter" oninput="filter_table('cls.table', 'tr', this.value)" placeholder="Search ...">
 <p/>
 
 <div>
-    <table class="dt" id="cls.table" onclick="cls_highlight(event)">
+    <table class="dte" id="cls.table" onclick="cls_highlight(event)">
         <thead>
-            <tr class="dt">
-                <th class="dt">Name</th>
-                <th class="dt">Short name</th>
-                <th class="dt">Course</th>
-                <th class="dt">Voided legs</th>
-                <th class="dt">Type</th>
-                <th class="dt">Use start control</th>
-                <th class="dt">Apply handicap</th>
-                <th class="dt">Mass start</th>
-                <th class="dt">Time limit</th>
-                <th class="dt">Penalty controls</th>
-                <th class="dt">Penalty time limit</th>
+            <tr id="clas.theader" class="dth">
+                <th class="dth">Name</th>
+                <th class="dth">Short name</th>
+                <th class="dth">Course</th>
+                <th class="dth">Voided legs</th>
+                <th class="dth">Type</th>
+                <th class="dth">Use start control</th>
+                <th class="dth">Apply handicap</th>
+                <th class="dth">Mass start</th>
+                <th class="dth">Time limit</th>
+                <th class="dth">Penalty controls</th>
+                <th class="dth">Penalty time limit</th>
             </tr>
         </thead>
         <tbody id="classes_tbody">
-        $for class_ in classes:
-            <tr class="dt" id="$class_.id">
-                <td class="dt">$class_.name</td>
-                <td class="dt">$(class_.short_name if class_.short_name is not None else '')</td>
-                <td class="dt">$(class_.course_name if class_.course_name is not None else '')</td>
-                <td class="dt">$format_voided_legs(class_.params.voided_legs)</td>
-                <td class="dt">$({'standard': 'Standard', 'net': 'Net', 'score': 'Score'}.get(class_.params.otype, ''))</td>
-                <td class="dt">$({'if_punched': 'If punched', 'no': 'No', 'yes': 'Yes'}.get(class_.params.using_start_control, ''))</td>
-                <td class="dt">$('Yes' if class_.params.apply_handicap_rule else '')</td>
-                <td class="dt" style="text-align:right">$format_date(class_.params.mass_start)</td>
-                <td class="dt" style="text-align:right">$format_time(class_.params.time_limit)</td>
-                <td class="dt" style="text-align:right">$format_int(class_.params.penalty_controls)</td>
-                <td class="dt" style="text-align:right">$format_int(class_.params.penalty_overtime)</td>
-            </tr> 
+            $if classes:
+                $ name = "Classes&nbsp;&nbsp;(" + str(len(classes)) + ")"
+                <tr class="dte h1">
+                    <th class="dte h1" colspan="99">$:name</th>
+                </tr>
+                $for class_ in classes:
+                    <tr class="dte" id="$class_.id">
+                        <td class="dte">$class_.name</td>
+                        <td class="dte">$(class_.short_name if class_.short_name is not None else '')</td>
+                        <td class="dte">$(class_.course_name if class_.course_name is not None else '')</td>
+                        <td class="dte">$format_voided_legs(class_.params.voided_legs)</td>
+                        <td class="dte">$({'standard': 'Standard', 'net': 'Net', 'score': 'Score'}.get(class_.params.otype, ''))</td>
+                        <td class="dte">$({'if_punched': 'If punched', 'no': 'No', 'yes': 'Yes'}.get(class_.params.using_start_control, ''))</td>
+                        <td class="dte">$('Yes' if class_.params.apply_handicap_rule else '')</td>
+                        <td class="dte" style="text-align:right">$format_date(class_.params.mass_start)</td>
+                        <td class="dte" style="text-align:right">$format_time(class_.params.time_limit)</td>
+                        <td class="dte" style="text-align:right">$format_int(class_.params.penalty_controls)</td>
+                        <td class="dte" style="text-align:right">$format_int(class_.params.penalty_overtime)</td>
+                    </tr>
         </tbody>
     </table>
 </div>

@@ -2,7 +2,7 @@ $def with (competitors_table)
  
 <!-- Tab content -->
 <div id="Competitors" class="tabcontent">
-  <div class="actions">
+  <div id="comp.actions" class="actions">
     <!-- Trigger/Open The Modal -->
     <button id="comp.myBtnReload" onclick="comp_update()">Reload</button>
     <button id="comp.myBtnImport" onclick="comp_myImport()">Import ...</button>
@@ -296,6 +296,14 @@ $def with (competitors_table)
         xhr.send();
     }
 
+    function set_comp_table_header_top() {
+        h = document.getElementById('comp.actions').offsetHeight;
+        document.getElementById('comp.theader').style.top = h - 1;
+
+    }
+
+    new ResizeObserver(set_comp_table_header_top).observe(document.getElementById('comp.actions'));
+
     function comp_updateTable(content) {
         // Get all elements with class="modal" and hide them
         modal = document.getElementsByClassName("modal");
@@ -305,5 +313,6 @@ $def with (competitors_table)
         document.getElementById('comp.data').innerHTML = content;
         document.getElementById('comp.myBtnEdit').disabled = true;
         document.getElementById('comp.myBtnDelete').disabled = true;
+        set_comp_table_header_top();
     }
 </script>

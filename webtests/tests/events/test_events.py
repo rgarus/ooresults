@@ -53,7 +53,7 @@ def event(event_page, delete_events) -> None:
     )
     dialog.submit()
     # check number of rows
-    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_rows() == 2
     assert event_page.table.nr_of_columns() == 7
 
 
@@ -74,7 +74,7 @@ def test_some_actions_disabled_if_no_row_is_selected(event_page, event):
 
 
 def test_all_actions_enabled_if_a_row_is_selected(event_page, event):
-    event_page.table.select_row(i=1)
+    event_page.table.select_row(i=2)
 
     assert event_page.actions.action("Reload").is_enabled()
     assert event_page.actions.action("Add event ...").is_enabled()
@@ -122,10 +122,13 @@ def test_add_event_with_required_data(event_page, delete_events):
     dialog.submit()
 
     # check number of rows
-    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_rows() == 2
     assert event_page.table.nr_of_columns() == 7
 
     assert event_page.table.row(i=1) == [
+        "Events  (1)",
+    ]
+    assert event_page.table.row(i=2) == [
         "Test-Lauf heute",
         "2023-12-28",
         "",
@@ -163,10 +166,13 @@ def test_add_event_with_all_data(event_page, delete_events):
     dialog.submit()
 
     # check number of rows
-    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_rows() == 2
     assert event_page.table.nr_of_columns() == 7
 
     assert event_page.table.row(i=1) == [
+        "Events  (1)",
+    ]
+    assert event_page.table.row(i=2) == [
         "Test-Lauf heute",
         "2023-12-28",
         "***",
@@ -202,7 +208,7 @@ def test_if_no_event_is_selected_and_a_new_event_is_added_then_no_event_is_selec
 
 
 def test_adding_a_new_event_does_not_change_selected_event(event_page, event):
-    event_page.table.select_row(i=1)
+    event_page.table.select_row(i=2)
     assert event_page.get_event_name() == "Test-Lauf heute"
     assert event_page.get_event_date() == "2023-12-28"
 
@@ -225,7 +231,7 @@ def test_adding_a_new_event_does_not_change_selected_event(event_page, event):
 
 
 def test_edit_event(event_page, event):
-    event_page.table.select_row(1)
+    event_page.table.select_row(2)
 
     dialog = event_page.actions.edit_event()
     dialog.check_values(
@@ -253,10 +259,13 @@ def test_edit_event(event_page, event):
     dialog.submit()
 
     # check number of rows
-    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_rows() == 2
     assert event_page.table.nr_of_columns() == 7
 
     assert event_page.table.row(i=1) == [
+        "Events  (1)",
+    ]
+    assert event_page.table.row(i=2) == [
         "Test-Lauf morgen",
         "2023-12-29",
         "***",
@@ -269,7 +278,7 @@ def test_edit_event(event_page, event):
 
 def test_if_an_event_is_deleted_no_event_is_selected(event_page, event):
     # select event
-    event_page.table.select_row(1)
+    event_page.table.select_row(2)
     assert event_page.get_event_name() == "Test-Lauf heute"
     assert event_page.get_event_date() == "2023-12-28"
 
@@ -313,10 +322,13 @@ def test_add_several_events(event_page, event):
     dialog.submit()
 
     # check number of rows
-    assert event_page.table.nr_of_rows() == 3
+    assert event_page.table.nr_of_rows() == 4
     assert event_page.table.nr_of_columns() == 7
 
     assert event_page.table.row(i=1) == [
+        "Events  (3)",
+    ]
+    assert event_page.table.row(i=2) == [
         "Test-Lauf 1",
         "2023-12-29",
         "",
@@ -325,7 +337,7 @@ def test_add_several_events(event_page, event):
         "Serie",
         "c, d",
     ]
-    assert event_page.table.row(i=2) == [
+    assert event_page.table.row(i=3) == [
         "Test-Lauf 2",
         "2023-12-29",
         "***",
@@ -334,7 +346,7 @@ def test_add_several_events(event_page, event):
         "Serie",
         "e, f",
     ]
-    assert event_page.table.row(i=3) == [
+    assert event_page.table.row(i=4) == [
         "Test-Lauf heute",
         "2023-12-28",
         "***",
@@ -375,16 +387,19 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(event_page, even
     dialog.submit()
 
     # check number of rows
-    assert event_page.table.nr_of_rows() == 3
+    assert event_page.table.nr_of_rows() == 4
     assert event_page.table.nr_of_columns() == 7
 
     event_page.filter().set_text("heute")
 
     # check number of rows
-    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_rows() == 2
     assert event_page.table.nr_of_columns() == 7
 
     assert event_page.table.row(i=1) == [
+        "Events  (3)",
+    ]
+    assert event_page.table.row(i=2) == [
         "Test-Lauf heute",
         "2023-12-28",
         "***",
@@ -415,10 +430,13 @@ def test_if_an_event_is_added_by_another_user_then_it_is_displayed_after_reload(
     )
 
     # check number of rows
-    assert event_page.table.nr_of_rows() == 1
+    assert event_page.table.nr_of_rows() == 2
     assert event_page.table.nr_of_columns() == 7
 
     assert event_page.table.row(i=1) == [
+        "Events  (1)",
+    ]
+    assert event_page.table.row(i=2) == [
         "Test-Lauf heute",
         "2023-12-28",
         "***",
@@ -431,10 +449,13 @@ def test_if_an_event_is_added_by_another_user_then_it_is_displayed_after_reload(
     event_page.actions.reload()
 
     # check number of rows
-    assert event_page.table.nr_of_rows() == 2
+    assert event_page.table.nr_of_rows() == 3
     assert event_page.table.nr_of_columns() == 7
 
     assert event_page.table.row(i=1) == [
+        "Events  (2)",
+    ]
+    assert event_page.table.row(i=2) == [
         "Test-Lauf heute",
         "2023-12-28",
         "***",
@@ -443,7 +464,7 @@ def test_if_an_event_is_added_by_another_user_then_it_is_displayed_after_reload(
         "Serie",
         "a, b",
     ]
-    assert event_page.table.row(i=2) == [
+    assert event_page.table.row(i=3) == [
         "XXX Event",
         "2024-05-17",
         "",

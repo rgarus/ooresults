@@ -74,15 +74,21 @@ def rows(table: etree.Element) -> List[List[str]]:
     rows = []
     for row in table.findall(path=".//tbody//tr"):
         content = []
-        for cell in row.findall(path=".//td"):
+        for cell in row.xpath(_path=".//th | .//td"):
             content.append(cell.text)
         rows.append(content)
     return rows
 
 
 def test_entries_table_with_no_entries(render, event: EventType):
-    entries = []
-    html = etree.HTML(str(render.entries_table(event=event, entries=entries)))
+    view_entries_list = []
+    html = etree.HTML(
+        str(
+            render.entries_table(
+                event=event, view="Entries", view_entries_list=view_entries_list
+            )
+        )
+    )
 
     table = html.find(".//table[@id='entr.table']")
     assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
@@ -185,7 +191,13 @@ def test_entries_table_with_several_entries(render, event: EventType):
             club_name="OL Bundestag",
         ),
     ]
-    html = etree.HTML(str(render.entries_table(event=event, entries=entries)))
+    html = etree.HTML(
+        str(
+            render.entries_table(
+                event=event, view="Entries", view_entries_list=[("Entries", entries)]
+            )
+        )
+    )
 
     table = html.find(".//table[@id='entr.table']")
     assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
@@ -204,7 +216,11 @@ def test_entries_table_with_several_entries(render, event: EventType):
         "Time",
         "Status",
     ]
+
     assert rows(table) == [
+        [
+            "Entries\xa0\xa0(3)",
+        ],
         [
             "Barbara",
             "Merkel",
@@ -282,7 +298,13 @@ def test_entries_table_with_fields(render):
             club_name=None,
         ),
     ]
-    html = etree.HTML(str(render.entries_table(event=event, entries=entries)))
+    html = etree.HTML(
+        str(
+            render.entries_table(
+                event=event, view="Entries", view_entries_list=[("Entries", entries)]
+            )
+        )
+    )
 
     table = html.find(".//table[@id='entr.table']")
     assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
@@ -304,6 +326,9 @@ def test_entries_table_with_fields(render):
         "Status",
     ]
     assert rows(table) == [
+        [
+            "Entries\xa0\xa0(1)",
+        ],
         [
             "Barbara",
             "Merkel",

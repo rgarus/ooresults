@@ -47,7 +47,7 @@ def rows(table: etree.Element) -> List[List[str]]:
     rows = []
     for row in table.findall(path=".//tbody//tr"):
         content = []
-        for cell in row.findall(path=".//td"):
+        for cell in row.xpath(_path=".//th | .//td"):
             content.append(cell.text)
         rows.append(content)
     return rows
@@ -134,6 +134,9 @@ def test_events_table_with_several_events(render):
         "Fields",
     ]
     assert rows(table) == [
+        [
+            "Events\xa0\xa0(3)",
+        ],
         [
             "Test-Lauf 1",
             "2023-12-29",

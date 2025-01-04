@@ -28,6 +28,7 @@ import tzlocal
 import web
 
 from ooresults.model import model
+from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.plugins import iof_entry_list
 from ooresults.plugins import iof_result_list
@@ -43,11 +44,46 @@ templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
 render = web.template.render(templates, globals=t_globals)
 
 
-def update(event_id: int):
+def update(event_id: int, view: str = "entries"):
     entry_list = model.get_entries(event_id=event_id)
     try:
         event = model.get_event(id=event_id)
-        return render.entries_table(event, entry_list)
+
+        unassigned_results = 0
+        for e in entry_list:
+            if e.class_id is None:
+                unassigned_results += 1
+
+        if view == "entries":
+            if entry_list[unassigned_results:]:
+                view_entries_list = [("Entries", entry_list[unassigned_results:])]
+            else:
+                view_entries_list = []
+        elif view == "classes":
+            view_entries: Dict[str, List[EntryType]] = {}
+            for e in entry_list[unassigned_results:]:
+                if e.class_name in view_entries:
+                    view_entries[e.class_name].append(e)
+                else:
+                    view_entries[e.class_name] = [e]
+            view_entries_list = list(view_entries.items())
+            view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
+        elif view == "clubs":
+            view_entries: Dict[str, List[EntryType]] = {}
+            for e in entry_list[unassigned_results:]:
+                if e.club_name in view_entries:
+                    view_entries[e.club_name].append(e)
+                else:
+                    view_entries[e.club_name] = [e]
+            view_entries_list = list(view_entries.items())
+            view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
+
+        # add unasigned results
+        if unassigned_results > 0:
+            unassigned_list = [("Unassigned results", entry_list[:unassigned_results])]
+        else:
+            unassigned_list = []
+        return render.entries_table(event, view, unassigned_list + view_entries_list)
     except EventNotFoundError:
         raise web.conflict("Event deleted")
     except:
@@ -60,7 +96,7 @@ class Update:
         """Update data"""
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
-        return update(event_id=event_id)
+        return update(event_id=event_id, view=data.view)
 
 
 class Import:

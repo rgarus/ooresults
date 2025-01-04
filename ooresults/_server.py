@@ -17,13 +17,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import logging
 import argparse
-import re
 import base64
+import logging
 import pathlib
-import sys
+import re
 import sqlite3
+import sys
 import time
 from typing import Optional
 
@@ -32,8 +32,8 @@ from cheroot.server import HTTPServer
 from cheroot.ssl.builtin import BuiltinSSLAdapter
 
 from ooresults import configuration
-from ooresults.model import model
 from ooresults.handler import cached_result
+from ooresults.model import model
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.user import Users
 from ooresults.utils import rental_cards
@@ -77,7 +77,7 @@ class Admin:
     def GET(self):
         events_table = render.events_table(model.get_events())
         events_tab_content = render.events_tab_content(events_table)
-        entries_table = render.entries_table(None, [])
+        entries_table = render.entries_table(None, "entries", [])
         entries_tab_content = render.entries_tab_content(entries_table)
         classes_table = render.classes_table(None, [])
         classes_tab_content = render.classes_tab_content(classes_table)

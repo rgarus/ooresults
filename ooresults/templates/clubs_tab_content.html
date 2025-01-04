@@ -2,7 +2,7 @@ $def with (clubs_table)
  
 <!-- Tab content -->
 <div id="Clubs" class="tabcontent">
-  <div class="actions">
+  <div id="club.actions" class="actions">
     <!-- Trigger/Open The Modal -->
     <button id="clb.myBtnReload" onclick="clb_update()">Reload</button>
     <button id="clb.myBtnAdd" onclick="clb_myAdd()">Add club ...</button>
@@ -172,6 +172,14 @@ $def with (clubs_table)
         xhr.send();
     }
 
+    function set_club_table_header_top() {
+        h = document.getElementById('club.actions').offsetHeight;
+        document.getElementById('club.theader').style.top = h - 1;
+
+    }
+
+    new ResizeObserver(set_club_table_header_top).observe(document.getElementById('club.actions'));
+
     function clb_updateTable(content) {
         // Get all elements with class="modal" and hide them
         modal = document.getElementsByClassName("modal");
@@ -181,5 +189,6 @@ $def with (clubs_table)
         document.getElementById('clb.data').innerHTML = content;
         document.getElementById('clb.myBtnEdit').disabled = true;
         document.getElementById('clb.myBtnDelete').disabled = true;
+        set_club_table_header_top();
     }
 </script>

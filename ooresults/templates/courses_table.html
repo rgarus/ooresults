@@ -16,27 +16,32 @@ $def with (event, courses)
 
 <p/>
 
-<input id="cour.filter" oninput="w3.filterHTML('#courses_tbody', 'tr', this.value)" placeholder="Search ...">
+<input id="cour.filter" oninput="filter_table('cou.table', 'tr', this.value)" placeholder="Search ...">
 <p/>
 
 <div>
-    <table class="dt" id="cou.table" onclick="cou_highlight(event)">
+    <table class="dte" id="cou.table" onclick="cou_highlight(event)">
         <thead>
-            <tr class="dt">
-                <th class="dt">Name</th>
-                <th class="dt">Length</th>
-                <th class="dt">Climb</th>
-                <th class="dt">Controls</th>
+            <tr id="cour.theader" class="dth">
+                <th class="dth">Name</th>
+                <th class="dth">Length</th>
+                <th class="dth">Climb</th>
+                <th class="dth">Controls</th>
             </tr>
         </thead>
         <tbody id="courses_tbody">
-        $for course in courses:
-            <tr class="dt" id="$course.id">
-                <td class="dt">$course.name</td>
-                <td class="dt" style="text-align:right">$(str(round(course.length)) if course.length is not None else '')</td>
-                <td class="dt" style="text-align:right">$(str(round(course.climb)) if course.climb is not None else '')</td>
-                <td class="dt">$' - '.join(course.controls)</td>
-            </tr> 
+            $if courses:
+                $ name = "Courses&nbsp;&nbsp;(" + str(len(courses)) + ")"
+                <tr class="dte h1">
+                    <th class="dte h1" colspan="99">$:name</th>
+                </tr>
+                $for course in courses:
+                    <tr class="dte" id="$course.id">
+                        <td class="dte">$course.name</td>
+                        <td class="dte" style="text-align:right">$(str(round(course.length)) if course.length is not None else '')</td>
+                        <td class="dte" style="text-align:right">$(str(round(course.climb)) if course.climb is not None else '')</td>
+                        <td class="dte">$' - '.join(course.controls)</td>
+                    </tr>
         </tbody>
     </table>
 </div>
