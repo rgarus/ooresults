@@ -56,5 +56,7 @@ Features
 Documentation
 -------------
 
-The `documentation <https://ooresults.readthedocs.io/en/latest/>`_ contains installation, a tutorial, a reference guide and configuration
-(currently only available in german language).
+Users of the ooresults software should read the `user documentation <https://ooresults.readthedocs.io/en/latest/>`_ (currently only available in German).
+It contains the installation, a tutorial, a reference guide and the configuration.
+
+Developers of ooresults should also read the `developer documentation <https://ooresults-dev.readthedocs.io/en/latest/>`_.

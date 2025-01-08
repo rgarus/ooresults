@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Willkommen zur ooresults Dokumentation!
-==========================================
+Willkommen zur ooresults Benutzerdokumentation!
+===============================================
 
 ooresults (open orienteering results) ist eine Software zur Erfassung und Auswertung
 der Ergebnisse kleinerer Orientierungsläufe und ist in der Lage SPORTident Karten zu lesen.
