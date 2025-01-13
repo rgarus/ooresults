@@ -72,14 +72,14 @@ Building the documentation
    python -m venv <venv-sphinx>
    <venv-sphinx>/bin/python -m pip install sphinx sphinx-multiproject
    
-   cd <git-local>
+   cd <git-local>/docs
    source <venv-sphinx>/bin/activate
    
    make html
    make latexpdf
    
    PROJECT=dev make html
-   PROJECT=dev makr latexpdf
+   PROJECT=dev make latexpdf
 
 
 
