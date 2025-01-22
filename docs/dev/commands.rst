@@ -33,14 +33,26 @@ Installing the software in editable mode
 
 
 
-Formating the Python source code
---------------------------------
+Formating the Python source code with black and isort
+-----------------------------------------------------
+
+For isort we use the following configuration parameters, defined in pyproject.toml in section [tool.isort]:
 
 .. code-block::
 
-   python -m pip install black
+   [tool.isort]
+   profile = "black"
+   force_single_line = "true"
+   lines_after_imports = 2
+
+Format the code:
+
+.. code-block::
+
+   python -m pip install black isort
    
    cd <git-local>
+   python -m isort .
    python -m black .
 
 
@@ -86,7 +98,7 @@ Building the documentation
 Building an ooresults release
 -----------------------------
 
-Edit and change the version number in the following files
+Edit and change the version number in the following files:
 
 - <git-local>/docs/conf.py
 - <git-local>/pyproject.toml
@@ -94,7 +106,7 @@ Edit and change the version number in the following files
 
 
 
-Build the release
+Build the release:
 
 .. code-block::
 

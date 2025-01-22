@@ -18,22 +18,22 @@
 
 
 import argparse
+import bz2
 import configparser
 import datetime
-import pathlib
 import json
-import time
-import threading
-import bz2
-import ssl
+import pathlib
 import queue
+import ssl
+import threading
+import time
 from typing import Dict
 from typing import Optional
 
-import websocket
 import jsonschema
-import sireader
 import serial.tools.list_ports
+import sireader
+import websocket
 
 
 #

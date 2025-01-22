@@ -19,8 +19,8 @@
 
 import dataclasses
 from decimal import Decimal
-from typing import Optional
 from typing import Dict
+from typing import Optional
 
 
 @dataclasses.dataclass

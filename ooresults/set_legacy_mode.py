@@ -20,8 +20,8 @@
 import sys
 import time
 
-import sireader
 import serial.tools.list_ports
+import sireader
 
 
 def connect() -> sireader.SIReaderReadout:

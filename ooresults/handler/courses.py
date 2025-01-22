@@ -23,10 +23,10 @@ import pathlib
 import web
 
 from ooresults.model import model
+from ooresults.plugins import iof_course_data
+from ooresults.repo.repo import ConstraintError
 from ooresults.repo.repo import CourseUsedError
 from ooresults.repo.repo import EventNotFoundError
-from ooresults.repo.repo import ConstraintError
-from ooresults.plugins import iof_course_data
 from ooresults.utils.globals import t_globals
 
 
