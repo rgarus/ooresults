@@ -20,15 +20,7 @@ $def with (event)
             </tr>
             <tr>
                 <th class="input-header"><label for="eve_publish">Publish</label></th>
-                <td>
-                    <select id="eve_publish" name="publish" oninput="mark_label(this)">
-                    $for publish in ['no', 'yes']:
-                        $if publish == ('yes' if event and event.publish else 'no'):
-                            <option value="$publish" selected>$publish</option>
-                        $else:
-                            <option value="$publish">$publish</option>
-                    </select>
-                </td>
+                <td><input id="eve_publish" name="publish" type="checkbox" value="true" oninput="mark_label(this)" $('checked' if event and event.publish else '')/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="eve_streamingAddress">Streaming address</label></th>

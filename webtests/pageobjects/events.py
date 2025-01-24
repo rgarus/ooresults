@@ -40,7 +40,7 @@ class AddEventDialog:
         name: str,
         date: str,
         key: str,
-        publish: str,
+        publish: bool,
         series: str,
         fields: List[str],
         streaming_address: str,
@@ -50,9 +50,7 @@ class AddEventDialog:
         assert name == TextControl(page=self.page, id="eve_name").get_text()
         assert date == DateControl(page=self.page, id="eve_date").get_date()
         assert key == TextControl(page=self.page, id="eve_key").get_text()
-        assert (
-            publish == ComboboxControl(page=self.page, id="eve_publish").selected_text()
-        )
+        assert publish == CheckboxControl(page=self.page, id="eve_publish").is_checked()
         assert series == TextControl(page=self.page, id="eve_series").get_text()
         assert (
             ", ".join(fields) == TextControl(page=self.page, id="eve_fields").get_text()
@@ -75,7 +73,7 @@ class AddEventDialog:
         name: Optional[str] = None,
         date: Optional[str] = None,
         key: Optional[str] = None,
-        publish: Optional[str] = None,
+        publish: Optional[bool] = None,
         series: Optional[str] = None,
         fields: Optional[List[str]] = None,
         streaming_address: Optional[str] = None,
@@ -89,9 +87,7 @@ class AddEventDialog:
         if key is not None:
             TextControl(page=self.page, id="eve_key").set_text(text=key)
         if publish is not None:
-            ComboboxControl(page=self.page, id="eve_publish").select_by_text(
-                text=publish
-            )
+            CheckboxControl(page=self.page, id="eve_publish").set_state(checked=publish)
         if series is not None:
             TextControl(page=self.page, id="eve_series").set_text(text=series)
         if fields is not None:

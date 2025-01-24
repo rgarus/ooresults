@@ -48,12 +48,9 @@ def test_add_event_for_add(render):
     input_key = html.find(".//input[@name='key']")
     assert input_key.attrib["value"] == ""
 
-    options_publish = html.findall(".//select[@name='publish']/option")
-    assert len(options_publish) == 2
-    assert options_publish[0].attrib == {"value": "no", "selected": "selected"}
-    assert options_publish[0].text == "no"
-    assert options_publish[1].attrib == {"value": "yes"}
-    assert options_publish[1].text == "yes"
+    input_publish = html.find(".//input[@name='publish']")
+    assert input_publish.attrib["value"] == "true"
+    assert "checked" not in input_publish.attrib
 
     input_streaming_address = html.find(".//input[@name='streaming_address']")
     assert input_streaming_address.attrib["value"] == ""
@@ -100,12 +97,9 @@ def test_add_event_for_edit(render):
     input_key = html.find(".//input[@name='key']")
     assert input_key.attrib["value"] == "sevenOr"
 
-    options_publish = html.findall(".//select[@name='publish']/option")
-    assert len(options_publish) == 2
-    assert options_publish[0].attrib == {"value": "no"}
-    assert options_publish[0].text == "no"
-    assert options_publish[1].attrib == {"value": "yes", "selected": "selected"}
-    assert options_publish[1].text == "yes"
+    input_publish = html.find(".//input[@name='publish']")
+    assert input_publish.attrib["value"] == "true"
+    assert "checked" in input_publish.attrib
 
     input_streaming_address = html.find(".//input[@name='streaming_address']")
     assert input_streaming_address.attrib["value"] == "localhost:8081"
