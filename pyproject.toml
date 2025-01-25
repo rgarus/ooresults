@@ -62,6 +62,7 @@ packages = [
     "ooresults",
     "ooresults.handler",
     "ooresults.model",
+    "ooresults.otypes",
     "ooresults.pdf",
     "ooresults.pdf.fonts",
     "ooresults.plugins",
