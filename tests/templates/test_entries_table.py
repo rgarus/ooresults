@@ -95,6 +95,7 @@ def test_entries_table_with_no_entries(render, event: EventType):
     assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
 
     assert headers(table) == [
+        "\xa0\xa0NC\xa0\xa0",
         "First name",
         "Last name",
         "Gender",
@@ -102,7 +103,6 @@ def test_entries_table_with_no_entries(render, event: EventType):
         "Chip",
         "Club",
         "Class",
-        "\xa0\xa0NC\xa0\xa0",
         "Start",
         "Time",
         "Status",
@@ -204,6 +204,7 @@ def test_entries_table_with_several_entries(render, event: EventType):
     assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
 
     assert headers(table) == [
+        "\xa0\xa0NC\xa0\xa0",
         "First name",
         "Last name",
         "Gender",
@@ -211,7 +212,6 @@ def test_entries_table_with_several_entries(render, event: EventType):
         "Chip",
         "Club",
         "Class",
-        "\xa0\xa0NC\xa0\xa0",
         "Start",
         "Time",
         "Status",
@@ -222,6 +222,7 @@ def test_entries_table_with_several_entries(render, event: EventType):
             "Entries\xa0\xa0(3)",
         ],
         [
+            None,
             "Barbara",
             "Merkel",
             None,
@@ -229,12 +230,12 @@ def test_entries_table_with_several_entries(render, event: EventType):
             None,
             None,
             "Elite F",
-            None,
             "12:38:59",
             None,
             None,
         ],
         [
+            None,
             "Angela",
             "Merkel",
             "F",
@@ -243,11 +244,11 @@ def test_entries_table_with_several_entries(render, event: EventType):
             "OL Bundestag",
             "Elite F",
             None,
-            None,
             "0:08",
             "OK",
         ],
         [
+            "X",
             "Manfred",
             "Merkel",
             "M",
@@ -255,7 +256,6 @@ def test_entries_table_with_several_entries(render, event: EventType):
             "4748496",
             "OL Bundestag",
             "Elite M",
-            "X",
             None,
             "0:08",
             "MP",
@@ -311,6 +311,7 @@ def test_entries_table_with_fields(render):
     assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
 
     assert headers(table) == [
+        "\xa0\xa0NC\xa0\xa0",
         "First name",
         "Last name",
         "Gender",
@@ -318,7 +319,6 @@ def test_entries_table_with_fields(render):
         "Chip",
         "Club",
         "Class",
-        "\xa0\xa0NC\xa0\xa0",
         "Start number",
         "Region",
         "Start",
@@ -330,6 +330,7 @@ def test_entries_table_with_fields(render):
             "Entries\xa0\xa0(1)",
         ],
         [
+            None,
             "Barbara",
             "Merkel",
             None,
@@ -337,7 +338,6 @@ def test_entries_table_with_fields(render):
             None,
             None,
             "Elite F",
-            None,
             "121",
             "Bayern",
             "12:38:59",

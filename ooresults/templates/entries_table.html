@@ -40,6 +40,7 @@ $def f(value) -> str:
     <option value="entries" selected>Entries</option>
     <option value="classes">Classes</option>
     <option value="clubs">Clubs</option>
+    <option value="states">States</option>
 </select>
 
 <p/>
@@ -48,6 +49,7 @@ $def f(value) -> str:
     <table class="dte" id="entr.table" onclick="entr_highlight(event)">
         <thead>
             <tr id="entr.theader" class="dth">
+                <th class="dth">&nbsp;&nbsp;NC&nbsp;&nbsp;</th>
                 <th class="dth">First name</th>
                 <th class="dth">Last name</th>
                 <th class="dth">Gender</th>
@@ -57,7 +59,6 @@ $def f(value) -> str:
                     <th class="dth">Club</th>
                 $if view != "classes":
                     <th class="dth">Class</th>
-                <th class="dth">&nbsp;&nbsp;NC&nbsp;&nbsp;</th>
                 $if event is not None:
                     $for field in event.fields:
                         <th class="dth">$field</th>
@@ -67,7 +68,7 @@ $def f(value) -> str:
             </tr>
         </thead>
         <tbody>
-            $ t = {"entries": "Entries", "classes": "Unassigned results", "clubs": "Individuals/No club"}
+            $ t = {"entries": "Entries", "classes": "Unassigned results", "clubs": "Individuals/No club", "states": "Unassigned results"}
             $for group_name, entries in view_entries_list:
                 $if entries:
                     $ name = group_name if group_name is not None else t[view]
@@ -77,6 +78,7 @@ $def f(value) -> str:
                     </tr>
                     $for entry in entries:
                         <tr class="dte" id="$entry.id">
+                            <td class="dte" style="text-align: center;">$('X' if entry.not_competing else '')</td>
                             <td class="dte">$f(entry.first_name)</td>
                             <td class="dte" id="entr_table_lastname">$f(entry.last_name)</td>
                             <td class="dte">$f(entry.gender)</td>
@@ -86,7 +88,6 @@ $def f(value) -> str:
                                 <td class="dte">$f(entry.club_name)</td>
                             $if view != "classes":
                                 <td class="dte">$f(entry.class_name)</td>
-                            <td class="dte" style="text-align: center;">$('X' if entry.not_competing else '')</td>
                             $if event is not None:
                                 $for i in range(len(event.fields)):
                                     <td class="dte">$entry.fields.get(i, '')</td>

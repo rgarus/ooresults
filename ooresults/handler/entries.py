@@ -77,8 +77,39 @@ def update(event_id: int, view: str = "entries"):
                     view_entries[e.club_name] = [e]
             view_entries_list = list(view_entries.items())
             view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
-
-        # add unasigned results
+        elif view == "states":
+            view_entries: Dict[ResultStatus, List[EntryType]] = {}
+            for e in entry_list[unassigned_results:]:
+                if e.result.status in view_entries:
+                    view_entries[e.result.status].append(e)
+                else:
+                    view_entries[e.result.status] = [e]
+            view_entries_list = list(view_entries.items())
+            f_order = {
+                ResultStatus.INACTIVE: 0,
+                ResultStatus.ACTIVE: 1,
+                ResultStatus.FINISHED: 2,
+                ResultStatus.OK: 3,
+                ResultStatus.MISSING_PUNCH: 4,
+                ResultStatus.DID_NOT_FINISH: 5,
+                ResultStatus.OVER_TIME: 6,
+                ResultStatus.DISQUALIFIED: 7,
+                ResultStatus.DID_NOT_START: 8,
+            }
+            view_entries_list.sort(key=lambda e: f_order[e[0]])
+            f_name = {
+                ResultStatus.INACTIVE: "Registered",
+                ResultStatus.ACTIVE: "Started",
+                ResultStatus.FINISHED: "Finished",
+                ResultStatus.OK: "OK",
+                ResultStatus.MISSING_PUNCH: "Missing punch",
+                ResultStatus.DID_NOT_FINISH: "Did not finish",
+                ResultStatus.OVER_TIME: "Over time",
+                ResultStatus.DISQUALIFIED: "Disqualified",
+                ResultStatus.DID_NOT_START: "Did not start",
+            }
+            view_entries_list = [(f_name[v[0]], v[1]) for v in view_entries_list]
+        # add unassigned results
         if unassigned_results > 0:
             unassigned_list = [("Unassigned results", entry_list[:unassigned_results])]
         else:
