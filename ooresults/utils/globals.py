@@ -42,8 +42,9 @@ MAP_STATUS = {
 }
 
 STREAMING_STATUS = {
-    streaming_status.Status.SERVER_NOT_REACHABLE: "Server not reachable",
-    streaming_status.Status.ACCESS_DENIED: "Access denied",
+    streaming_status.Status.NOT_CONNECTED: "Not connected",
+    streaming_status.Status.INTERNAL_ERROR: "Internal error",
+    streaming_status.Status.PROTOCOL_ERROR: "Protocol error",
     streaming_status.Status.EVENT_NOT_FOUND: "Event not found",
     streaming_status.Status.ERROR: "Error",
     streaming_status.Status.OK: "Ok",

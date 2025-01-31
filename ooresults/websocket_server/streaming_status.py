@@ -17,6 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import logging
 import threading
 from enum import Enum
 from typing import Awaitable
@@ -27,8 +28,9 @@ from ooresults.otypes.event_type import EventType
 
 
 class Status(Enum):
-    SERVER_NOT_REACHABLE = "ServerNotReachable"
-    ACCESS_DENIED = "AccessDenied"
+    NOT_CONNECTED = "NotConnected"
+    INTERNAL_ERROR = "InternalError"
+    PROTOCOL_ERROR = "ProtocolError"
     EVENT_NOT_FOUND = "EventNotFound"
     ERROR = "Error"
     OK = "Ok"
@@ -44,10 +46,12 @@ class StreamingStatus:
         with self.lock:
             return self.status.get(id, None)
 
-    async def set(self, event: EventType, status: Status) -> None:
+    async def set(self, event: EventType, status: Status, comment: str = "") -> None:
         with self.lock:
             changed = self.status.get(event.id, None) != status
             self.status[event.id] = status
+        if changed:
+            logging.info(f"Streaming status: {status}, {comment}")
         if changed and self.awaitable:
             await self.awaitable(event)
 

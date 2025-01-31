@@ -238,24 +238,24 @@ async def test_if_streaming_is_enabled_then_connect_is_called_until_connected(
     # call order of mocked objects in Streaming.stream()
     #
     # get_events -> [event]
-    # connect -> OSError
-    # sleep(10)
-    # connect -> OSError
-    # sleep(10)
+    # connect -> OSError()
+    # sleep(20)
+    # connect -> OSError()
+    # sleep(20)
     # connect -> ClientConnection()
     # event_class_results -> event(3), []
     # send
     # recv -> '{"result": "ok"}'
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(0)
 
     calls = [
         # get_events -> [event]
         C(name="mock_get_events", value=[event]),
-        # connect -> OSError
-        C(name="mock_connect", value=OSError),
-        # sleep(10)
-        C(name="mock_sleep", kwargs={"delay": 10}),
+        # connect -> OSError()
+        C(name="mock_connect", value=OSError()),
+        # sleep(20)
+        C(name="mock_sleep", kwargs={"delay": 20}),
     ]
     value_calls(parent=parent, calls=calls)
     s = streaming.Streaming(loop=loop)
@@ -263,14 +263,14 @@ async def test_if_streaming_is_enabled_then_connect_is_called_until_connected(
     # synchronize
     await parent.mock_sleep.sync()
     # assertions
-    assert streaming_status.status.get(id=event.id) == Status.SERVER_NOT_REACHABLE
+    assert streaming_status.status.get(id=event.id) == Status.NOT_CONNECTED
 
     check_calls(parent=parent, calls=calls)
     c1 = [
-        # connect -> OSError
-        C(name="mock_connect", value=OSError),
-        # sleep(10)
-        C(name="mock_sleep", kwargs={"delay": 10}),
+        # connect -> OSError()
+        C(name="mock_connect", value=OSError()),
+        # sleep(20)
+        C(name="mock_sleep", kwargs={"delay": 20}),
     ]
     calls += c1
     value_calls(parent=parent, calls=c1)
@@ -278,7 +278,7 @@ async def test_if_streaming_is_enabled_then_connect_is_called_until_connected(
     # synchronize
     await parent.mock_sleep.sync()
     # assertions
-    assert streaming_status.status.get(id=event.id) == Status.SERVER_NOT_REACHABLE
+    assert streaming_status.status.get(id=event.id) == Status.NOT_CONNECTED
 
     check_calls(parent=parent, calls=calls)
     c1 = [
@@ -290,8 +290,8 @@ async def test_if_streaming_is_enabled_then_connect_is_called_until_connected(
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -363,7 +363,7 @@ async def test_if_answer_is_event_not_found_then_reconnect_after_45_sec(
         C(name="mock_ws.send"),
         # recv -> '{"result": "eventNotFound"}'
         C(name="mock_ws.recv", value='{"result": "eventNotFound"}'),
-        # sleep(30)
+        # sleep(45)
         C(name="mock_sleep", kwargs={"delay": 45}),
     ]
     calls += c1
@@ -394,12 +394,12 @@ async def test_if_no_answer_then_reconnect_after_45_sec(
     # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
-    # recv -> TimeoutError'
+    # recv -> TimeoutError()'
     # sleep(15)
     # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
-    # recv -> TimeoutError'
+    # recv -> TimeoutError()'
     # sleep(15)
 
     calls = [
@@ -411,8 +411,8 @@ async def test_if_no_answer_then_reconnect_after_45_sec(
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
         # send
         C(name="mock_ws.send"),
-        # recv -> TimeoutError'
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> TimeoutError()'
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(15)
         C(name="mock_sleep", kwargs={"delay": 15}),
     ]
@@ -422,7 +422,7 @@ async def test_if_no_answer_then_reconnect_after_45_sec(
     # synchronize
     await parent.mock_sleep.sync()
     # assertions
-    assert streaming_status.status.get(id=event.id) == Status.ACCESS_DENIED
+    assert streaming_status.status.get(id=event.id) == Status.PROTOCOL_ERROR
 
     check_calls(parent=parent, calls=calls)
     c1 = [
@@ -433,7 +433,7 @@ async def test_if_no_answer_then_reconnect_after_45_sec(
         # send
         C(name="mock_ws.send"),
         # recv -> TimeoutError}'
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(15)
         C(name="mock_sleep", kwargs={"delay": 15}),
     ]
@@ -443,7 +443,7 @@ async def test_if_no_answer_then_reconnect_after_45_sec(
     # synchronize
     await parent.mock_sleep.sync()
     # assertions
-    assert streaming_status.status.get(id=event.id) == Status.ACCESS_DENIED
+    assert streaming_status.status.get(id=event.id) == Status.PROTOCOL_ERROR
 
     check_calls(parent=parent, calls=calls)
     # stop streaming
@@ -493,7 +493,7 @@ async def test_if_unexpected_answer_then_reconnect_after_45_sec(
     # synchronize
     await parent.mock_sleep.sync()
     # assertions
-    assert streaming_status.status.get(id=event.id) == Status.ACCESS_DENIED
+    assert streaming_status.status.get(id=event.id) == Status.PROTOCOL_ERROR
 
     check_calls(parent=parent, calls=calls)
     c1 = [
@@ -514,7 +514,7 @@ async def test_if_unexpected_answer_then_reconnect_after_45_sec(
     # synchronize
     await parent.mock_sleep.sync()
     # assertions
-    assert streaming_status.status.get(id=event.id) == Status.ACCESS_DENIED
+    assert streaming_status.status.get(id=event.id) == Status.PROTOCOL_ERROR
 
     check_calls(parent=parent, calls=calls)
     # stop streaming
@@ -542,7 +542,7 @@ async def test_if_answer_is_error_then_repeat_sending_actual_result_after_30_sec
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "error"}'
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(0)
 
     calls = [
@@ -557,7 +557,7 @@ async def test_if_answer_is_error_then_repeat_sending_actual_result_after_30_sec
         # recv -> '{"result": "error"}'
         C(name="mock_ws.recv", value='{"result": "error"}'),
         # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -577,8 +577,8 @@ async def test_if_answer_is_error_then_repeat_sending_actual_result_after_30_sec
         C(name="mock_ws.send"),
         # recv -> '{"result": "error"}'
         C(name="mock_ws.recv", value='{"result": "error"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -589,6 +589,65 @@ async def test_if_answer_is_error_then_repeat_sending_actual_result_after_30_sec
     await parent.mock_sleep.sync()
     # assertions
     assert streaming_status.status.get(id=event.id) == Status.ERROR
+
+    check_calls(parent=parent, calls=calls)
+    # stop streaming
+    event.streaming_enabled = False
+    await s.update_event(event)
+
+
+@pytest.mark.asyncio
+async def test_if_after_connect_an_unknown_exception_is_raised_new_state_is_internal_error(
+    event: EventType,
+    parent: mock.MagicMock,
+):
+    loop = asyncio.get_running_loop()
+    event.streaming_enabled = True
+
+    # call order of mocked objects in Streaming.stream()
+    #
+    # get_events -> [event]
+    # connect -> ClientConnection()
+    # event_class_results -> Exception()
+    # sleep(30)
+    # connect -> ClientConnection()
+    # event_class_results -> Exception()
+    # sleep(30)
+
+    calls = [
+        # get_events -> [event]
+        C(name="mock_get_events", value=[event]),
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
+        # event_class_results(3) -> event, []
+        C(name="mock_event_class_results", kwargs={"event_id": 3}, value=Exception()),
+        # sleep(30)
+        C(name="mock_sleep", kwargs={"delay": 30}),
+    ]
+    value_calls(parent=parent, calls=calls)
+    s = streaming.Streaming(loop=loop)
+
+    # synchronize
+    await parent.mock_sleep.sync()
+    # assertions
+    assert streaming_status.status.get(id=event.id) == Status.INTERNAL_ERROR
+
+    check_calls(parent=parent, calls=calls)
+    c1 = [
+        # connect -> ClientConnection()
+        C(name="mock_connect", value=ClientConnection),
+        # event_class_results(3) -> event, []
+        C(name="mock_event_class_results", kwargs={"event_id": 3}, value=Exception()),
+        # sleep(30)
+        C(name="mock_sleep", kwargs={"delay": 30}),
+    ]
+    calls += c1
+    value_calls(parent=parent, calls=c1)
+
+    # synchronize
+    await parent.mock_sleep.sync()
+    # assertions
+    assert streaming_status.status.get(id=event.id) == Status.INTERNAL_ERROR
 
     check_calls(parent=parent, calls=calls)
     # stop streaming
@@ -612,12 +671,12 @@ async def test_if_answer_is_ok_then_repeat_sending_different_results_every_30_se
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(0)
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(0)
 
     calls = [
@@ -631,8 +690,8 @@ async def test_if_answer_is_ok_then_repeat_sending_different_results_every_30_se
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -656,8 +715,8 @@ async def test_if_answer_is_ok_then_repeat_sending_different_results_every_30_se
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0))
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -691,15 +750,15 @@ async def test_if_answer_is_ok_then_do_not_send_the_same_result_again(
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(0)
     # event_class_results -> event, []
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(0)
     # event_class_results -> event, [(class_info, [])]
     # send
     # recv -> '{"result": "ok"}'
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(0)
 
     calls = [
@@ -713,8 +772,8 @@ async def test_if_answer_is_ok_then_do_not_send_the_same_result_again(
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -730,8 +789,8 @@ async def test_if_answer_is_ok_then_do_not_send_the_same_result_again(
     c1 = [
         # event_class_results(3) -> event, []
         C(name="mock_event_class_results", kwargs={"event_id": 3}, value=(event, [])),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -755,8 +814,8 @@ async def test_if_answer_is_ok_then_do_not_send_the_same_result_again(
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -789,13 +848,13 @@ async def test_if_answer_is_ok_and_connection_closed_then_reconnect_after_30_sec
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
-    # recv -> WebSocketException
+    # recv -> ConnectionClosed()
     # sleep(30)
     # connect -> ClientConnection()
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(30)
 
     calls = [
@@ -809,8 +868,11 @@ async def test_if_answer_is_ok_and_connection_closed_then_reconnect_after_30_sec
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> WebSocketException
-        C(name="mock_ws.recv", value=websockets.exceptions.WebSocketException),
+        # recv -> ConnectionClosed
+        C(
+            name="mock_ws.recv",
+            value=websockets.exceptions.ConnectionClosed(rcvd=None, sent=None),
+        ),
         # sleep(30)
         C(name="mock_sleep", kwargs={"delay": 30}),
     ]
@@ -820,7 +882,7 @@ async def test_if_answer_is_ok_and_connection_closed_then_reconnect_after_30_sec
     # synchronize
     await parent.mock_sleep.sync()
     # assertions
-    assert streaming_status.status.get(id=event.id) == Status.OK
+    assert streaming_status.status.get(id=event.id) == Status.NOT_CONNECTED
 
     check_calls(parent=parent, calls=calls)
     c1 = [
@@ -832,8 +894,8 @@ async def test_if_answer_is_ok_and_connection_closed_then_reconnect_after_30_sec
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -866,7 +928,7 @@ async def test_if_stream_parameters_are_changed_then_reconnect(
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(0)
     #
     # await s.update_event(event=event)
@@ -875,7 +937,7 @@ async def test_if_stream_parameters_are_changed_then_reconnect(
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(0)
 
     calls = [
@@ -889,8 +951,8 @@ async def test_if_stream_parameters_are_changed_then_reconnect(
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -913,8 +975,8 @@ async def test_if_stream_parameters_are_changed_then_reconnect(
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -951,7 +1013,7 @@ async def test_if_stream_is_disabled_then_results_are_no_longer_send(
     # event_class_results -> event, []
     # send
     # recv -> '{"result": "ok"}'
-    # recv -> Timeout
+    # recv -> Timeout()
     # sleep(0)
     #
     # await s.update_event(event=event)
@@ -967,8 +1029,8 @@ async def test_if_stream_is_disabled_then_results_are_no_longer_send(
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]
@@ -1053,8 +1115,8 @@ async def test_if_stream_is_enabled_then_connect_to_server(
         C(name="mock_ws.send"),
         # recv -> '{"result": "ok"}'
         C(name="mock_ws.recv", value='{"result": "ok"}'),
-        # recv -> Timeout
-        C(name="mock_ws.recv", value=asyncio.TimeoutError),
+        # recv -> Timeout()
+        C(name="mock_ws.recv", value=asyncio.TimeoutError()),
         # sleep(0)
         C(name="mock_sleep", kwargs={"delay": 0}),
     ]

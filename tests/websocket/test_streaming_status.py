@@ -33,7 +33,7 @@ def status_1() -> StreamingStatus:
     s = StreamingStatus()
     s.status = {
         2: Status.ERROR,
-        4: Status.SERVER_NOT_REACHABLE,
+        4: Status.NOT_CONNECTED,
     }
     return s
 
@@ -44,7 +44,7 @@ def status_2() -> StreamingStatus:
     s.status = {
         2: Status.ERROR,
         3: Status.OK,
-        4: Status.SERVER_NOT_REACHABLE,
+        4: Status.NOT_CONNECTED,
     }
     return s
 
@@ -74,16 +74,16 @@ def test_set_status(status_1, event):
     assert status_1.status == {
         2: Status.ERROR,
         3: Status.OK,
-        4: Status.SERVER_NOT_REACHABLE,
+        4: Status.NOT_CONNECTED,
     }
 
 
 def test_update_status(status_2, event):
-    asyncio.run(status_2.set(event=event, status=Status.ACCESS_DENIED))
+    asyncio.run(status_2.set(event=event, status=Status.PROTOCOL_ERROR))
     assert status_2.status == {
         2: Status.ERROR,
-        3: Status.ACCESS_DENIED,
-        4: Status.SERVER_NOT_REACHABLE,
+        3: Status.PROTOCOL_ERROR,
+        4: Status.NOT_CONNECTED,
     }
 
 
@@ -91,7 +91,7 @@ def test_delete_status(status_2, event):
     asyncio.run(status_2.delete(event=event))
     assert status_2.status == {
         2: Status.ERROR,
-        4: Status.SERVER_NOT_REACHABLE,
+        4: Status.NOT_CONNECTED,
     }
 
 

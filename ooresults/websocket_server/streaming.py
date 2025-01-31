@@ -74,7 +74,7 @@ class Streaming:
         try:
             await streaming_status.status.set(
                 event=event,
-                status=streaming_status.Status.SERVER_NOT_REACHABLE,
+                status=streaming_status.Status.NOT_CONNECTED,
             )
 
             uri = f"wss://{event.streaming_address}/import"
@@ -100,21 +100,25 @@ class Streaming:
                         break
                     except asyncio.CancelledError:
                         raise
-                    except Exception:
+                    except Exception as e:
                         await streaming_status.status.set(
                             event=event,
-                            status=streaming_status.Status.SERVER_NOT_REACHABLE,
+                            status=streaming_status.Status.NOT_CONNECTED,
+                            comment=str(e),
                         )
                         websocket = None
-                        await asyncio.sleep(delay=10)
+                        await asyncio.sleep(delay=20)
 
+                # websocket is opened
                 sent_event = None
                 sent_class_results = None
                 result = None
 
                 while True:
-                    wait_time = 15
+                    error = False
+                    wait_time = 0
                     try:
+                        # compute actual result
                         (
                             act_event,
                             act_class_results,
@@ -126,13 +130,11 @@ class Streaming:
                             ),
                         )
 
+                        # send actual result as IOF result list only if it has changed
                         if (
                             sent_event != act_event
                             or sent_class_results != act_class_results
                         ):
-                            sent_event = act_event
-                            sent_class_results = act_class_results
-
                             content = iof_result_list.create_result_list(
                                 event=act_event,
                                 class_results=act_class_results,
@@ -140,25 +142,23 @@ class Streaming:
                             )
                             data = bz2.compress(content)
 
-                            try:
-                                await websocket.send(data)
-                                answer = await asyncio.wait_for(websocket.recv(), 30)
+                            await websocket.send(data)
+                            answer = await asyncio.wait_for(websocket.recv(), 30)
 
-                                answer = json.loads(answer)
-                                result = answer["result"]
-                            except asyncio.TimeoutError:
-                                wait_time = 15
-                                break
-                            except (json.decoder.JSONDecodeError, KeyError):
-                                wait_time = 45
-                                break
+                            answer = json.loads(answer)
+                            result = answer["result"]
 
                             if result == "ok":
+                                sent_event = act_event
+                                sent_class_results = act_class_results
+
+                                # new state: OK
                                 await streaming_status.status.set(
                                     event=act_event,
                                     status=streaming_status.Status.OK,
                                 )
                             elif result == "eventNotFound":
+                                # new state: EVENT_NOT_FOUND (on live server)
                                 await streaming_status.status.set(
                                     event=act_event,
                                     status=streaming_status.Status.EVENT_NOT_FOUND,
@@ -166,48 +166,68 @@ class Streaming:
                                 wait_time = 45
                                 break
                             else:
-                                sent_event = None
-                                sent_class_results = None
-                                wait_time = 45
-                                await streaming_status.status.set(
-                                    event=act_event,
-                                    status=streaming_status.Status.ERROR,
-                                )
+                                # new state: ERROR
+                                error = True
 
                         try:
                             await asyncio.wait_for(websocket.recv(), 30)
                         except asyncio.TimeoutError:
-                            wait_time = 0
+                            # no data received, this is ok
+                            pass
                         else:
                             # if no exception is raised, an unexpected answer is received
                             # set the status to error and close the connection
                             await websocket.close()
-                            await streaming_status.status.set(
-                                event=act_event,
-                                status=streaming_status.Status.ERROR,
-                            )
+                            # new state: ERROR
+                            error = True
+                            wait_time = 15
 
-                    except EventNotFoundError:
+                    except asyncio.TimeoutError:
+                        # new state: ERROR
+                        error = True
+                        wait_time = 15
+                        break
+                    except (json.decoder.JSONDecodeError, KeyError):
+                        # new state: ERROR
+                        error = True
+                        wait_time = 45
+                        break
+                    except (EventNotFoundError, asyncio.CancelledError):
                         raise
-                    except websockets.exceptions.WebSocketException:
+                    except websockets.exceptions.ConnectionClosed:
+                        await streaming_status.status.set(
+                            event=event,
+                            status=streaming_status.Status.NOT_CONNECTED,
+                        )
                         wait_time = 30
                         break
-                    except asyncio.CancelledError:
-                        wait_time = 0
-                        raise
                     except Exception:
                         logging.exception(msg="", exc_info=True, stack_info=True)
+                        # new state: ERROR
+                        await streaming_status.status.set(
+                            event=event,
+                            status=streaming_status.Status.INTERNAL_ERROR,
+                        )
+                        wait_time = 30
+                        break
                     finally:
-                        if not result:
-                            await streaming_status.status.set(
-                                event=event,
-                                status=streaming_status.Status.ACCESS_DENIED,
-                            )
+                        if error:
+                            # If after connecting and sending the result no or no correct
+                            # answer is received, we can not decide if we are connected
+                            # to an ooresults server not working correctly or to something
+                            # else. In this case we set the status to protocol error.
+                            if result:
+                                await streaming_status.status.set(
+                                    event=event,
+                                    status=streaming_status.Status.ERROR,
+                                )
+                            else:
+                                await streaming_status.status.set(
+                                    event=event,
+                                    status=streaming_status.Status.PROTOCOL_ERROR,
+                                )
                         await asyncio.sleep(delay=wait_time)
-
-                        # check State.CLOSING due to
-                        # https://github.com/python-websockets/websockets/issues/1527
-                        if websocket.state in (State.CLOSING, State.CLOSED):
+                        if websocket.state == State.CLOSED:
                             break
 
         except asyncio.CancelledError:

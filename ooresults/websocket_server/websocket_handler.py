@@ -34,7 +34,6 @@ import tzlocal
 import web
 import websockets.exceptions
 from websockets.asyncio.server import ServerConnection
-from websockets.protocol import State
 
 from ooresults.model import model
 from ooresults.otypes import result_type
@@ -126,16 +125,7 @@ class WebSocketHandler:
             event_key = websocket.request.headers.get("X-Event-Key", "")
             try:
                 if self.import_stream:
-                    # workaround for
-                    # https://github.com/python-websockets/websockets/issues/1527
-                    while websocket.state not in (State.CLOSING, State.CLOSED):
-                        try:
-                            message = await asyncio.wait_for(
-                                websocket.recv(), timeout=30
-                            )
-                        except asyncio.TimeoutError:
-                            continue
-
+                    async for message in websocket:
                         t1 = time.time()
                         try:
                             data = bz2.decompress(message)
@@ -171,16 +161,7 @@ class WebSocketHandler:
             event = None
             try:
                 if self.demo_reader:
-                    # workaround for
-                    # https://github.com/python-websockets/websockets/issues/1527
-                    while websocket.state not in (State.CLOSING, State.CLOSED):
-                        try:
-                            message = await asyncio.wait_for(
-                                websocket.recv(), timeout=30
-                            )
-                        except asyncio.TimeoutError:
-                            continue
-
+                    async for message in websocket:
                         # workaround to detect lost websocket connection in the browser
                         # see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
                         if message == "__ping__":
@@ -300,16 +281,9 @@ class WebSocketHandler:
         elif websocket.request.path == "/cardreader":
             event = None
             event_key = websocket.request.headers.get("X-Event-Key", "")
-            print(">>>>>>>>>>> cardreader", event_key)
             try:
-                # workaround for
-                # https://github.com/python-websockets/websockets/issues/1527
-                while websocket.state not in (State.CLOSING, State.CLOSED):
-                    try:
-                        message = await asyncio.wait_for(websocket.recv(), timeout=30)
-                    except asyncio.TimeoutError:
-                        continue
-
+                print(">>>>>>>>>>> cardreader", event_key)
+                async for message in websocket:
                     try:
                         data = bz2.decompress(message)
                     except:
@@ -390,17 +364,7 @@ class WebSocketHandler:
                                 event_key,
                             )
                             await self.send(conn=websocket, event=e, message={})
-
-                            # workaround for
-                            # https://github.com/python-websockets/websockets/issues/1527
-                            while websocket.state not in (State.CLOSING, State.CLOSED):
-                                try:
-                                    message = await asyncio.wait_for(
-                                        websocket.recv(), timeout=30
-                                    )
-                                except asyncio.TimeoutError:
-                                    continue
-
+                            async for message in websocket:
                                 # workaround to detect lost websocket connection in the browser
                                 # see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
                                 if message == "__ping__":
