@@ -187,7 +187,7 @@ class Import:
             logging.exception("Internal server error")
             raise
 
-        return update(event_id)
+        return update(event_id=event_id, view=data.view)
 
 
 class Export:
@@ -289,7 +289,7 @@ class Add:
             logging.exception("Internal server error")
             raise
 
-        return update(event_id)
+        return update(event_id=event_id, view=data.view)
 
 
 class FillEditForm:
@@ -379,14 +379,14 @@ class Delete:
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
         model.delete_entry(int(data.id))
-        return update(event_id=event_id)
+        return update(event_id=event_id, view=data.view)
 
 
 class SplitTimes:
     def POST(self):
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
-        return update(event_id=event_id)
+        return update(event_id=event_id, view=data.view)
 
 
 class EditPunch:

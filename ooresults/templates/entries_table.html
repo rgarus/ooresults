@@ -37,10 +37,11 @@ $def f(value) -> str:
 <input id="entr.filter" oninput="filter_table('entr.table', 'tr', this.value)" placeholder="Search ...">
 <label for="entr.view">&nbsp;&nbsp;&nbsp;&nbsp;View:&nbsp;&nbsp;</label>
 <select id="entr.view" onchange="entr_reload_view(this)">
-    <option value="entries" selected>Entries</option>
-    <option value="classes">Classes</option>
-    <option value="clubs">Clubs</option>
-    <option value="states">States</option>
+    $for value, text in (('entries', 'Entries'), ('classes', 'Classes'), ('clubs', 'Clubs'), ('states', 'States')):
+        $if view == value:
+            <option value="$value" selected>$text</option>
+        $else:
+            <option value="$str(value)">$text</option>
 </select>
 
 <p/>
