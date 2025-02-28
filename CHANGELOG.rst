@@ -2,8 +2,8 @@ Changelog
 =========
 
 
-[Unreleased]
-------------
+[0.4.0] - 2025-02-28
+--------------------
 
 .. warning::
 
@@ -14,7 +14,7 @@ Changelog
 Added
 ^^^^^
 
-- Display of entry data grouped by "Entries", "Classes" and "Clubs" added.
+- Display of entry data grouped by "Entries", "Classes", "Clubs" or "States" added.
 
 Changed
 ^^^^^^^
