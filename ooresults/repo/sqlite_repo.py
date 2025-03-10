@@ -71,89 +71,98 @@ class SqliteRepo(Repo):
 
         if not values:
             # create and initialize database tables
-            self.db.query("CREATE TABLE version (value INTEGER PRIMARY KEY);")
-            self.db.query(
-                "CREATE TABLE classes ("
-                "id INTEGER PRIMARY KEY,"
-                "event_id INTEGER NOT NULL,"
-                "name TEXT NOT NULL,"
-                "short_name TEXT,"
-                "course_id INTEGER,"
-                "params BLOB NOT NULL,"
-                "UNIQUE (event_id, name)"
-                ");"
-            )
-            self.db.query(
-                "CREATE TABLE courses ("
-                "id INTEGER PRIMARY KEY,"
-                "event_id INTEGER NOT NULL,"
-                "name TEXT NOT NULL,"
-                "length FLOAT,"
-                "climb FLOAT,"
-                "controls BLOB NOT NULL,"
-                "UNIQUE (event_id, name)"
-                ");"
-            )
-            self.db.query(
-                "CREATE TABLE clubs (" "id INTEGER PRIMARY KEY," "name TEXT UNIQUE" ");"
-            )
-            self.db.query(
-                "CREATE TABLE competitors ("
-                "id INTEGER PRIMARY KEY,"
-                "first_name TEXT NOT NULL,"
-                "last_name TEXT NOT NULL,"
-                "club_id INTEGER,"
-                "gender TEXT,"
-                "year INTEGER,"
-                "chip TEXT,"
-                "UNIQUE (first_name, last_name)"
-                ");"
-            )
-            self.db.query(
-                "CREATE TABLE events ("
-                "id INTEGER PRIMARY KEY,"
-                "name TEXT NOT NULL UNIQUE,"
-                "date TEXT,"
-                "key TEXT UNIQUE,"
-                "publish BOOL NOT NULL,"
-                "series TEXT,"
-                "fields BLOB NOT NULL,"
-                "streaming_address TEXT,"
-                "streaming_key TEXT,"
-                "streaming_enabled BOOL"
-                ");"
-            )
-            self.db.query(
-                "CREATE TABLE entries ("
-                "id INTEGER PRIMARY KEY,"
-                "event_id INTEGER NOT NULL,"
-                "competitor_id INTEGER,"
-                "class_id INTEGER,"
-                "club_id INTEGER,"
-                "not_competing BOOL NOT NULL,"
-                "result BLOB NOT NULL,"
-                "start BLOB NOT NULL,"
-                "chip TEXT,"
-                "fields BLOB NOT NULL,"
-                "UNIQUE (event_id, competitor_id)"
-                ");"
-            )
-            self.db.query(
-                "CREATE TABLE settings ("
-                "name TEXT NOT NULL,"
-                "nr_of_best_results INTEGER,"
-                "mode TEXT NOT NULL,"
-                "maximum_points INTEGER NOT NULL,"
-                "decimal_places INTEGER NOT NULL"
-                ");"
-            )
-
             t = self.db.transaction()
             self.db.ctx.db.execute("BEGIN EXCLUSIVE TRANSACTION;")
-            self.db.insert("version", value=update_tables.VERSION)
-            t.commit()
-            logging.info(f"DB version initialized to {update_tables.VERSION}")
+            try:
+                self.db.query("CREATE TABLE version (value INTEGER PRIMARY KEY);")
+                self.db.query(
+                    "CREATE TABLE classes ("
+                    "id INTEGER PRIMARY KEY,"
+                    "event_id INTEGER NOT NULL,"
+                    "name TEXT NOT NULL,"
+                    "short_name TEXT,"
+                    "course_id INTEGER,"
+                    "params BLOB NOT NULL,"
+                    "UNIQUE (event_id, name)"
+                    ");"
+                )
+                self.db.query(
+                    "CREATE TABLE courses ("
+                    "id INTEGER PRIMARY KEY,"
+                    "event_id INTEGER NOT NULL,"
+                    "name TEXT NOT NULL,"
+                    "length FLOAT,"
+                    "climb FLOAT,"
+                    "controls BLOB NOT NULL,"
+                    "UNIQUE (event_id, name)"
+                    ");"
+                )
+                self.db.query(
+                    "CREATE TABLE clubs ("
+                    "id INTEGER PRIMARY KEY,"
+                    "name TEXT UNIQUE"
+                    ");"
+                )
+                self.db.query(
+                    "CREATE TABLE competitors ("
+                    "id INTEGER PRIMARY KEY,"
+                    "first_name TEXT NOT NULL,"
+                    "last_name TEXT NOT NULL,"
+                    "club_id INTEGER,"
+                    "gender TEXT,"
+                    "year INTEGER,"
+                    "chip TEXT,"
+                    "UNIQUE (first_name, last_name)"
+                    ");"
+                )
+                self.db.query(
+                    "CREATE TABLE events ("
+                    "id INTEGER PRIMARY KEY,"
+                    "name TEXT NOT NULL UNIQUE,"
+                    "date TEXT,"
+                    "key TEXT UNIQUE,"
+                    "publish BOOL NOT NULL,"
+                    "series TEXT,"
+                    "fields BLOB NOT NULL,"
+                    "streaming_address TEXT,"
+                    "streaming_key TEXT,"
+                    "streaming_enabled BOOL"
+                    ");"
+                )
+                self.db.query(
+                    "CREATE TABLE entries ("
+                    "id INTEGER PRIMARY KEY,"
+                    "event_id INTEGER NOT NULL,"
+                    "competitor_id INTEGER,"
+                    "class_id INTEGER,"
+                    "club_id INTEGER,"
+                    "not_competing BOOL NOT NULL,"
+                    "result BLOB NOT NULL,"
+                    "start BLOB NOT NULL,"
+                    "chip TEXT,"
+                    "fields BLOB NOT NULL,"
+                    "UNIQUE (event_id, competitor_id)"
+                    ");"
+                )
+                self.db.query(
+                    "CREATE TABLE settings ("
+                    "name TEXT NOT NULL,"
+                    "nr_of_best_results INTEGER,"
+                    "mode TEXT NOT NULL,"
+                    "maximum_points INTEGER NOT NULL,"
+                    "decimal_places INTEGER NOT NULL"
+                    ");"
+                )
 
+                self.db.insert("version", value=update_tables.VERSION)
+                t.commit()
+                logging.info(f"DB version initialized to {update_tables.VERSION}")
+            except:
+                t.rollback()
+                logging.exception(
+                    f"Error during DB initialization to version {update_tables.VERSION}"
+                )
+                raise
         else:
             update_tables.update_tables(db=self.db, path=db)
 

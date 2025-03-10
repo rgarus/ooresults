@@ -67,7 +67,7 @@ def update(path: str = "ooresults.sqlite"):
         conn.commit()
 
     except:
-        logging.exception("Exception")
+        logging.exception(f"Error during DB update to version {VERSION}")
         conn.rollback()
         raise
     finally:
