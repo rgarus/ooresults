@@ -87,12 +87,12 @@ def clubs() -> List[ClubType]:
 
 
 @pytest.fixture()
-def not_assigned_results() -> List[Dict]:
-    return [
-        {"key": 15, "value": "15:34:12   --   34578"},
-        {"key": 37, "value": "15:18:19   --   34578"},
-        {"key": 26, "value": "16:00:11   --   8123599"},
-    ]
+def unassigned_results() -> Dict[int, str]:
+    return {
+        15: "15:34:12   --   34578",
+        37: "15:18:19   --   34578",
+        26: "16:00:11   --   8123599",
+    }
 
 
 @pytest.fixture()
@@ -112,7 +112,7 @@ def test_add_entry_for_add(
                 entry=entry,
                 classes=classes,
                 clubs=clubs,
-                results=[],
+                unassigned_results={},
                 event_fields=[],
             )
         )
@@ -222,7 +222,7 @@ def test_add_entry_for_edit_without_results(
                 entry=entry,
                 classes=classes,
                 clubs=clubs,
-                results=[],
+                unassigned_results={},
                 event_fields=[],
             )
         )
@@ -307,7 +307,7 @@ def test_add_entry_for_edit_with_results(
     render,
     classes: List[ClassType],
     clubs: List[ClubType],
-    not_assigned_results: List[Dict],
+    unassigned_results: Dict[int, str],
 ):
     entry = EntryType(
         id=11,
@@ -349,7 +349,7 @@ def test_add_entry_for_edit_with_results(
                 entry=entry,
                 classes=classes,
                 clubs=clubs,
-                results=[{"key": -1, "value": "Remove result"}] + not_assigned_results,
+                unassigned_results=unassigned_results,
                 event_fields=[],
             )
         )
@@ -463,7 +463,7 @@ def test_add_entry_for_edit_with_additional_fields(
                 entry=entry,
                 classes=classes,
                 clubs=[],
-                results=[],
+                unassigned_results={},
                 event_fields=["Number", "Region"],
             )
         )

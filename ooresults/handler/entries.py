@@ -293,8 +293,8 @@ class Add:
 
 
 class FillEditForm:
-    def collect_not_assigned_si_results(self, entries) -> List[Dict]:
-        results = []
+    def collect_unassigned_si_results(self, entries: List[EntryType]) -> Dict[int, str]:
+        unassigned_results = {}
         for e in entries:
             if e.last_name is None:
                 last_punch = e.result.finish_time
@@ -311,9 +311,9 @@ class FillEditForm:
                     punch_time = "--:--:--"
                 else:
                     punch_time = last_punch.strftime("%H:%M:%S")
+                unassigned_results[e.id] = f"{punch_time}   --   {e.chip}"
 
-                results.append({"key": e.id, "value": f"{punch_time}   --   {e.chip}"})
-        return results
+        return unassigned_results
 
     def POST(self):
         """Query data to fill add or edit form"""
@@ -322,16 +322,13 @@ class FillEditForm:
             event_id = int(data.event_id) if data.event_id != "" else -1
             event = model.get_event(id=event_id)
 
-            results = []
             if data.id == "":
                 entry = None
             else:
                 entry = model.get_entry(int(data.id))
-                if entry.result is not None and entry.result.has_punches():
-                    results += [{"key": -1, "value": "Remove result"}]
 
             entries = model.get_entries(event_id=event_id)
-            results += self.collect_not_assigned_si_results(entries)
+            unassigned_results = self.collect_unassigned_si_results(entries=entries)
 
             classes = model.get_classes(event_id=event_id)
             clubs = model.get_clubs()
@@ -343,7 +340,7 @@ class FillEditForm:
             logging.exception("Internal server error")
             raise
 
-        return render.add_entry(entry, classes, clubs, results, event.fields)
+        return render.add_entry(entry, classes, clubs, unassigned_results, event.fields)
 
 
 class FillCompetitorsForm:

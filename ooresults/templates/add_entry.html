@@ -1,4 +1,4 @@
-$def with (entry, classes, clubs, results, event_fields)
+$def with (entry, classes, clubs, unassigned_results, event_fields)
 
 $def format_date(time):
     $if time is not None:
@@ -41,6 +41,7 @@ $else:
     $ result = PersonRaceResult()
     $ start = PersonRaceStart()
 
+$ has_result = entry is not None and entry.result is not None and entry.result.has_punches()
 
 <!-- Modal content -->
 <div class="modal-content">
@@ -78,8 +79,8 @@ $else:
                            value="$year" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                $ readonly = "readonly" if [r for r in results if r['key'] == -1] else ""
-                $ disabled = "disabled" if [r for r in results if r['key'] == -1] else ""
+                $ readonly = "readonly" if has_result else ""
+                $ disabled = "disabled" if has_result else ""
                 <th class="input-header"><label for="ent_chip" $disabled>Chip</label></th>
                 <td><input id="ent_chip" name="chip" type="text" value="$chip" oninput="mark_label(this)" $readonly/></td>
             </tr>
@@ -128,24 +129,25 @@ $else:
             <tr>
                 <th class="input-header"><label for="ent_status">Status</label></th>
                 <td>
-                    $ has_no_result = [r for r in results if r['key'] == -1] == []
                     <select id="ent_status" name="status" oninput="mark_label(this)">
                     $for status in list(ResultStatus):
                         $if status == result.status:
                             <option value="$status.value" selected>$MAP_STATUS[status]</option>
-                        $elif has_no_result or status not in (ResultStatus.INACTIVE, ResultStatus.ACTIVE, ResultStatus.DID_NOT_START):
+                        $elif not has_result or status not in (ResultStatus.INACTIVE, ResultStatus.ACTIVE, ResultStatus.DID_NOT_START):
                             <option value="$status.value">$MAP_STATUS[status]</option>
                     </select>
                 </td>
             </tr>
-            $if results != []:
+            $if has_result or unassigned_results:
                 <tr>
                     <th class="input-header"><label for="ent_result">Result</label></th>
                     <td>
                         <select id="ent_result" name="result" oninput="mark_label(this)">
                             <option value="" selected></option>
-                            $for r in results:
-                                <option value="$str(r['key'])">$r['value']</option>
+                            $if has_result:
+                                <option value="-1">Remove result</option>
+                            $for k, v in unassigned_results.items():
+                                <option value="$str(k)">$v</option>
                         </select>
                     </td>
                 </tr>
