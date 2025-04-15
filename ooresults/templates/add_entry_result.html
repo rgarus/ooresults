@@ -40,36 +40,36 @@ $def visible(condition):
                 <td>$entry.first_name</td>
             </tr>
             <tr>
-                <th class="input-header"><label>Last name</label></th>
-                <td><label>$entry.last_name</label></td>
+                <th class="input-header">Last name</th>
+                <td>$entry.last_name</td>
             </tr>
             <tr>
-                <th class="input-header"><label>Year</label></th>
-                <td><label>$entry.year</label></td>
+                <th class="input-header">Year</th>
+                <td>$entry.year</td>
             </tr>
             <tr>
-                <th class="input-header"><label>Class</label></th>
-                <td><label>$entry.class_name</label></td>
+                <th class="input-header">Class</th>
+                <td>$entry.class_name</td>
             </tr>
             <tr>
-                <th class="input-header"><label>Chip</label></th>
-                <td><label>$entry.chip</label></td>
+                <th class="input-header">Chip</th>
+                <td>$entry.chip</td>
             </tr>
             <tr>
-                <th class="input-header"><label>Start time</label></th>
-                <td><label>$format_date(entry.result.start_time)</label></td>
+                <th class="input-header">Start time</th>
+                <td>$format_date(entry.result.start_time)</td>
             </tr>
             <tr>
-                <th class="input-header"><label>Finish time</label></th>
-                <td><label>$format_date(entry.result.finish_time)</label></td>
+                <th class="input-header">Finish time</th>
+                <td>$format_date(entry.result.finish_time)</td>
             </tr>
             <tr>
-                <th class="input-header"><label>Status</label></th>
-                <td><label>$MAP_STATUS[entry.result.status]</label></td>
+                <th class="input-header">Status</th>
+                <td>$MAP_STATUS[entry.result.status]</td>
             </tr>
             <tr>
-                <th class="input-header"><label>Time</label></th>
-                <td><label>$minutes_seconds(entry.result.extensions.get('running_time', entry.result.time))</label></td>
+                <th class="input-header">Time</th>
+                <td>$minutes_seconds(entry.result.extensions.get('running_time', entry.result.time))</td>
             </tr>
         </table>
             

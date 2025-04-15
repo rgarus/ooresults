@@ -34,9 +34,20 @@ def render():
     return web.template.render(templates, globals=t_globals)
 
 
-def test_add_course_for_add(render):
-    course = None
-    html = etree.HTML(str(render.add_course(course)))
+@pytest.fixture()
+def course() -> CourseType:
+    return CourseType(
+        id=7,
+        event_id=2,
+        name="Bahn A",
+        length=None,
+        climb=None,
+        controls=[],
+    )
+
+
+def test_course_is_none(render):
+    html = etree.HTML(str(render.add_course(course=None)))
 
     input_id = html.find(".//input[@name='id']")
     assert input_id.attrib["value"] == ""
@@ -54,16 +65,8 @@ def test_add_course_for_add(render):
     assert input_name.attrib["value"] == ""
 
 
-def test_add_course_for_edit(render):
-    course = CourseType(
-        id=7,
-        event_id=2,
-        name="Bahn A",
-        length=5400,
-        climb=160,
-        controls=["124", "137", "123", "129"],
-    )
-    html = etree.HTML(str(render.add_course(course)))
+def test_course_is_not_none(render, course: CourseType):
+    html = etree.HTML(str(render.add_course(course=course)))
 
     input_id = html.find(".//input[@name='id']")
     assert input_id.attrib["value"] == "7"
@@ -72,10 +75,34 @@ def test_add_course_for_edit(render):
     assert input_name.attrib["value"] == "Bahn A"
 
     input_name = html.find(".//input[@name='length']")
+    assert input_name.attrib["value"] == ""
+
+    input_name = html.find(".//input[@name='climb']")
+    assert input_name.attrib["value"] == ""
+
+    input_name = html.find(".//input[@name='controls']")
+    assert input_name.attrib["value"] == ""
+
+
+def test_length_is_defined(render, course: CourseType):
+    course.length = 5400
+    html = etree.HTML(str(render.add_course(course=course)))
+
+    input_name = html.find(".//input[@name='length']")
     assert input_name.attrib["value"] == "5400"
+
+
+def test_climb_is_defined(render, course: CourseType):
+    course.climb = 160
+    html = etree.HTML(str(render.add_course(course=course)))
 
     input_name = html.find(".//input[@name='climb']")
     assert input_name.attrib["value"] == "160"
+
+
+def test_controls_are_defined(render, course: CourseType):
+    course.controls = ["124", "137", "123", "129"]
+    html = etree.HTML(str(render.add_course(course=course)))
 
     input_name = html.find(".//input[@name='controls']")
     assert input_name.attrib["value"] == "124 - 137 - 123 - 129"

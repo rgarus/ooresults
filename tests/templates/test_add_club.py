@@ -34,9 +34,16 @@ def render():
     return web.template.render(templates, globals=t_globals)
 
 
-def test_add_club_for_add(render):
-    club = None
-    html = etree.HTML(str(render.add_club(club)))
+@pytest.fixture()
+def club() -> ClubType:
+    return ClubType(
+        id=7,
+        name="OL Bundestag",
+    )
+
+
+def test_club_is_none(render):
+    html = etree.HTML(str(render.add_club(club=None)))
 
     input_id = html.find(".//input[@name='id']")
     assert input_id.attrib["value"] == ""
@@ -45,12 +52,8 @@ def test_add_club_for_add(render):
     assert input_name.attrib["value"] == ""
 
 
-def test_add_club_for_edit(render):
-    club = ClubType(
-        id=7,
-        name="OL Bundestag",
-    )
-    html = etree.HTML(str(render.add_club(club)))
+def test_club_is_not_none(render, club: ClubType):
+    html = etree.HTML(str(render.add_club(club=club)))
 
     input_id = html.find(".//input[@name='id']")
     assert input_id.attrib["value"] == "7"

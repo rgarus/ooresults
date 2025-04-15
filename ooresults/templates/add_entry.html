@@ -15,8 +15,8 @@ $if entry:
     $ class_id = entry.class_id
     $ class_name = entry.class_name
     $ club_id = entry.club_id
-    $ club_name = entry.club_name
-    $ gender = entry.gender
+    $ club_name = entry.club_name if entry.club_name else ""
+    $ gender = entry.gender if entry.gender else ""
     $ year = str(entry.year) if entry.year is not None else ''
     $ not_competing = entry.not_competing
     $ chip = entry.chip
@@ -31,7 +31,7 @@ $else:
     $ last_name = ""
     $ class_id = ""
     $ class_name = ""
-    $ club_id = ""
+    $ club_id = None
     $ club_name = ""
     $ gender = ""
     $ year = None

@@ -35,9 +35,27 @@ def render():
     return web.template.render(templates, globals=t_globals)
 
 
-def test_add_event_for_add(render):
-    event = None
-    html = etree.HTML(str(render.add_event(event)))
+@pytest.fixture()
+def event() -> EventType:
+    return EventType(
+        id=2,
+        name="ABC Event",
+        date=date(year=2023, month=7, day=19),
+        key=None,
+        publish=False,
+        series=None,
+        fields=[],
+        streaming_address=None,
+        streaming_key=None,
+        streaming_enabled=None,
+    )
+
+
+def test_event_is_none(render):
+    html = etree.HTML(str(render.add_event(event=None)))
+
+    input_id = html.find(".//input[@name='id']")
+    assert input_id.attrib["value"] == ""
 
     input_name = html.find(".//input[@name='name']")
     assert input_name.attrib["value"] == ""
@@ -69,24 +87,11 @@ def test_add_event_for_add(render):
     assert input_fields.attrib["value"] == ""
 
 
-def test_add_event_for_edit(render):
-    event = EventType(
-        id=2,
-        name="ABC Event",
-        date=date(
-            year=2023,
-            month=7,
-            day=19,
-        ),
-        key="sevenOr",
-        publish=True,
-        series="Run 1",
-        fields=["Start number", "Region"],
-        streaming_address="localhost:8081",
-        streaming_key="abcde",
-        streaming_enabled=True,
-    )
-    html = etree.HTML(str(render.add_event(event)))
+def test_event_is_not_none(render, event: EventType):
+    html = etree.HTML(str(render.add_event(event=event)))
+
+    input_id = html.find(".//input[@name='id']")
+    assert input_id.attrib["value"] == "2"
 
     input_name = html.find(".//input[@name='name']")
     assert input_name.attrib["value"] == "ABC Event"
@@ -95,24 +100,99 @@ def test_add_event_for_edit(render):
     assert input_date.attrib["value"] == "2023-07-19"
 
     input_key = html.find(".//input[@name='key']")
+    assert input_key.attrib["value"] == ""
+
+    input_publish = html.find(".//input[@name='publish']")
+    assert input_publish.attrib["value"] == "true"
+    assert "checked" not in input_publish.attrib
+
+    input_streaming_address = html.find(".//input[@name='streaming_address']")
+    assert input_streaming_address.attrib["value"] == ""
+
+    input_streaming_key = html.find(".//input[@name='streaming_key']")
+    assert input_streaming_key.attrib["value"] == ""
+
+    input_streaming_enabled = html.find(".//input[@name='streaming_enabled']")
+    assert input_streaming_enabled.attrib["value"] == "true"
+    assert "checked" not in input_streaming_enabled.attrib
+
+    input_series = html.find(".//input[@name='series']")
+    assert input_series.attrib["value"] == ""
+
+    input_fields = html.find(".//input[@name='fields']")
+    assert input_fields.attrib["value"] == ""
+
+
+def test_key_is_defined(render, event: EventType):
+    event.key = "sevenOr"
+    html = etree.HTML(str(render.add_event(event=event)))
+
+    input_key = html.find(".//input[@name='key']")
     assert input_key.attrib["value"] == "sevenOr"
+
+
+def test_publish_is_true(render, event: EventType):
+    event.publish = True
+    html = etree.HTML(str(render.add_event(event=event)))
 
     input_publish = html.find(".//input[@name='publish']")
     assert input_publish.attrib["value"] == "true"
     assert "checked" in input_publish.attrib
 
-    input_streaming_address = html.find(".//input[@name='streaming_address']")
-    assert input_streaming_address.attrib["value"] == "localhost:8081"
 
-    input_streaming_key = html.find(".//input[@name='streaming_key']")
-    assert input_streaming_key.attrib["value"] == "abcde"
-
-    input_streaming_enabled = html.find(".//input[@name='streaming_enabled']")
-    assert input_streaming_enabled.attrib["value"] == "true"
-    assert "checked" in input_streaming_enabled.attrib
+def test_series_is_defined(render, event: EventType):
+    event.series = "Run 1"
+    html = etree.HTML(str(render.add_event(event=event)))
 
     input_series = html.find(".//input[@name='series']")
     assert input_series.attrib["value"] == "Run 1"
 
+
+def test_one_field(render, event: EventType):
+    event.fields = ["Start number"]
+    html = etree.HTML(str(render.add_event(event=event)))
+
+    input_fields = html.find(".//input[@name='fields']")
+    assert input_fields.attrib["value"] == "Start number"
+
+
+def test_two_fields(render, event: EventType):
+    event.fields = ["Start number", "Region"]
+    html = etree.HTML(str(render.add_event(event=event)))
+
     input_fields = html.find(".//input[@name='fields']")
     assert input_fields.attrib["value"] == "Start number, Region"
+
+
+def test_streaming_address_is_defined(render, event: EventType):
+    event.streaming_address = "localhost:8081"
+    html = etree.HTML(str(render.add_event(event=event)))
+
+    input_streaming_address = html.find(".//input[@name='streaming_address']")
+    assert input_streaming_address.attrib["value"] == "localhost:8081"
+
+
+def test_streaming_key_is_defined(render, event: EventType):
+    event.streaming_key = "abcde"
+    html = etree.HTML(str(render.add_event(event=event)))
+
+    input_streaming_key = html.find(".//input[@name='streaming_key']")
+    assert input_streaming_key.attrib["value"] == "abcde"
+
+
+def test_streaming_enabled_is_false(render, event: EventType):
+    event.streaming_enabled = False
+    html = etree.HTML(str(render.add_event(event=event)))
+
+    input_streaming_enabled = html.find(".//input[@name='streaming_enabled']")
+    assert input_streaming_enabled.attrib["value"] == "true"
+    assert "checked" not in input_streaming_enabled.attrib
+
+
+def test_streaming_enabled_is_true(render, event: EventType):
+    event.streaming_enabled = True
+    html = etree.HTML(str(render.add_event(event=event)))
+
+    input_streaming_enabled = html.find(".//input[@name='streaming_enabled']")
+    assert input_streaming_enabled.attrib["value"] == "true"
+    assert "checked" in input_streaming_enabled.attrib

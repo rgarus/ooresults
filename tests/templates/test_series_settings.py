@@ -34,49 +34,19 @@ def render():
     return web.template.render(templates, globals=t_globals)
 
 
-def test_series_settings_1(render):
-    settings = Settings(
-        name="Munich O-Cup",
-        nr_of_best_results=None,
-        mode="Proportional",
-        maximum_points=1000,
-        decimal_places=3,
-    )
-    html = etree.HTML(str(render.series_settings(settings)))
+@pytest.fixture()
+def settings():
+    return Settings()
+
+
+def test_series_is_not_none(render, settings: Settings):
+    html = etree.HTML(str(render.series_settings(settings=settings)))
 
     input_name = html.find(".//input[@name='name']")
-    assert input_name.attrib["value"] == "Munich O-Cup"
+    assert input_name.attrib["value"] == ""
 
     input_nr_of_best_results = html.find(".//input[@name='nr_of_best_results']")
     assert input_nr_of_best_results.attrib["value"] == ""
-
-    options_mode = html.findall(".//select[@name='mode']/option")
-    assert len(options_mode) == 1
-    assert options_mode[0].attrib == {"value": "Proportional", "selected": "selected"}
-    assert options_mode[0].text == "Proportional"
-
-    input_maximum_points = html.find(".//input[@name='maximum_points']")
-    assert input_maximum_points.attrib["value"] == "1000"
-
-    input_decimal_places = html.find(".//input[@name='decimal_places']")
-    assert input_decimal_places.attrib["value"] == "3"
-
-
-def test_series_settings_2(render):
-    settings = Settings(
-        name="O-Night",
-        nr_of_best_results=3,
-        mode="Proportional",
-        maximum_points=100,
-        decimal_places=2,
-    )
-    html = etree.HTML(str(render.series_settings(settings)))
-
-    input_name = html.find(".//input[@name='name']")
-    assert input_name.attrib["value"] == "O-Night"
-
-    input_nr_of_best_results = html.find(".//input[@name='nr_of_best_results']")
-    assert input_nr_of_best_results.attrib["value"] == "3"
 
     options_mode = html.findall(".//select[@name='mode']/option")
     assert len(options_mode) == 1
@@ -88,3 +58,35 @@ def test_series_settings_2(render):
 
     input_decimal_places = html.find(".//input[@name='decimal_places']")
     assert input_decimal_places.attrib["value"] == "2"
+
+
+def test_name_is_unequal_default(render, settings: Settings):
+    settings.name = "Munich O-Cup"
+    html = etree.HTML(str(render.series_settings(settings)))
+
+    input_name = html.find(".//input[@name='name']")
+    assert input_name.attrib["value"] == "Munich O-Cup"
+
+
+def test_nr_of_best_results_is_defined(render, settings: Settings):
+    settings.nr_of_best_results = 3
+    html = etree.HTML(str(render.series_settings(settings)))
+
+    input_nr_of_best_results = html.find(".//input[@name='nr_of_best_results']")
+    assert input_nr_of_best_results.attrib["value"] == "3"
+
+
+def test_maximum_points_is_unequal_default(render, settings: Settings):
+    settings.maximum_points = 1000
+    html = etree.HTML(str(render.series_settings(settings)))
+
+    input_maximum_points = html.find(".//input[@name='maximum_points']")
+    assert input_maximum_points.attrib["value"] == "1000"
+
+
+def test_decimal_places_is_unequal_default(render, settings: Settings):
+    settings.decimal_places = 3
+    html = etree.HTML(str(render.series_settings(settings)))
+
+    input_decimal_places = html.find(".//input[@name='decimal_places']")
+    assert input_decimal_places.attrib["value"] == "3"
