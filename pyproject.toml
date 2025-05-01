@@ -11,9 +11,8 @@ authors = [
 description = "A software for the evaluation of the results of orienteering events"
 readme = "README.rst"
 license = {file = "LICENSE"}
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -24,23 +23,24 @@ classifiers = [
 ]
 keywords = ["orienteering", "sportident"]
 dependencies = [
-    "web.py",
+    "case-converter",
+    "clevercsv",
+    "fastclasses-json",
+    "fpdf2 != 2.5.7",
+    "iso8601",
+    "jsonschema",
     "lxml",
+    "pyOpenSSL",
+    "pyserial",
     "requests",
     "sireader",
-    "iso8601",
-    "clevercsv",
-    "jsonschema",
-    "websocket-client",
-    "websockets >= 14.2",
-    "fpdf2 != 2.5.7",
-    "pyserial",
     "tzlocal",
     "unidecode",
-    "pyOpenSSL",
-    "case-converter",
-    "fastclasses-json",
+    "web.py",
+    "websocket-client",
+    "websockets >= 14.2",
 ]
+
 
 [project.optional-dependencies]
 test = [

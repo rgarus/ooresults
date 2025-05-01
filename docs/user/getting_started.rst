@@ -51,7 +51,7 @@ Es hat folgende Eigenschaften:
 Installation
 ------------
 
-ooresults benötigt mindestens Python 3.8.
+ooresults benötigt mindestens Python 3.9.
 Der folgende Befehl installiert die neueste Version von ooresults und seine Abhängigkeiten aus dem Python Package Index:
 
 .. code-block::

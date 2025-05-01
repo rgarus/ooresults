@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+
+- Since version 0.4.0, ooresults requires Python ≥ 3.9.
+
+
 [0.4.0] - 2025-02-28
 --------------------
 

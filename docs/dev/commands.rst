@@ -62,7 +62,6 @@ Testing the ooresults software
 
 The software should be tested for the following Python versions:
 
-- Python 3.8
 - Python 3.9
 - Python 3.10
 - Python 3.11

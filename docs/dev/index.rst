@@ -11,7 +11,7 @@ Here, “open” stands for “Open Source” (licensed under AGPL) on the one h
 and for “Open Architecture” (extendable by plugins) on the other.
 ooresults is able to read SPORTident cards.
 
-ooresults uses Python 3.8+ and is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, version 3.
+ooresults uses Python 3.9+ and is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, version 3.
 It is operated using a current web browser (Chrome, Firefox, Edge, ...).
 
 

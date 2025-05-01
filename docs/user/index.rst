@@ -9,7 +9,7 @@ Willkommen zur ooresults Benutzerdokumentation!
 ooresults (open orienteering results) ist eine Software zur Erfassung und Auswertung
 der Ergebnisse kleinerer Orientierungsläufe und ist in der Lage SPORTident Karten zu lesen.
 
-ooresults benötigt Python 3.8+ und ist unter der GNU AFFERO GENERAL PUBLIC LICENSE, Version 3, lizenziert.
+ooresults benötigt Python 3.9+ und ist unter der GNU AFFERO GENERAL PUBLIC LICENSE, Version 3, lizenziert.
 Die Bedienung erfolgt mit Hilfe eines aktuellen Webbrowser (Chrome, Firefox, Edge, ...).
 
 
