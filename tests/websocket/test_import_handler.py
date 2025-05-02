@@ -107,10 +107,12 @@ def entry_id(db: SqliteRepo, event_id: int, class_id: int) -> int:
 class WebSocketServer(threading.Thread):
     def __init__(
         self,
+        barrier: threading.Barrier,
         host: str = "0.0.0.0",
         port: int = 8081,
     ):
         super().__init__()
+        self.barrier = barrier
         self.daemon = True
         self.handler = WebSocketHandler(import_stream=True)
         self.host = host
@@ -130,6 +132,7 @@ class WebSocketServer(threading.Thread):
             host=self.host,
             port=self.port,
         )
+        self.barrier.wait()
 
     async def close(self):
         self.server.close()
@@ -138,8 +141,10 @@ class WebSocketServer(threading.Thread):
 
 @pytest.fixture
 def websocket_server():
-    model.websocket_server = WebSocketServer()
+    barrier = threading.Barrier(parties=2)
+    model.websocket_server = WebSocketServer(barrier=barrier)
     model.websocket_server.start()
+    barrier.wait()
     yield model.websocket_server
     future = asyncio.run_coroutine_threadsafe(
         coro=model.websocket_server.close(),

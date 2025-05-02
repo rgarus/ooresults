@@ -75,6 +75,21 @@ The software should be tested for the following Python versions:
 
 
 
+Testing with docker
+-------------------
+
+We use docker to check if the unit tests run successfully with all
+supported Python versions. A dockerfile and a bash script are stored
+in <git-local>/tests/docker. To execute the tests run the following
+script:
+
+.. code-block::
+
+   cd <git-local>
+   tests/docker/tests.sh
+
+
+
 Building the documentation
 --------------------------
 
