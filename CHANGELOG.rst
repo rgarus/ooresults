@@ -10,6 +10,11 @@ Changed
 
 - Since version 0.4.0, ooresults requires Python ≥ 3.9.
 
+Fixed
+^^^^^
+
+- The filter on the Clubs tab does not work.
+
 
 [0.4.0] - 2025-02-28
 --------------------
