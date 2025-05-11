@@ -33,13 +33,13 @@ def event_page(page: webdriver.Remote) -> EventPage:
 
 
 @pytest.fixture
-def delete_events(event_page: EventPage):
+def delete_events(event_page: EventPage) -> None:
     event_page.delete_events()
 
 
 @pytest.fixture
-def event(event_page, delete_events) -> None:
-    dialog = event_page.actions.add_event()
+def event(event_page: EventPage, delete_events: None) -> None:
+    dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf heute",
         date="2023-12-28",
@@ -57,7 +57,9 @@ def event(event_page, delete_events) -> None:
     assert event_page.table.nr_of_columns() == 7
 
 
-def test_all_actions_displayed(event_page: EventPage):
+def test_if_event_page_is_displayed_then_all_actions_are_displayed(
+    event_page: EventPage,
+):
     assert event_page.actions.texts() == [
         "Reload",
         "Add event ...",
@@ -66,14 +68,18 @@ def test_all_actions_displayed(event_page: EventPage):
     ]
 
 
-def test_some_actions_disabled_if_no_row_is_selected(event_page, event):
+def test_if_no_row_is_selected_then_some_actions_are_disabled(
+    event_page: EventPage, event: None
+):
     assert event_page.actions.action("Reload").is_enabled()
     assert event_page.actions.action("Add event ...").is_enabled()
     assert event_page.actions.action("Edit event ...").is_disabled()
     assert event_page.actions.action("Delete event").is_disabled()
 
 
-def test_all_actions_enabled_if_a_row_is_selected(event_page, event):
+def test_if_a_row_is_selected_then_all_actions_are_enabled(
+    event_page: EventPage, event: None
+):
     event_page.table.select_row(i=2)
 
     assert event_page.actions.action("Reload").is_enabled()
@@ -82,7 +88,9 @@ def test_all_actions_enabled_if_a_row_is_selected(event_page, event):
     assert event_page.actions.action("Delete event").is_enabled()
 
 
-def test_table_header(event_page: EventPage):
+def test_if_event_page_is_selected_then_the_table_header_is_displayed(
+    event_page: EventPage,
+):
     assert event_page.table.nr_of_columns() == 7
     assert event_page.table.headers() == [
         "Name",
@@ -95,8 +103,10 @@ def test_table_header(event_page: EventPage):
     ]
 
 
-def test_add_event_with_required_data(event_page, delete_events):
-    dialog = event_page.actions.add_event()
+def test_if_an_event_is_added_with_required_data_then_an_additional_event_is_displayed(
+    event_page: EventPage, delete_events: None
+):
+    dialog = event_page.actions.add()
     dialog.check_values(
         name="",
         date="",
@@ -139,8 +149,32 @@ def test_add_event_with_required_data(event_page, delete_events):
     ]
 
 
-def test_add_event_with_all_data(event_page, delete_events):
-    dialog = event_page.actions.add_event()
+def test_if_adding_an_event_is_cancelled_then_no_additional_event_is_displayed(
+    event_page: EventPage, delete_events: None
+):
+    dialog = event_page.actions.add()
+    dialog.enter_values(
+        name="Test-Lauf heute",
+        date="2023-12-28",
+        key=None,
+        publish=None,
+        series=None,
+        fields=[],
+        streaming_address=None,
+        streaming_key=None,
+        streaming_enabled=None,
+    )
+    dialog.cancel()
+
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 0
+    assert event_page.table.nr_of_columns() == 7
+
+
+def test_if_an_event_is_added_with_all_data_then_an_additional_event_is_displayed(
+    event_page: EventPage, delete_events: None
+):
+    dialog = event_page.actions.add()
     dialog.check_values(
         name="",
         date="",
@@ -184,12 +218,12 @@ def test_add_event_with_all_data(event_page, delete_events):
 
 
 def test_if_no_event_is_selected_and_a_new_event_is_added_then_no_event_is_selected(
-    event_page, event
+    event_page: EventPage, event: None
 ):
     assert event_page.get_event_name() == ""
     assert event_page.get_event_date() == ""
 
-    dialog = event_page.actions.add_event()
+    dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf 1",
         date="2023-12-29",
@@ -205,14 +239,18 @@ def test_if_no_event_is_selected_and_a_new_event_is_added_then_no_event_is_selec
 
     assert event_page.get_event_name() == ""
     assert event_page.get_event_date() == ""
+    assert event_page.table.selected_row() is None
 
 
-def test_adding_a_new_event_does_not_change_selected_event(event_page, event):
+def test_if_a_new_event_is_added_then_the_selected_event_is_not_changed(
+    event_page: EventPage, event: None
+):
     event_page.table.select_row(i=2)
     assert event_page.get_event_name() == "Test-Lauf heute"
     assert event_page.get_event_date() == "2023-12-28"
+    assert event_page.table.selected_row() == 2
 
-    dialog = event_page.actions.add_event()
+    dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf 1",
         date="2023-12-29",
@@ -228,12 +266,24 @@ def test_adding_a_new_event_does_not_change_selected_event(event_page, event):
 
     assert event_page.get_event_name() == "Test-Lauf heute"
     assert event_page.get_event_date() == "2023-12-28"
+    row = event_page.table.selected_row()
+    assert event_page.table.row(i=row) == [
+        "Test-Lauf heute",
+        "2023-12-28",
+        "***",
+        "yes",
+        "enabled",
+        "Serie",
+        "a, b",
+    ]
 
 
-def test_edit_event(event_page, event):
+def test_if_an_event_is_edited_then_the_changed_data_are_displayed(
+    event_page: EventPage, event: None
+):
     event_page.table.select_row(2)
 
-    dialog = event_page.actions.edit_event()
+    dialog = event_page.actions.edit()
     dialog.check_values(
         name="Test-Lauf heute",
         date="2023-12-28",
@@ -276,24 +326,111 @@ def test_edit_event(event_page, event):
     ]
 
 
-def test_if_an_event_is_deleted_no_event_is_selected(event_page, event):
+def test_if_an_event_is_deleted_then_the_event_is_no_longer_displayed(
+    event_page: EventPage, event: None
+):
+    # add a second event
+    dialog = event_page.actions.add()
+    dialog.enter_values(
+        name="Test-Lauf morgen",
+        date="2023-12-29",
+        key="local",
+        publish=False,
+        series="Serie 2",
+        fields=["field"],
+        streaming_address="myhost:8081",
+        streaming_key="",
+        streaming_enabled=True,
+    )
+    dialog.submit()
+
     # select event
     event_page.table.select_row(2)
     assert event_page.get_event_name() == "Test-Lauf heute"
     assert event_page.get_event_date() == "2023-12-28"
 
     # delete event
-    event_page.actions.delete_event().ok()
-    assert event_page.get_event_name() == ""
-    assert event_page.get_event_date() == ""
+    event_page.actions.delete().ok()
 
     # check number of rows
-    assert event_page.table.nr_of_rows() == 0
+    assert event_page.table.nr_of_rows() == 2
     assert event_page.table.nr_of_columns() == 7
 
+    assert event_page.table.row(i=1) == [
+        "Events  (1)",
+    ]
+    assert event_page.table.row(i=2) == [
+        "Test-Lauf morgen",
+        "2023-12-29",
+        "***",
+        "no",
+        "",
+        "Serie 2",
+        "field",
+    ]
 
-def test_add_several_events(event_page, event):
-    dialog = event_page.actions.add_event()
+
+def test_if_an_event_is_deleted_then_no_event_is_selected(
+    event_page: EventPage, event: None
+):
+    # add a second event
+    dialog = event_page.actions.add()
+    dialog.enter_values(
+        name="Test-Lauf morgen",
+        date="2023-12-29",
+        key="local",
+        publish=False,
+        series="Serie 2",
+        fields=["field"],
+        streaming_address="myhost:8081",
+        streaming_key="",
+        streaming_enabled=True,
+    )
+    dialog.submit()
+
+    # select event
+    event_page.table.select_row(2)
+    assert event_page.get_event_name() == "Test-Lauf heute"
+    assert event_page.get_event_date() == "2023-12-28"
+
+    # delete event
+    event_page.actions.delete().ok()
+    assert event_page.get_event_name() == ""
+    assert event_page.get_event_date() == ""
+    assert event_page.table.selected_row() is None
+
+
+def test_if_deleting_an_event_is_cancelled_then_the_event_is_displayed_further(
+    event_page: EventPage, event: None
+):
+    # select event
+    event_page.table.select_row(2)
+    assert event_page.table.selected_row() == 2
+
+    # delete event
+    event_page.actions.delete().cancel()
+
+    assert event_page.get_event_name() == "Test-Lauf heute"
+    assert event_page.get_event_date() == "2023-12-28"
+
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 2
+    assert event_page.table.row(i=1) == ["Events  (1)"]
+    assert event_page.table.row(i=2) == [
+        "Test-Lauf heute",
+        "2023-12-28",
+        "***",
+        "yes",
+        "enabled",
+        "Serie",
+        "a, b",
+    ]
+
+
+def test_if_several_events_are_added_then_the_added_events_are_displayed(
+    event_page: EventPage, event: None
+):
+    dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf 1",
         date="2023-12-29",
@@ -307,7 +444,7 @@ def test_add_several_events(event_page, event):
     )
     dialog.submit()
 
-    dialog = event_page.actions.add_event()
+    dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf 2",
         date="2023-12-29",
@@ -357,8 +494,10 @@ def test_add_several_events(event_page, event):
     ]
 
 
-def test_if_filter_is_set_then_only_matching_rows_are_displayed(event_page, event):
-    dialog = event_page.actions.add_event()
+def test_if_filter_is_set_then_only_matching_rows_are_displayed(
+    event_page: EventPage, event: None
+):
+    dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf 1",
         date="2023-12-29",
@@ -372,7 +511,7 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(event_page, even
     )
     dialog.submit()
 
-    dialog = event_page.actions.add_event()
+    dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf 2",
         date="2023-12-29",
@@ -411,7 +550,7 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(event_page, even
 
 
 def test_if_an_event_is_added_by_another_user_then_it_is_displayed_after_reload(
-    event_page, event
+    event_page: EventPage, event: None
 ):
     post(
         url="https://127.0.0.1:8080/event/add",

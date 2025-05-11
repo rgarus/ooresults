@@ -22,9 +22,10 @@ from typing import Optional
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.expected_conditions import invisibility_of_element
+from selenium.webdriver.support.wait import WebDriverWait
 
 from webtests.controls.checkbox_control import CheckboxControl
-from webtests.controls.combobox_control import ComboboxControl
 from webtests.controls.date_control import DateControl
 from webtests.controls.text_control import TextControl
 from webtests.pageobjects.actions import Actions
@@ -109,13 +110,15 @@ class AddEventDialog:
 
     def submit(self):
         elem = self.page.find_element(By.ID, "evnt.formAdd")
-        elem = elem.find_element(By.XPATH, "button[@type='submit']")
+        elem = elem.find_element(By.XPATH, "button[text()='Save']")
         elem.click()
+        WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
 
     def cancel(self):
         elem = self.page.find_element(By.ID, "evnt.formAdd")
-        elem = elem.find_element(By.XPATH, "button[@type='cancel']")
+        elem = elem.find_element(By.XPATH, "button[text()='Cancel']")
         elem.click()
+        WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
 
 
 class DeleteEventDialog:
@@ -124,11 +127,13 @@ class DeleteEventDialog:
 
     def ok(self) -> None:
         elem = self.page.find_element(By.ID, "evnt.formDelete")
-        elem.find_element(By.XPATH, "button[@type='submit']").click()
+        elem.find_element(By.XPATH, "button[text()='Delete']").click()
+        WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
 
     def cancel(self) -> None:
         elem = self.page.find_element(By.ID, "evnt.formDelete")
-        elem.find_element(By.XPATH, "button[@type='cancel']").click()
+        elem.find_element(By.XPATH, "button[text()='Cancel']").click()
+        WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
 
 
 class EventPage:
@@ -149,7 +154,7 @@ class EventPage:
     def delete_events(self):
         for i in range(self.table.nr_of_rows() - 1):
             self.table.select_row(2)
-            self.actions.delete_event().ok()
+            self.actions.delete().ok()
 
 
 class EventActions(Actions):
@@ -159,15 +164,15 @@ class EventActions(Actions):
     def reload(self) -> None:
         self.action(text="Reload").click()
 
-    def add_event(self) -> AddEventDialog:
+    def add(self) -> AddEventDialog:
         self.action(text="Add event ...").click()
         return AddEventDialog(page=self.page)
 
-    def edit_event(self) -> AddEventDialog:
+    def edit(self) -> AddEventDialog:
         self.action(text="Edit event ...").click()
         return AddEventDialog(page=self.page)
 
-    def delete_event(self) -> DeleteEventDialog:
+    def delete(self) -> DeleteEventDialog:
         self.action(text="Delete event").click()
         return DeleteEventDialog(page=self.page)
 
@@ -175,3 +180,11 @@ class EventActions(Actions):
 class EventTable(Table):
     def __init__(self, page: webdriver.Remote):
         super().__init__(page=page, xpath="//table[@id='evnt.table']")
+
+    def selected_row(self) -> Optional[int]:
+        rows = self.selected_rows()
+
+        if len(rows) >= 2:
+            raise RuntimeError(f"Multiple rows selected: {rows}")
+        else:
+            return rows[0] if rows else None

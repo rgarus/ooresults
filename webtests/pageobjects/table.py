@@ -18,7 +18,6 @@
 
 
 from typing import List
-from typing import Optional
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -62,12 +61,13 @@ class Table:
         rows = [row for row in rows if row.is_displayed()]
         rows[i - 1].find_elements(By.XPATH, ".//td")[0].click()
 
-    def selected_row(self) -> Optional[int]:
+    def selected_rows(self) -> List[int]:
         rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
         rows = [row for row in rows if row.is_displayed()]
+        selected_rows = []
 
         for i, row in enumerate(rows):
             if row.value_of_css_property("background-color") == "rgb(165, 42, 42)":
-                return i + 1
-        else:
-            return None
+                selected_rows.append(i + 1)
+
+        return selected_rows
