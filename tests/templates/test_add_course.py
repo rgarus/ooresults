@@ -85,7 +85,7 @@ def test_course_is_not_none(render, course: CourseType):
 
 
 def test_length_is_defined(render, course: CourseType):
-    course.length = 5400
+    course.length = 5400.4
     html = etree.HTML(str(render.add_course(course=course)))
 
     input_name = html.find(".//input[@name='length']")
@@ -93,7 +93,7 @@ def test_length_is_defined(render, course: CourseType):
 
 
 def test_climb_is_defined(render, course: CourseType):
-    course.climb = 160
+    course.climb = 159.8
     html = etree.HTML(str(render.add_course(course=course)))
 
     input_name = html.find(".//input[@name='climb']")

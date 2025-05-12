@@ -455,7 +455,7 @@ def test_year_is_defined(
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
-    entry.year = "1957"
+    entry.year = 1957
     html = etree.HTML(
         str(
             render.add_entry(

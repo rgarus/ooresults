@@ -54,42 +54,9 @@ def event() -> EventType:
     )
 
 
-def headers(table: etree.Element) -> List[str]:
-    headers = []
-    for h in table.findall(path=".//thead//tr//th"):
-        headers.append(h.text)
-    return headers
-
-
-def rows(table: etree.Element) -> List[List[str]]:
-    rows = []
-    for row in table.findall(path=".//tbody//tr"):
-        content = []
-        for cell in row.xpath(_path=".//th | .//td"):
-            content.append(cell.text)
-        rows.append(content)
-    return rows
-
-
-def test_courses_table_with_no_courses(render, event: EventType):
-    courses = []
-    html = etree.HTML(str(render.courses_table(event=event, courses=courses)))
-
-    table = html.find(".//table[@id='cou.table']")
-    assert html.find(".//td[@id='cour.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='cour.event_date']").text == "2023-12-29"
-
-    assert headers(table) == [
-        "Name",
-        "Length",
-        "Climb",
-        "Controls",
-    ]
-    assert rows(table) == []
-
-
-def test_courses_table_with_several_courses(render, event: EventType):
-    courses = [
+@pytest.fixture()
+def courses() -> List[CourseType]:
+    return [
         CourseType(
             id=110,
             event_id=3,
@@ -102,37 +69,95 @@ def test_courses_table_with_several_courses(render, event: EventType):
             id=109,
             event_id=3,
             name="Bahn A",
-            length=4800,
-            climb=180,
-            controls=["124", "131", "121", "122"],
+            length=None,
+            climb=None,
+            controls=[],
         ),
     ]
-    html = etree.HTML(str(render.courses_table(event=event, courses=courses)))
 
-    table = html.find(".//table[@id='cou.table']")
-    assert html.find(".//td[@id='cour.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='cour.event_date']").text == "2023-12-29"
 
-    assert headers(table) == [
+TABLE_ID = "cou.table"
+
+
+def test_courses_list_is_empty(render, event: EventType):
+    html = etree.HTML(str(render.courses_table(event=event, courses=[])))
+
+    # headers
+    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    assert [h.text for h in headers] == [
         "Name",
         "Length",
         "Climb",
         "Controls",
     ]
-    assert rows(table) == [
-        [
-            "Courses\xa0\xa0(2)",
-        ],
-        [
-            "Bahn B",
-            None,
-            None,
-            None,
-        ],
-        [
-            "Bahn A",
-            "4800",
-            "180",
-            "124 - 131 - 121 - 122",
-        ],
+
+    # rows
+    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr/")
+    assert len(rows) == 0
+
+
+def test_courses_list_is_not_empty(render, event: EventType, courses: List[CourseType]):
+    html = etree.HTML(str(render.courses_table(event=event, courses=courses)))
+
+    assert html.find(".//td[@id='cour.event_name']").text == "Test-Lauf 1"
+    assert html.find(".//td[@id='cour.event_date']").text == "2023-12-29"
+
+    # headers
+    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    assert [h.text for h in headers] == [
+        "Name",
+        "Length",
+        "Climb",
+        "Controls",
     ]
+
+    # rows
+    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    assert len(rows) == 3
+
+    # row 1
+    assert [th.text for th in rows[0].findall(".//th")] == [
+        "Courses\xa0\xa0(2)",
+    ]
+
+    # row 2
+    assert rows[1].attrib["id"] == "110"
+    assert [td.text for td in rows[1].findall(".//td")] == [
+        "Bahn B",
+        None,
+        None,
+        None,
+    ]
+
+    # row 3
+    assert rows[2].attrib["id"] == "109"
+    assert [td.text for td in rows[2].findall(".//td")] == [
+        "Bahn A",
+        None,
+        None,
+        None,
+    ]
+
+
+def test_length_is_defined(render, event: EventType, courses: List[CourseType]):
+    courses[0].length = 5400.4
+    html = etree.HTML(str(render.courses_table(event=event, courses=courses)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[2]")
+    assert elem.text == "5400"
+
+
+def test_climb_is_defined(render, event: EventType, courses: List[CourseType]):
+    courses[0].climb = 159.8
+    html = etree.HTML(str(render.courses_table(event=event, courses=courses)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
+    assert elem.text == "160"
+
+
+def test_controls_are_defined(render, event: EventType, courses: List[CourseType]):
+    courses[0].controls = ["124", "137", "123", "129"]
+    html = etree.HTML(str(render.courses_table(event=event, courses=courses)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
+    assert elem.text == "124 - 137 - 123 - 129"

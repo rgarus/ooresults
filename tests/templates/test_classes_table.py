@@ -57,101 +57,36 @@ def event() -> EventType:
     )
 
 
-def headers(table: etree.Element) -> List[str]:
-    headers = []
-    for h in table.findall(path=".//thead//tr//th"):
-        headers.append(h.text)
-    return headers
-
-
-def rows(table: etree.Element) -> List[List[str]]:
-    rows = []
-    for row in table.findall(path=".//tbody//tr"):
-        content = []
-        for cell in row.xpath(_path=".//th | .//td"):
-            content.append(cell.text)
-        rows.append(content)
-    return rows
-
-
-def test_classes_table_with_no_classes(render, event: EventType):
-    classes = []
-    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
-
-    table = html.find(".//table[@id='cls.table']")
-    assert html.find(".//td[@id='clas.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='clas.event_date']").text == "2023-12-29"
-
-    assert headers(table) == [
-        "Name",
-        "Short name",
-        "Course",
-        "Voided legs",
-        "Type",
-        "Use start control",
-        "Apply handicap",
-        "Mass start",
-        "Time limit",
-        "Penalty controls",
-        "Penalty time limit",
-    ]
-    assert rows(table) == []
-
-
-S1 = datetime.datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
-
-
-def test_classes_table_with_several_classes(render, event: EventType):
-    classes = [
+@pytest.fixture()
+def classes() -> List[ClassInfoType]:
+    return [
         ClassInfoType(
             id=109,
             name="Elite",
-            short_name="Elite",
-            course_id=122,
-            course_name="Bahn A",
-            course_length=4200,
-            course_climb=280,
-            number_of_controls=12,
-            params=ClassParams(
-                otype="standard",
-                using_start_control="yes",
-                mass_start=None,
-                time_limit=None,
-                penalty_controls=None,
-                penalty_overtime=None,
-                apply_handicap_rule=True,
-                voided_legs=[
-                    VoidedLeg(control_1="121", control_2="126"),
-                    VoidedLeg(control_1="122", control_2="121"),
-                    VoidedLeg(control_1="130", control_2="131"),
-                ],
-            ),
+            short_name=None,
+            course_id=None,
+            course_name=None,
+            course_length=None,
+            course_climb=None,
+            number_of_controls=None,
+            params=ClassParams(),
         ),
         ClassInfoType(
             id=110,
             name="Elite F",
-            short_name="Elite Women",
-            course_id=122,
-            course_name="Bahn A",
-            course_length=4200,
-            course_climb=280,
-            number_of_controls=12,
-            params=ClassParams(
-                otype="net",
-                using_start_control="if_punched",
-                mass_start=S1,
-                time_limit=1800,
-                penalty_controls=180,
-                penalty_overtime=60,
-                apply_handicap_rule=False,
-                voided_legs=[],
-            ),
+            short_name=None,
+            course_id=None,
+            course_name=None,
+            course_length=None,
+            course_climb=None,
+            number_of_controls=None,
+            params=ClassParams(),
         ),
         ClassInfoType(
             id=111,
             name="Elite M",
-            short_name="Elite Men",
-            course_id=122,
+            short_name=None,
+            course_id=None,
             course_name=None,
             course_length=None,
             course_climb=None,
@@ -159,13 +94,20 @@ def test_classes_table_with_several_classes(render, event: EventType):
             params=ClassParams(),
         ),
     ]
-    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
 
-    table = html.find(".//table[@id='cls.table']")
+
+TABLE_ID = "cls.table"
+
+
+def test_class_list_is_empty(render, event: EventType):
+    html = etree.HTML(str(render.classes_table(event=event, classes=[])))
+
     assert html.find(".//td[@id='clas.event_name']").text == "Test-Lauf 1"
     assert html.find(".//td[@id='clas.event_date']").text == "2023-12-29"
 
-    assert headers(table) == [
+    # headers
+    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    assert [h.text for h in headers] == [
         "Name",
         "Short name",
         "Course",
@@ -178,47 +120,211 @@ def test_classes_table_with_several_classes(render, event: EventType):
         "Penalty controls",
         "Penalty time limit",
     ]
-    assert rows(table) == [
-        [
-            "Classes\xa0\xa0(3)",
-        ],
-        [
-            "Elite",
-            "Elite",
-            "Bahn A",
-            "121-126, 122-121, 130-131",
-            "Standard",
-            "Yes",
-            "Yes",
-            None,
-            None,
-            None,
-            None,
-        ],
-        [
-            "Elite F",
-            "Elite Women",
-            "Bahn A",
-            None,
-            "Net",
-            "If punched",
-            None,
-            "12:38:59",
-            "30:00",
-            "180",
-            "60",
-        ],
-        [
-            "Elite M",
-            "Elite Men",
-            None,
-            None,
-            "Standard",
-            "If punched",
-            None,
-            None,
-            None,
-            None,
-            None,
-        ],
+
+    # rows
+    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr/")
+    assert len(rows) == 0
+
+
+S1 = datetime.datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
+
+
+def test_class_list_is_not_empty(
+    render, event: EventType, classes: List[ClassInfoType]
+):
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    assert html.find(".//td[@id='clas.event_name']").text == "Test-Lauf 1"
+    assert html.find(".//td[@id='clas.event_date']").text == "2023-12-29"
+
+    # headers
+    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    assert [h.text for h in headers] == [
+        "Name",
+        "Short name",
+        "Course",
+        "Voided legs",
+        "Type",
+        "Use start control",
+        "Apply handicap",
+        "Mass start",
+        "Time limit",
+        "Penalty controls",
+        "Penalty time limit",
     ]
+
+    # rows
+    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    assert len(rows) == 4
+
+    # row 1
+    assert [th.text for th in rows[0].findall(".//th")] == [
+        "Classes\xa0\xa0(3)",
+    ]
+
+    # row 2
+    assert rows[1].attrib["id"] == "109"
+    assert [td.text for td in rows[1].findall(".//td")] == [
+        "Elite",
+        None,
+        None,
+        None,
+        "Standard",
+        "If punched",
+        None,
+        None,
+        None,
+        None,
+        None,
+    ]
+
+    # row 3
+    assert rows[2].attrib["id"] == "110"
+    assert [td.text for td in rows[2].findall(".//td")] == [
+        "Elite F",
+        None,
+        None,
+        None,
+        "Standard",
+        "If punched",
+        None,
+        None,
+        None,
+        None,
+        None,
+    ]
+
+    # row 4
+    assert rows[3].attrib["id"] == "111"
+    assert [td.text for td in rows[3].findall(".//td")] == [
+        "Elite M",
+        None,
+        None,
+        None,
+        "Standard",
+        "If punched",
+        None,
+        None,
+        None,
+        None,
+        None,
+    ]
+
+
+def test_short_name_is_defined(render, event: EventType, classes: List[ClassInfoType]):
+    classes[0].short_name = "E Men"
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[2]")
+    assert elem.text == "E Men"
+
+
+def test_course_is_defined(render, event: EventType, classes: List[ClassInfoType]):
+    classes[0].course_id = 2
+    classes[0].course_name = "Bahn A"
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
+    assert elem.text == "Bahn A"
+
+
+def test_one_voided_leg(render, event: EventType, classes: List[ClassInfoType]):
+    classes[0].params.voided_legs = [VoidedLeg("113", "115")]
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
+    assert elem.text == "113-115"
+
+
+def test_two_voided_legs(render, event: EventType, classes: List[ClassInfoType]):
+    classes[0].params.voided_legs = [VoidedLeg("113", "115"), VoidedLeg("114", "126")]
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
+    assert elem.text == "113-115, 114-126"
+
+
+def test_otype_is_net(render, event: EventType, classes: List[ClassInfoType]):
+    classes[0].params.otype = "net"
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[5]")
+    assert elem.text == "Net"
+
+
+def test_otype_is_score(render, event: EventType, classes: List[ClassInfoType]):
+    classes[0].params.otype = "score"
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[5]")
+    assert elem.text == "Score"
+
+
+def test_start_control_is_yes(render, event: EventType, classes: List[ClassInfoType]):
+    classes[0].params.using_start_control = "yes"
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
+    assert elem.text == "Yes"
+
+
+def test_start_control_is_no(render, event: EventType, classes: List[ClassInfoType]):
+    classes[0].params.using_start_control = "no"
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
+    assert elem.text == "No"
+
+
+def test_apply_handicap_role_is_true(
+    render, event: EventType, classes: List[ClassInfoType]
+):
+    classes[0].params.apply_handicap_rule = True
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
+    assert elem.text == "Yes"
+
+
+def test_mass_start_is_defined(render, event: EventType, classes: List[ClassInfoType]):
+    classes[0].params.mass_start = datetime.datetime(
+        year=2023,
+        month=7,
+        day=19,
+        hour=14,
+        minute=30,
+        second=0,
+        tzinfo=timezone.utc,
+    )
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[8]")
+    assert elem.text == "14:30:00"
+
+
+def test_time_limit_is_defined(render, event: EventType, classes: List[ClassInfoType]):
+    classes[0].params.time_limit = 2700
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[9]")
+    assert elem.text == "45:00"
+
+
+def test_penalty_controls_is_defined(
+    render, event: EventType, classes: List[ClassInfoType]
+):
+    classes[0].params.penalty_controls = 240
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[10]")
+    assert elem.text == "240"
+
+
+def test_penalty_overtime_is_defined(
+    render, event: EventType, classes: List[ClassInfoType]
+):
+    classes[0].params.penalty_overtime = 180
+    html = etree.HTML(str(render.classes_table(event=event, classes=classes)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[11]")
+    assert elem.text == "180"

@@ -35,37 +35,9 @@ def render():
     return web.template.render(templates, globals=t_globals)
 
 
-def headers(table: etree.Element) -> List[str]:
-    headers = []
-    for h in table.findall(path=".//thead//tr//th"):
-        headers.append(h.text)
-    return headers
-
-
-def rows(table: etree.Element) -> List[List[str]]:
-    rows = []
-    for row in table.findall(path=".//tbody//tr"):
-        content = []
-        for cell in row.xpath(_path=".//th | .//td"):
-            content.append(cell.text)
-        rows.append(content)
-    return rows
-
-
-def test_clubs_table_with_no_clubs(render):
-    clubs = []
-    html = etree.HTML(str(render.clubs_table(clubs=clubs)))
-
-    table = html.find(".//table[@id='clb.table']")
-
-    assert headers(table) == [
-        "Name",
-    ]
-    assert rows(table) == []
-
-
-def test_clubs_table_with_several_clubs(render):
-    clubs = [
+@pytest.fixture()
+def clubs() -> List[ClubType]:
+    return [
         ClubType(
             id=145,
             name="OL Bundestag",
@@ -75,21 +47,51 @@ def test_clubs_table_with_several_clubs(render):
             name="Orieentering club",
         ),
     ]
-    html = etree.HTML(str(render.clubs_table(clubs=clubs)))
 
-    table = html.find(".//table[@id='clb.table']")
 
-    assert headers(table) == [
+TABLE_ID = "clb.table"
+
+
+def test_club_list_is_empty(render):
+    html = etree.HTML(str(render.clubs_table(clubs=[])))
+
+    # headers
+    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    assert [h.text for h in headers] == [
         "Name",
     ]
-    assert rows(table) == [
-        [
-            "Clubs\xa0\xa0(2)",
-        ],
-        [
-            "OL Bundestag",
-        ],
-        [
-            "Orieentering club",
-        ],
+
+    # rows
+    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr/")
+    assert len(rows) == 0
+
+
+def test_club_list_is_not_empty(render, clubs: List[ClubType]):
+    html = etree.HTML(str(render.clubs_table(clubs=clubs)))
+
+    # headers
+    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    assert [h.text for h in headers] == [
+        "Name",
+    ]
+
+    # rows
+    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    assert len(rows) == 3
+
+    # row 1
+    assert [th.text for th in rows[0].findall(".//th")] == [
+        "Clubs\xa0\xa0(2)",
+    ]
+
+    # row 2
+    assert rows[1].attrib["id"] == "145"
+    assert [td.text for td in rows[1].findall(".//td")] == [
+        "OL Bundestag",
+    ]
+
+    # row 3
+    assert rows[2].attrib["id"] == "146"
+    assert [td.text for td in rows[2].findall(".//td")] == [
+        "Orieentering club",
     ]

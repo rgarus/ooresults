@@ -114,7 +114,6 @@ def person_race_result() -> PersonRaceResult:
 
 def test_without_competitor_and_without_punches(render, entry: EntryType):
     html = etree.HTML(str(render.add_entry_result(entry=entry)))
-    print(str(render.add_entry_result(entry=entry)))
 
     input_id = html.find(".//input[@id='entr.spId']")
     assert input_id.attrib["name"] == "entry_id"
@@ -182,7 +181,9 @@ def test_with_competitor_but_without_punches(render, entry: EntryType):
     assert tds[3].text is None
     assert tds[4].text is None
     assert tds[5].text is None
-    assert rows[0].findall(".//td[7]/input") is not None
+    inp = tds[6].find("./input")
+    assert inp.attrib["name"] == "edit_start"
+    assert inp.attrib["onclick"] == "entr_myPunchEdit(-1)"
 
     # stop time
     tds = rows[1].findall(".//td")
@@ -193,7 +194,9 @@ def test_with_competitor_but_without_punches(render, entry: EntryType):
     assert tds[3].text is None
     assert tds[4].text is None
     assert tds[5].text is None
-    assert rows[0].findall(".//td[7]/input") is not None
+    inp = tds[6].find("./input")
+    assert inp.attrib["name"] == "edit_finish"
+    assert inp.attrib["onclick"] == "entr_myPunchEdit(-2)"
 
 
 def test_first_name_is_defined(render, entry: EntryType):
@@ -461,7 +464,9 @@ def test_with_competitor_and_with_punches(
     assert tds[3].text == "10:00:00"
     assert tds[4].text is None
     assert tds[5].text == "0:00"
-    assert rows[0].findall(".//td[7]/input") is not None
+    inp = tds[6].find("./input")
+    assert inp.attrib["name"] == "edit_start"
+    assert inp.attrib["onclick"] == "entr_myPunchEdit(-1)"
 
     # stop time
     tds = rows[1].findall(".//td")
@@ -472,7 +477,9 @@ def test_with_competitor_and_with_punches(
     assert tds[3].text == "10:33:21"
     assert tds[4].text is None
     assert tds[5].text == "33:21"
-    assert rows[0].findall(".//td[7]/input") is not None
+    inp = tds[6].find("./input")
+    assert inp.attrib["name"] == "edit_finish"
+    assert inp.attrib["onclick"] == "entr_myPunchEdit(-2)"
 
     # control 1
     tds = rows[2].findall(".//td")
@@ -483,7 +490,9 @@ def test_with_competitor_and_with_punches(
     assert tds[3].text is None
     assert tds[4].text is None
     assert tds[5].text is None
-    assert rows[0].findall(".//td[7]/input") is not None
+    inp = tds[6].find("./input")
+    assert inp.attrib["name"] == "edit_0"
+    assert inp.attrib["onclick"] == "entr_myPunchEdit(0)"
 
     # control 2
     tds = rows[3].findall(".//td")
@@ -494,7 +503,9 @@ def test_with_competitor_and_with_punches(
     assert tds[3].text is None
     assert tds[4].text is None
     assert tds[5].text is None
-    assert rows[0].findall(".//td[7]/input") is not None
+    inp = tds[6].find("./input")
+    assert inp.attrib["name"] == "edit_1"
+    assert inp.attrib["onclick"] == "entr_myPunchEdit(1)"
 
     # control 3
     tds = rows[4].findall(".//td")
@@ -505,7 +516,9 @@ def test_with_competitor_and_with_punches(
     assert tds[3].text == "10:13:38"
     assert tds[4].text is None
     assert tds[5].text == "13:38"
-    assert rows[0].findall(".//td[7]/input") is not None
+    inp = tds[6].find("./input")
+    assert inp.attrib["name"] == "edit_2"
+    assert inp.attrib["onclick"] == "entr_myPunchEdit(2)"
 
     # control 4
     tds = rows[5].findall(".//td")
@@ -516,7 +529,9 @@ def test_with_competitor_and_with_punches(
     assert tds[3].text == "10:18:56"
     assert tds[4].text is None
     assert tds[5].text == "18:56"
-    assert rows[0].findall(".//td[7]/input") is not None
+    inp = tds[6].find("./input")
+    assert inp.attrib["name"] == "edit_3"
+    assert inp.attrib["onclick"] == "entr_myPunchEdit(3)"
 
     # control 5
     tds = rows[6].findall(".//td")
@@ -527,4 +542,6 @@ def test_with_competitor_and_with_punches(
     assert tds[3].text == "10:26:33"
     assert tds[4].text is None
     assert tds[5].text == "26:33"
-    assert rows[0].findall(".//td[7]/input") is not None
+    inp = tds[6].find("./input")
+    assert inp.attrib["name"] == "edit_4"
+    assert inp.attrib["onclick"] == "entr_myPunchEdit(4)"

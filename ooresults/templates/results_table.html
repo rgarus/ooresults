@@ -82,7 +82,7 @@ $for class_, ranked_results in class_results:
             <th class="dt">Rank</th>
             <th class="dt">Name</th>
             <th class="dt">Club</th>
-            $if columns == []:
+            $if not columns:
                 <th class="dt">Time</th>
             $else:
                 $if 'factor' in columns:
@@ -109,7 +109,7 @@ $for class_, ranked_results in class_results:
             <td class="dt">$format_rank(ranked_result.rank, entry.not_competing)</td>
             <td class="dt">$f(entry.first_name) $f(entry.last_name)</td>
             <td class="dt">$f(entry.club_name)</td>
-            $if columns == []:
+            $if not columns:
                 <td class="dt" style="text-align:right">$format_time_total(result.time, result.status, entry.start.start_time)</td>
             $else:
                 $if 'factor' in columns:

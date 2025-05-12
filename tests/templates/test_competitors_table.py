@@ -35,42 +35,9 @@ def render():
     return web.template.render(templates, globals=t_globals)
 
 
-def headers(table: etree.Element) -> List[str]:
-    headers = []
-    for h in table.findall(path=".//thead//tr//th"):
-        headers.append(h.text)
-    return headers
-
-
-def rows(table: etree.Element) -> List[List[str]]:
-    rows = []
-    for row in table.findall(path=".//tbody//tr"):
-        content = []
-        for cell in row.xpath(_path=".//th | .//td"):
-            content.append(cell.text)
-        rows.append(content)
-    return rows
-
-
-def test_competitors_table_with_no_competitors(render):
-    competitors = []
-    html = etree.HTML(str(render.competitors_table(competitors=competitors)))
-
-    table = html.find(".//table[@id='comp.table']")
-
-    assert headers(table) == [
-        "First name",
-        "Last name",
-        "Gender",
-        "Year",
-        "Chip",
-        "Club",
-    ]
-    assert rows(table) == []
-
-
-def test_competitors_table_with_several_competitors(render):
-    competitors = [
+@pytest.fixture()
+def competitors() -> List[CompetitorType]:
+    return [
         CompetitorType(
             id=112,
             first_name="Barbara",
@@ -85,28 +52,34 @@ def test_competitors_table_with_several_competitors(render):
             id=113,
             first_name="Angela",
             last_name="Merkel",
-            gender="F",
-            year=1957,
-            chip="4748495",
-            club_id=145,
-            club_name="OL Bundestag",
+            gender=None,
+            year=None,
+            chip=None,
+            club_id=None,
+            club_name=None,
         ),
         CompetitorType(
             id=114,
             first_name="Manfred",
             last_name="Merkel",
-            gender="M",
-            year=1959,
-            chip="4748496",
-            club_id=145,
-            club_name="OL Bundestag",
+            gender=None,
+            year=None,
+            chip=None,
+            club_id=None,
+            club_name=None,
         ),
     ]
-    html = etree.HTML(str(render.competitors_table(competitors=competitors)))
 
-    table = html.find(".//table[@id='comp.table']")
 
-    assert headers(table) == [
+TABLE_ID = "comp.table"
+
+
+def test_competitor_list_is_empty(render):
+    html = etree.HTML(str(render.competitors_table(competitors=[])))
+
+    # headers
+    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    assert [h.text for h in headers] == [
         "First name",
         "Last name",
         "Gender",
@@ -114,32 +87,113 @@ def test_competitors_table_with_several_competitors(render):
         "Chip",
         "Club",
     ]
-    assert rows(table) == [
-        [
-            "Competitors\xa0\xa0(3)",
-        ],
-        [
-            "Barbara",
-            "Merkel",
-            None,
-            None,
-            None,
-            None,
-        ],
-        [
-            "Angela",
-            "Merkel",
-            "F",
-            "1957",
-            "4748495",
-            "OL Bundestag",
-        ],
-        [
-            "Manfred",
-            "Merkel",
-            "M",
-            "1959",
-            "4748496",
-            "OL Bundestag",
-        ],
+
+    # rows
+    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr/")
+    assert len(rows) == 0
+
+
+def test_competitor_list_is_not_empty(render, competitors: List[CompetitorType]):
+    html = etree.HTML(str(render.competitors_table(competitors=competitors)))
+
+    # headers
+    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    assert [h.text for h in headers] == [
+        "First name",
+        "Last name",
+        "Gender",
+        "Year",
+        "Chip",
+        "Club",
     ]
+
+    # rows
+    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    assert len(rows) == 4
+
+    # row 1
+    assert [th.text for th in rows[0].findall(".//th")] == [
+        "Competitors\xa0\xa0(3)",
+    ]
+
+    # row 2
+    assert rows[1].attrib["id"] == "112"
+    assert [td.text for td in rows[1].findall(".//td")] == [
+        "Barbara",
+        "Merkel",
+        None,
+        None,
+        None,
+        None,
+    ]
+
+    # row 3
+    assert rows[2].attrib["id"] == "113"
+    assert [td.text for td in rows[2].findall(".//td")] == [
+        "Angela",
+        "Merkel",
+        None,
+        None,
+        None,
+        None,
+    ]
+
+    # row 4
+    assert rows[3].attrib["id"] == "114"
+    assert [td.text for td in rows[3].findall(".//td")] == [
+        "Manfred",
+        "Merkel",
+        None,
+        None,
+        None,
+        None,
+    ]
+
+
+def test_gender_is_unknown(render, competitors: List[CompetitorType]):
+    competitors[0].gender = ""
+    html = etree.HTML(str(render.competitors_table(competitors=competitors)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
+    assert elem.text is None
+
+
+def test_gender_is_female(render, competitors: List[CompetitorType]):
+    competitors[0].gender = "F"
+    html = etree.HTML(str(render.competitors_table(competitors=competitors)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
+    assert elem.text == "F"
+
+
+def test_gender_is_male(render, competitors: List[CompetitorType]):
+    competitors[0].gender = "M"
+    html = etree.HTML(str(render.competitors_table(competitors=competitors)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
+    assert elem.text == "M"
+
+
+def test_year_is_defined(render, competitors: List[CompetitorType]):
+    competitors[0].year = 1957
+    html = etree.HTML(str(render.competitors_table(competitors=competitors)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
+    assert elem.text == "1957"
+
+
+def test_chip_is_defined(render, competitors: List[CompetitorType]):
+    competitors[0].chip = "1234567"
+    html = etree.HTML(str(render.competitors_table(competitors=competitors)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[5]")
+    assert elem.text == "1234567"
+
+
+def test_club_is_defined(render, competitors: List[CompetitorType]):
+    competitors[0].club_id = 2
+    competitors[0].club_name = "OL Bundestag"
+    html = etree.HTML(str(render.competitors_table(competitors=competitors)))
+
+    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
+    assert elem.text == "OL Bundestag"
