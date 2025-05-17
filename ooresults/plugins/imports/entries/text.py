@@ -23,7 +23,7 @@ from ooresults.otypes import result_type
 def parse(content: bytes):
     try:
         content = content.decode(encoding="utf-8")
-    except:
+    except Exception:
         content = content.decode(encoding="windows-1252")
 
     # Format:

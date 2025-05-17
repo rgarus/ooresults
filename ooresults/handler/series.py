@@ -37,7 +37,6 @@ render = web.template.render(templates, globals=t_globals)
 class Update:
     def POST(self):
         """Update data"""
-        data = web.input()
         settings, events, results = model.build_series_result()
         return render.series_table(events, results)
 
@@ -88,7 +87,6 @@ class PdfResult:
 class CsvResult:
     def POST(self):
         """Export results as csv for creating diplomas"""
-        data = web.input()
         try:
             settings, events, results = model.build_series_result()
 

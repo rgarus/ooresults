@@ -134,7 +134,7 @@ def test_class_results_list_is_empty(render, event: EventType):
     assert html.find(".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
     assert html.find(".//div[@id='res.event']//tr[2]//td").text == "2023-12-29"
 
-    table = html.find(f".//div[@id='res.result']/table")
+    table = html.find(".//div[@id='res.result']/table")
     assert [child.tag for child in table] == []
 
 
@@ -152,7 +152,7 @@ def test_class_results_list_with_one_class_but_without_results(
     assert html.find(".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
     assert html.find(".//div[@id='res.event']//tr[2]//td").text == "2023-12-29"
 
-    table = html.find(f".//div[@id='res.result']/table")
+    table = html.find(".//div[@id='res.result']/table")
     assert [child.tag for child in table] == []
 
 
@@ -171,11 +171,11 @@ def test_class_results_list_with_one_class_and_with_results(
     assert html.find(".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
     assert html.find(".//div[@id='res.event']//tr[2]//td").text == "2023-12-29"
 
-    table = html.find(f".//div[@id='res.result']/table")
+    table = html.find(".//div[@id='res.result']/table")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # headers
-    headers = table.findall(f"./thead[1]/tr")
+    headers = table.findall("./thead[1]/tr")
     assert len(headers) == 2
 
     # header 1
@@ -191,7 +191,7 @@ def test_class_results_list_with_one_class_and_with_results(
     ]
 
     # rows
-    rows = table.findall(f"./tbody[1]/tr")
+    rows = table.findall("./tbody[1]/tr")
     assert len(rows) == 1
 
     # row 1
@@ -215,7 +215,7 @@ def test_rank_is_defined(
         )
     )
 
-    elem = html.find(f".//div[@id='res.result']/table/tbody[1]/tr[1]/td[1]")
+    elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[1]")
     assert elem.text == "3"
 
 
@@ -232,7 +232,7 @@ def test_entry_is_not_competing(
         )
     )
 
-    elem = html.find(f".//div[@id='res.result']/table/tbody[1]/tr[1]/td[1]")
+    elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[1]")
     assert elem.text == "NC"
 
 
@@ -250,7 +250,7 @@ def test_club_is_defined(
         )
     )
 
-    elem = html.find(f".//div[@id='res.result']/table/tbody[1]/tr[1]/td[3]")
+    elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[3]")
     assert elem.text == "OL Bundestag"
 
 
@@ -269,7 +269,7 @@ def test_status_is_inactive_with_start_time(
         )
     )
 
-    elem = html.find(f".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
+    elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
     assert elem.text == "Start at 12:38:59"
 
 
@@ -288,7 +288,7 @@ def test_status_is_ok(
         )
     )
 
-    elem = html.find(f".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
+    elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
     assert elem.text == "6:57"
 
 
@@ -324,7 +324,7 @@ def test_status_is_not_inactive_or_ok(
         )
     )
 
-    elem = html.find(f".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
+    elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
     assert elem.text == text
 
 
@@ -352,11 +352,11 @@ def test_class_results_list_with_two_classes_and_with_results(
     assert html.find(".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
     assert html.find(".//div[@id='res.event']//tr[2]//td").text == "2023-12-29"
 
-    table = html.find(f".//div[@id='res.result']/table")
+    table = html.find(".//div[@id='res.result']/table")
     assert [child.tag for child in table] == ["thead", "tbody", "thead", "tbody"]
 
     # headers
-    headers = table.findall(f"./thead[1]/tr")
+    headers = table.findall("./thead[1]/tr")
     assert len(headers) == 2
 
     # header 1
@@ -372,7 +372,7 @@ def test_class_results_list_with_two_classes_and_with_results(
     ]
 
     # rows
-    rows = table.findall(f"./tbody[1]/tr")
+    rows = table.findall("./tbody[1]/tr")
     assert len(rows) == 2
 
     # row 1
@@ -392,7 +392,7 @@ def test_class_results_list_with_two_classes_and_with_results(
     ]
 
     # headers
-    headers = table.findall(f"./thead[2]/tr")
+    headers = table.findall("./thead[2]/tr")
     assert len(headers) == 2
 
     # header 1
@@ -408,7 +408,7 @@ def test_class_results_list_with_two_classes_and_with_results(
     ]
 
     # rows
-    rows = table.findall(f"./tbody[2]/tr")
+    rows = table.findall("./tbody[2]/tr")
     assert len(rows) == 1
 
     # row 1
@@ -421,11 +421,11 @@ def test_class_results_list_with_two_classes_and_with_results(
 
 
 def check_header(html: etree.Element, values: List[str]) -> None:
-    table = html.find(f".//div[@id='res.result']/table")
+    table = html.find(".//div[@id='res.result']/table")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # headers
-    headers = table.findall(f"./thead[1]/tr")
+    headers = table.findall("./thead[1]/tr")
     assert len(headers) == 2
 
     # header 1
@@ -437,15 +437,15 @@ def check_header(html: etree.Element, values: List[str]) -> None:
 
 
 def check_row(html: etree.Element, values: List[Optional[str]]) -> None:
-    table = html.find(f".//div[@id='res.result']/table")
+    table = html.find(".//div[@id='res.result']/table")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # headers
-    headers = table.findall(f"./thead[1]/tr")
+    headers = table.findall("./thead[1]/tr")
     assert len(headers) == 2
 
     # rows
-    rows = table.findall(f"./tbody[1]/tr")
+    rows = table.findall("./tbody[1]/tr")
     assert len(rows) == 1
 
     # row 1

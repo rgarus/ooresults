@@ -89,7 +89,7 @@ def test_if_a_club_is_added_with_required_data_then_an_additional_club_is_displa
     club_page: ClubPage, delete_clubs: None
 ):
     dialog = club_page.actions.add()
-    dialog.check_values(name=""),
+    dialog.check_values(name="")
     dialog.enter_values(name="OL Bundestag")
     dialog.submit()
 
@@ -105,7 +105,7 @@ def test_if_adding_a_club_is_cancelled_then_no_additional_club_is_displayed(
     club_page: ClubPage, delete_clubs: None
 ):
     dialog = club_page.actions.add()
-    dialog.check_values(name=""),
+    dialog.check_values(name="")
     dialog.enter_values(name="OL Bundestag")
     dialog.cancel()
 

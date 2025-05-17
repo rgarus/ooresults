@@ -1031,7 +1031,7 @@ class SqliteRepo(Repo):
                     course_id = class_["course_id"]
                     class_params = class_["params"]
                     controls = self.get_course(id=course_id).controls
-                except:
+                except Exception:
                     class_params = ClassParams()
                     controls = []
                 c["result"].compute_result(

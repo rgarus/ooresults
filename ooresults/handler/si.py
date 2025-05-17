@@ -40,7 +40,7 @@ class Si1:
                     id = event.id
                     key = event.key
                     break
-        except:
+        except Exception:
             pass
 
         return render.si.si1_page(id, key)
@@ -57,7 +57,7 @@ class Si2:
                 if str(event.id) == data.id:
                     id = event.id
                     key = event.key
-        except:
+        except Exception:
             pass
 
         return render.si.si2_page(id, key)

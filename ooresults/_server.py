@@ -315,7 +315,7 @@ def main() -> Optional[int]:
                 ssl_cert=config.ssl_cert,
                 ssl_key=config.ssl_key,
             )
-        except:
+        except Exception:
             model.websocket_server = WebSocketServer(
                 demo_reader=config.demo_reader,
                 import_stream=config.import_stream,

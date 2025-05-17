@@ -252,7 +252,6 @@ class Cardreader:
 
                 try:
                     # some properties are now set
-                    card_number = si.sicard  #  8320666
                     card_type = si.cardtype  #  'SI10'
                     self.webSocketClient.set_state(
                         entry_type="cardInserted",

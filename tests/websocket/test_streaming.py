@@ -30,7 +30,7 @@ from websockets.asyncio.client import connect
 from websockets.protocol import State
 
 import ooresults
-from ooresults.model import model
+import ooresults.model.model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.event_type import EventType

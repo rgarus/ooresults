@@ -147,7 +147,7 @@ def test_configuration_exception_if_cert_files_defined_but_not_found():
                     expected_exception=FileNotFoundError,
                     match=f"Certificate file '{ssl_cert}' not found",
                 ):
-                    c = configuration.Config(path=temp)
+                    configuration.Config(path=temp)
 
                 assert not (home / ".ooresults" / "cert" / "cert.pem").exists()
                 assert not (home / ".ooresults" / "cert" / "privkey.pem").exists()

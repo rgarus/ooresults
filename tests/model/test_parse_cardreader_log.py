@@ -396,7 +396,6 @@ def test_parse_with_many_controls():
     c7 = datetime(2015, 1, 1, 12, 39, 13, tzinfo=timezone.utc)
     f1 = datetime(2015, 1, 1, 12, 39, 15, tzinfo=timezone.utc)
 
-    controls = ["101", "102", "103"]
     item = {
         "entryType": "cardRead",
         "entryTime": "2015-01-01T13:00:00Z",
@@ -486,12 +485,6 @@ def test_parse_with_many_controls():
 
 
 def test_parse_without_entry_type_raises_exception():
-    e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
-    s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
-    c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
-    c2 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
-    f1 = datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
-
     item = {
         "entryTime": "2015-01-01T13:00:00Z",
         "startTime": "2015-01-01T12:38:59Z",
@@ -504,16 +497,10 @@ def test_parse_without_entry_type_raises_exception():
     }
 
     with pytest.raises(jsonschema.ValidationError):
-        d = model.parse_cardreader_log(item=item)
+        model.parse_cardreader_log(item=item)
 
 
 def test_parse_without_entry_time_raises_exception():
-    e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
-    s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
-    c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
-    c2 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
-    f1 = datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
-
     item = {
         "entryType": "cardRead",
         "startTime": "2015-01-01T12:38:59Z",
@@ -526,16 +513,10 @@ def test_parse_without_entry_time_raises_exception():
     }
 
     with pytest.raises(jsonschema.ValidationError):
-        d = model.parse_cardreader_log(item=item)
+        model.parse_cardreader_log(item=item)
 
 
 def test_parse_without_control_card_raises_exception():
-    e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
-    s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
-    c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
-    c2 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
-    f1 = datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
-
     item = {
         "entryType": "cardRead",
         "entryTime": "2015-01-01T13:00:00Z",
@@ -548,4 +529,4 @@ def test_parse_without_control_card_raises_exception():
     }
 
     with pytest.raises(jsonschema.ValidationError):
-        d = model.parse_cardreader_log(item=item)
+        model.parse_cardreader_log(item=item)

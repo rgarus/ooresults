@@ -129,7 +129,6 @@ def parse_course_data(content: bytes) -> Tuple[Dict, List[Dict], List[Dict]]:
     if date is not None:
         event["date"] = iso8601.parse_date(date.text).date()
 
-    result = []
     race_course_data_list = root.findall("RaceCourseData", namespaces=namespaces)
 
     course_list = race_course_data_list[0].findall("Course", namespaces=namespaces)

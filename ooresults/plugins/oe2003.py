@@ -38,7 +38,7 @@ def cp1252(value: str) -> str:
     try:
         _ = value.encode("windows-1252")
         return value
-    except:
+    except Exception:
         return unidecode(value)
 
 
@@ -172,7 +172,7 @@ def parse(content: bytes) -> List[Dict]:
 
     try:
         content = content.decode(encoding="utf-8")
-    except:
+    except Exception:
         content = content.decode(encoding="windows-1252")
 
     dialect = csv.Sniffer().sniff(content, delimiters=",;\t")
@@ -328,7 +328,7 @@ def parse(content: bytes) -> List[Dict]:
                         for i in item.split(":"):
                             t = 60 * t + int(i)
                         r["result"].time = t
-                    except:
+                    except Exception:
                         pass
                 elif column == "year":
                     try:
@@ -338,7 +338,7 @@ def parse(content: bytes) -> List[Dict]:
                             r["year"] = 1900 + int(item)
                         else:
                             r["year"] = int(item)
-                    except:
+                    except Exception:
                         r["year"] = None
                 elif column == "gender":
                     if item == "":
@@ -364,7 +364,7 @@ def parse(content: bytes) -> List[Dict]:
                             t = 0
                             for j in control_time.split(":"):
                                 t = 60 * t + int(j)
-                        except:
+                        except Exception:
                             t = None
 
                         status = SpStatus.MISSING if control_time == "-----" else None

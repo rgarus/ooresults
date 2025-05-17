@@ -129,7 +129,7 @@ class WebSocketHandler:
                         t1 = time.time()
                         try:
                             data = bz2.decompress(message)
-                        except:
+                        except Exception:
                             data = message
 
                         await asyncio.get_event_loop().run_in_executor(
@@ -286,12 +286,12 @@ class WebSocketHandler:
                 async for message in websocket:
                     try:
                         data = bz2.decompress(message)
-                    except:
+                    except Exception:
                         raise RuntimeError("Data not bz2 encoded")
 
                     try:
                         item = json.loads(data.decode())
-                    except:
+                    except Exception:
                         raise RuntimeError("Data not json deserialisable")
 
                     try:

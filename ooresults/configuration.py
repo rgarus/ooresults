@@ -19,8 +19,6 @@
 
 import configparser
 import pathlib
-from typing import List
-from typing import Optional
 
 from OpenSSL import crypto
 

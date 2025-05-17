@@ -97,7 +97,7 @@ def import_classes(event_id: int, classes: List[Dict]) -> None:
                     )
                     break
             else:
-                id = db.add_class(
+                db.add_class(
                     event_id=event_id,
                     name=c["name"],
                     short_name=c.get("short_name", None),
@@ -152,7 +152,7 @@ def update_class(
         try:
             class_params = params
             controls = db.get_course(id=course_id).controls
-        except:
+        except Exception:
             class_params = ClassParams()
             controls = []
 
@@ -213,7 +213,7 @@ def import_courses(
                     )
                     break
             else:
-                id = db.add_course(
+                db.add_course(
                     event_id=event_id,
                     name=c["name"],
                     length=c.get("length", None),
@@ -236,7 +236,7 @@ def import_courses(
                             )
                             break
                     else:
-                        id = db.add_class(
+                        db.add_class(
                             event_id=event_id,
                             name=i["class_name"],
                             short_name=None,
@@ -257,7 +257,7 @@ def import_courses(
                             )
                             break
                     else:
-                        id = db.add_class(
+                        db.add_class(
                             event_id=event_id,
                             name=i["class_name"],
                             short_name=None,

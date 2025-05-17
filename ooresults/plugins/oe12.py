@@ -32,7 +32,7 @@ def cp1252(value: str) -> str:
     try:
         _ = value.encode("windows-1252")
         return value
-    except:
+    except Exception:
         return unidecode(value)
 
 

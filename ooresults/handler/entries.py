@@ -346,7 +346,6 @@ class FillEditForm:
 class FillCompetitorsForm:
     def POST(self):
         """Query data to fill add or edit form"""
-        data = web.input()
         competitors = model.get_competitors()
 
         return render.add_entry_competitors(competitors)
@@ -356,9 +355,8 @@ class FillResultForm:
     def POST(self):
         """Query data to fill result form"""
         data = web.input()
-        event_id = int(data.event_id) if data.event_id != "" else -1
         try:
-            entry = model.get_entry(int(data.id))
+            entry = model.get_entry(id=int(data.id))
         except EventNotFoundError:
             raise web.conflict("Event deleted")
         except KeyError:
