@@ -18,7 +18,6 @@
 
 
 import logging
-import pathlib
 
 import web
 
@@ -27,18 +26,14 @@ from ooresults.plugins import iof_course_data
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.repo import CourseUsedError
 from ooresults.repo.repo import EventNotFoundError
-from ooresults.utils.globals import t_globals
-
-
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 def update(event_id: int):
     courses = model.get_courses(event_id=event_id)
     try:
         event = model.get_event(id=event_id)
-        return render.courses_table(event, courses)
+        return render.courses_table(event=event, courses=courses)
     except EventNotFoundError:
         raise web.conflict("Event deleted")
     except:
@@ -172,4 +167,4 @@ class FillEditForm:
             logging.exception("Internal server error")
             raise
 
-        return render.add_course(course)
+        return render.add_course(course=course)

@@ -18,23 +18,14 @@
 
 
 import dataclasses
-import pathlib
 import threading
 import typing
 from collections import OrderedDict
 from typing import Optional
 
-import web
-
 from ooresults.handler import results
 from ooresults.model import model
-from ooresults.utils.globals import t_globals
-
-
-### Templates
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render_base = web.template.render(templates, base="base", globals={"str": str})
-render = web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 @dataclasses.dataclass
@@ -71,7 +62,9 @@ def get_cached_data(event_id: int):
         if not (cached_data and cached_data.content is not None and cached_data.valid):
             event, class_results = model.event_class_results(event_id=event_id)
             columns = results.build_columns(class_results)
-            content = render.results_table(event, class_results, columns)
+            content = render.results_table(
+                event=event, class_results=class_results, columns=columns
+            )
 
             with lock:
                 cached_data = caches.get(event_id, None)

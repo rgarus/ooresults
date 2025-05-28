@@ -17,16 +17,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pathlib
-
 import web
 
 from ooresults.model import model
-from ooresults.utils.globals import t_globals
-
-
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 class Si1:
@@ -43,7 +37,7 @@ class Si1:
         except Exception:
             pass
 
-        return render.si.si1_page(id, key)
+        return render.si1_page(id=id, key=key)
 
 
 class Si2:
@@ -60,4 +54,4 @@ class Si2:
         except Exception:
             pass
 
-        return render.si.si2_page(id, key)
+        return render.si2_page(id=id, key=key)

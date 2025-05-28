@@ -17,21 +17,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pathlib
-
 import pytest
-import web
 from lxml import etree
 
-import ooresults
 from ooresults.otypes.club_type import ClubType
-from ooresults.utils.globals import t_globals
-
-
-@pytest.fixture()
-def render():
-    templates = pathlib.Path(ooresults.__file__).resolve().parent / "templates"
-    return web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 @pytest.fixture()
@@ -42,8 +32,8 @@ def club() -> ClubType:
     )
 
 
-def test_club_is_none(render):
-    html = etree.HTML(str(render.add_club(club=None)))
+def test_club_is_none():
+    html = etree.HTML(render.add_club(club=None))
 
     input_id = html.find(".//input[@name='id']")
     assert input_id.attrib["value"] == ""
@@ -52,8 +42,8 @@ def test_club_is_none(render):
     assert input_name.attrib["value"] == ""
 
 
-def test_club_is_not_none(render, club: ClubType):
-    html = etree.HTML(str(render.add_club(club=club)))
+def test_club_is_not_none(club: ClubType):
+    html = etree.HTML(render.add_club(club=club))
 
     input_id = html.find(".//input[@name='id']")
     assert input_id.attrib["value"] == "7"

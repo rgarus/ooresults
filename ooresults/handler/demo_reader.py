@@ -17,15 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pathlib
-
-import web
-
-from ooresults.utils.globals import t_globals
-
-
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 class Update:

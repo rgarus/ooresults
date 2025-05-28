@@ -18,27 +18,17 @@
 
 
 import datetime
-import pathlib
 from datetime import timezone
-from typing import List
 
 import pytest
-import web
 from lxml import etree
 
-import ooresults
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.start_type import PersonRaceStart
-from ooresults.utils.globals import t_globals
-
-
-@pytest.fixture()
-def render():
-    templates = pathlib.Path(ooresults.__file__).resolve().parent / "templates"
-    return web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 @pytest.fixture()
@@ -86,15 +76,11 @@ def entry_full(event: EventType) -> EntryType:
     )
 
 
-def test_entry_list_with_view_is_entries(
-    render, event: EventType, entry_full: List[EntryType]
-):
+def test_entry_list_with_view_is_entries(event: EventType, entry_full: EntryType):
     event.fields = ["Start number", "Region"]
     html = etree.HTML(
-        str(
-            render.entries_table(
-                event=event, view="entries", view_entries_list=[(None, [entry_full])]
-            )
+        render.entries_table(
+            event=event, view="entries", view_entries_list=[(None, [entry_full])]
         )
     )
 
@@ -158,15 +144,11 @@ def test_entry_list_with_view_is_entries(
     ]
 
 
-def test_entry_list_with_view_is_classes(
-    render, event: EventType, entry_full: List[EntryType]
-):
+def test_entry_list_with_view_is_classes(event: EventType, entry_full: EntryType):
     event.fields = ["Start number", "Region"]
     html = etree.HTML(
-        str(
-            render.entries_table(
-                event=event, view="classes", view_entries_list=[(None, [entry_full])]
-            )
+        render.entries_table(
+            event=event, view="classes", view_entries_list=[(None, [entry_full])]
         )
     )
 
@@ -228,15 +210,11 @@ def test_entry_list_with_view_is_classes(
     ]
 
 
-def test_entry_list_with_view_is_clubs(
-    render, event: EventType, entry_full: List[EntryType]
-):
+def test_entry_list_with_view_is_clubs(event: EventType, entry_full: EntryType):
     event.fields = ["Start number", "Region"]
     html = etree.HTML(
-        str(
-            render.entries_table(
-                event=event, view="clubs", view_entries_list=[(None, [entry_full])]
-            )
+        render.entries_table(
+            event=event, view="clubs", view_entries_list=[(None, [entry_full])]
         )
     )
 
@@ -298,15 +276,11 @@ def test_entry_list_with_view_is_clubs(
     ]
 
 
-def test_entry_list_with_view_is_states(
-    render, event: EventType, entry_full: List[EntryType]
-):
+def test_entry_list_with_view_is_states(event: EventType, entry_full: EntryType):
     event.fields = ["Start number", "Region"]
     html = etree.HTML(
-        str(
-            render.entries_table(
-                event=event, view="states", view_entries_list=[(None, [entry_full])]
-            )
+        render.entries_table(
+            event=event, view="states", view_entries_list=[(None, [entry_full])]
         )
     )
 

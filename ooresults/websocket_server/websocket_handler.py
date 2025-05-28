@@ -24,14 +24,12 @@ import datetime
 import functools
 import json
 import logging
-import pathlib
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
 from typing import Tuple
 
 import tzlocal
-import web
 import websockets.exceptions
 from websockets.asyncio.server import ServerConnection
 
@@ -41,12 +39,8 @@ from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SpStatus
 from ooresults.repo.repo import EventNotFoundError
-from ooresults.utils.globals import t_globals
+from ooresults.utils import render
 from ooresults.websocket_server import streaming_status
-
-
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals=t_globals)
 
 
 class WebSocketHandler:
@@ -100,14 +94,19 @@ class WebSocketHandler:
         if path == "/si2":
             stream_status = streaming_status.status.get(id=event.id)
             print("stream_status:", stream_status)
-            data = render.si.si2_data(status, stream_status, event, self.messages)
+            data = render.si2_data(
+                status=status,
+                stream_status=stream_status,
+                event=event,
+                messages=self.messages,
+            )
         else:
             if status != "cardRead":
                 data = message.get("controlCard", "")
             elif message.get("error", None) is not None:
-                data = render.si.si1_error(message)
+                data = render.si1_error(message=message)
             elif message.get("lastName", None) is not None:
-                data = render.si.si1_data(message)
+                data = render.si1_data(message=message)
             else:
                 return
             data = json.dumps({"status": status, "data": str(data)})

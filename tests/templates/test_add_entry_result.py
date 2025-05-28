@@ -17,28 +17,19 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pathlib
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 
 import pytest
-import web
 from lxml import etree
 
-import ooresults
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SplitTime
 from ooresults.otypes.result_type import SpStatus
-from ooresults.utils.globals import t_globals
-
-
-@pytest.fixture()
-def render():
-    templates = pathlib.Path(ooresults.__file__).resolve().parent / "templates"
-    return web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 S1 = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
@@ -112,8 +103,8 @@ def person_race_result() -> PersonRaceResult:
     )
 
 
-def test_without_competitor_and_without_punches(render, entry: EntryType):
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+def test_without_competitor_and_without_punches(entry: EntryType):
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     input_id = html.find(".//input[@id='entr.spId']")
     assert input_id.attrib["name"] == "entry_id"
@@ -146,11 +137,11 @@ def test_without_competitor_and_without_punches(render, entry: EntryType):
     assert tds[5].text is None
 
 
-def test_with_competitor_but_without_punches(render, entry: EntryType):
+def test_with_competitor_but_without_punches(entry: EntryType):
     entry.competitor_id = 25
     entry.first_name = "Angela"
     entry.last_name = "Merkel"
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     input_id = html.find(".//input[@id='entr.spId']")
     assert input_id.attrib["name"] == "entry_id"
@@ -199,57 +190,57 @@ def test_with_competitor_but_without_punches(render, entry: EntryType):
     assert inp.attrib["onclick"] == "entr_myPunchEdit(-2)"
 
 
-def test_first_name_is_defined(render, entry: EntryType):
+def test_first_name_is_defined(entry: EntryType):
     entry.first_name = "Angela"
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     tds = html.findall(".//form[@id='entr.formSplitTimes']/table[1]//td")
     assert tds[0].text == "Angela"
 
 
-def test_last_name_is_defined(render, entry: EntryType):
+def test_last_name_is_defined(entry: EntryType):
     entry.last_name = "Merkel"
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     tds = html.findall(".//form[@id='entr.formSplitTimes']/table[1]//td")
     assert tds[1].text == "Merkel"
 
 
-def test_year_is_defined(render, entry: EntryType):
+def test_year_is_defined(entry: EntryType):
     entry.year = 1957
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     tds = html.findall(".//form[@id='entr.formSplitTimes']/table[1]//td")
     assert tds[2].text == "1957"
 
 
-def test_class_name_is_defined(render, entry: EntryType):
+def test_class_name_is_defined(entry: EntryType):
     entry.class_name = "Elite Women"
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     tds = html.findall(".//form[@id='entr.formSplitTimes']/table[1]//td")
     assert tds[3].text == "Elite Women"
 
 
-def test_chip_is_defined(render, entry: EntryType):
+def test_chip_is_defined(entry: EntryType):
     entry.chip = "1234567"
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     tds = html.findall(".//form[@id='entr.formSplitTimes']/table[1]//td")
     assert tds[4].text == "1234567"
 
 
-def test_start_time_is_defined(render, entry: EntryType):
+def test_start_time_is_defined(entry: EntryType):
     entry.result.start_time = S1
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     tds = html.findall(".//form[@id='entr.formSplitTimes']/table[1]//td")
     assert tds[5].text == "10:00:00"
 
 
-def test_finish_time_is_defined(render, entry: EntryType):
+def test_finish_time_is_defined(entry: EntryType):
     entry.result.finish_time = F1
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     tds = html.findall(".//form[@id='entr.formSplitTimes']/table[1]//td")
     assert tds[6].text == "10:33:21"
@@ -269,25 +260,25 @@ def test_finish_time_is_defined(render, entry: EntryType):
         (ResultStatus.DISQUALIFIED, "DSQ"),
     ],
 )
-def test_status_is_defined(render, entry: EntryType, status: ResultStatus, text: str):
+def test_status_is_defined(entry: EntryType, status: ResultStatus, text: str):
     entry.result.status = status
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     tds = html.findall(".//form[@id='entr.formSplitTimes']/table[1]//td")
     assert tds[7].text == text
 
 
-def test_time_is_defined(render, entry: EntryType):
+def test_time_is_defined(entry: EntryType):
     entry.result.time = 2001
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     tds = html.findall(".//form[@id='entr.formSplitTimes']/table[1]//td")
     assert tds[8].text == "33:21"
 
 
-def test_clear_time_is_defined_and_without_competitor(render, entry: EntryType):
+def test_clear_time_is_defined_and_without_competitor(entry: EntryType):
     entry.result.punched_clear_time = C1
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     rows = html.findall(".//form[@id='entr.formSplitTimes']/table[2]/tbody/tr")
     # rows Clear, Finish
@@ -304,10 +295,10 @@ def test_clear_time_is_defined_and_without_competitor(render, entry: EntryType):
     assert tds[5].text is None
 
 
-def test_clear_time_is_defined_and_with_competitor(render, entry: EntryType):
+def test_clear_time_is_defined_and_with_competitor(entry: EntryType):
     entry.competitor_id = 25
     entry.result.punched_clear_time = C1
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     rows = html.findall(".//form[@id='entr.formSplitTimes']/table[2]/tbody/tr")
     # rows Clear, Start, Finish
@@ -325,9 +316,9 @@ def test_clear_time_is_defined_and_with_competitor(render, entry: EntryType):
     assert tds[6].text is None
 
 
-def test_check_time_is_defined_and_without_competitor(render, entry: EntryType):
+def test_check_time_is_defined_and_without_competitor(entry: EntryType):
     entry.result.punched_check_time = C1
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     rows = html.findall(".//form[@id='entr.formSplitTimes']/table[2]/tbody/tr")
     # rows Check, Finish
@@ -344,10 +335,10 @@ def test_check_time_is_defined_and_without_competitor(render, entry: EntryType):
     assert tds[5].text is None
 
 
-def test_check_time_is_defined_and_with_competitor(render, entry: EntryType):
+def test_check_time_is_defined_and_with_competitor(entry: EntryType):
     entry.competitor_id = 25
     entry.result.punched_check_time = C1
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     rows = html.findall(".//form[@id='entr.formSplitTimes']/table[2]/tbody/tr")
     # rows Check, Start, Finish
@@ -366,10 +357,10 @@ def test_check_time_is_defined_and_with_competitor(render, entry: EntryType):
 
 
 def test_without_competitor_but_with_punches(
-    render, entry: EntryType, person_race_result: PersonRaceResult
+    entry: EntryType, person_race_result: PersonRaceResult
 ):
     entry.result = person_race_result
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     rows = html.findall(".//form[@id='entr.formSplitTimes']/table[2]/tbody/tr")
     assert len(rows) == 7
@@ -446,11 +437,11 @@ def test_without_competitor_but_with_punches(
 
 
 def test_with_competitor_and_with_punches(
-    render, entry: EntryType, person_race_result: PersonRaceResult
+    entry: EntryType, person_race_result: PersonRaceResult
 ):
     entry.competitor_id = 25
     entry.result = person_race_result
-    html = etree.HTML(str(render.add_entry_result(entry=entry)))
+    html = etree.HTML(render.add_entry_result(entry=entry))
 
     rows = html.findall(".//form[@id='entr.formSplitTimes']/table[2]/tbody/tr")
     assert len(rows) == 7

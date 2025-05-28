@@ -19,7 +19,6 @@
 
 import io
 import logging
-import pathlib
 
 import clevercsv as csv
 import web
@@ -27,18 +26,14 @@ import web
 import ooresults.pdf.series
 from ooresults.model import model
 from ooresults.otypes import series_type
-from ooresults.utils.globals import t_globals
-
-
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 class Update:
     def POST(self):
         """Update data"""
         settings, events, results = model.build_series_result()
-        return render.series_table(events, results)
+        return render.series_table(events=events, results=results)
 
 
 class Settings:
@@ -61,7 +56,7 @@ class Settings:
             raise web.internalerror(str(e))
 
         settings, events, results = model.build_series_result()
-        return render.series_table(events, results)
+        return render.series_table(events=events, results=results)
 
 
 class PdfResult:
@@ -149,4 +144,4 @@ class FillSettingsForm:
     def POST(self):
         """Query data to fill settings form"""
         settings = model.get_series_settings()
-        return render.series_settings(settings)
+        return render.series_settings(settings=settings)

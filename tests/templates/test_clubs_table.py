@@ -17,22 +17,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pathlib
 from typing import List
 
 import pytest
-import web
 from lxml import etree
 
-import ooresults
 from ooresults.otypes.club_type import ClubType
-from ooresults.utils.globals import t_globals
-
-
-@pytest.fixture()
-def render():
-    templates = pathlib.Path(ooresults.__file__).resolve().parent / "templates"
-    return web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 @pytest.fixture()
@@ -52,8 +43,8 @@ def clubs() -> List[ClubType]:
 TABLE_ID = "clb.table"
 
 
-def test_club_list_is_empty(render):
-    html = etree.HTML(str(render.clubs_table(clubs=[])))
+def test_club_list_is_empty():
+    html = etree.HTML(render.clubs_table(clubs=[]))
 
     # headers
     headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
@@ -66,8 +57,8 @@ def test_club_list_is_empty(render):
     assert len(rows) == 0
 
 
-def test_club_list_is_not_empty(render, clubs: List[ClubType]):
-    html = etree.HTML(str(render.clubs_table(clubs=clubs)))
+def test_club_list_is_not_empty(clubs: List[ClubType]):
+    html = etree.HTML(render.clubs_table(clubs=clubs))
 
     # headers
     headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")

@@ -18,29 +18,20 @@
 
 
 import datetime
-import pathlib
 from datetime import timezone
 from typing import List
 from typing import Optional
 
 import pytest
-import web
 from lxml import etree
 
-import ooresults
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import ResultStatus
-from ooresults.utils.globals import t_globals
-
-
-@pytest.fixture()
-def render():
-    templates = pathlib.Path(ooresults.__file__).resolve().parent / "templates"
-    return web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 @pytest.fixture()
@@ -126,9 +117,9 @@ def entry_3(event: EventType) -> EntryType:
     )
 
 
-def test_class_results_list_is_empty(render, event: EventType):
+def test_class_results_list_is_empty(event: EventType):
     html = etree.HTML(
-        str(render.results_table(event=event, class_results=[], columns=set()))
+        render.results_table(event=event, class_results=[], columns=set())
     )
 
     assert html.find(".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
@@ -139,13 +130,11 @@ def test_class_results_list_is_empty(render, event: EventType):
 
 
 def test_class_results_list_with_one_class_but_without_results(
-    render, event: EventType, class_info_1: ClassInfoType
+    event: EventType, class_info_1: ClassInfoType
 ):
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event, class_results=[(class_info_1, [])], columns=set()
-            )
+        render.results_table(
+            event=event, class_results=[(class_info_1, [])], columns=set()
         )
     )
 
@@ -157,15 +146,11 @@ def test_class_results_list_with_one_class_but_without_results(
 
 
 def test_class_results_list_with_one_class_and_with_results(
-    render, event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
+    event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
 ):
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event, class_results=class_results, columns=set()
-            )
-        )
+        render.results_table(event=event, class_results=class_results, columns=set())
     )
 
     assert html.find(".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
@@ -204,15 +189,11 @@ def test_class_results_list_with_one_class_and_with_results(
 
 
 def test_rank_is_defined(
-    render, event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
+    event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
 ):
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1, rank=3)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event, class_results=class_results, columns=set()
-            )
-        )
+        render.results_table(event=event, class_results=class_results, columns=set())
     )
 
     elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[1]")
@@ -220,16 +201,12 @@ def test_rank_is_defined(
 
 
 def test_entry_is_not_competing(
-    render, event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
+    event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
 ):
     entry_1.not_competing = True
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event, class_results=class_results, columns=set()
-            )
-        )
+        render.results_table(event=event, class_results=class_results, columns=set())
     )
 
     elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[1]")
@@ -237,17 +214,13 @@ def test_entry_is_not_competing(
 
 
 def test_club_is_defined(
-    render, event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
+    event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
 ):
     entry_1.club_id = 57
     entry_1.club_name = "OL Bundestag"
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event, class_results=class_results, columns=set()
-            )
-        )
+        render.results_table(event=event, class_results=class_results, columns=set())
     )
 
     elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[3]")
@@ -255,18 +228,14 @@ def test_club_is_defined(
 
 
 def test_status_is_inactive_with_start_time(
-    render, event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
+    event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
 ):
     entry_1.result.status = ResultStatus.INACTIVE
     entry_1.result.time = 417
     entry_1.start.start_time = S1
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event, class_results=class_results, columns=set()
-            )
-        )
+        render.results_table(event=event, class_results=class_results, columns=set())
     )
 
     elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
@@ -274,18 +243,14 @@ def test_status_is_inactive_with_start_time(
 
 
 def test_status_is_ok(
-    render, event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
+    event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
 ):
     entry_1.result.status = ResultStatus.OK
     entry_1.result.time = 417
     entry_1.start.start_time = S1
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event, class_results=class_results, columns=set()
-            )
-        )
+        render.results_table(event=event, class_results=class_results, columns=set())
     )
 
     elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
@@ -305,7 +270,6 @@ def test_status_is_ok(
     ],
 )
 def test_status_is_not_inactive_or_ok(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -317,11 +281,7 @@ def test_status_is_not_inactive_or_ok(
     entry_1.start.start_time = S1
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event, class_results=class_results, columns=set()
-            )
-        )
+        render.results_table(event=event, class_results=class_results, columns=set())
     )
 
     elem = html.find(".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
@@ -329,7 +289,6 @@ def test_status_is_not_inactive_or_ok(
 
 
 def test_class_results_list_with_two_classes_and_with_results(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     class_info_2: ClassInfoType,
@@ -342,11 +301,7 @@ def test_class_results_list_with_two_classes_and_with_results(
         (class_info_2, [RankedEntryType(entry=entry_3)]),
     ]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event, class_results=class_results, columns=set()
-            )
-        )
+        render.results_table(event=event, class_results=class_results, columns=set())
     )
 
     assert html.find(".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
@@ -452,21 +407,14 @@ def check_row(html: etree.Element, values: List[Optional[str]]) -> None:
     assert [td.text for td in rows[0].findall(".//td")] == values
 
 
-def test_score(
-    render,
-    event: EventType,
-    class_info_1: ClassInfoType,
-    entry_1: EntryType,
-):
+def test_score(event: EventType, class_info_1: ClassInfoType, entry_1: EntryType):
     class_info_1.params.otype = "score"
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"score_controls", "score_overtime", "score"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"score_controls", "score_overtime", "score"},
         )
     )
 
@@ -510,7 +458,6 @@ def test_score(
     ],
 )
 def test_score_and_status_is_not_inactive_or_ok(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -523,12 +470,10 @@ def test_score_and_status_is_not_inactive_or_ok(
     entry_1.start.start_time = S1
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"score_controls", "score_overtime", "score"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"score_controls", "score_overtime", "score"},
         )
     )
 
@@ -560,10 +505,7 @@ def test_score_and_status_is_not_inactive_or_ok(
 
 
 def test_score_and_status_is_ok(
-    render,
-    event: EventType,
-    class_info_1: ClassInfoType,
-    entry_1: EntryType,
+    event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
 ):
     class_info_1.params.otype = "score"
     entry_1.result.status = ResultStatus.OK
@@ -576,12 +518,10 @@ def test_score_and_status_is_ok(
     }
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"score_controls", "score_overtime", "score"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"score_controls", "score_overtime", "score"},
         )
     )
 
@@ -613,7 +553,6 @@ def test_score_and_status_is_ok(
 
 
 def test_score_and_status_is_ok_but_no_values_defined(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -624,12 +563,10 @@ def test_score_and_status_is_ok_but_no_values_defined(
     entry_1.result.extensions = {"score": 45.72}
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"score_controls", "score_overtime", "score"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"score_controls", "score_overtime", "score"},
         )
     )
 
@@ -661,7 +598,6 @@ def test_score_and_status_is_ok_but_no_values_defined(
 
 
 def test_score_status_is_inactive_with_start_time(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -671,12 +607,10 @@ def test_score_status_is_inactive_with_start_time(
     entry_1.start.start_time = S1
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"score_controls", "score_overtime", "score"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"score_controls", "score_overtime", "score"},
         )
     )
 
@@ -708,7 +642,6 @@ def test_score_status_is_inactive_with_start_time(
 
 
 def test_score_and_handicap_without_factor_defined(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -716,12 +649,10 @@ def test_score_and_handicap_without_factor_defined(
     class_info_1.params.otype = "score"
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"score_controls", "score_overtime", "score", "factor"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"score_controls", "score_overtime", "score", "factor"},
         )
     )
 
@@ -755,7 +686,6 @@ def test_score_and_handicap_without_factor_defined(
 
 
 def test_score_and_handicap_with_factor_defined(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -764,12 +694,10 @@ def test_score_and_handicap_with_factor_defined(
     entry_1.result.extensions = {"factor": 0.4567}
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"score_controls", "score_overtime", "score", "factor"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"score_controls", "score_overtime", "score", "factor"},
         )
     )
 
@@ -803,19 +731,16 @@ def test_score_and_handicap_with_factor_defined(
 
 
 def test_class_results_list_no_score_all_columns(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
 ):
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"penalties_controls", "penalties_overtime", "factor"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"penalties_controls", "penalties_overtime", "factor"},
         )
     )
 
@@ -849,7 +774,6 @@ def test_class_results_list_no_score_all_columns(
 
 
 def test_no_score_with_handicap_and_factor_defined(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -857,12 +781,10 @@ def test_no_score_with_handicap_and_factor_defined(
     entry_1.result.extensions = {"factor": 0.4567}
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"factor"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"factor"},
         )
     )
 
@@ -904,7 +826,6 @@ def test_no_score_with_handicap_and_factor_defined(
     ],
 )
 def test_no_score_and_status_is_not_inactive_or_ok(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -916,12 +837,10 @@ def test_no_score_and_status_is_not_inactive_or_ok(
     entry_1.start.start_time = S1
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"penalties_controls", "penalties_overtime"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"penalties_controls", "penalties_overtime"},
         )
     )
 
@@ -953,7 +872,6 @@ def test_no_score_and_status_is_not_inactive_or_ok(
 
 
 def test_no_score_and_status_is_ok(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -968,12 +886,10 @@ def test_no_score_and_status_is_ok(
     }
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"penalties_controls", "penalties_overtime"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"penalties_controls", "penalties_overtime"},
         )
     )
 
@@ -1005,7 +921,6 @@ def test_no_score_and_status_is_ok(
 
 
 def test_no_score_and_status_is_ok_but_no_values_defined(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -1015,12 +930,10 @@ def test_no_score_and_status_is_ok_but_no_values_defined(
     entry_1.result.extensions = {"score": 45.72}
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"penalties_controls", "penalties_overtime"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"penalties_controls", "penalties_overtime"},
         )
     )
 
@@ -1052,7 +965,6 @@ def test_no_score_and_status_is_ok_but_no_values_defined(
 
 
 def test_no_score_status_is_inactive_with_start_time(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -1061,12 +973,10 @@ def test_no_score_status_is_inactive_with_start_time(
     entry_1.start.start_time = S1
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"penalties_controls", "penalties_overtime"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"penalties_controls", "penalties_overtime"},
         )
     )
 
@@ -1098,7 +1008,6 @@ def test_no_score_status_is_inactive_with_start_time(
 
 
 def test_no_score_and_status_is_ok_and_only_penalties_controls(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -1113,12 +1022,10 @@ def test_no_score_and_status_is_ok_and_only_penalties_controls(
     }
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"penalties_controls"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"penalties_controls"},
         )
     )
 
@@ -1148,7 +1055,6 @@ def test_no_score_and_status_is_ok_and_only_penalties_controls(
 
 
 def test_no_score_and_status_is_ok_and_only_penalties_overtime(
-    render,
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
@@ -1163,12 +1069,10 @@ def test_no_score_and_status_is_ok_and_only_penalties_overtime(
     }
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = etree.HTML(
-        str(
-            render.results_table(
-                event=event,
-                class_results=class_results,
-                columns={"penalties_overtime"},
-            )
+        render.results_table(
+            event=event,
+            class_results=class_results,
+            columns={"penalties_overtime"},
         )
     )
 

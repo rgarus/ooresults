@@ -17,22 +17,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pathlib
 from typing import List
 
 import pytest
-import web
 from lxml import etree
 
-import ooresults
 from ooresults.otypes.competitor_type import CompetitorType
-from ooresults.utils.globals import t_globals
-
-
-@pytest.fixture()
-def render():
-    templates = pathlib.Path(ooresults.__file__).resolve().parent / "templates"
-    return web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 @pytest.fixture()
@@ -61,8 +52,8 @@ def competitors() -> List[CompetitorType]:
     ]
 
 
-def test_competitor_list_is_not_empty(render, competitors: List[CompetitorType]):
-    html = etree.HTML(str(render.add_entry_competitors(competitors=competitors)))
+def test_competitor_list_is_not_empty(competitors: List[CompetitorType]):
+    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
     trs = html.findall(".//tbody/tr")
     assert len(trs) == 2
@@ -87,18 +78,18 @@ def test_competitor_list_is_not_empty(render, competitors: List[CompetitorType])
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_unknown(render, competitors: List[CompetitorType], row: int):
+def test_gender_is_unknown(competitors: List[CompetitorType], row: int):
     competitors[row - 1].gender = ""
-    html = etree.HTML(str(render.add_entry_competitors(competitors=competitors)))
+    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
         assert html.find(f".//tbody/tr[{i}]/td[3]").text is None
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_female(render, competitors: List[CompetitorType], row: int):
+def test_gender_is_female(competitors: List[CompetitorType], row: int):
     competitors[row - 1].gender = "F"
-    html = etree.HTML(str(render.add_entry_competitors(competitors=competitors)))
+    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
         if i == row:
@@ -108,9 +99,9 @@ def test_gender_is_female(render, competitors: List[CompetitorType], row: int):
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_male(render, competitors: List[CompetitorType], row: int):
+def test_gender_is_male(competitors: List[CompetitorType], row: int):
     competitors[row - 1].gender = "M"
-    html = etree.HTML(str(render.add_entry_competitors(competitors=competitors)))
+    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
         if i == row:
@@ -120,9 +111,9 @@ def test_gender_is_male(render, competitors: List[CompetitorType], row: int):
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_year_is_defined(render, competitors: List[CompetitorType], row: int):
+def test_year_is_defined(competitors: List[CompetitorType], row: int):
     competitors[row - 1].year = 1957
-    html = etree.HTML(str(render.add_entry_competitors(competitors=competitors)))
+    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
         if i == row:
@@ -132,9 +123,9 @@ def test_year_is_defined(render, competitors: List[CompetitorType], row: int):
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_chip_is_defined(render, competitors: List[CompetitorType], row: int):
+def test_chip_is_defined(competitors: List[CompetitorType], row: int):
     competitors[row - 1].chip = "1234567"
-    html = etree.HTML(str(render.add_entry_competitors(competitors=competitors)))
+    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
         if i == row:
@@ -144,10 +135,10 @@ def test_chip_is_defined(render, competitors: List[CompetitorType], row: int):
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_club_is_defined(render, competitors: List[CompetitorType], row: int):
+def test_club_is_defined(competitors: List[CompetitorType], row: int):
     competitors[row - 1].club_id = 2
     competitors[row - 1].club_name = "OL Bundestag"
-    html = etree.HTML(str(render.add_entry_competitors(competitors=competitors)))
+    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
         if i == row:

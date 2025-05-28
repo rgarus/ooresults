@@ -17,7 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pathlib
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -25,10 +24,8 @@ from typing import Dict
 from typing import List
 
 import pytest
-import web
 from lxml import etree
 
-import ooresults
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassType
 from ooresults.otypes.club_type import ClubType
@@ -38,16 +35,10 @@ from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SplitTime
 from ooresults.otypes.result_type import SpStatus
 from ooresults.otypes.start_type import PersonRaceStart
-from ooresults.utils.globals import t_globals
+from ooresults.utils import render
 
 
 S1 = datetime(2021, 8, 19, 18, 43, 33, tzinfo=timezone(timedelta(hours=2)))
-
-
-@pytest.fixture()
-def render():
-    templates = pathlib.Path(ooresults.__file__).resolve().parent / "templates"
-    return web.template.render(templates, globals=t_globals)
 
 
 @pytest.fixture()
@@ -111,16 +102,14 @@ def entry() -> EntryType:
     )
 
 
-def test_entry_is_none(render, classes: List[ClassType], clubs: List[ClubType]):
+def test_entry_is_none(classes: List[ClassType], clubs: List[ClubType]):
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=None,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=None,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -200,20 +189,17 @@ def test_entry_is_none(render, classes: List[ClassType], clubs: List[ClubType]):
 
 
 def test_entry_is_not_none(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -293,21 +279,18 @@ def test_entry_is_not_none(
 
 
 def test_competitor_id_is_defined(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.competitor_id = 3
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -317,21 +300,18 @@ def test_competitor_id_is_defined(
 
 
 def test_first_name_is_defined(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.first_name = "Angela"
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -340,21 +320,18 @@ def test_first_name_is_defined(
 
 
 def test_last_name_is_defined(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.last_name = "Merkel"
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -363,21 +340,18 @@ def test_last_name_is_defined(
 
 
 def test_gender_is_unknown(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.gender = ""
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -392,21 +366,18 @@ def test_gender_is_unknown(
 
 
 def test_gender_is_female(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.gender = "F"
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -421,21 +392,18 @@ def test_gender_is_female(
 
 
 def test_gender_is_male(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.gender = "M"
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -450,21 +418,18 @@ def test_gender_is_male(
 
 
 def test_year_is_defined(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.year = 1957
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -473,7 +438,6 @@ def test_year_is_defined(
 
 
 def test_class_id_is_7(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
@@ -481,14 +445,12 @@ def test_class_id_is_7(
     entry.class_id = 7
     entry.class_name = "Elite Men"
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -501,7 +463,6 @@ def test_class_id_is_7(
 
 
 def test_class_id_is_3(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
@@ -509,14 +470,12 @@ def test_class_id_is_3(
     entry.class_id = 8
     entry.class_name = "Elite Women"
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -529,21 +488,18 @@ def test_class_id_is_3(
 
 
 def test_not_competing_is_true(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.not_competing = True
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -553,21 +509,18 @@ def test_not_competing_is_true(
 
 
 def test_chip_is_defined(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.chip = "1234567"
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -576,7 +529,6 @@ def test_chip_is_defined(
 
 
 def test_club_id_is_2(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
@@ -584,14 +536,12 @@ def test_club_id_is_2(
     entry.club_id = 2
     entry.club_name = "OL Bundestag"
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -606,7 +556,6 @@ def test_club_id_is_2(
 
 
 def test_club_id_is_3(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
@@ -614,14 +563,12 @@ def test_club_id_is_3(
     entry.club_id = 3
     entry.club_name = "OC Bundestag"
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -636,21 +583,18 @@ def test_club_id_is_3(
 
 
 def test_with_one_field(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.fields = {0: "1024"}
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=["Number"],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=["Number"],
         )
     )
 
@@ -659,21 +603,18 @@ def test_with_one_field(
 
 
 def test_with_two_fields(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.fields = {0: "1024", 1: "Thüringen"}
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=["Number", "Region"],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=["Number", "Region"],
         )
     )
 
@@ -685,21 +626,18 @@ def test_with_two_fields(
 
 
 def test_start_time_is_defined(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.start = PersonRaceStart(start_time=S1)
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -722,7 +660,6 @@ def test_start_time_is_defined(
     ],
 )
 def test_status(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
@@ -731,14 +668,12 @@ def test_status(
 ):
     entry.result = PersonRaceResult(status=status)
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -763,21 +698,18 @@ def test_status(
 
 
 def test_without_result_and_without_unassigned_results(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
 ):
     entry.result = PersonRaceResult()
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -788,7 +720,6 @@ def test_without_result_and_without_unassigned_results(
 
 
 def test_without_result_but_with_unassigned_results(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
@@ -796,14 +727,12 @@ def test_without_result_but_with_unassigned_results(
 ):
     entry.result = PersonRaceResult()
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results=unassigned_results,
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results=unassigned_results,
+            event_fields=[],
         )
     )
 
@@ -823,7 +752,6 @@ def test_without_result_but_with_unassigned_results(
 
 
 def test_with_results_but_without_unassigned_results(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
@@ -844,14 +772,12 @@ def test_with_results_but_without_unassigned_results(
         ],
     )
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results={},
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results={},
+            event_fields=[],
         )
     )
 
@@ -882,7 +808,6 @@ def test_with_results_but_without_unassigned_results(
 
 
 def test_with_results_and_with_unassigned_results(
-    render,
     entry: EntryType,
     classes: List[ClassType],
     clubs: List[ClubType],
@@ -904,14 +829,12 @@ def test_with_results_and_with_unassigned_results(
         ],
     )
     html = etree.HTML(
-        str(
-            render.add_entry(
-                entry=entry,
-                classes=classes,
-                clubs=clubs,
-                unassigned_results=unassigned_results,
-                event_fields=[],
-            )
+        render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results=unassigned_results,
+            event_fields=[],
         )
     )
 

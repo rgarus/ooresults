@@ -36,18 +36,12 @@ from ooresults.handler import cached_result
 from ooresults.model import model
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.user import Users
+from ooresults.utils import render
 from ooresults.utils import rental_cards
-from ooresults.utils.globals import t_globals
 from ooresults.websocket_server.websocket_server import WebSocketServer
 
 
 web.config.debug = False
-
-
-### Templates
-templates = pathlib.Path(__file__).resolve().parent / "templates"
-render_base = web.template.render(templates, base="base", globals={"str": str})
-render = web.template.render(templates, globals=t_globals)
 
 
 class Root:
@@ -59,9 +53,9 @@ class Root:
                 results_table = cached_result.get_cached_data(event_id=event.id)
                 t2 = time.time()
                 logging.info(f"Requesting result, {web.ctx['ip']}, {t2 - t1:.3f}")
-                return render.root(results_table)
+                return render.root(results_table=results_table)
         else:
-            return render.root(None)
+            return render.root(results_table=None)
 
 
 class Login:
@@ -75,32 +69,7 @@ class Login:
 
 class Admin:
     def GET(self):
-        events_table = render.events_table(model.get_events())
-        events_tab_content = render.events_tab_content(events_table)
-        entries_table = render.entries_table(None, "entries", [])
-        entries_tab_content = render.entries_tab_content(entries_table)
-        classes_table = render.classes_table(None, [])
-        classes_tab_content = render.classes_tab_content(classes_table)
-        courses_table = render.courses_table(None, [])
-        courses_tab_content = render.courses_tab_content(courses_table)
-        results_table = render.results_table(None, [], set())
-        results_tab_content = render.results_tab_content(results_table)
-        series_table = render.series_table([], [])
-        series_tab_content = render.series_tab_content(series_table)
-        competitors_table = render.competitors_table([])
-        competitors_tab_content = render.competitors_tab_content(competitors_table)
-        clubs_table = render.clubs_table([])
-        clubs_tab_content = render.clubs_tab_content(clubs_table)
-        return render_base.main(
-            events_tab_content,
-            entries_tab_content,
-            classes_tab_content,
-            courses_tab_content,
-            results_tab_content,
-            series_tab_content,
-            competitors_tab_content,
-            clubs_tab_content,
-        )
+        return render.main(events=model.get_events())
 
 
 class Static:

@@ -17,24 +17,15 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pathlib
 from datetime import date
 from typing import List
 from typing import Optional
 
 import pytest
-import web
 from lxml import etree
 
-import ooresults
 from ooresults.otypes.event_type import EventType
-from ooresults.utils.globals import t_globals
-
-
-@pytest.fixture()
-def render():
-    templates = pathlib.Path(ooresults.__file__).resolve().parent / "templates"
-    return web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 @pytest.fixture()
@@ -85,8 +76,8 @@ def events() -> List[EventType]:
 TABLE_ID = "evnt.table"
 
 
-def test_events_list_is_empty(render):
-    html = etree.HTML(str(render.events_table(events=[])))
+def test_events_list_is_empty():
+    html = etree.HTML(render.events_table(events=[]))
 
     # headers
     headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
@@ -105,8 +96,8 @@ def test_events_list_is_empty(render):
     assert len(rows) == 0
 
 
-def test_events_list_is_not_empty(render, events: List[EventType]):
-    html = etree.HTML(str(render.events_table(events=events)))
+def test_events_list_is_not_empty(events: List[EventType]):
+    html = etree.HTML(render.events_table(events=events))
 
     # headers
     headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
@@ -166,17 +157,17 @@ def test_events_list_is_not_empty(render, events: List[EventType]):
     ]
 
 
-def test_key_is_defined(render, events: List[EventType]):
+def test_key_is_defined(events: List[EventType]):
     events[0].key = "sevenOr"
-    html = etree.HTML(str(render.events_table(events=events)))
+    html = etree.HTML(render.events_table(events=events))
 
     elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
     assert elem.text == "***"
 
 
-def test_publish_is_true(render, events: List[EventType]):
+def test_publish_is_true(events: List[EventType]):
     events[0].publish = True
-    html = etree.HTML(str(render.events_table(events=events)))
+    html = etree.HTML(render.events_table(events=events))
 
     elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
     assert elem.text == "yes"
@@ -215,7 +206,6 @@ def test_publish_is_true(render, events: List[EventType]):
     ],
 )
 def test_streaming_is_defined(
-    render,
     events: List[EventType],
     streaming_address: Optional[str],
     streaming_key: Optional[str],
@@ -225,31 +215,31 @@ def test_streaming_is_defined(
     events[0].streaming_address = streaming_address
     events[0].streaming_key = streaming_key
     events[0].streaming_enabled = streaming_enabled
-    html = etree.HTML(str(render.events_table(events=events)))
+    html = etree.HTML(render.events_table(events=events))
 
     elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[5]")
     assert elem.text == value
 
 
-def test_series_is_defined(render, events: List[EventType]):
+def test_series_is_defined(events: List[EventType]):
     events[0].series = "Run 1"
-    html = etree.HTML(str(render.events_table(events=events)))
+    html = etree.HTML(render.events_table(events=events))
 
     elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
     assert elem.text == "Run 1"
 
 
-def test_one_field(render, events: List[EventType]):
+def test_one_field(events: List[EventType]):
     events[0].fields = ["Start number"]
-    html = etree.HTML(str(render.events_table(events=events)))
+    html = etree.HTML(render.events_table(events=events))
 
     elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
     assert elem.text == "Start number"
 
 
-def test_two_fields(render, events: List[EventType]):
+def test_two_fields(events: List[EventType]):
     events[0].fields = ["Start number", "Region"]
-    html = etree.HTML(str(render.events_table(events=events)))
+    html = etree.HTML(render.events_table(events=events))
 
     elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
     assert elem.text == "Start number, Region"

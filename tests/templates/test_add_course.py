@@ -17,21 +17,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pathlib
-
 import pytest
-import web
 from lxml import etree
 
-import ooresults
 from ooresults.otypes.course_type import CourseType
-from ooresults.utils.globals import t_globals
-
-
-@pytest.fixture()
-def render():
-    templates = pathlib.Path(ooresults.__file__).resolve().parent / "templates"
-    return web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 @pytest.fixture()
@@ -46,8 +36,8 @@ def course() -> CourseType:
     )
 
 
-def test_course_is_none(render):
-    html = etree.HTML(str(render.add_course(course=None)))
+def test_course_is_none():
+    html = etree.HTML(render.add_course(course=None))
 
     input_id = html.find(".//input[@name='id']")
     assert input_id.attrib["value"] == ""
@@ -65,8 +55,8 @@ def test_course_is_none(render):
     assert input_name.attrib["value"] == ""
 
 
-def test_course_is_not_none(render, course: CourseType):
-    html = etree.HTML(str(render.add_course(course=course)))
+def test_course_is_not_none(course: CourseType):
+    html = etree.HTML(render.add_course(course=course))
 
     input_id = html.find(".//input[@name='id']")
     assert input_id.attrib["value"] == "7"
@@ -84,25 +74,25 @@ def test_course_is_not_none(render, course: CourseType):
     assert input_name.attrib["value"] == ""
 
 
-def test_length_is_defined(render, course: CourseType):
+def test_length_is_defined(course: CourseType):
     course.length = 5400.4
-    html = etree.HTML(str(render.add_course(course=course)))
+    html = etree.HTML(render.add_course(course=course))
 
     input_name = html.find(".//input[@name='length']")
     assert input_name.attrib["value"] == "5400"
 
 
-def test_climb_is_defined(render, course: CourseType):
+def test_climb_is_defined(course: CourseType):
     course.climb = 159.8
-    html = etree.HTML(str(render.add_course(course=course)))
+    html = etree.HTML(render.add_course(course=course))
 
     input_name = html.find(".//input[@name='climb']")
     assert input_name.attrib["value"] == "160"
 
 
-def test_controls_are_defined(render, course: CourseType):
+def test_controls_are_defined(course: CourseType):
     course.controls = ["124", "137", "123", "129"]
-    html = etree.HTML(str(render.add_course(course=course)))
+    html = etree.HTML(render.add_course(course=course))
 
     input_name = html.find(".//input[@name='controls']")
     assert input_name.attrib["value"] == "124 - 137 - 123 - 129"

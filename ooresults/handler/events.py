@@ -19,22 +19,17 @@
 
 import datetime
 import logging
-import pathlib
 
 import web
 
 from ooresults.model import model
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.repo import EventNotFoundError
-from ooresults.utils.globals import t_globals
-
-
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 def update():
-    return render.events_table(model.get_events())
+    return render.events_table(events=model.get_events())
 
 
 class Update:
@@ -114,4 +109,4 @@ class FillEditForm:
         except EventNotFoundError:
             raise web.conflict("Event deleted")
 
-        return render.add_event(event)
+        return render.add_event(event=event)

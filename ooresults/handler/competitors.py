@@ -18,7 +18,6 @@
 
 
 import logging
-import pathlib
 
 import web
 
@@ -26,17 +25,13 @@ from ooresults.model import model
 from ooresults.plugins import iof_competitor_list
 from ooresults.repo.repo import CompetitorUsedError
 from ooresults.repo.repo import ConstraintError
-from ooresults.utils.globals import t_globals
-
-
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 class Update:
     def POST(self):
         """Update data"""
-        return render.competitors_table(model.get_competitors())
+        return render.competitors_table(competitors=model.get_competitors())
 
 
 class Add:
@@ -70,7 +65,7 @@ class Add:
             logging.exception("Internal server error")
             raise
 
-        return render.competitors_table(model.get_competitors())
+        return render.competitors_table(competitors=model.get_competitors())
 
 
 class Import:
@@ -87,7 +82,7 @@ class Import:
         except Exception as e:
             raise web.Conflict(str(e))
 
-        return render.competitors_table(model.get_competitors())
+        return render.competitors_table(competitors=model.get_competitors())
 
 
 class Export:
@@ -115,7 +110,7 @@ class Delete:
         data = web.input()
         try:
             model.delete_competitor(int(data.id))
-            return render.competitors_table(model.get_competitors())
+            return render.competitors_table(competitors=model.get_competitors())
         except CompetitorUsedError:
             raise web.conflict("Competitor used in entries")
         except:
@@ -133,4 +128,4 @@ class FillEditForm:
             competitor = model.get_competitor(int(data.id))
 
         clubs = model.get_clubs()
-        return render.add_competitor(competitor, clubs)
+        return render.add_competitor(competitor=competitor, clubs=clubs)

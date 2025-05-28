@@ -19,7 +19,6 @@
 
 import datetime
 import logging
-import pathlib
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -37,11 +36,7 @@ from ooresults.plugins import oe2003
 from ooresults.plugins.imports.entries import text
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.repo import EventNotFoundError
-from ooresults.utils.globals import t_globals
-
-
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 def update(event_id: int, view: str = "entries"):
@@ -114,7 +109,11 @@ def update(event_id: int, view: str = "entries"):
             unassigned_list = [("Unassigned results", entry_list[:unassigned_results])]
         else:
             unassigned_list = []
-        return render.entries_table(event, view, unassigned_list + view_entries_list)
+        return render.entries_table(
+            event=event,
+            view=view,
+            view_entries_list=unassigned_list + view_entries_list,
+        )
     except EventNotFoundError:
         raise web.conflict("Event deleted")
     except:
@@ -340,7 +339,13 @@ class FillEditForm:
             logging.exception("Internal server error")
             raise
 
-        return render.add_entry(entry, classes, clubs, unassigned_results, event.fields)
+        return render.add_entry(
+            entry=entry,
+            classes=classes,
+            clubs=clubs,
+            unassigned_results=unassigned_results,
+            event_fields=event.fields,
+        )
 
 
 class FillCompetitorsForm:
@@ -348,7 +353,7 @@ class FillCompetitorsForm:
         """Query data to fill add or edit form"""
         competitors = model.get_competitors()
 
-        return render.add_entry_competitors(competitors)
+        return render.add_entry_competitors(competitors=competitors)
 
 
 class FillResultForm:
@@ -365,7 +370,7 @@ class FillResultForm:
             logging.exception("Internal server error")
             raise
 
-        return render.add_entry_result(entry)
+        return render.add_entry_result(entry=entry)
 
 
 class Delete:
@@ -424,4 +429,4 @@ class EditPunch:
             logging.exception("Internal server error")
             raise
 
-        return render.add_entry_result(entry)
+        return render.add_entry_result(entry=entry)

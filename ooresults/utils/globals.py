@@ -19,13 +19,7 @@
 
 from typing import Optional
 
-from ooresults.otypes.class_type import ClassParams
-from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
-from ooresults.otypes.result_type import SplitTime
-from ooresults.otypes.result_type import SpStatus
-from ooresults.otypes.start_type import PersonRaceStart
-from ooresults.utils.rental_cards import format_card
 from ooresults.websocket_server import streaming_status
 
 
@@ -50,8 +44,6 @@ STREAMING_STATUS = {
     streaming_status.Status.OK: "Ok",
 }
 
-EXPERIMENTAL = False
-
 
 def minutes_seconds(time: Optional[int]) -> str:
     if time is None:
@@ -64,21 +56,3 @@ def minutes_seconds(time: Optional[int]) -> str:
 
 def streaming_status_ok(status: streaming_status.Status) -> bool:
     return status == streaming_status.Status.OK
-
-
-t_globals = {
-    "str": str,
-    "round": round,
-    "ClassParams": ClassParams,
-    "ResultStatus": ResultStatus,
-    "SplitTime": SplitTime,
-    "SpStatus": SpStatus,
-    "PersonRaceResult": PersonRaceResult,
-    "PersonRaceStart": PersonRaceStart,
-    "MAP_STATUS": MAP_STATUS,
-    "STREAMING_STATUS": STREAMING_STATUS,
-    "streaming_status_ok": streaming_status_ok,
-    "EXPERIMENTAL": EXPERIMENTAL,
-    "minutes_seconds": minutes_seconds,
-    "format_card": format_card,
-}

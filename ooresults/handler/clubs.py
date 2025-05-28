@@ -18,24 +18,19 @@
 
 
 import logging
-import pathlib
 
 import web
 
 from ooresults.model import model
 from ooresults.repo.repo import ClubUsedError
 from ooresults.repo.repo import ConstraintError
-from ooresults.utils.globals import t_globals
-
-
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 class Update:
     def POST(self):
         """Update data"""
-        return render.clubs_table(model.get_clubs())
+        return render.clubs_table(clubs=model.get_clubs())
 
 
 class Add:
@@ -56,7 +51,7 @@ class Add:
             logging.exception("Internal server error")
             raise
 
-        return render.clubs_table(model.get_clubs())
+        return render.clubs_table(clubs=model.get_clubs())
 
 
 class Delete:
@@ -66,7 +61,7 @@ class Delete:
         print(data)
         try:
             model.delete_club(int(data.id))
-            return render.clubs_table(model.get_clubs())
+            return render.clubs_table(clubs=model.get_clubs())
         except ClubUsedError:
             raise web.conflict("Club used in competitors or entries")
         except:
@@ -89,4 +84,4 @@ class FillEditForm:
             logging.exception("Internal server error")
             raise
 
-        return render.add_club(club)
+        return render.add_club(club=club)

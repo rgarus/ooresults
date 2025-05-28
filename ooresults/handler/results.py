@@ -18,8 +18,8 @@
 
 
 import logging
-import pathlib
 from typing import List
+from typing import Set
 from typing import Tuple
 
 import web
@@ -30,16 +30,12 @@ from ooresults.model import model
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.repo.repo import EventNotFoundError
-from ooresults.utils.globals import t_globals
-
-
-templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-render = web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 def build_columns(
     class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]]
-) -> set:
+) -> Set[str]:
     columns = set()
     for class_, _ in class_results:
         if class_.params.apply_handicap_rule:
@@ -62,7 +58,9 @@ class Update:
         try:
             event, class_results = model.event_class_results(event_id=event_id)
             columns = build_columns(class_results)
-            return render.results_table(event, class_results, columns)
+            return render.results_table(
+                event=event, class_results=class_results, columns=columns
+            )
         except EventNotFoundError:
             raise web.conflict("Event deleted")
         except:

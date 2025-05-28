@@ -17,23 +17,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pathlib
 from typing import List
 
 import pytest
-import web
 from lxml import etree
 
-import ooresults
 from ooresults.otypes.club_type import ClubType
 from ooresults.otypes.competitor_type import CompetitorType
-from ooresults.utils.globals import t_globals
-
-
-@pytest.fixture()
-def render():
-    templates = pathlib.Path(ooresults.__file__).resolve().parent / "templates"
-    return web.template.render(templates, globals=t_globals)
+from ooresults.utils import render
 
 
 @pytest.fixture()
@@ -55,8 +46,8 @@ def competitor() -> CompetitorType:
     )
 
 
-def test_competitor_is_none(render, clubs: List[ClubType]):
-    html = etree.HTML(str(render.add_competitor(competitor=None, clubs=clubs)))
+def test_competitor_is_none(clubs: List[ClubType]):
+    html = etree.HTML(render.add_competitor(competitor=None, clubs=clubs))
 
     input_id = html.find(".//input[@name='id']")
     assert input_id.attrib["value"] == ""
@@ -92,10 +83,8 @@ def test_competitor_is_none(render, clubs: List[ClubType]):
     assert option_club[2].text == "OL Bundestag"
 
 
-def test_competitor_is_not_none(
-    render, competitor: CompetitorType, clubs: List[ClubType]
-):
-    html = etree.HTML(str(render.add_competitor(competitor=competitor, clubs=clubs)))
+def test_competitor_is_not_none(competitor: CompetitorType, clubs: List[ClubType]):
+    html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
     input_id = html.find(".//input[@name='id']")
     assert input_id.attrib["value"] == "7"
@@ -131,9 +120,9 @@ def test_competitor_is_not_none(
     assert option_club[2].text == "OL Bundestag"
 
 
-def test_gender_is_unknown(render, competitor: CompetitorType, clubs: List[ClubType]):
+def test_gender_is_unknown(competitor: CompetitorType, clubs: List[ClubType]):
     competitor.gender = ""
-    html = etree.HTML(str(render.add_competitor(competitor=competitor, clubs=clubs)))
+    html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
     options_gender = html.findall(".//select[@name='gender']/option")
     assert len(options_gender) == 3
@@ -145,9 +134,9 @@ def test_gender_is_unknown(render, competitor: CompetitorType, clubs: List[ClubT
     assert options_gender[2].text == "M"
 
 
-def test_gender_is_female(render, competitor: CompetitorType, clubs: List[ClubType]):
+def test_gender_is_female(competitor: CompetitorType, clubs: List[ClubType]):
     competitor.gender = "F"
-    html = etree.HTML(str(render.add_competitor(competitor=competitor, clubs=clubs)))
+    html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
     options_gender = html.findall(".//select[@name='gender']/option")
     assert len(options_gender) == 3
@@ -159,9 +148,9 @@ def test_gender_is_female(render, competitor: CompetitorType, clubs: List[ClubTy
     assert options_gender[2].text == "M"
 
 
-def test_gender_is_male(render, competitor: CompetitorType, clubs: List[ClubType]):
+def test_gender_is_male(competitor: CompetitorType, clubs: List[ClubType]):
     competitor.gender = "M"
-    html = etree.HTML(str(render.add_competitor(competitor=competitor, clubs=clubs)))
+    html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
     options_gender = html.findall(".//select[@name='gender']/option")
     assert len(options_gender) == 3
@@ -173,26 +162,26 @@ def test_gender_is_male(render, competitor: CompetitorType, clubs: List[ClubType
     assert options_gender[2].text == "M"
 
 
-def test_year_is_defined(render, competitor: CompetitorType, clubs: List[ClubType]):
+def test_year_is_defined(competitor: CompetitorType, clubs: List[ClubType]):
     competitor.year = 1957
-    html = etree.HTML(str(render.add_competitor(competitor=competitor, clubs=clubs)))
+    html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
     input_year = html.find(".//input[@name='year']")
     assert input_year.attrib["value"] == "1957"
 
 
-def test_chip_is_defined(render, competitor: CompetitorType, clubs: List[ClubType]):
+def test_chip_is_defined(competitor: CompetitorType, clubs: List[ClubType]):
     competitor.chip = "1234567"
-    html = etree.HTML(str(render.add_competitor(competitor=competitor, clubs=clubs)))
+    html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
     input_year = html.find(".//input[@name='chip']")
     assert input_year.attrib["value"] == "1234567"
 
 
-def test_club_id_is_2(render, competitor: CompetitorType, clubs: List[ClubType]):
+def test_club_id_is_2(competitor: CompetitorType, clubs: List[ClubType]):
     competitor.club_id = 2
     competitor.club_name = "OL Bundestag"
-    html = etree.HTML(str(render.add_competitor(competitor=competitor, clubs=clubs)))
+    html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
     option_club = html.findall(".//select[@name='club_id']/option")
     assert len(option_club) == 3
@@ -204,10 +193,10 @@ def test_club_id_is_2(render, competitor: CompetitorType, clubs: List[ClubType])
     assert option_club[2].text == "OL Bundestag"
 
 
-def test_club_id_is_3(render, competitor: CompetitorType, clubs: List[ClubType]):
+def test_club_id_is_3(competitor: CompetitorType, clubs: List[ClubType]):
     competitor.club_id = 3
     competitor.club_name = "OC Bundestag"
-    html = etree.HTML(str(render.add_competitor(competitor=competitor, clubs=clubs)))
+    html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
     option_club = html.findall(".//select[@name='club_id']/option")
     assert len(option_club) == 3
