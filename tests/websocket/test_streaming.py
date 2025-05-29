@@ -24,6 +24,7 @@ from typing import List
 from unittest import mock
 
 import pytest
+import pytest_asyncio
 import websockets.exceptions
 from websockets.asyncio.client import ClientConnection
 from websockets.asyncio.client import connect
@@ -92,8 +93,8 @@ class SleepAsyncMock(mock.AsyncMock):
         self.event_continue.clear()
 
 
-@pytest.fixture
-def mock_sleep(event_loop):
+@pytest_asyncio.fixture
+async def mock_sleep():
     with mock.patch(
         target="asyncio.sleep",
         spec=asyncio.sleep,
@@ -103,8 +104,8 @@ def mock_sleep(event_loop):
         yield m
 
 
-@pytest.fixture
-def mock_connect():
+@pytest_asyncio.fixture
+async def mock_connect():
     with mock.patch(
         target="ooresults.websocket_server.streaming.connect",
         spec=connect,
