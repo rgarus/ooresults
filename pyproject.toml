@@ -85,3 +85,11 @@ asyncio_default_fixture_loop_scope = "function"
 profile = "black"
 force_single_line = "true"
 lines_after_imports = 2
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+lines-after-imports = 2

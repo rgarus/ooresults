@@ -7,8 +7,8 @@ Delopment workflow
       :depth: 2
 
 
-This section describes commands to clone, edit, format, test, build and publish the ooresults software for operating system Linux.
-
+This section describes commands for cloning, editing, analysing, formatting, testing,
+creating and publishing the ooresults software for the Linux operating system.
 
 
 Cloning the software
@@ -33,10 +33,11 @@ Installing the software in editable mode
 
 
 
-Formating the Python source code with black and isort
------------------------------------------------------
+Formatting the Python source code with black and isort
+------------------------------------------------------
 
-For isort we use the following configuration parameters, defined in pyproject.toml in section [tool.isort]:
+For isort we use the following configuration parameters,
+defined in pyproject.toml in section [tool.isort]:
 
 .. code-block::
 
@@ -54,6 +55,22 @@ Format the code:
    cd <git-local>
    python -m isort .
    python -m black .
+
+
+   
+Analysing the Python source code with Ruff
+------------------------------------------
+
+We use Ruff linter for the static code analysis of the Python source code.
+The rules used are defined in pyproject.toml in the sections
+[tool.ruff.lint] and [tool.ruff.lint.isort].
+
+.. code-block::
+
+   python -m pip install ruff
+   
+   cd <git-local>
+   python -m ruff check
 
 
 
@@ -135,15 +152,17 @@ Build the release:
 Publishing the release
 ----------------------
 
-For uploading the build results to https://pypi.org use (during upload use __token__ as username):
+For uploading the build results to https://pypi.org use
+(during upload use __token__ as username):
 
 .. code-block::
 
    cd <git-local>
    <venv-build>/bin/python -m twine check dist/*
    <venv-build>/bin/python -m twine upload dist/*
-   
-For uploading the build results to https://test.pypi.org use (during upload use __token__ as username):
+
+For uploading the build results to https://test.pypi.org use
+(during upload use __token__ as username):
 
 .. code-block::
 
