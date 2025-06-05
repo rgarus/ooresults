@@ -371,8 +371,7 @@ class WebSocketHandler:
                                 else:
                                     print(f"WEBSOCKET RECEIVED, {addr}, {message}")
                                     break
-                    else:
-                        await websocket.send("__no_access__")
+                    await websocket.send("__no_access__")
             except websockets.exceptions.ConnectionClosed:
                 pass
             finally:

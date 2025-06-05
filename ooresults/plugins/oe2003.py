@@ -20,8 +20,6 @@
 import io
 from datetime import datetime
 from datetime import timedelta
-from typing import Dict
-from typing import List
 
 import clevercsv as csv
 from unidecode import unidecode
@@ -42,7 +40,7 @@ def cp1252(value: str) -> str:
         return unidecode(value)
 
 
-def create(entries: List[EntryType], class_list: List[ClassInfoType]) -> bytes:
+def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
     output = io.StringIO()
     writer = csv.writer(output, delimiter=";", quoting=csv.QUOTE_MINIMAL)
 
@@ -166,8 +164,8 @@ def create(entries: List[EntryType], class_list: List[ClassInfoType]) -> bytes:
     return content.encode(encoding="windows-1252")
 
 
-def parse(content: bytes) -> List[Dict]:
-    column_nr = {}
+def parse(content: bytes) -> list[dict]:
+    column_nr: dict[str, int] = {}
     result = []
 
     try:
@@ -295,8 +293,8 @@ def parse(content: bytes) -> List[Dict]:
             }
             fields = {}
 
-            for column in column_nr:
-                item = values[column_nr[column]]
+            for column, nr in column_nr.items():
+                item = values[nr]
                 if column == "status":
                     mapping = {
                         "0": ResultStatus.OK,

@@ -48,5 +48,4 @@ class Actions:
         for action in self.actions():
             if action.text() == text:
                 return action
-        else:
-            raise RuntimeError("Action not found")
+        raise RuntimeError("Action not found")

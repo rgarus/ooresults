@@ -48,8 +48,7 @@ class Tabs:
         for tab in self.tabs():
             if tab.text() == text:
                 return tab
-        else:
-            raise RuntimeError("Tab not found")
+        raise RuntimeError("Tab not found")
 
     def selected_tab(self) -> Tab:
         selected_tabs = []

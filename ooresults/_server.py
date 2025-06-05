@@ -54,8 +54,7 @@ class Root:
                 t2 = time.time()
                 logging.info(f"Requesting result, {web.ctx['ip']}, {t2 - t1:.3f}")
                 return render.root(results_table=results_table)
-        else:
-            return render.root(results_table=None)
+        return render.root(results_table=None)
 
 
 class Login:

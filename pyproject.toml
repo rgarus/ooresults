@@ -87,8 +87,13 @@ force_single_line = "true"
 lines_after_imports = 2
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "W"]
-ignore = ["E501"]
+select = ["E", "F", "I", "PLC", "PLE", "PLW", "W"]
+ignore = [
+    "E501",  # Line too long
+    "PLW0603",  # Using the global statement to update {name} is discouraged
+    "PLW2901",  # Redefined loop name
+
+]
 
 [tool.ruff.lint.isort]
 force-single-line = true

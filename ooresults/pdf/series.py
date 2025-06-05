@@ -122,20 +122,20 @@ def create_pdf(
                     align="R",
                 )
                 pdf.set_font()
-                for i in range(len(events)):
-                    if i in ser_result.races:
-                        if ser_result.races[i].bonus:
+                for j in range(len(events)):
+                    if j in ser_result.races:
+                        if ser_result.races[j].bonus:
                             cell(
                                 w=W_POINTS,
                                 h=None,
-                                txt="(" + str(ser_result.races[i].points) + ")",
+                                txt=f"({ser_result.races[j].points})",
                                 align="R",
                             )
                         else:
                             cell(
                                 w=W_POINTS,
                                 h=None,
-                                txt=str(ser_result.races[i].points),
+                                txt=f"{ser_result.races[j].points}",
                                 align="R",
                             )
                     else:

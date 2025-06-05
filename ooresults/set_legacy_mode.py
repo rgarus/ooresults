@@ -32,9 +32,7 @@ def connect() -> sireader.SIReaderReadout:
             return si
         except (sireader.SIReaderException, sireader.SIReaderTimeout) as msg:
             errors += f"port: {port.device}: {msg}\n"
-            pass
-    else:
-        errors = "No SI Reader found" if errors == "" else errors
+    errors = "No SI Reader found" if errors == "" else errors
     raise sireader.SIReaderException(f"No SI Reader found. Possible reasons: {errors}")
 
 
