@@ -33,7 +33,7 @@ import tzlocal
 import websockets.exceptions
 from websockets.asyncio.server import ServerConnection
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes import result_type
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import ResultStatus
@@ -134,7 +134,7 @@ class WebSocketHandler:
                         await asyncio.get_event_loop().run_in_executor(
                             executor=self.executor,
                             func=functools.partial(
-                                model.import_iof_result_list,
+                                model.results.import_iof_result_list,
                                 event_key=event_key,
                                 content=data,
                             ),
@@ -187,7 +187,7 @@ class WebSocketHandler:
 
                             # add the event date to the times entered on the webpage
                             events = await asyncio.get_event_loop().run_in_executor(
-                                executor=self.executor, func=model.get_events
+                                executor=self.executor, func=model.events.get_events
                             )
                             date_of_event = datetime.date.today()
                             for e in events:
@@ -240,7 +240,7 @@ class WebSocketHandler:
                                 ) = await asyncio.get_event_loop().run_in_executor(
                                     executor=self.executor,
                                     func=functools.partial(
-                                        model.store_cardreader_result,
+                                        model.results.store_cardreader_result,
                                         event_key=item["key"],
                                         item=d,
                                     ),
@@ -294,7 +294,7 @@ class WebSocketHandler:
                         raise RuntimeError("Data not json deserialisable")
 
                     try:
-                        item = model.parse_cardreader_log(item=item)
+                        item = model.results.parse_cardreader_log(item=item)
                     except Exception as e:
                         raise RuntimeError(str(e))
 
@@ -306,7 +306,7 @@ class WebSocketHandler:
                         ) = await asyncio.get_event_loop().run_in_executor(
                             executor=self.executor,
                             func=functools.partial(
-                                model.store_cardreader_result,
+                                model.results.store_cardreader_result,
                                 event_key=event_key,
                                 item=item,
                             ),
@@ -353,7 +353,7 @@ class WebSocketHandler:
 
                     # check event key
                     events = await asyncio.get_event_loop().run_in_executor(
-                        executor=self.executor, func=model.get_events
+                        executor=self.executor, func=model.events.get_events
                     )
                     for e in events:
                         if str(e.id) == event_id and e.key == event_key:

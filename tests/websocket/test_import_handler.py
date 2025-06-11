@@ -34,7 +34,7 @@ from websockets.asyncio.client import connect
 from websockets.asyncio.server import serve
 
 import ooresults
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.competitor_type import CompetitorType
@@ -142,13 +142,13 @@ class WebSocketServer(threading.Thread):
 @pytest.fixture
 def websocket_server():
     barrier = threading.Barrier(parties=2)
-    model.websocket_server = WebSocketServer(barrier=barrier)
-    model.websocket_server.start()
+    model.results.websocket_server = WebSocketServer(barrier=barrier)
+    model.results.websocket_server.start()
     barrier.wait()
-    yield model.websocket_server
+    yield model.results.websocket_server
     future = asyncio.run_coroutine_threadsafe(
-        coro=model.websocket_server.close(),
-        loop=model.websocket_server.loop,
+        coro=model.results.websocket_server.close(),
+        loop=model.results.websocket_server.loop,
     )
     future.result()
 
@@ -296,7 +296,7 @@ async def test_live_server_import_result_list_snapshot(
         jsonschema.validate(instance=response, schema=schema_streaming_result)
         assert response == {"result": "ok"}
 
-    competitors = model.get_competitors()
+    competitors = model.competitors.get_competitors()
     assert competitors == [
         CompetitorType(
             id=competitors[0].id,
@@ -320,7 +320,7 @@ async def test_live_server_import_result_list_snapshot(
         ),
     ]
 
-    classes = model.get_classes(event_id=event_id)
+    classes = model.classes.get_classes(event_id=event_id)
     assert classes == [
         ClassInfoType(
             id=classes[0].id,
@@ -335,7 +335,7 @@ async def test_live_server_import_result_list_snapshot(
         ),
     ]
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=entries[0].id,
@@ -419,7 +419,7 @@ async def test_live_server_import_result_list_delta(
         jsonschema.validate(instance=response, schema=schema_streaming_result)
         assert response == {"result": "ok"}
 
-    competitors = model.get_competitors()
+    competitors = model.competitors.get_competitors()
     assert competitors == [
         CompetitorType(
             id=competitors[0].id,
@@ -443,7 +443,7 @@ async def test_live_server_import_result_list_delta(
         ),
     ]
 
-    classes = model.get_classes(event_id=event_id)
+    classes = model.classes.get_classes(event_id=event_id)
     assert classes == [
         ClassInfoType(
             id=classes[0].id,
@@ -469,7 +469,7 @@ async def test_live_server_import_result_list_delta(
         ),
     ]
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=entries[0].id,

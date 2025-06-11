@@ -24,7 +24,7 @@ from typing import Optional
 import tzlocal
 import web
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_params import VoidedLeg
 from ooresults.plugins import iof_class_list
@@ -35,9 +35,9 @@ from ooresults.utils import render
 
 
 def update(event_id: int):
-    classes = model.get_classes(event_id=event_id)
+    classes = model.classes.get_classes(event_id=event_id)
     try:
-        event = model.get_event(id=event_id)
+        event = model.events.get_event(id=event_id)
         return render.classes_table(event=event, classes=classes)
     except EventNotFoundError:
         raise web.conflict("Event deleted")
@@ -62,7 +62,7 @@ class Import:
         try:
             if data.cls_import == "cls.import.1":
                 classes = iof_class_list.parse_class_list(data.browse1)
-                model.import_classes(event_id=event_id, classes=classes)
+                model.classes.import_classes(event_id=event_id, classes=classes)
 
         except EventNotFoundError:
             raise web.conflict("Event deleted")
@@ -79,7 +79,7 @@ class Export:
         event_id = int(data.event_id) if data.event_id != "" else -1
         try:
             if data.cls_export == "cls.export.1":
-                classes = model.get_classes(event_id=event_id)
+                classes = model.classes.get_classes(event_id=event_id)
                 content = iof_class_list.create_class_list(classes)
 
         except EventNotFoundError:
@@ -156,12 +156,12 @@ class Add:
                 )
 
         try:
-            event = model.get_event(id=event_id)
+            event = model.events.get_event(id=event_id)
 
             params.mass_start = self.parse_start_time(data.massStart, event.date)
             course_id = int(data.course_id) if data.course_id != "" else None
             if data.id == "":
-                model.add_class(
+                model.classes.add_class(
                     event_id=event_id,
                     name=data.name,
                     short_name=data.short_name if data.short_name != "" else None,
@@ -170,7 +170,7 @@ class Add:
                 )
 
             else:
-                model.update_class(
+                model.classes.update_class(
                     id=int(data.id),
                     event_id=event_id,
                     name=data.name,
@@ -199,7 +199,7 @@ class Delete:
         print(data)
         event_id = int(data.event_id) if data.event_id != "" else -1
         try:
-            model.delete_class(id=int(data.id))
+            model.classes.delete_class(id=int(data.id))
             return update(event_id)
 
         except ClassUsedError:
@@ -218,7 +218,7 @@ class FillEditForm:
             if data.id == "":
                 class_ = None
             else:
-                class_ = model.get_class(id=int(data.id))
+                class_ = model.classes.get_class(id=int(data.id))
 
         except EventNotFoundError:
             raise web.conflict("Event deleted")
@@ -228,5 +228,5 @@ class FillEditForm:
             logging.exception("Internal server error")
             raise
 
-        courses = model.get_courses(event_id=event_id)
+        courses = model.courses.get_courses(event_id=event_id)
         return render.add_class(class_=class_, courses=courses)

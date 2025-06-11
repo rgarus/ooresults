@@ -26,7 +26,7 @@ import web
 
 import ooresults.pdf.result
 import ooresults.pdf.splittimes
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.repo.repo import EventNotFoundError
@@ -56,7 +56,7 @@ class Update:
         event_id = int(data.event_id) if data.event_id != "" else -1
 
         try:
-            event, class_results = model.event_class_results(event_id=event_id)
+            event, class_results = model.results.event_class_results(event_id=event_id)
             columns = build_columns(class_results)
             return render.results_table(
                 event=event, class_results=class_results, columns=columns
@@ -76,7 +76,7 @@ class PdfResult:
         include_dns = "res_include_dns" in data
 
         try:
-            event, class_results = model.event_class_results(event_id=event_id)
+            event, class_results = model.results.event_class_results(event_id=event_id)
             columns = build_columns(class_results)
             content = ooresults.pdf.result.create_pdf(
                 event=event,
@@ -101,7 +101,7 @@ class PdfSplittimes:
         landscape = "res_landscape" in data
 
         try:
-            event, class_results = model.event_class_results(event_id=event_id)
+            event, class_results = model.results.event_class_results(event_id=event_id)
             content = ooresults.pdf.splittimes.create_pdf(
                 event=event,
                 results=class_results,

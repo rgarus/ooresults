@@ -23,7 +23,7 @@ from datetime import timezone
 
 import pytest
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
@@ -229,7 +229,7 @@ def test_add_entry_without_result(
     club_id: int,
     competitor_id: int,
 ):
-    id = model.add_or_update_entry(
+    id = model.entries.add_or_update_entry(
         id=None,
         event_id=event_id,
         competitor_id=None,
@@ -247,7 +247,7 @@ def test_add_entry_without_result(
         result_id=None,
     )
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=id,
@@ -284,7 +284,7 @@ def test_add_entry_with_result(
     competitor_id: int,
     entry_2: EntryType,
 ):
-    id = model.add_or_update_entry(
+    id = model.entries.add_or_update_entry(
         id=None,
         event_id=event_id,
         competitor_id=None,
@@ -302,7 +302,7 @@ def test_add_entry_with_result(
         result_id=entry_2.id,
     )
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=id,
@@ -365,7 +365,7 @@ def test_update_entry_remove_result_and_store_removed_result_without_edits(
     competitor_id: int,
     entry_1: EntryType,
 ):
-    id = model.add_or_update_entry(
+    id = model.entries.add_or_update_entry(
         id=entry_1.id,
         event_id=event_id,
         competitor_id=None,
@@ -383,7 +383,7 @@ def test_update_entry_remove_result_and_store_removed_result_without_edits(
         result_id=-1,
     )
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=entries[0].id,
@@ -447,7 +447,7 @@ def test_update_entry_remove_result_with_status_disqualified_do_not_change_statu
     competitor_id: int,
     entry_1: EntryType,
 ):
-    id = model.add_or_update_entry(
+    id = model.entries.add_or_update_entry(
         id=entry_1.id,
         event_id=event_id,
         competitor_id=None,
@@ -465,7 +465,7 @@ def test_update_entry_remove_result_with_status_disqualified_do_not_change_statu
         result_id=-1,
     )
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=entries[0].id,
@@ -530,7 +530,7 @@ def test_update_entry_change_status_and_remove_result_stores_changed_status(
     competitor_id: int,
     entry_1: EntryType,
 ):
-    id = model.add_or_update_entry(
+    id = model.entries.add_or_update_entry(
         id=entry_1.id,
         event_id=event_id,
         competitor_id=None,
@@ -548,7 +548,7 @@ def test_update_entry_change_status_and_remove_result_stores_changed_status(
         result_id=-1,
     )
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=entries[0].id,
@@ -614,7 +614,7 @@ def test_update_entry_replace_result_and_store_replaced_result_without_edits(
     entry_1: EntryType,
     entry_2: EntryType,
 ):
-    id = model.add_or_update_entry(
+    id = model.entries.add_or_update_entry(
         id=entry_1.id,
         event_id=event_id,
         competitor_id=None,
@@ -632,7 +632,7 @@ def test_update_entry_replace_result_and_store_replaced_result_without_edits(
         result_id=entry_2.id,
     )
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=entries[0].id,
@@ -721,7 +721,7 @@ def test_update_entry_set_status_to_dns(
     club_id: int,
     competitor_id: int,
 ):
-    id = model.add_or_update_entry(
+    id = model.entries.add_or_update_entry(
         id=None,
         event_id=event_id,
         competitor_id=None,
@@ -738,7 +738,7 @@ def test_update_entry_set_status_to_dns(
         start_time=None,
         result_id=None,
     )
-    model.add_or_update_entry(
+    model.entries.add_or_update_entry(
         id=id,
         event_id=event_id,
         competitor_id=competitor_id,
@@ -756,7 +756,7 @@ def test_update_entry_set_status_to_dns(
         result_id=None,
     )
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=id,

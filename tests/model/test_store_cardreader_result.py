@@ -22,7 +22,7 @@ import datetime
 
 import pytest
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import CardReaderMessage
@@ -305,7 +305,9 @@ def test_assign_to_entry_if_cardnumber_is_unique(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -403,7 +405,9 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -501,7 +505,9 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -587,7 +593,9 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -690,7 +698,9 @@ def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
     print(res)
 
     assert status == "cardRead"
@@ -788,7 +798,9 @@ def test_store_as_new_entry_if_another_result_exists(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -907,7 +919,9 @@ def test_do_not_store_as_new_entry_if_result_already_exists(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -970,7 +984,9 @@ def test_store_as_new_entry_if_cardnumber_is_unknown(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -1087,7 +1103,9 @@ def test_store_as_new_entry_if_cardnumber_exist_several_times(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -1208,7 +1226,9 @@ def test_use_already_assigned_entry_if_it_has_the_same_result(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -1276,7 +1296,9 @@ def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -1397,7 +1419,9 @@ def test_use_empty_control_list_if_course_is_undefined(
         result=result,
     )
 
-    status, event, res = model.store_cardreader_result(event_key="4711", item=item)
+    status, event, res = model.results.store_cardreader_result(
+        event_key="4711", item=item
+    )
 
     assert status == "cardRead"
     assert event.id == event_id
@@ -1494,7 +1518,7 @@ def test_raise_exception_if_event_key_is_unknown(
     )
 
     with pytest.raises(repo.EventNotFoundError, match='Event for key "4712" not found'):
-        status, event, res = model.store_cardreader_result(event_key="4712", item=item)
+        model.results.store_cardreader_result(event_key="4712", item=item)
 
     entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3

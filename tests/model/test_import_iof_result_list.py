@@ -24,7 +24,7 @@ from datetime import timezone
 
 import pytest
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.competitor_type import CompetitorType
@@ -123,12 +123,12 @@ def test_import_iof_result_list_snapshot(
     s = datetime.datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime.datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    model.import_iof_result_list(
+    model.results.import_iof_result_list(
         event_key="local",
         content=content.encode(),
     )
 
-    competitors = model.get_competitors()
+    competitors = model.competitors.get_competitors()
     assert competitors == [
         CompetitorType(
             id=competitors[0].id,
@@ -152,7 +152,7 @@ def test_import_iof_result_list_snapshot(
         ),
     ]
 
-    classes = model.get_classes(event_id=event_id)
+    classes = model.classes.get_classes(event_id=event_id)
     assert classes == [
         ClassInfoType(
             id=classes[0].id,
@@ -167,7 +167,7 @@ def test_import_iof_result_list_snapshot(
         ),
     ]
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=entries[0].id,
@@ -238,12 +238,12 @@ def test_import_iof_result_list_delta(
     s = datetime.datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime.datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    model.import_iof_result_list(
+    model.results.import_iof_result_list(
         event_key="local",
         content=content.encode(),
     )
 
-    competitors = model.get_competitors()
+    competitors = model.competitors.get_competitors()
     assert competitors == [
         CompetitorType(
             id=competitors[0].id,
@@ -267,7 +267,7 @@ def test_import_iof_result_list_delta(
         ),
     ]
 
-    classes = model.get_classes(event_id=event_id)
+    classes = model.classes.get_classes(event_id=event_id)
     assert classes == [
         ClassInfoType(
             id=classes[0].id,
@@ -293,7 +293,7 @@ def test_import_iof_result_list_delta(
         ),
     ]
 
-    entries = model.get_entries(event_id=event_id)
+    entries = model.entries.get_entries(event_id=event_id)
     assert entries == [
         EntryType(
             id=entries[0].id,

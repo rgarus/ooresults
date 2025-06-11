@@ -31,7 +31,7 @@ import websockets.exceptions
 from websockets.asyncio.client import connect
 from websockets.protocol import State
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.event_type import EventType
 from ooresults.plugins import iof_result_list
 from ooresults.repo.repo import EventNotFoundError
@@ -45,7 +45,7 @@ class Streaming:
         self.events: Dict[int, EventType] = {}
         self.executor = ThreadPoolExecutor(max_workers=5)
 
-        events = model.get_events()
+        events = model.events.get_events()
         for event in events:
             if event.streaming_enabled:
                 e = copy.deepcopy(event)
@@ -125,7 +125,7 @@ class Streaming:
                         ) = await asyncio.get_event_loop().run_in_executor(
                             executor=self.executor,
                             func=functools.partial(
-                                model.event_class_results,
+                                model.results.event_class_results,
                                 event_id=event.id,
                             ),
                         )

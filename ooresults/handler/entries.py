@@ -26,7 +26,7 @@ from typing import Optional
 import tzlocal
 import web
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.plugins import iof_entry_list
@@ -40,9 +40,9 @@ from ooresults.utils import render
 
 
 def update(event_id: int, view: str = "entries"):
-    entry_list = model.get_entries(event_id=event_id)
+    entry_list = model.entries.get_entries(event_id=event_id)
     try:
-        event = model.get_event(id=event_id)
+        event = model.events.get_event(id=event_id)
 
         unassigned_results = 0
         for e in entry_list:
@@ -137,12 +137,12 @@ class Import:
         try:
             if data.entr_import == "entr.import.1":
                 _, entries = iof_entry_list.parse_entry_list(data.browse1)
-                model.import_entries(event_id=event_id, entries=entries)
+                model.entries.import_entries(event_id=event_id, entries=entries)
             elif data.entr_import == "entr.import.2":
                 _, entries, _ = iof_result_list.parse_result_list(data.browse2)
-                model.import_entries(event_id=event_id, entries=entries)
+                model.entries.import_entries(event_id=event_id, entries=entries)
             elif data.entr_import == "entr.import.3":
-                event = model.get_event(id=event_id)
+                event = model.events.get_event(id=event_id)
                 entries = oe2003.parse(content=data.browse3)
 
                 tz = tzlocal.get_localzone()
@@ -173,10 +173,10 @@ class Import:
                                 event.date, i.punch_time.time(), tzinfo=tz
                             )
 
-                model.import_entries(event_id=event_id, entries=entries)
+                model.entries.import_entries(event_id=event_id, entries=entries)
             elif data.entr_import == "entr.import.4":
                 entries = text.parse(content=data.browse4)
-                model.import_entries(event_id=event_id, entries=entries)
+                model.entries.import_entries(event_id=event_id, entries=entries)
 
         except EventNotFoundError:
             raise web.conflict("Event deleted")
@@ -196,24 +196,26 @@ class Export:
         event_id = int(data.event_id) if data.event_id != "" else -1
         try:
             if data.entr_export == "entr.export.1":
-                entry_list = model.get_entries(event_id=event_id)
-                event = model.get_event(id=event_id)
+                entry_list = model.entries.get_entries(event_id=event_id)
+                event = model.events.get_event(id=event_id)
                 content = iof_entry_list.create_entry_list(event, entry_list)
             elif data.entr_export == "entr.export.2":
-                event, class_results = model.event_class_results(event_id=event_id)
+                event, class_results = model.results.event_class_results(
+                    event_id=event_id
+                )
                 content = iof_result_list.create_result_list(event, class_results)
             elif data.entr_export == "entr.export.3":
-                event, class_results = model.results_for_splitsbrowser(
+                event, class_results = model.results.results_for_splitsbrowser(
                     event_id=event_id
                 )
                 content = iof_result_list.create_result_list(event, class_results)
             elif data.entr_export == "entr.export.4":
-                class_list = model.get_classes(event_id=event_id)
-                entry_list = model.get_entries(event_id=event_id)
+                class_list = model.classes.get_classes(event_id=event_id)
+                entry_list = model.entries.get_entries(event_id=event_id)
                 content = oe2003.create(entry_list, class_list)
             elif data.entr_export == "entr.export.5":
-                class_list = model.get_classes(event_id=event_id)
-                entry_list = model.get_entries(event_id=event_id)
+                class_list = model.classes.get_classes(event_id=event_id)
+                entry_list = model.entries.get_entries(event_id=event_id)
                 content = oe12.create(entry_list, class_list)
 
         except EventNotFoundError:
@@ -248,7 +250,7 @@ class Add:
             data = web.input()
             print(data)
             event_id = int(data.event_id) if data.event_id != "" else -1
-            event = model.get_event(id=event_id)
+            event = model.events.get_event(id=event_id)
 
             entered_start_time = self.parse_start_time(data.start_time, event.date)
 
@@ -258,7 +260,7 @@ class Add:
                 if name in data:
                     fields[i] = data[name]
 
-            model.add_or_update_entry(
+            model.entries.add_or_update_entry(
                 id=int(data.id) if data.id != "" else None,
                 event_id=event_id,
                 competitor_id=int(data.competitor_id)
@@ -319,18 +321,18 @@ class FillEditForm:
         try:
             data = web.input()
             event_id = int(data.event_id) if data.event_id != "" else -1
-            event = model.get_event(id=event_id)
+            event = model.events.get_event(id=event_id)
 
             if data.id == "":
                 entry = None
             else:
-                entry = model.get_entry(int(data.id))
+                entry = model.entries.get_entry(int(data.id))
 
-            entries = model.get_entries(event_id=event_id)
+            entries = model.entries.get_entries(event_id=event_id)
             unassigned_results = self.collect_unassigned_si_results(entries=entries)
 
-            classes = model.get_classes(event_id=event_id)
-            clubs = model.get_clubs()
+            classes = model.classes.get_classes(event_id=event_id)
+            clubs = model.clubs.get_clubs()
         except EventNotFoundError:
             raise web.conflict("Event deleted")
         except KeyError:
@@ -351,7 +353,7 @@ class FillEditForm:
 class FillCompetitorsForm:
     def POST(self):
         """Query data to fill add or edit form"""
-        competitors = model.get_competitors()
+        competitors = model.competitors.get_competitors()
 
         return render.add_entry_competitors(competitors=competitors)
 
@@ -361,7 +363,7 @@ class FillResultForm:
         """Query data to fill result form"""
         data = web.input()
         try:
-            entry = model.get_entry(id=int(data.id))
+            entry = model.entries.get_entry(int(data.id))
         except EventNotFoundError:
             raise web.conflict("Event deleted")
         except KeyError:
@@ -378,7 +380,7 @@ class Delete:
         """Delete entry"""
         data = web.input()
         event_id = int(data.event_id) if data.event_id != "" else -1
-        model.delete_entry(int(data.id))
+        model.entries.delete_entry(int(data.id))
         return update(event_id=event_id, view=data.view)
 
 
@@ -411,7 +413,7 @@ class EditPunch:
             punch_time = datetime.time.fromisoformat(data.punch_time)
 
         try:
-            entry = model.edit_entry_result(
+            entry = model.entries.edit_entry_result(
                 entry_id=entry_id,
                 event_id=event_id,
                 command=data.command,

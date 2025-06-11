@@ -30,8 +30,7 @@ from websockets.asyncio.client import ClientConnection
 from websockets.asyncio.client import connect
 from websockets.protocol import State
 
-import ooresults
-import ooresults.model.model
+import ooresults.model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.event_type import EventType
@@ -118,8 +117,8 @@ async def mock_connect():
 @pytest.fixture
 def mock_get_events():
     with mock.patch(
-        target="ooresults.model.model.get_events",
-        spec=ooresults.model.model.get_events,
+        target="ooresults.model.events.get_events",
+        spec=ooresults.model.events.get_events,
         spec_set=True,
         new=mock.Mock(),
     ) as m:
@@ -129,8 +128,8 @@ def mock_get_events():
 @pytest.fixture
 def mock_event_class_results():
     with mock.patch(
-        target="ooresults.model.model.event_class_results",
-        spec=ooresults.model.model.event_class_results,
+        target="ooresults.model.results.event_class_results",
+        spec=ooresults.model.results.event_class_results,
         spec_set=True,
         new=mock.Mock(),
     ) as m:

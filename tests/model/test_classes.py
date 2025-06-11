@@ -23,7 +23,7 @@ from datetime import timezone
 
 import pytest
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.entry_type import EntryType
@@ -140,9 +140,9 @@ def test_import_class_data_update_existing_class(
             "short_name": "E-M",
         },
     ]
-    model.import_classes(event_id=event_id, classes=classes)
+    model.classes.import_classes(event_id=event_id, classes=classes)
 
-    cl = model.get_classes(event_id=event_id)
+    cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 1
     assert cl[0] == ClassInfoType(
         id=class_1_id,
@@ -165,9 +165,9 @@ def test_import_class_data_without_short_name_does_not_change_existing_short_nam
             "name": "Elite Men",
         },
     ]
-    model.import_classes(event_id=event_id, classes=classes)
+    model.classes.import_classes(event_id=event_id, classes=classes)
 
-    cl = model.get_classes(event_id=event_id)
+    cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 1
     assert cl[0] == ClassInfoType(
         id=class_1_id,
@@ -191,9 +191,9 @@ def test_import_class_data_add_not_existing_class(
             "short_name": "E",
         },
     ]
-    model.import_classes(event_id=event_id, classes=classes)
+    model.classes.import_classes(event_id=event_id, classes=classes)
 
-    cl = model.get_classes(event_id=event_id)
+    cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 2
     assert cl[0].id != class_1_id
 
@@ -237,9 +237,9 @@ def test_import_class_data_update_or_add_class(
             "short_name": "E Women",
         },
     ]
-    model.import_classes(event_id=event_id, classes=classes)
+    model.classes.import_classes(event_id=event_id, classes=classes)
 
-    cl = model.get_classes(event_id=event_id)
+    cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 3
     assert cl[0].id != cl[1].id
     assert cl[0].id != cl[2].id
@@ -287,7 +287,7 @@ def test_update_class_data_recalculates_entry_result(
     course_2_id: int,
     entry_1: EntryType,
 ):
-    model.update_class(
+    model.classes.update_class(
         id=class_1_id,
         event_id=event_id,
         name="Elite Men",
@@ -295,7 +295,7 @@ def test_update_class_data_recalculates_entry_result(
         course_id=course_2_id,
         params=ClassParams(),
     )
-    cl = model.get_classes(event_id=event_id)
+    cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 1
 
     assert cl[0] == ClassInfoType(
@@ -310,7 +310,7 @@ def test_update_class_data_recalculates_entry_result(
         params=ClassParams(),
     )
 
-    e = model.get_entries(event_id=event_id)
+    e = model.entries.get_entries(event_id=event_id)
     assert len(e) == 1
 
     assert e[0].result == PersonRaceResult(

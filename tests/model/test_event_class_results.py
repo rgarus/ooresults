@@ -22,7 +22,7 @@ import datetime
 
 import pytest
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.class_type import ClassType
@@ -239,7 +239,7 @@ def test_event_class_results(
     entry_3: EntryType,
     entry_4: EntryType,
 ):
-    m_event, m_class_results = model.event_class_results(event_id=event.id)
+    m_event, m_class_results = model.results.event_class_results(event_id=event.id)
 
     class_info_a = ClassInfoType(
         id=class_a.id,

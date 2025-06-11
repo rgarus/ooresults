@@ -23,7 +23,7 @@ from datetime import timezone
 import jsonschema
 import pytest
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.result_type import CardReaderMessage
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
@@ -50,7 +50,7 @@ def test_parse_with_start_time_and_with_finish_time():
         "finishTime": "2015-01-01T12:39:07Z",
     }
 
-    d = model.parse_cardreader_log(item=item)
+    d = model.results.parse_cardreader_log(item=item)
     assert d == CardReaderMessage(
         entry_type="cardRead",
         entry_time=e1,
@@ -103,7 +103,7 @@ def test_parse_without_start_time_and_with_finish_time():
         "finishTime": "2015-01-01T12:39:07Z",
     }
 
-    d = model.parse_cardreader_log(item=item)
+    d = model.results.parse_cardreader_log(item=item)
     assert d == CardReaderMessage(
         entry_type="cardRead",
         entry_time=e1,
@@ -156,7 +156,7 @@ def test_parse_with_start_time_and_without_finish_time():
         ],
     }
 
-    d = model.parse_cardreader_log(item=item)
+    d = model.results.parse_cardreader_log(item=item)
     assert d == CardReaderMessage(
         entry_type="cardRead",
         entry_time=e1,
@@ -207,7 +207,7 @@ def test_parse_without_start_time_and_without_finish_time():
         ],
     }
 
-    d = model.parse_cardreader_log(item=item)
+    d = model.results.parse_cardreader_log(item=item)
     assert d == CardReaderMessage(
         entry_type="cardRead",
         entry_time=e1,
@@ -260,7 +260,7 @@ def test_parse_with_clear_time():
         ],
     }
 
-    d = model.parse_cardreader_log(item=item)
+    d = model.results.parse_cardreader_log(item=item)
     assert d == CardReaderMessage(
         entry_type="cardRead",
         entry_time=e1,
@@ -313,7 +313,7 @@ def test_parse_with_check_time():
         ],
     }
 
-    d = model.parse_cardreader_log(item=item)
+    d = model.results.parse_cardreader_log(item=item)
     assert d == CardReaderMessage(
         entry_type="cardRead",
         entry_time=e1,
@@ -363,7 +363,7 @@ def test_parse_without_controls():
         "finishTime": "2015-01-01T12:39:07Z",
     }
 
-    d = model.parse_cardreader_log(item=item)
+    d = model.results.parse_cardreader_log(item=item)
     assert d == CardReaderMessage(
         entry_type="cardRead",
         entry_time=e1,
@@ -413,7 +413,7 @@ def test_parse_with_many_controls():
         "finishTime": "2015-01-01T12:39:15Z",
     }
 
-    d = model.parse_cardreader_log(item=item)
+    d = model.results.parse_cardreader_log(item=item)
     assert d == CardReaderMessage(
         entry_type="cardRead",
         entry_time=e1,
@@ -497,7 +497,7 @@ def test_parse_without_entry_type_raises_exception():
     }
 
     with pytest.raises(jsonschema.ValidationError):
-        model.parse_cardreader_log(item=item)
+        model.results.parse_cardreader_log(item=item)
 
 
 def test_parse_without_entry_time_raises_exception():
@@ -513,7 +513,7 @@ def test_parse_without_entry_time_raises_exception():
     }
 
     with pytest.raises(jsonschema.ValidationError):
-        model.parse_cardreader_log(item=item)
+        model.results.parse_cardreader_log(item=item)
 
 
 def test_parse_without_control_card_raises_exception():
@@ -529,4 +529,4 @@ def test_parse_without_control_card_raises_exception():
     }
 
     with pytest.raises(jsonschema.ValidationError):
-        model.parse_cardreader_log(item=item)
+        model.results.parse_cardreader_log(item=item)

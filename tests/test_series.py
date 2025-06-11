@@ -21,8 +21,8 @@ from decimal import Decimal
 
 import pytest
 
+from ooresults import model
 from ooresults.model import build_results
-from ooresults.model import model
 from ooresults.otypes import series_type
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
@@ -179,7 +179,7 @@ def test_use_only_events_in_series(
     event_1: EventType, event_2: EventType, event_3: EventType
 ):
     events = [event_1, event_2, event_3]
-    data = model.create_event_list(events=events)
+    data = model.results.create_event_list(events=events)
     assert data == [event_3, event_1]
 
 
@@ -187,21 +187,21 @@ def test_sort_events_by_date(
     event_1: EventType, event_3: EventType, event_5: EventType
 ):
     events = [event_1, event_3, event_5]
-    data = model.create_event_list(events=events)
+    data = model.results.create_event_list(events=events)
     assert data == [event_5, event_3, event_1]
 
     events = [event_3, event_5, event_1]
-    data = model.create_event_list(events=events)
+    data = model.results.create_event_list(events=events)
     assert data == [event_5, event_3, event_1]
 
 
 def test_sort_events_by_name_if_dates_are_equal(event_3: EventType, event_4: EventType):
     events = [event_3, event_4]
-    data = model.create_event_list(events=events)
+    data = model.results.create_event_list(events=events)
     assert data == [event_3, event_4]
 
     events = [event_4, event_3]
-    data = model.create_event_list(events=events)
+    data = model.results.create_event_list(events=events)
     assert data == [event_3, event_4]
 
 

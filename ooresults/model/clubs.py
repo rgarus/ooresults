@@ -17,41 +17,36 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import web
+from typing import List
 
 from ooresults import model
-from ooresults.utils import render
+from ooresults.handler import cached_result
+from ooresults.otypes.club_type import ClubType
+from ooresults.repo.repo import TransactionMode
 
 
-class Si1:
-    def GET(self):
-        id = ""
-        key = ""
-
-        try:
-            for event in model.events.get_events():
-                if event.key:
-                    id = event.id
-                    key = event.key
-                    break
-        except Exception:
-            pass
-
-        return render.si1_page(id=id, key=key)
+def get_clubs() -> List[ClubType]:
+    with model.db.transaction():
+        return model.db.get_clubs()
 
 
-class Si2:
-    def GET(self):
-        id = ""
-        key = ""
-        data = web.input()
+def get_club(id: int) -> ClubType:
+    with model.db.transaction():
+        return model.db.get_club(id=id)
 
-        try:
-            for event in model.events.get_events():
-                if str(event.id) == data.id:
-                    id = event.id
-                    key = event.key
-        except Exception:
-            pass
 
-        return render.si2_page(id=id, key=key)
+def add_club(name) -> None:
+    with model.db.transaction(mode=TransactionMode.IMMEDIATE):
+        model.db.add_club(name=name)
+
+
+def update_club(id, name) -> None:
+    with model.db.transaction(mode=TransactionMode.IMMEDIATE):
+        model.db.update_club(id=id, name=name)
+
+    cached_result.clear_cache()
+
+
+def delete_club(id) -> None:
+    with model.db.transaction(mode=TransactionMode.IMMEDIATE):
+        model.db.delete_club(id=id)

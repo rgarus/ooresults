@@ -32,7 +32,7 @@ from websockets.asyncio.client import ClientConnection
 from websockets.asyncio.client import connect
 from websockets.asyncio.server import serve
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
@@ -101,13 +101,13 @@ class WebSocketServer(threading.Thread):
 @pytest.fixture
 def websocket_server():
     barrier = threading.Barrier(parties=2)
-    model.websocket_server = WebSocketServer(barrier=barrier)
-    model.websocket_server.start()
+    model.results.websocket_server = WebSocketServer(barrier=barrier)
+    model.results.websocket_server.start()
     barrier.wait()
-    yield model.websocket_server
+    yield model.results.websocket_server
     future = asyncio.run_coroutine_threadsafe(
-        coro=model.websocket_server.close(),
-        loop=model.websocket_server.loop,
+        coro=model.results.websocket_server.close(),
+        loop=model.results.websocket_server.loop,
     )
     future.result()
 

@@ -22,14 +22,14 @@ import logging
 
 import web
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.utils import render
 
 
 def update():
-    return render.events_table(events=model.get_events())
+    return render.events_table(events=model.events.get_events())
 
 
 class Update:
@@ -53,7 +53,7 @@ class Add:
                 )
 
             if data.id == "":
-                model.add_event(
+                model.events.add_event(
                     name=data.name,
                     date=datetime.datetime.strptime(data.date, "%Y-%m-%d").date(),
                     key=data.key if data.key != "" else None,
@@ -65,7 +65,7 @@ class Add:
                     streaming_enabled=streaming_enabled,
                 )
             else:
-                model.update_event(
+                model.events.update_event(
                     id=int(data.id),
                     name=data.name,
                     date=datetime.datetime.strptime(data.date, "%Y-%m-%d").date(),
@@ -92,7 +92,7 @@ class Delete:
     def POST(self):
         """Delete entry"""
         data = web.input()
-        model.delete_event(int(data.id))
+        model.events.delete_event(int(data.id))
         return update()
 
 
@@ -104,7 +104,7 @@ class FillEditForm:
             if data.id == "":
                 event = None
             else:
-                event = model.get_event(id=int(data.id))
+                event = model.events.get_event(id=int(data.id))
 
         except EventNotFoundError:
             raise web.conflict("Event deleted")

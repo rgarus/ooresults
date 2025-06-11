@@ -21,7 +21,7 @@ import logging
 
 import web
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.plugins import iof_competitor_list
 from ooresults.repo.repo import CompetitorUsedError
 from ooresults.repo.repo import ConstraintError
@@ -31,7 +31,7 @@ from ooresults.utils import render
 class Update:
     def POST(self):
         """Update data"""
-        return render.competitors_table(competitors=model.get_competitors())
+        return render.competitors_table(competitors=model.competitors.get_competitors())
 
 
 class Add:
@@ -41,7 +41,7 @@ class Add:
         print(data)
         try:
             if data.id == "":
-                model.add_competitor(
+                model.competitors.add_competitor(
                     first_name=data.first_name,
                     last_name=data.last_name,
                     club_id=int(data.club_id) if data.club_id != "" else None,
@@ -50,7 +50,7 @@ class Add:
                     chip=data.chip.strip(),
                 )
             else:
-                model.update_competitor(
+                model.competitors.update_competitor(
                     id=int(data.id),
                     first_name=data.first_name,
                     last_name=data.last_name,
@@ -65,7 +65,7 @@ class Add:
             logging.exception("Internal server error")
             raise
 
-        return render.competitors_table(competitors=model.get_competitors())
+        return render.competitors_table(competitors=model.competitors.get_competitors())
 
 
 class Import:
@@ -77,12 +77,12 @@ class Import:
                 competitors = iof_competitor_list.parse_competitor_list(
                     content=data.browse1
                 )
-                model.import_competitors(competitors=competitors)
+                model.competitors.import_competitors(competitors=competitors)
 
         except Exception as e:
             raise web.Conflict(str(e))
 
-        return render.competitors_table(competitors=model.get_competitors())
+        return render.competitors_table(competitors=model.competitors.get_competitors())
 
 
 class Export:
@@ -92,7 +92,7 @@ class Export:
         print("###", data)
         try:
             if data.comp_export == "comp.export.1":
-                competitors = model.get_competitors()
+                competitors = model.competitors.get_competitors()
                 content = iof_competitor_list.create_competitor_list(
                     competitors=competitors
                 )
@@ -109,8 +109,10 @@ class Delete:
         """Delete entry"""
         data = web.input()
         try:
-            model.delete_competitor(int(data.id))
-            return render.competitors_table(competitors=model.get_competitors())
+            model.competitors.delete_competitor(int(data.id))
+            return render.competitors_table(
+                competitors=model.competitors.get_competitors()
+            )
         except CompetitorUsedError:
             raise web.conflict("Competitor used in entries")
         except:
@@ -125,7 +127,7 @@ class FillEditForm:
         if data.id == "":
             competitor = None
         else:
-            competitor = model.get_competitor(int(data.id))
+            competitor = model.competitors.get_competitor(int(data.id))
 
-        clubs = model.get_clubs()
+        clubs = model.clubs.get_clubs()
         return render.add_competitor(competitor=competitor, clubs=clubs)

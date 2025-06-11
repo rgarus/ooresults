@@ -24,7 +24,7 @@ import clevercsv as csv
 import web
 
 import ooresults.pdf.series
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes import series_type
 from ooresults.utils import render
 
@@ -32,13 +32,13 @@ from ooresults.utils import render
 class Update:
     def POST(self):
         """Update data"""
-        settings, events, results = model.build_series_result()
+        settings, events, results = model.results.build_series_result()
         return render.series_table(events=events, results=results)
 
 
 class Settings:
     def POST(self):
-        """Update seeries settings"""
+        """Update series settings"""
         data = web.input()
         print(data)
         try:
@@ -51,11 +51,11 @@ class Settings:
                 maximum_points=int(data.maximum_points),
                 decimal_places=int(data.decimal_places),
             )
-            model.update_series_settings(settings=settings)
+            model.results.update_series_settings(settings=settings)
         except Exception as e:
             raise web.internalerror(str(e))
 
-        settings, events, results = model.build_series_result()
+        settings, events, results = model.results.build_series_result()
         return render.series_table(events=events, results=results)
 
 
@@ -66,7 +66,7 @@ class PdfResult:
         landscape = "ser_landscape" in data
 
         try:
-            settings, events, results = model.build_series_result()
+            settings, events, results = model.results.build_series_result()
             content = ooresults.pdf.series.create_pdf(
                 settings=settings, events=events, results=results, landscape=landscape
             )
@@ -83,7 +83,7 @@ class CsvResult:
     def POST(self):
         """Export results as csv for creating diplomas"""
         try:
-            settings, events, results = model.build_series_result()
+            settings, events, results = model.results.build_series_result()
 
             output = io.StringIO()
             writer = csv.writer(output, delimiter=";", quoting=csv.QUOTE_MINIMAL)
@@ -143,5 +143,5 @@ class CsvResult:
 class FillSettingsForm:
     def POST(self):
         """Query data to fill settings form"""
-        settings = model.get_series_settings()
+        settings = model.results.get_series_settings()
         return render.series_settings(settings=settings)

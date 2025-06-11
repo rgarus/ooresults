@@ -21,7 +21,7 @@ import logging
 
 import web
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.plugins import iof_course_data
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.repo import CourseUsedError
@@ -30,9 +30,9 @@ from ooresults.utils import render
 
 
 def update(event_id: int):
-    courses = model.get_courses(event_id=event_id)
+    courses = model.courses.get_courses(event_id=event_id)
     try:
-        event = model.get_event(id=event_id)
+        event = model.events.get_event(id=event_id)
         return render.courses_table(event=event, courses=courses)
     except EventNotFoundError:
         raise web.conflict("Event deleted")
@@ -59,7 +59,7 @@ class Import:
                 _, courses, class_course = iof_course_data.parse_course_data(
                     data.browse1
                 )
-                model.import_courses(
+                model.courses.import_courses(
                     event_id=event_id, courses=courses, class_course=class_course
                 )
 
@@ -78,9 +78,9 @@ class Export:
         event_id = int(data.event_id) if data.event_id != "" else -1
         try:
             if data.cou_export == "cou.export.1":
-                event = model.get_event(id=event_id)
-                courses = model.get_courses(event_id=event_id)
-                classes = model.get_classes(event_id=event_id)
+                event = model.events.get_event(id=event_id)
+                courses = model.courses.get_courses(event_id=event_id)
+                classes = model.classes.get_classes(event_id=event_id)
                 content = iof_course_data.create_course_data(event, courses, classes)
 
         except EventNotFoundError:
@@ -104,7 +104,7 @@ class Add:
         controls = [c.strip() for c in controls]
         try:
             if data.id == "":
-                model.add_course(
+                model.courses.add_course(
                     event_id=event_id,
                     name=data.name,
                     length=length,
@@ -112,7 +112,7 @@ class Add:
                     controls=controls,
                 )
             else:
-                model.update_course(
+                model.courses.update_course(
                     id=int(data.id),
                     event_id=event_id,
                     name=data.name,
@@ -141,7 +141,7 @@ class Delete:
         print(data)
         event_id = int(data.event_id) if data.event_id != "" else -1
         try:
-            model.delete_course(id=int(data.id))
+            model.courses.delete_course(id=int(data.id))
             return update(event_id)
         except CourseUsedError:
             raise web.conflict("Course used in classes")
@@ -158,7 +158,7 @@ class FillEditForm:
             if data.id == "":
                 course = None
             else:
-                course = model.get_course(id=int(data.id))
+                course = model.courses.get_course(id=int(data.id))
         except EventNotFoundError:
             raise web.conflict("Event deleted")
         except KeyError:

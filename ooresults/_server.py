@@ -32,8 +32,8 @@ from cheroot.server import HTTPServer
 from cheroot.ssl.builtin import BuiltinSSLAdapter
 
 from ooresults import configuration
+from ooresults import model
 from ooresults.handler import cached_result
-from ooresults.model import model
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.user import Users
 from ooresults.utils import render
@@ -47,7 +47,7 @@ web.config.debug = False
 class Root:
     def GET(self):
         t1 = time.time()
-        events = model.get_events()
+        events = model.events.get_events()
         for event in events:
             if event.publish:
                 results_table = cached_result.get_cached_data(event_id=event.id)
@@ -68,7 +68,7 @@ class Login:
 
 class Admin:
     def GET(self):
-        return render.main(events=model.get_events())
+        return render.main(events=model.events.get_events())
 
 
 class Static:
@@ -254,9 +254,7 @@ def main() -> Optional[int]:
     rental_cards.read_rental_cards(path=main_path / "rental_cards.txt")
 
     try:
-        model.db = SqliteRepo(
-            db=str(database),
-        )
+        model.db = SqliteRepo(db=str(database))
     except (RuntimeError, sqlite3.Error):
         exc_type, exc_value, _ = sys.exc_info()
         logging.error(f"{exc_type.__module__}.{exc_type.__name__}: {exc_value}")
@@ -277,18 +275,18 @@ def main() -> Optional[int]:
     try:
         app.add_processor(my_processor)
         try:
-            model.websocket_server = WebSocketServer(
+            model.results.websocket_server = WebSocketServer(
                 demo_reader=config.demo_reader,
                 import_stream=config.import_stream,
                 ssl_cert=config.ssl_cert,
                 ssl_key=config.ssl_key,
             )
         except Exception:
-            model.websocket_server = WebSocketServer(
+            model.results.websocket_server = WebSocketServer(
                 demo_reader=config.demo_reader,
                 import_stream=config.import_stream,
             )
-        model.websocket_server.start()
+        model.results.websocket_server.start()
         logging.info("Webserver started")
         app.run()
     except KeyboardInterrupt:

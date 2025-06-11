@@ -17,30 +17,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional
-
-from ooresults.repo.repo import Repo
-
-from . import classes
-from . import clubs
-from . import competitors
-from . import courses
-from . import entries
-from . import events
-from . import results
-from . import series
+from ooresults import model
+from ooresults.otypes.series_type import Settings
+from ooresults.repo.repo import TransactionMode
 
 
-__all__ = [
-    "classes",
-    "clubs",
-    "competitors",
-    "courses",
-    "entries",
-    "events",
-    "results",
-    "series",
-]
+def get_series_settings() -> Settings:
+    with model.db.transaction():
+        return model.db.get_series_settings()
 
 
-db: Optional[Repo] = None
+def update_series_settings(settings: Settings) -> None:
+    with model.db.transaction(mode=TransactionMode.IMMEDIATE):
+        model.db.update_series_settings(settings=settings)

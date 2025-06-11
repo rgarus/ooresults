@@ -23,7 +23,7 @@ from decimal import Decimal
 
 import pytest
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassType
 from ooresults.otypes.course_type import CourseType
@@ -271,7 +271,7 @@ def test_build_series_result(
     entry_3: EntryType,
     entry_4: EntryType,
 ):
-    m_settings, m_events, m_ranked_classes = model.build_series_result()
+    m_settings, m_events, m_ranked_classes = model.results.build_series_result()
 
     assert m_settings == settings
     assert m_events == [event_1, event_2]

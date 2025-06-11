@@ -23,7 +23,7 @@ from datetime import timezone
 
 import pytest
 
-from ooresults.model import model
+from ooresults import model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.course_type import CourseType
@@ -48,7 +48,7 @@ def event_id(db: SqliteRepo) -> int:
         date=datetime.date(year=2020, month=1, day=1),
         key=None,
         publish=False,
-        series=False,
+        series=None,
         fields=[],
     )
 
@@ -143,9 +143,9 @@ def test_import_course_data_with_climb_update_existing_course(
             "controls": ["101", "102"],
         },
     ]
-    model.import_courses(event_id=event_id, courses=courses, class_course=[])
+    model.courses.import_courses(event_id=event_id, courses=courses, class_course=[])
 
-    co = model.get_courses(event_id=event_id)
+    co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 1
     assert co[0] == CourseType(
         id=course_1_id,
@@ -168,9 +168,9 @@ def test_import_course_data_without_climb_update_existing_course(
             "controls": ["101", "102"],
         },
     ]
-    model.import_courses(event_id=event_id, courses=courses, class_course=[])
+    model.courses.import_courses(event_id=event_id, courses=courses, class_course=[])
 
-    co = model.get_courses(event_id=event_id)
+    co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 1
     assert co[0] == CourseType(
         id=course_1_id,
@@ -191,9 +191,9 @@ def test_import_course_data_add_not_existing_course(event_id: int, course_1_id: 
             "controls": ["104"],
         },
     ]
-    model.import_courses(event_id=event_id, courses=courses, class_course=[])
+    model.courses.import_courses(event_id=event_id, courses=courses, class_course=[])
 
-    co = model.get_courses(event_id=event_id)
+    co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 2
     assert co[1].id != co[0].id
 
@@ -236,9 +236,9 @@ def test_import_course_data_update_or_add_courses(event_id: int, course_1_id: in
             "controls": [],
         },
     ]
-    model.import_courses(event_id=event_id, courses=courses, class_course=[])
+    model.courses.import_courses(event_id=event_id, courses=courses, class_course=[])
 
-    co = model.get_courses(event_id=event_id)
+    co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 3
     assert co[0].id != co[1].id
     assert co[0].id != co[2].id
@@ -279,9 +279,11 @@ def test_import_course_data_add_not_existing_class(
             "course_name": None,
         }
     ]
-    model.import_courses(event_id=event_id, courses=[], class_course=class_course)
+    model.courses.import_courses(
+        event_id=event_id, courses=[], class_course=class_course
+    )
 
-    co = model.get_courses(event_id=event_id)
+    co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 1
     assert co[0] == CourseType(
         id=course_1_id,
@@ -292,7 +294,7 @@ def test_import_course_data_add_not_existing_class(
         controls=["101", "102", "103"],
     )
 
-    cl = list(model.get_classes(event_id=event_id))
+    cl = list(model.classes.get_classes(event_id=event_id))
     assert len(cl) == 2
     assert cl[0].id != cl[1].id
 
@@ -337,9 +339,11 @@ def test_import_course_data_update_class_course_assignment(
             "course_name": "Bahn B",
         }
     ]
-    model.import_courses(event_id=event_id, courses=courses, class_course=class_course)
+    model.courses.import_courses(
+        event_id=event_id, courses=courses, class_course=class_course
+    )
 
-    co = model.get_courses(event_id=event_id)
+    co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 2
     assert co[0].id != co[1].id
 
@@ -360,7 +364,7 @@ def test_import_course_data_update_class_course_assignment(
         controls=["201", "102"],
     )
 
-    cl = model.get_classes(event_id=event_id)
+    cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 2
 
     assert cl[0] == ClassInfoType(
@@ -396,9 +400,11 @@ def test_import_course_data_remove_class_course_assigment(
             "course_name": None,
         }
     ]
-    model.import_courses(event_id=event_id, courses=[], class_course=class_course)
+    model.courses.import_courses(
+        event_id=event_id, courses=[], class_course=class_course
+    )
 
-    co = model.get_courses(event_id=event_id)
+    co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 1
 
     assert co[0] == CourseType(
@@ -410,7 +416,7 @@ def test_import_course_data_remove_class_course_assigment(
         controls=["101", "102", "103"],
     )
 
-    cl = list(model.get_classes(event_id=event_id))
+    cl = list(model.classes.get_classes(event_id=event_id))
     assert len(cl) == 1
 
     assert cl[0] == ClassInfoType(
@@ -461,9 +467,11 @@ def test_import_course_data_update_or_add_class_course_assigments(
             "course_name": "Bahn B",
         },
     ]
-    model.import_courses(event_id=event_id, courses=courses, class_course=class_course)
+    model.courses.import_courses(
+        event_id=event_id, courses=courses, class_course=class_course
+    )
 
-    co = model.get_courses(event_id=event_id)
+    co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 2
     assert co[0].id != co[1].id
 
@@ -484,7 +492,7 @@ def test_import_course_data_update_or_add_class_course_assigments(
         controls=["104"],
     )
 
-    cl = model.get_classes(event_id=event_id)
+    cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 4
     assert cl[0].id not in (class_1_id, class_2_id, cl[2].id, cl[3].id)
     assert cl[1].id not in (class_1_id, class_2_id, cl[2].id, cl[3].id)
@@ -538,7 +546,7 @@ def test_import_course_data_update_or_add_class_course_assigments(
 def test_update_course_data_recalculates_entry_result(
     event_id: int, class_1_id: int, course_1_id: int, entry_1: EntryType
 ):
-    model.update_course(
+    model.courses.update_course(
         id=course_1_id,
         event_id=event_id,
         name="Course 3",
@@ -546,7 +554,7 @@ def test_update_course_data_recalculates_entry_result(
         climb=150,
         controls=["101", "104"],
     )
-    co = model.get_courses(event_id=event_id)
+    co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 1
 
     assert co[0] == CourseType(
@@ -558,7 +566,7 @@ def test_update_course_data_recalculates_entry_result(
         controls=["101", "104"],
     )
 
-    e = model.get_entries(event_id=event_id)
+    e = model.entries.get_entries(event_id=event_id)
     assert len(e) == 1
 
     assert e[0].result == PersonRaceResult(
