@@ -128,6 +128,9 @@ Noch nicht vorhandene Kategorien werden ebenfalls automatisch erzeugt.
 
    Für den OE2003 Export aus OrienteeringOnline werden spezielle Rechte in OrienteeringOnline benötigt.
 
+Durch Auswahl einer Ansicht können die Teilnehmer in Gruppen (z.B. nach Kategorien getrennt) angezeigt werden:
+
+.. image:: images/import_entries_6_edited.png
 
 Anlegen der Bahnen
 ------------------

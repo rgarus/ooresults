@@ -194,7 +194,7 @@ Anzeigen und Editieren der Ergebnisse eines Läufers
 
 1. Selektieren des Läufers in der "Entries" Liste.
    Mit Hilfe der Filter-Funktion kann die Liste verkleinert werden.
-#. Anklicken der Funktion "Show result"
+#. Anklicken der Funktion "Edit split times ..."
 
 .. image:: images/entries_result_1.png
 
