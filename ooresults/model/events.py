@@ -30,7 +30,9 @@ from ooresults.repo.repo import TransactionMode
 
 def get_events() -> List[EventType]:
     with model.db.transaction():
-        return model.db.get_events()
+        events = model.db.get_events()
+    events.sort(key=lambda e: e.date, reverse=True)
+    return events
 
 
 def get_event(id: int) -> EventType:

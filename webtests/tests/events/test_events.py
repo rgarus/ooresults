@@ -345,7 +345,7 @@ def test_if_an_event_is_deleted_then_the_event_is_no_longer_displayed(
     dialog.submit()
 
     # select event
-    event_page.table.select_row(2)
+    event_page.table.select_row(3)
     assert event_page.get_event_name() == "Test-Lauf heute"
     assert event_page.get_event_date() == "2023-12-28"
 
@@ -389,7 +389,7 @@ def test_if_an_event_is_deleted_then_no_event_is_selected(
     dialog.submit()
 
     # select event
-    event_page.table.select_row(2)
+    event_page.table.select_row(3)
     assert event_page.get_event_name() == "Test-Lauf heute"
     assert event_page.get_event_date() == "2023-12-28"
 
@@ -494,6 +494,73 @@ def test_if_several_events_are_added_then_the_added_events_are_displayed(
     ]
 
 
+def test_events_are_displayed_ordered_by_date_descending(
+    event_page: EventPage, event: None
+):
+    dialog = event_page.actions.add()
+    dialog.enter_values(
+        name="Test-Lauf 1",
+        date="2023-12-27",
+        key=None,
+        publish=False,
+        series="Serie",
+        fields=["c", "d"],
+        streaming_address=None,
+        streaming_key=None,
+        streaming_enabled=None,
+    )
+    dialog.submit()
+
+    dialog = event_page.actions.add()
+    dialog.enter_values(
+        name="Test-Lauf 2",
+        date="2023-12-29",
+        key="local",
+        publish=False,
+        series="Serie",
+        fields=["e", "f"],
+        streaming_address="myhost:8081",
+        streaming_key="secret-key",
+        streaming_enabled=True,
+    )
+    dialog.submit()
+
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 4
+    assert event_page.table.nr_of_columns() == 7
+
+    assert event_page.table.row(i=1) == [
+        "Events  (3)",
+    ]
+    assert event_page.table.row(i=2) == [
+        "Test-Lauf 2",
+        "2023-12-29",
+        "***",
+        "no",
+        "enabled",
+        "Serie",
+        "e, f",
+    ]
+    assert event_page.table.row(i=3) == [
+        "Test-Lauf heute",
+        "2023-12-28",
+        "***",
+        "yes",
+        "enabled",
+        "Serie",
+        "a, b",
+    ]
+    assert event_page.table.row(i=4) == [
+        "Test-Lauf 1",
+        "2023-12-27",
+        "",
+        "no",
+        "",
+        "Serie",
+        "c, d",
+    ]
+
+
 def test_if_filter_is_set_then_only_matching_rows_are_displayed(
     event_page: EventPage, event: None
 ):
@@ -595,15 +662,6 @@ def test_if_an_event_is_added_by_another_user_then_it_is_displayed_after_reload(
         "Events  (2)",
     ]
     assert event_page.table.row(i=2) == [
-        "Test-Lauf heute",
-        "2023-12-28",
-        "***",
-        "yes",
-        "enabled",
-        "Serie",
-        "a, b",
-    ]
-    assert event_page.table.row(i=3) == [
         "XXX Event",
         "2024-05-17",
         "",
@@ -611,4 +669,13 @@ def test_if_an_event_is_added_by_another_user_then_it_is_displayed_after_reload(
         "",
         "",
         "",
+    ]
+    assert event_page.table.row(i=3) == [
+        "Test-Lauf heute",
+        "2023-12-28",
+        "***",
+        "yes",
+        "enabled",
+        "Serie",
+        "a, b",
     ]

@@ -29,7 +29,8 @@ Einloggen
 
 .. image:: images/login_2.png
 
-Bei korrekter Eingabe von Benutzernamen und Passwort werden die bereits angelegten Wettkämpfe angezeigt.
+Bei korrekter Eingabe von Benutzernamen und Passwort werden die bereits angelegten Wettkämpfe
+in absteigender chronologischer Reihenfolge angezeigt.
 
 .. image:: images/login_3.png
 
