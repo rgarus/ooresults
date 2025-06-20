@@ -57,7 +57,7 @@ die Funktion "Settings ..." geöffnet.
 Veranstalterbonus
 -----------------
 
-Teilnehmer, die in einem Wettkampf der Kategorie "Organizer" zugeordnet sind,
+Teilnehmer, die in einem Wettkampf der Kategorie "Organizer" oder "Organizers" zugeordnet sind,
 erhalten für diesen Wettkampf einen Veranstalterbonus. Er beträgt 50% des Punkte-Ergebnisses
 bei Teilnahme an einem Lauf, ansonsten ist es der Durchschnitt der beiden besten Punkte-Ergebnisse.
 
@@ -67,5 +67,5 @@ bei Teilnahme an einem Lauf, ansonsten ist es der Durchschnitt der beiden besten
 
 .. warning::
 
-   Die Kategorie "Organizer" erscheint nicht in Start- und Ergebnislisten und kann daher nicht als
-   Wettkampfkategorie verwendet werden.
+   Die Kategorien "Organizer" und "Organizers" erscheinen nicht in Start- und Ergebnislisten
+   und können daher nicht als Wettkampfkategorien verwendet werden.

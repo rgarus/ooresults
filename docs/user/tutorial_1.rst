@@ -174,8 +174,9 @@ automatisch angelegten Kategorien müssen noch um weitere Daten ergänzt werden.
 
 .. warning::
 
-   Der Name Organizer kann nicht als Wettkampfkategorie verwendet werden. Teilnehmer, die dieser Kategorie zugeordnet sind,
-   erhalten einen Veranstalterbonus bei Serien, und werden nicht in Start- und Ergebnislisten aufgeführt.
+   Die Namen Organizer und Organizers können nicht als Wettkampfkategorien verwendet werden.
+   Teilnehmer, die diesen Kategorien zugeordnet sind, erhalten einen Veranstalterbonus bei Serien.
+   Die Kategorien werden nicht in Start- und Ergebnislisten aufgeführt.
 
 Für die Tutorial-Wettkämpfe werden folgende Kategorien verwendet:
 

@@ -331,7 +331,9 @@ def build_series_result() -> (
                 entries=copy.deepcopy(entries),
             )
             list_of_results.append(class_results)
-            organizers.append([e for e in entries if e.class_name == "Organizer"])
+            organizers.append(
+                [e for e in entries if e.class_name in ["Organizer", "Organizers"]]
+            )
 
     ranked_classes = build_results.build_total_results(
         settings=settings,

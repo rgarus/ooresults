@@ -533,7 +533,9 @@ def test_best_3_of_4_races(
     ]
 
 
+@pytest.mark.parametrize("organizer", ["Organizer", "Organizers"])
 def test_bonus_1_race(
+    organizer: str,
     event_1: EventType,
     event_2: EventType,
     class_info_1: ClassInfoType,
@@ -559,7 +561,7 @@ def test_bonus_1_race(
         first_name="Angela",
         last_name="Merkel",
         class_id=2,
-        class_name="Organizer",
+        class_name=organizer,
     )
 
     data = build_results.build_total_results(
@@ -607,7 +609,9 @@ def test_bonus_1_race(
     ]
 
 
+@pytest.mark.parametrize("organizer", ["Organizer", "Organizers"])
 def test_bonus_2_races(
+    organizer: str,
     event_1: EventType,
     event_2: EventType,
     event_3: EventType,
@@ -635,7 +639,7 @@ def test_bonus_2_races(
         first_name="Angela",
         last_name="Merkel",
         class_id=2,
-        class_name="Organizer",
+        class_name=organizer,
     )
 
     entry_3 = EntryType(
@@ -709,7 +713,9 @@ def test_bonus_2_races(
     ]
 
 
+@pytest.mark.parametrize("organizer", ["Organizer", "Organizers"])
 def test_bonus_4_races(
+    organizer: str,
     event_1: EventType,
     event_2: EventType,
     event_3: EventType,
@@ -754,7 +760,7 @@ def test_bonus_4_races(
         first_name="Angela",
         last_name="Merkel",
         class_id=3,
-        class_name="Organizer",
+        class_name=organizer,
     )
 
     entry_4 = EntryType(

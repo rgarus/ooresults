@@ -39,7 +39,7 @@ def build_results(
 ) -> List[Tuple[ClassInfoType, List[RankedEntryType]]]:
     all_results = []
     for class_info in class_infos:
-        if class_info.name == "Organizer":
+        if class_info.name in ["Organizer", "Organizers"]:
             continue
 
         class_results: List[RankedEntryType] = []
@@ -136,7 +136,7 @@ def build_total_results(
     r: Dict[str, Dict[Tuple[str, str], PersonSeriesResult]] = {}
     for i, class_results in enumerate(list_of_results):
         for class_, ranked_entries in class_results:
-            if class_.name == "Organizer":
+            if class_.name in ["Organizer", "Organizers"]:
                 continue
             if class_.name not in r:
                 r[class_.name] = {}
