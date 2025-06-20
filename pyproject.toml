@@ -26,7 +26,7 @@ dependencies = [
     "case-converter",
     "clevercsv",
     "fastclasses-json",
-    "fpdf2 != 2.5.7",
+    "fpdf2 == 2.6.1",
     "iso8601",
     "jsonschema",
     "lxml",
