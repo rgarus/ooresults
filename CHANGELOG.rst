@@ -2,6 +2,23 @@ Changelog
 =========
 
 
+[0.4.2] - 2025-06-21
+--------------------
+
+Changed
+^^^^^^^
+
+- The events displayed on the Events tab are no longer sorted by name, but by date in descending order.
+- Function 'Show result ...' of tab Entries renamed to 'Edit split times ...'.
+- Instead of the ‘Organizer’ class, the ‘Organizers’ class can also be used as a special class for calculating the organizer bonus of a series.
+- User documentation updated.
+
+Fixed
+^^^^^
+
+- Fixed a performance issue when printing split times results with current fpdf2 versions.
+
+
 [0.4.1] - 2025-05-13
 --------------------
 
