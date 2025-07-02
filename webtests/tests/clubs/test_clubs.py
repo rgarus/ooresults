@@ -27,8 +27,7 @@ from webtests.tests.conftest import post
 
 @pytest.fixture
 def club_page(page: webdriver.Remote) -> ClubPage:
-    tabs = Tabs(page=page)
-    tabs.tab(text="Clubs").click()
+    Tabs(page=page).select(text="Clubs")
     return ClubPage(page=page)
 
 
@@ -245,14 +244,17 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(
     assert club_page.table.nr_of_rows() == 4
     assert club_page.table.nr_of_columns() == 1
 
-    club_page.filter().set_text("bund")
+    try:
+        club_page.filter().set_text("bund")
 
-    # check number of rows
-    assert club_page.table.nr_of_rows() == 2
-    assert club_page.table.nr_of_columns() == 1
+        # check number of rows
+        assert club_page.table.nr_of_rows() == 2
+        assert club_page.table.nr_of_columns() == 1
 
-    assert club_page.table.row(i=1) == ["Clubs  (3)"]
-    assert club_page.table.row(i=2) == ["OL Bundestag"]
+        assert club_page.table.row(i=1) == ["Clubs  (3)"]
+        assert club_page.table.row(i=2) == ["OL Bundestag"]
+    finally:
+        club_page.filter().set_text("")
 
 
 def test_if_an_club_is_added_by_another_user_then_it_is_displayed_after_reload(

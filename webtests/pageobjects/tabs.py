@@ -60,3 +60,6 @@ class Tabs:
             return selected_tabs[0]
         else:
             raise RuntimeError(f"Selected tabs: {[t.text() for t in selected_tabs]}")
+
+    def select(self, text: str) -> None:
+        self.tab(text=text).click()

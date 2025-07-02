@@ -27,8 +27,7 @@ from webtests.tests.conftest import post
 
 @pytest.fixture
 def event_page(page: webdriver.Remote) -> EventPage:
-    tabs = Tabs(page=page)
-    tabs.tab(text="Events").click()
+    Tabs(page=page).select(text="Events")
     return EventPage(page=page)
 
 
@@ -596,24 +595,27 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(
     assert event_page.table.nr_of_rows() == 4
     assert event_page.table.nr_of_columns() == 7
 
-    event_page.filter().set_text("heute")
+    try:
+        event_page.filter().set_text("heute")
 
-    # check number of rows
-    assert event_page.table.nr_of_rows() == 2
-    assert event_page.table.nr_of_columns() == 7
+        # check number of rows
+        assert event_page.table.nr_of_rows() == 2
+        assert event_page.table.nr_of_columns() == 7
 
-    assert event_page.table.row(i=1) == [
-        "Events  (3)",
-    ]
-    assert event_page.table.row(i=2) == [
-        "Test-Lauf heute",
-        "2023-12-28",
-        "***",
-        "yes",
-        "enabled",
-        "Serie",
-        "a, b",
-    ]
+        assert event_page.table.row(i=1) == [
+            "Events  (3)",
+        ]
+        assert event_page.table.row(i=2) == [
+            "Test-Lauf heute",
+            "2023-12-28",
+            "***",
+            "yes",
+            "enabled",
+            "Serie",
+            "a, b",
+        ]
+    finally:
+        event_page.filter().set_text("")
 
 
 def test_if_an_event_is_added_by_another_user_then_it_is_displayed_after_reload(
