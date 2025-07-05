@@ -17,8 +17,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import List
 from typing import Optional
+from typing import Set
+from typing import Tuple
 
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.websocket_server import streaming_status
 
@@ -43,6 +48,22 @@ STREAMING_STATUS = {
     streaming_status.Status.ERROR: "Error",
     streaming_status.Status.OK: "Ok",
 }
+
+
+def build_columns(
+    class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]]
+) -> Set[str]:
+    columns = set()
+    for class_, _ in class_results:
+        if class_.params.apply_handicap_rule:
+            columns.add("factor")
+        if class_.params.penalty_controls is not None:
+            columns.add("penalties_controls")
+        if class_.params.penalty_overtime is not None:
+            columns.add("penalties_overtime")
+        if class_.params.otype == "score":
+            columns.add("score")
+    return columns
 
 
 def minutes_seconds(time: Optional[int]) -> str:

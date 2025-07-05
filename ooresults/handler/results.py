@@ -18,35 +18,15 @@
 
 
 import logging
-from typing import List
-from typing import Set
-from typing import Tuple
 
 import web
 
 import ooresults.pdf.result
 import ooresults.pdf.splittimes
 from ooresults import model
-from ooresults.otypes.class_type import ClassInfoType
-from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.repo.repo import EventNotFoundError
+from ooresults.utils import globals
 from ooresults.utils import render
-
-
-def build_columns(
-    class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]]
-) -> Set[str]:
-    columns = set()
-    for class_, _ in class_results:
-        if class_.params.apply_handicap_rule:
-            columns.add("factor")
-        if class_.params.penalty_controls is not None:
-            columns.add("penalties_controls")
-        if class_.params.penalty_overtime is not None:
-            columns.add("penalties_overtime")
-        if class_.params.otype == "score":
-            columns.add("score")
-    return columns
 
 
 class Update:
@@ -57,10 +37,7 @@ class Update:
 
         try:
             event, class_results = model.results.event_class_results(event_id=event_id)
-            columns = build_columns(class_results)
-            return render.results_table(
-                event=event, class_results=class_results, columns=columns
-            )
+            return render.results_table(event=event, class_results=class_results)
         except EventNotFoundError:
             raise web.conflict("Event deleted")
         except:
@@ -77,12 +54,11 @@ class PdfResult:
 
         try:
             event, class_results = model.results.event_class_results(event_id=event_id)
-            columns = build_columns(class_results)
             content = ooresults.pdf.result.create_pdf(
                 event=event,
                 results=class_results,
                 include_dns=include_dns,
-                landscape=len(columns) > 0,
+                landscape=len(globals.build_columns(class_results)) > 0,
             )
             return content
 

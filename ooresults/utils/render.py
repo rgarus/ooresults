@@ -21,7 +21,6 @@ import pathlib
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Set
 from typing import Tuple
 
 import web
@@ -44,6 +43,7 @@ from ooresults.otypes.series_type import Settings
 from ooresults.otypes.start_type import PersonRaceStart
 from ooresults.utils.globals import MAP_STATUS
 from ooresults.utils.globals import STREAMING_STATUS
+from ooresults.utils.globals import build_columns
 from ooresults.utils.globals import minutes_seconds
 from ooresults.utils.globals import streaming_status_ok
 from ooresults.utils.rental_cards import format_card
@@ -70,6 +70,7 @@ t_globals = {
     "STREAMING_STATUS": STREAMING_STATUS,
     "streaming_status_ok": streaming_status_ok,
     "EXPERIMENTAL": EXPERIMENTAL,
+    "build_columns": build_columns,
     "minutes_seconds": minutes_seconds,
     "format_card": format_card,
 }
@@ -190,11 +191,8 @@ def add_event(event: Optional[EventType]) -> str:
 def results_table(
     event: EventType,
     class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
-    columns: Set[str],
 ) -> str:
-    return str(
-        _render.results_table(event=event, class_results=class_results, columns=columns)
-    )
+    return str(_render.results_table(event=event, class_results=class_results))
 
 
 def series_table(
@@ -228,7 +226,7 @@ def main(events: List[EventType]) -> str:
     classes_tab_content = _render.classes_tab_content(classes_table)
     courses_table = _render.courses_table(None, [])
     courses_tab_content = _render.courses_tab_content(courses_table)
-    results_table = _render.results_table(None, [], set())
+    results_table = _render.results_table(None, [])
     results_tab_content = _render.results_tab_content(results_table)
     series_table = _render.series_table([], [])
     series_tab_content = _render.series_tab_content(series_table)

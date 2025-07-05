@@ -24,7 +24,6 @@ from collections import OrderedDict
 from typing import Optional
 
 from ooresults import model
-from ooresults.handler import results
 from ooresults.utils import render
 
 
@@ -61,10 +60,7 @@ def get_cached_data(event_id: int):
 
         if not (cached_data and cached_data.content is not None and cached_data.valid):
             event, class_results = model.results.event_class_results(event_id=event_id)
-            columns = results.build_columns(class_results)
-            content = render.results_table(
-                event=event, class_results=class_results, columns=columns
-            )
+            content = render.results_table(event=event, class_results=class_results)
 
             with lock:
                 cached_data = caches.get(event_id, None)

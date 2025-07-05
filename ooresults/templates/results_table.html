@@ -1,4 +1,4 @@
-$def with (event, class_results, columns)
+$def with (event, class_results)
 
 
 $def format_rank(rank, not_competing: bool) -> str:
@@ -72,6 +72,8 @@ $def f(value) -> str:
 <div id="res.result">
 
 <table style="border-collapse: collapse">
+$ columns = build_columns(class_results=class_results)
+
 $for class_, ranked_results in class_results:
     $if not ranked_results:
         $continue
