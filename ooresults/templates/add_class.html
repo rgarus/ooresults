@@ -97,15 +97,7 @@ $else:
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_handicap">Apply handicap rule</label></th>
-                <td>
-                    <select id="cla_handicap" name="handicap" oninput="mark_label(this)">
-                        $for value, text in ((0, 'No'), (1, 'Yes'))
-                            $if value == params.apply_handicap_rule:
-                                <option value="$str(value)" selected>$text</option>
-                            $else:
-                                <option value="$str(value)">$text</option>
-                    </select>
-                </td>
+                <td><input id="cla_handicap" name="handicap" type="checkbox" value="true" oninput="mark_label(this)" $('checked' if params and params.apply_handicap_rule else '')/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_massStart">Mass start</label></th>

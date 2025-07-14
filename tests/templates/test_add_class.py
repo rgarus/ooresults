@@ -107,12 +107,9 @@ def test_class_is_none(courses: List[CourseType]):
     assert option_start[2].attrib == {"value": "yes"}
     assert option_start[2].text == "Yes"
 
-    option_handicap = html.findall(".//select[@name='handicap']/option")
-    assert len(option_handicap) == 2
-    assert option_handicap[0].attrib == {"value": "0", "selected": "selected"}
-    assert option_handicap[0].text == "No"
-    assert option_handicap[1].attrib == {"value": "1"}
-    assert option_handicap[1].text == "Yes"
+    input_handicap = html.find(".//input[@name='handicap']")
+    assert input_handicap.attrib["value"] == "true"
+    assert "checked" not in input_handicap.attrib
 
     input_mass_start = html.find(".//input[@name='massStart']")
     assert input_mass_start.attrib["value"] == ""
@@ -169,12 +166,9 @@ def test_class_is_not_none(class_: ClassType, courses: List[CourseType]):
     assert option_start[2].attrib == {"value": "yes"}
     assert option_start[2].text == "Yes"
 
-    option_handicap = html.findall(".//select[@name='handicap']/option")
-    assert len(option_handicap) == 2
-    assert option_handicap[0].attrib == {"value": "0", "selected": "selected"}
-    assert option_handicap[0].text == "No"
-    assert option_handicap[1].attrib == {"value": "1"}
-    assert option_handicap[1].text == "Yes"
+    input_handicap = html.find(".//input[@name='handicap']")
+    assert input_handicap.attrib["value"] == "true"
+    assert "checked" not in input_handicap.attrib
 
     input_mass_start = html.find(".//input[@name='massStart']")
     assert input_mass_start.attrib["value"] == ""
@@ -325,12 +319,9 @@ def test_apply_handicap_role_is_true(class_: ClassType, courses: List[CourseType
     class_.params.apply_handicap_rule = True
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
-    option_handicap = html.findall(".//select[@name='handicap']/option")
-    assert len(option_handicap) == 2
-    assert option_handicap[0].attrib == {"value": "0"}
-    assert option_handicap[0].text == "No"
-    assert option_handicap[1].attrib == {"value": "1", "selected": "selected"}
-    assert option_handicap[1].text == "Yes"
+    input_handicap = html.find(".//input[@name='handicap']")
+    assert input_handicap.attrib["value"] == "true"
+    assert "checked" in input_handicap.attrib
 
 
 def test_one_voided_leg(class_: ClassType, courses: List[CourseType]):

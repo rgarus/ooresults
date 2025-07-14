@@ -117,7 +117,7 @@ class Add:
         params = ClassParams()
         params.otype = data.get("type", "standard")
         params.using_start_control = data.get("startControl", "if_punched")
-        params.apply_handicap_rule = data.get("handicap", "0") == "1"
+        params.apply_handicap_rule = data.get("handicap", "") == "true"
         if data.get("timeLimit", "") != "":
             m, _, s = data["timeLimit"].partition(":")
             params.time_limit = 60 * int(m) + int(s)
