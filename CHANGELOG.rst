@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+
+- Display of an empty text instead of 'no' in the event table for an unpublished event.
+
+
 [0.4.2] - 2025-06-21
 --------------------
 

@@ -50,7 +50,7 @@ $def streaming_enabled(enabled):
                     <td class="dte">$event.name</td>
                     <td class="dte">$event.date.isoformat()</td>
                     <td class="dte">$('***' if event.key is not None else '')</td>
-                    <td class="dte">$('yes' if event.publish else 'no')</td>
+                    <td class="dte">$('yes' if event.publish else '')</td>
                     <td class="dte">$streaming_enabled(event.streaming_enabled)</td>
                     <td class="dte">$(event.series if event.series is not None else '')</td>
                     <td class="dte">$', '.join(event.fields)</td>
