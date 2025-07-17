@@ -19,6 +19,7 @@
 
 from typing import List
 from typing import Optional
+from typing import TypeVar
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -32,9 +33,16 @@ from webtests.pageobjects.actions import Actions
 from webtests.pageobjects.table import Table
 
 
+T = TypeVar("T", bound="AddCompetitorDialog")
+
+
 class AddCompetitorDialog:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
+
+    def wait(self: T) -> T:
+        self.page.find_element(By.ID, "comp.formAdd")
+        return self
 
     def check_values(
         self,
@@ -44,7 +52,9 @@ class AddCompetitorDialog:
         year: str,
         chip: str,
         club: str,
-    ):
+    ) -> None:
+        self.wait()
+
         assert first_name == TextControl(page=self.page, id="com_firstName").get_text()
         assert last_name == TextControl(page=self.page, id="com_lastName").get_text()
         assert (
@@ -68,7 +78,9 @@ class AddCompetitorDialog:
         year: Optional[str] = None,
         chip: Optional[str] = None,
         club: Optional[str] = None,
-    ):
+    ) -> None:
+        self.wait()
+
         if first_name is not None:
             TextControl(page=self.page, id="com_firstName").set_text(text=first_name)
         if last_name is not None:
@@ -82,13 +94,13 @@ class AddCompetitorDialog:
         if club is not None:
             ComboboxControl(page=self.page, id="com_clubId").select_by_text(text=club)
 
-    def submit(self):
+    def submit(self) -> None:
         elem = self.page.find_element(By.ID, "comp.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Save']")
         elem.click()
         WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
 
-    def cancel(self):
+    def cancel(self) -> None:
         elem = self.page.find_element(By.ID, "comp.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Cancel']")
         elem.click()
@@ -96,7 +108,7 @@ class AddCompetitorDialog:
 
 
 class ImportCompetitorDialog:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
 
     def cancel(self) -> None:
@@ -106,7 +118,7 @@ class ImportCompetitorDialog:
 
 
 class ExportCompetitorDialog:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
 
     def cancel(self) -> None:
@@ -116,7 +128,7 @@ class ExportCompetitorDialog:
 
 
 class DeleteCompetitorDialog:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
 
     def ok(self) -> None:
@@ -131,7 +143,7 @@ class DeleteCompetitorDialog:
 
 
 class CompetitorPage:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
         self.actions = CompetitorActions(page=page)
         self.table = CompetitorTable(page=page)
@@ -139,14 +151,14 @@ class CompetitorPage:
     def filter(self) -> TextControl:
         return TextControl(page=self.page, id="comp.filter")
 
-    def delete_competitors(self):
+    def delete_competitors(self) -> None:
         for i in range(self.table.nr_of_rows() - 1):
             self.table.select_row(2)
             self.actions.delete().ok()
 
 
 class CompetitorActions(Actions):
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         super().__init__(page=page, id="comp.actions")
 
     def reload(self) -> None:
@@ -174,7 +186,7 @@ class CompetitorActions(Actions):
 
 
 class CompetitorTable(Table):
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         super().__init__(page=page, xpath="//table[@id='comp.table']")
 
     def selected_row(self) -> Optional[int]:
@@ -184,3 +196,7 @@ class CompetitorTable(Table):
             raise RuntimeError(f"Multiple rows selected: {rows}")
         else:
             return rows[0] if rows else None
+
+    def double_click_row(self, i: int) -> AddCompetitorDialog:
+        super().double_click_row(i=i)
+        return AddCompetitorDialog(page=self.page)

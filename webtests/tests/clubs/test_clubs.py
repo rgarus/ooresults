@@ -143,6 +143,22 @@ def test_if_a_club_is_edited_then_the_changed_data_are_displayed(
     assert club_page.table.row(i=2) == ["OC Kanzleramt"]
 
 
+def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
+    club_page: ClubPage, club: None
+):
+    dialog = club_page.table.double_click_row(2)
+    dialog.check_values(name="OL Bundestag")
+    dialog.enter_values(name="OC Kanzleramt")
+    dialog.submit()
+
+    # check number of rows
+    assert club_page.table.nr_of_rows() == 2
+    assert club_page.table.nr_of_columns() == 1
+
+    assert club_page.table.row(i=1) == ["Clubs  (1)"]
+    assert club_page.table.row(i=2) == ["OC Kanzleramt"]
+
+
 def test_if_a_club_is_edited_then_no_club_is_selected(club_page: ClubPage, club: None):
     club_page.table.select_row(i=2)
     dialog = club_page.actions.edit()

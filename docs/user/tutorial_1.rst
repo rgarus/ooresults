@@ -57,6 +57,8 @@ Die angezeigten Daten beziehen sich dann auf diesen Wettkampf.
    Hinzufügen, Ändern oder Löschen eines Datensatzes eines Registerblattes erfolgt durch Anklicken eines der ToolButtons.
    Einige Funktionen stehen erst zur Verfügung, nachdem ein Datensatz ausgewählt wurde.
    Der aktuell ausgewählte Datensatz wird mit rotem Hintergrund dargestellt.
+   
+   Ein Doppelklick auf einen Datensatz öffnet direkt das Fenster zur Bearbeitung des Datensatzes.
 
 .. image:: images/login_4_edited.png
 

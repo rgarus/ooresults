@@ -3,7 +3,7 @@ $def with (clubs)
 <input id="club.filter" oninput="filter_table('clb.table', 'tr', this.value)" placeholder="Search ...">
 <p/>
 
-<table class="dte" id="clb.table" onclick="clb_highlight(event)">
+<table class="dte" id="clb.table" onclick="clb_highlight(event)" ondblclick="clb_highlight(event)" onmousedown="table_mousedown(event)">
     <thead>
         <tr id="club.theader" class="dth">
             <th class="dth">Name</th>

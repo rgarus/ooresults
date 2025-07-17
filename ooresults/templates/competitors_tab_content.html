@@ -102,6 +102,9 @@ $def with (competitors_table)
             comp_selected.className = 'selected';
             document.getElementById('comp.myBtnEdit').disabled = false;
             document.getElementById('comp.myBtnDelete').disabled = false;
+            if (e.type == "dblclick") {
+                comp_myEdit();
+            }
         }
     }
 

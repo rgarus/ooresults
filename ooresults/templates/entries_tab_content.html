@@ -185,6 +185,9 @@ $def with (entries_table)
             entr_comp_selected = e.target.parentNode;
             entr_comp_selected.className = 'selected';
             document.getElementById('entry.comp.add').disabled = false;
+            if (e.type == "dblclick") {
+                entr_comp_save();
+            }
         }
     }
 
@@ -210,6 +213,9 @@ $def with (entries_table)
             document.getElementById('entr.myBtnResult').disabled = false;
             ln = entr_selected.querySelector('[id="entr_table_lastname"]').innerHTML == '';
             document.getElementById('entr.myBtnEdit').disabled = ln;
+            if (e.type == "dblclick" && !ln) {
+                entr_myEdit();
+            }
         }
     }
 
@@ -421,7 +427,12 @@ $def with (entries_table)
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                entr_updateTable(this.responseText)
+                filter_content = document.getElementById('entr.filter').value;
+                entr_updateTable(this.responseText);
+                document.getElementById('entr.filter').value = filter_content;
+                if (filter_content != "") {
+                    filter_table('entr.table', 'tr', filter_content);
+                }
             }
             if (this.readyState == 4 && this.status == 409) {
                 window.alert(this.responseText);

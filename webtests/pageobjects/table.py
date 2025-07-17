@@ -20,6 +20,7 @@
 from typing import List
 
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 
 
@@ -60,6 +61,12 @@ class Table:
         rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
         rows = [row for row in rows if row.is_displayed()]
         rows[i - 1].find_elements(By.XPATH, ".//td")[0].click()
+
+    def double_click_row(self, i: int) -> None:
+        rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
+        rows = [row for row in rows if row.is_displayed()]
+        row = rows[i - 1].find_elements(By.XPATH, ".//td")[0]
+        ActionChains(driver=self.page).double_click(on_element=row).perform()
 
     def selected_rows(self) -> List[int]:
         rows = self._table().find_elements(By.XPATH, ".//tbody//tr")

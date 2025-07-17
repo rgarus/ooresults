@@ -311,6 +311,45 @@ def test_if_a_competitor_is_edited_then_the_changed_data_are_displayed(
     ]
 
 
+def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
+    competitor_page: CompetitorPage, competitor: None
+):
+    dialog = competitor_page.table.double_click_row(2)
+    dialog.check_values(
+        first_name="Annalena",
+        last_name="Baerbock",
+        gender="F",
+        year="1980",
+        chip="7379879",
+        club="",
+    )
+    dialog.enter_values(
+        first_name="Anna Lena",
+        last_name="Bärbock",
+        gender="",
+        year="2001",
+        chip="1234",
+        club="",
+    )
+    dialog.submit()
+
+    # check number of rows
+    assert competitor_page.table.nr_of_rows() == 2
+    assert competitor_page.table.nr_of_columns() == 6
+
+    assert competitor_page.table.row(i=1) == [
+        "Competitors  (1)",
+    ]
+    assert competitor_page.table.row(i=2) == [
+        "Anna Lena",
+        "Bärbock",
+        "",
+        "2001",
+        "1234",
+        "",
+    ]
+
+
 def test_if_a_competitor_is_deleted_then_the_competitor_is_no_longer_displayed(
     competitor_page: CompetitorPage, competitor: None
 ):

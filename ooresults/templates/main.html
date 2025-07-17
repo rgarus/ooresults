@@ -74,6 +74,15 @@ $:clubs_tab_content
     } 
 </script>
 
+<script>
+    function table_mousedown(e) {
+        if (e.target.tagName == "TD") {
+            if (e.detail > 1) {
+                e.preventDefault();
+            }
+        }
+    }
+</script>
 
 <script>
     function updateDisplayedParams(selected) {

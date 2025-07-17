@@ -27,7 +27,7 @@ $def streaming_enabled(enabled):
 <input id="eve_filter" oninput="filter_table('evnt.table', 'tr', this.value)" placeholder="Search ...">
 <p/>
 
-<table class="dte" id="evnt.table" onclick="evnt_highlight(event)">
+<table class="dte" id="evnt.table" onclick="evnt_highlight(event)" ondblclick="evnt_highlight(event)" onmousedown="table_mousedown(event)">
     <thead>
         <tr id="evnt.theader" class="dth">
             <th class="dth">Name</th>

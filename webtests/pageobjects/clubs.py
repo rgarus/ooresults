@@ -18,6 +18,7 @@
 
 
 from typing import Optional
+from typing import TypeVar
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -29,14 +30,25 @@ from webtests.pageobjects.actions import Actions
 from webtests.pageobjects.table import Table
 
 
+T = TypeVar("T", bound="AddClubDialog")
+
+
 class AddClubDialog:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
 
+    def wait(self: T) -> T:
+        self.page.find_element(By.ID, "clb.formAdd")
+        return self
+
     def check_values(self, name: str) -> None:
+        self.wait()
+
         assert name == TextControl(page=self.page, id="clb_name").get_text()
 
     def enter_values(self, name: Optional[str] = None) -> None:
+        self.wait()
+
         if name is not None:
             TextControl(page=self.page, id="clb_name").set_text(text=name)
 
@@ -54,7 +66,7 @@ class AddClubDialog:
 
 
 class DeleteClubDialog:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
 
     def ok(self) -> None:
@@ -69,7 +81,7 @@ class DeleteClubDialog:
 
 
 class ClubPage:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
         self.actions = ClubActions(page=page)
         self.table = ClubTable(page=page)
@@ -84,7 +96,7 @@ class ClubPage:
 
 
 class ClubActions(Actions):
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         super().__init__(page=page, id="club.actions")
 
     def reload(self) -> None:
@@ -104,7 +116,7 @@ class ClubActions(Actions):
 
 
 class ClubTable(Table):
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         super().__init__(page=page, xpath="//table[@id='clb.table']")
 
     def selected_row(self) -> Optional[int]:
@@ -114,3 +126,7 @@ class ClubTable(Table):
             raise RuntimeError(f"Multiple rows selected: {rows}")
         else:
             return rows[0] if rows else None
+
+    def double_click_row(self, i: int) -> AddClubDialog:
+        super().double_click_row(i=i)
+        return AddClubDialog(page=self.page)

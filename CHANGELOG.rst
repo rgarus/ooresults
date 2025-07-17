@@ -5,6 +5,11 @@ Changelog
 [Unreleased]
 ------------
 
+Added
+^^^^^
+
+- Double click on a table row opens the 'Edit' window.
+
 Changed
 ^^^^^^^
 

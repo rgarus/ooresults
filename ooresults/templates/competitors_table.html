@@ -3,7 +3,7 @@ $def with (competitors)
 <input id="comp.filter" oninput="filter_table('comp.table', 'tr', this.value)" placeholder="Search ..."/>
 <p/>
 
-<table class="dte" id="comp.table" onclick="comp_highlight(event)">
+<table class="dte" id="comp.table" onclick="comp_highlight(event)" ondblclick="comp_highlight(event)" onmousedown="table_mousedown(event)">
     <thead>
         <tr id="comp.theader" class="dth">
             <th class="dth">First name</th>

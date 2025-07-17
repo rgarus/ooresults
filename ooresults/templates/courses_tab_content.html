@@ -101,6 +101,9 @@ $def with (courses_table)
             cou_selected.className = 'selected';
             document.getElementById('cou.myBtnEdit').disabled = false;
             document.getElementById('cou.myBtnDelete').disabled = false;
+            if (e.type == "dblclick") {
+                cou_myEdit();
+            }
         }
     }
 

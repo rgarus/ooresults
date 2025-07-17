@@ -44,6 +44,9 @@ $def with (clubs_table)
             clb_selected.className = 'selected';
             document.getElementById('clb.myBtnEdit').disabled = false;
             document.getElementById('clb.myBtnDelete').disabled = false;
+            if (e.type == "dblclick") {
+                clb_myEdit();
+            }
         }
     }
 

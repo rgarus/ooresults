@@ -58,6 +58,10 @@ $def with (events_table)
             element.innerHTML = evnt_selected.getElementsByTagName('TD')[0].innerHTML;
             element = document.getElementById('evnt.event_date');
             element.innerHTML = evnt_selected.getElementsByTagName('TD')[1].innerHTML;
+
+            if (e.type == "dblclick") {
+                evnt_myEdit();
+            }
         }
     }
 

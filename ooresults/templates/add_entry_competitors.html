@@ -7,7 +7,7 @@ $def with (competitors)
     <input oninput="w3.filterHTML('#competitors_tbody', 'tr', this.value)" placeholder="Search ..."/>
     <p/>
     <div style="display: block; height: 50%; overflow: auto">
-        <table class="dt" id="entry.comp.table" onclick="entr_comp_highlight(event)" >
+        <table class="dt" id="entry.comp.table" onclick="entr_comp_highlight(event)" ondblclick="entr_comp_highlight(event)" onmousedown="table_mousedown(event)" >
             <thead>
                 <tr class="dt">
                     <th class="dt">First name</th>

@@ -101,6 +101,9 @@ $def with (classes_table)
             cls_selected.className = 'selected';
             document.getElementById('cls.myBtnEdit').disabled = false;
             document.getElementById('cls.myBtnDelete').disabled = false;
+            if (e.type == "dblclick") {
+                cls_myEdit();
+            }
         }
     }
 

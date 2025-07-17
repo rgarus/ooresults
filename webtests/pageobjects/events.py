@@ -19,6 +19,7 @@
 
 from typing import List
 from typing import Optional
+from typing import TypeVar
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -32,9 +33,16 @@ from webtests.pageobjects.actions import Actions
 from webtests.pageobjects.table import Table
 
 
+T = TypeVar("T", bound="AddEventDialog")
+
+
 class AddEventDialog:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
+
+    def wait(self: T) -> T:
+        self.page.find_element(By.ID, "evnt.formAdd")
+        return self
 
     def check_values(
         self,
@@ -47,7 +55,9 @@ class AddEventDialog:
         streaming_address: str,
         streaming_key: str,
         streaming_enabled: bool,
-    ):
+    ) -> None:
+        self.wait()
+
         assert name == TextControl(page=self.page, id="eve_name").get_text()
         assert date == DateControl(page=self.page, id="eve_date").get_date()
         assert key == TextControl(page=self.page, id="eve_key").get_text()
@@ -80,7 +90,9 @@ class AddEventDialog:
         streaming_address: Optional[str] = None,
         streaming_key: Optional[str] = None,
         streaming_enabled: Optional[bool] = None,
-    ):
+    ) -> None:
+        self.wait()
+
         if name is not None:
             TextControl(page=self.page, id="eve_name").set_text(text=name)
         if date is not None:
@@ -108,13 +120,13 @@ class AddEventDialog:
                 checked=streaming_enabled
             )
 
-    def submit(self):
+    def submit(self) -> None:
         elem = self.page.find_element(By.ID, "evnt.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Save']")
         elem.click()
         WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
 
-    def cancel(self):
+    def cancel(self) -> None:
         elem = self.page.find_element(By.ID, "evnt.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Cancel']")
         elem.click()
@@ -122,7 +134,7 @@ class AddEventDialog:
 
 
 class DeleteEventDialog:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
 
     def ok(self) -> None:
@@ -137,7 +149,7 @@ class DeleteEventDialog:
 
 
 class EventPage:
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
         self.actions = EventActions(page=page)
         self.table = EventTable(page=page)
@@ -158,7 +170,7 @@ class EventPage:
 
 
 class EventActions(Actions):
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         super().__init__(page=page, id="eve_actions")
 
     def reload(self) -> None:
@@ -178,7 +190,7 @@ class EventActions(Actions):
 
 
 class EventTable(Table):
-    def __init__(self, page: webdriver.Remote):
+    def __init__(self, page: webdriver.Remote) -> None:
         super().__init__(page=page, xpath="//table[@id='evnt.table']")
 
     def selected_row(self) -> Optional[int]:
@@ -188,3 +200,7 @@ class EventTable(Table):
             raise RuntimeError(f"Multiple rows selected: {rows}")
         else:
             return rows[0] if rows else None
+
+    def double_click_row(self, i: int) -> AddEventDialog:
+        super().double_click_row(i=i)
+        return AddEventDialog(page=self.page)

@@ -325,6 +325,52 @@ def test_if_an_event_is_edited_then_the_changed_data_are_displayed(
     ]
 
 
+def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
+    event_page: EventPage, event: None
+):
+    dialog = event_page.table.double_click_row(2)
+    dialog.check_values(
+        name="Test-Lauf heute",
+        date="2023-12-28",
+        key="local-key",
+        publish=True,
+        series="Serie",
+        fields=["a", "b"],
+        streaming_address="localhost:8081",
+        streaming_key="abcde",
+        streaming_enabled=True,
+    )
+    dialog.enter_values(
+        name="Test-Lauf morgen",
+        date="2023-12-29",
+        key="local",
+        publish=False,
+        series="Serie 2",
+        fields=["field"],
+        streaming_address="myhost:8081",
+        streaming_key="",
+        streaming_enabled=True,
+    )
+    dialog.submit()
+
+    # check number of rows
+    assert event_page.table.nr_of_rows() == 2
+    assert event_page.table.nr_of_columns() == 7
+
+    assert event_page.table.row(i=1) == [
+        "Events  (1)",
+    ]
+    assert event_page.table.row(i=2) == [
+        "Test-Lauf morgen",
+        "2023-12-29",
+        "***",
+        "",
+        "",
+        "Serie 2",
+        "field",
+    ]
+
+
 def test_if_an_event_is_deleted_then_the_event_is_no_longer_displayed(
     event_page: EventPage, event: None
 ):
