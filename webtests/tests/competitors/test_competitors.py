@@ -235,23 +235,7 @@ def test_if_a_competitor_is_added_you_can_choose_between_gender_unknown_and_fema
     ]
 
 
-def test_if_no_competitor_is_selected_and_a_new_competitor_is_added_then_no_competitor_is_selected(
-    competitor_page: CompetitorPage, competitor: None
-):
-    dialog = competitor_page.actions.add()
-    dialog.enter_values(
-        first_name="Robert",
-        last_name="Habeck",
-        gender="M",
-        year="1969",
-        chip="7509749",
-        club="",
-    )
-    dialog.submit()
-    assert competitor_page.table.selected_row() is None
-
-
-def test_if_a_new_competitor_is_added_then_no_competitor_is_selected(
+def test_if_a_competitor_is_selected_and_a_new_competitor_is_added_then_no_competitor_is_selected(
     competitor_page: CompetitorPage, competitor: None
 ):
     competitor_page.table.select_row(i=2)

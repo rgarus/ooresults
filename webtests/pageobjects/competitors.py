@@ -23,7 +23,7 @@ from typing import TypeVar
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.expected_conditions import invisibility_of_element
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from webtests.controls.combobox_control import ComboboxControl
@@ -41,7 +41,9 @@ class AddCompetitorDialog:
         self.page = page
 
     def wait(self: T) -> T:
-        self.page.find_element(By.ID, "comp.formAdd")
+        WebDriverWait(self.page, 10).until(
+            EC.visibility_of_element_located(locator=(By.ID, "comp.formAdd"))
+        )
         return self
 
     def check_values(
@@ -98,13 +100,13 @@ class AddCompetitorDialog:
         elem = self.page.find_element(By.ID, "comp.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Save']")
         elem.click()
-        WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
+        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
 
     def cancel(self) -> None:
         elem = self.page.find_element(By.ID, "comp.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Cancel']")
         elem.click()
-        WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
+        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class ImportCompetitorDialog:
@@ -114,7 +116,7 @@ class ImportCompetitorDialog:
     def cancel(self) -> None:
         elem = self.page.find_element(By.ID, "comp.formImport")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
+        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class ExportCompetitorDialog:
@@ -124,7 +126,7 @@ class ExportCompetitorDialog:
     def cancel(self) -> None:
         elem = self.page.find_element(By.ID, "comp.formExport")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
+        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class DeleteCompetitorDialog:
@@ -134,12 +136,12 @@ class DeleteCompetitorDialog:
     def ok(self) -> None:
         elem = self.page.find_element(By.ID, "comp.formDelete")
         elem.find_element(By.XPATH, "button[text()='Delete']").click()
-        WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
+        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
 
     def cancel(self) -> None:
         elem = self.page.find_element(By.ID, "comp.formDelete")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(invisibility_of_element(elem))
+        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class CompetitorPage:

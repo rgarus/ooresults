@@ -205,21 +205,7 @@ def test_if_a_course_is_added_with_all_data_then_an_additional_course_is_display
     ]
 
 
-def test_if_no_course_is_selected_and_a_new_course_is_added_then_no_course_is_selected(
-    course_page: CoursePage, course: None
-):
-    dialog = course_page.actions.add()
-    dialog.enter_values(
-        name="Bahn A",
-        length="",
-        climb="",
-        controls="121-124-122-123",
-    )
-    dialog.submit()
-    assert course_page.table.selected_row() is None
-
-
-def test_if_a_new_course_is_added_then_no_course_is_selected(
+def test_if_a_course_is_selected_and_a_new_course_is_added_then_no_course_is_selected(
     course_page: CoursePage, course: None
 ):
     course_page.table.select_row(i=2)
@@ -338,7 +324,7 @@ def test_if_a_course_is_deleted_then_the_course_is_no_longer_displayed(
     ]
 
 
-def test_if_a_course_is_deleted_then_no_courser_is_selected(
+def test_if_a_course_is_deleted_then_no_course_is_selected(
     course_page: CoursePage, course: None
 ):
     # add a second course
