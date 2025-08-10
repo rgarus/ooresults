@@ -1,4 +1,4 @@
-$def with (id, key)
+$def with (event_id, key)
 
 <!DOCTYPE html>
 <html>
@@ -19,6 +19,9 @@ $def with (id, key)
     <body style="margin: 0">
         <div id="page"></div>
         <script>
+            var event_id = "$:(str(event_id) if event_id is not None else "")";
+            var key = "$:(key if key else "")";
+
             /* Function to open fullscreen mode */
             function openFullscreen() {
                 if (document.documentElement.requestFullscreen) {
@@ -73,7 +76,7 @@ $def with (id, key)
                 var elem = document.getElementById('page')
 
                 ws.onopen = function(event) {
-                    ws.send($:('"' + str(id) + ',' + str(key) + '"'))
+                    ws.send(event_id + ',' + key);
                     status = 'online';
                     message();
                     tp = setTimeout(function() {ping()}, 10000);

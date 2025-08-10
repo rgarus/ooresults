@@ -17,41 +17,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import web
+from lxml import etree
 
-from ooresults import model
 from ooresults.utils import render
 
 
-class Si1:
-    def GET(self):
-        event_id = None
-        key = None
-
-        try:
-            for event in model.events.get_events():
-                if event.key:
-                    event_id = event.id
-                    key = event.key
-                    break
-        except Exception:
-            pass
-
-        return render.si1_page(event_id=event_id, key=key)
-
-
-class Si2:
-    def GET(self):
-        event_id = None
-        key = None
-        data = web.input()
-
-        try:
-            for event in model.events.get_events():
-                if str(event.id) == data.id:
-                    event_id = event.id
-                    key = event.key
-        except Exception:
-            pass
-
-        return render.si2_page(event_id=event_id, key=key)
+def test_unauthorized():
+    html = etree.HTML(render.unauthorized())
+    assert html is not None

@@ -1,11 +1,11 @@
-$def with (id, key)
+$def with (event_id, key)
 
 <!DOCTYPE html>
 <html>
     <head>
         <title>SI reader</title>
-        <link rel="stylesheet" href="mystatic/style.css">
-        <link rel="stylesheet" href="mystatic/style-tab.css">
+        <link rel="stylesheet" href="mystatic/style.css"/>
+        <link rel="stylesheet" href="mystatic/style-tab.css"/>
         <style>
             .bgr {background-color: #ff7070;}
             .bgy {background-color: #ffff00;}
@@ -17,6 +17,8 @@ $def with (id, key)
     <body>
         <div id="page"></div>
         <script>
+            var event_id = "$:(str(event_id) if event_id is not None else "")";
+            var key = "$:(key if key else "")";
             var status = 'offline';
 
             function statusMessage() {
@@ -40,7 +42,7 @@ $def with (id, key)
                 var ws = new WebSocket(websocketServerLocation);
 
                 ws.onopen = function(event) {
-                    ws.send($:('"' + str(id) + ',' + str(key) + '"'));
+                    ws.send(event_id + ',' + key);
                     tp = setTimeout(function() {ping()}, 10000);
                 };
                 ws.onerror = function(event) {

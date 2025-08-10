@@ -7,13 +7,13 @@ $code
         else:
             return MAP_STATUS[status]
     
-    def background(status: str) -> str:
-        if status == ResultStatus.OK:
+    def background(message) -> str:
+        if message.get('status', ResultStatus.INACTIVE) == ResultStatus.OK:
             return "bgg"
         else:
             return "bgr"
 
-<div class="$background(message.get('status', ''))">
+<div id="si1.div" class="$background(message)">
     <div style="height: 37vh;" class="vertical-center">
         <p class="s2">$message['lastName'], $message['firstName']</p>
     </div>

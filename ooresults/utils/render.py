@@ -48,7 +48,6 @@ from ooresults.utils.globals import minutes_seconds
 from ooresults.utils.globals import streaming_status_ok
 from ooresults.utils.rental_cards import format_card
 from ooresults.websocket_server.streaming_status import Status
-from ooresults.websocket_server.streaming_status import StreamingStatus
 
 
 web.config.debug = False
@@ -81,8 +80,8 @@ _render_base = web.template.render(_templates, base="base", globals={"str": str}
 _render = web.template.render(_templates, globals=t_globals)
 
 
-def si1_page(id: Optional[int], key: Optional[str]) -> str:
-    return str(_render.si.si1_page(id=id, key=key))
+def si1_page(event_id: Optional[int], key: Optional[str]) -> str:
+    return str(_render.si.si1_page(event_id=event_id, key=key))
 
 
 def si1_data(message: Dict) -> str:
@@ -93,13 +92,13 @@ def si1_error(message: Dict) -> str:
     return str(_render.si.si1_error(message=message))
 
 
-def si2_page(id: Optional[int], key: Optional[str]) -> str:
-    return str(_render.si.si2_page(id=id, key=key))
+def si2_page(event_id: Optional[int], key: Optional[str]) -> str:
+    return str(_render.si.si2_page(event_id=event_id, key=key))
 
 
 def si2_data(
-    status: Status,
-    stream_status: Optional[StreamingStatus],
+    status: str,
+    stream_status: Optional[Status],
     event: EventType,
     messages: List[Dict],
 ) -> str:

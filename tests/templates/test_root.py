@@ -17,41 +17,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import web
+from lxml import etree
 
-from ooresults import model
 from ooresults.utils import render
 
 
-class Si1:
-    def GET(self):
-        event_id = None
-        key = None
+def test_results_table_is_none():
+    html = etree.HTML(render.root(results_table=None))
+    assert html is not None
 
-        try:
-            for event in model.events.get_events():
-                if event.key:
-                    event_id = event.id
-                    key = event.key
-                    break
-        except Exception:
-            pass
-
-        return render.si1_page(event_id=event_id, key=key)
+    assert html.find("body/h2").text == "No results available"
 
 
-class Si2:
-    def GET(self):
-        event_id = None
-        key = None
-        data = web.input()
+def test_results_table_is_not_none():
+    html = etree.HTML(render.root(results_table="<p>abc</p>"))
+    assert html is not None
 
-        try:
-            for event in model.events.get_events():
-                if str(event.id) == data.id:
-                    event_id = event.id
-                    key = event.key
-        except Exception:
-            pass
-
-        return render.si2_page(event_id=event_id, key=key)
+    assert html.find("body/p").text == "abc"

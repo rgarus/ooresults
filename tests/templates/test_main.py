@@ -17,41 +17,19 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import web
+from lxml import etree
 
-from ooresults import model
 from ooresults.utils import render
 
 
-class Si1:
-    def GET(self):
-        event_id = None
-        key = None
+def test_events_list_is_empty():
+    html = etree.HTML(render.main(events=[]))
+    assert html is not None
 
-        try:
-            for event in model.events.get_events():
-                if event.key:
-                    event_id = event.id
-                    key = event.key
-                    break
-        except Exception:
-            pass
-
-        return render.si1_page(event_id=event_id, key=key)
-
-
-class Si2:
-    def GET(self):
-        event_id = None
-        key = None
-        data = web.input()
-
-        try:
-            for event in model.events.get_events():
-                if str(event.id) == data.id:
-                    event_id = event.id
-                    key = event.key
-        except Exception:
-            pass
-
-        return render.si2_page(event_id=event_id, key=key)
+    assert len(html.findall(".//div[@id='tabs']")) == 1
+    assert len(html.findall(".//div[@id='eve_actions']")) == 1
+    assert len(html.findall(".//div[@id='entr.actions']")) == 1
+    assert len(html.findall(".//div[@id='clas.actions']")) == 1
+    assert len(html.findall(".//div[@id='cour.actions']")) == 1
+    assert len(html.findall(".//div[@id='comp.actions']")) == 1
+    assert len(html.findall(".//div[@id='club.actions']")) == 1
