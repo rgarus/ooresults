@@ -1,5 +1,6 @@
-$def with (clubs_table)
- 
+## clubs_table: str
+
+
 <!-- Tab content -->
 <div id="Clubs" class="tabcontent">
   <div id="club.actions" class="actions">
@@ -11,7 +12,7 @@ $def with (clubs_table)
   </div>
 
   <div id=clb.data class="data">
-    $:clubs_table
+    ${clubs_table | n}
   </div>
 
   <!-- The Modal -->

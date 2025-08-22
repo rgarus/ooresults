@@ -1,8 +1,11 @@
-$def with (event_id, key)
+## event_id: Optional[int]
+## key: Optional[str]
+
 
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
         <title>SI reader</title>
         <link rel="stylesheet" href="mystatic/style.css"/>
         <link rel="stylesheet" href="mystatic/style-tab.css"/>
@@ -17,8 +20,8 @@ $def with (event_id, key)
     <body>
         <div id="page"></div>
         <script>
-            var event_id = "$:(str(event_id) if event_id is not None else "")";
-            var key = "$:(key if key else "")";
+            var event_id = "${event_id}";
+            var key = "${key | f, n}";
             var status = 'offline';
 
             function statusMessage() {

@@ -1,46 +1,47 @@
-$def with (event)
+## event: EventType
+
 
 <!-- Modal content -->
 <div class="modal-content">
     <span class="close" onclick="document.getElementById('evnt.addDialog').style.display='none'">&times;</span>
     <form id="evnt.formAdd" class="form-container" autocomplete="off" onsubmit="evnt_submitAdd(); return false;">
-        <input id="evnt.addId" name="id" type="text" value="$(event.id if event else '')" hidden/>
+        <input id="evnt.addId" name="id" type="text" value="${event.id if event else ''}" hidden/>
         <table id="evnt.addFormTable">
             <tr>
                 <th class="input-header"><label for="eve_name">Name *</label></th>
-                <td><input id="eve_name" name="name" type="text" value="$(event.name if event else '')" required oninput="mark_label(this)"/></td>
+                <td><input id="eve_name" name="name" type="text" value="${event.name if event else ''}" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="eve_date">Date *</label></th>
-                <td><input id="eve_date" name="date" type="date" min="2000-01-01" max="2099-12-31" value="$(event.date.isoformat() if event else '')" required oninput="mark_label(this)"/></td>
+                <td><input id="eve_date" name="date" type="date" min="2000-01-01" max="2099-12-31" value="${event.date.isoformat() if event else ''}" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="eve_key">Key</label></th>
-                <td><input id="eve_key" name="key" type="text" value="$(event.key if event and event.key else '')" oninput="mark_label(this)"/></td>
+                <td><input id="eve_key" name="key" type="text" value="${event.key if event else ''}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="eve_publish">Publish</label></th>
-                <td><input id="eve_publish" name="publish" type="checkbox" value="true" oninput="mark_label(this)" $('checked' if event and event.publish else '')/></td>
+                <td><input id="eve_publish" name="publish" type="checkbox" value="true" oninput="mark_label(this)" ${"checked" if event and event.publish else ""}/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="eve_streamingAddress">Streaming address</label></th>
-                <td><input id="eve_streamingAddress" name="streaming_address" type="text" value="$(event.streaming_address if event and event.streaming_address else '')" oninput="mark_label(this)"/></td>
+                <td><input id="eve_streamingAddress" name="streaming_address" type="text" value="${event.streaming_address if event else ''}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="eve_streamingKey">Streaming key</label></th>
-                <td><input id="eve_streamingKey" name="streaming_key" type="text" value="$(event.streaming_key if event and event.streaming_key else '')" oninput="mark_label(this)"/></td>
+                <td><input id="eve_streamingKey" name="streaming_key" type="text" value="${event.streaming_key if event else ''}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="eve_streamingEnabled">Streaming enabled</label></th>
-                <td><input id="eve_streamingEnabled" name="streaming_enabled" type="checkbox" value="true" oninput="mark_label(this)" $('checked' if event and event.streaming_enabled else '')/></td>
+                <td><input id="eve_streamingEnabled" name="streaming_enabled" type="checkbox" value="true" oninput="mark_label(this)" ${"checked" if event and event.streaming_enabled else ""}/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="eve_series">Series</label></th>
-                <td><input id="eve_series" name="series" type="text" value="$(event.series if event and event.series else '')" oninput="mark_label(this)"/></td>
+                <td><input id="eve_series" name="series" type="text" value="${event.series if event and event.series else ''}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="eve_fields">Fields</label></th>
-                <td><input id="eve_fields" name="fields" type="text" value="$(', '.join(event.fields) if event and event.fields else '')" oninput="mark_label(this)"/></td>
+                <td><input id="eve_fields" name="fields" type="text" value="${', '.join(event.fields) if event and event.fields else ''}" oninput="mark_label(this)"/></td>
             </tr>
         </table>
         <p></p>

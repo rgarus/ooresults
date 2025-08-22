@@ -1,39 +1,34 @@
-$def with (course)
+## course: CourseType
 
-$if course:
-    $ id = str(course.id)
-    $ name = course.name
-    $ length = str(round(course.length)) if course.length is not None else ""
-    $ climb = str(round(course.climb)) if course.climb is not None else ""
-    $ controls = " - ".join(course.controls)
-$else:
-    $ id = ""
-    $ name = ""
-    $ length = ""
-    $ climb = ""
-    $ controls = ""
+
+<%
+length = str(round(course.length)) if course and course.length is not None else ""
+climb = str(round(course.climb)) if course and course.climb is not None else ""
+controls = " - ".join(course.controls) if course else ""
+%>
+
 
 <!-- Modal content -->
 <div class="modal-content">
     <span class="close" onclick="document.getElementById('cou.addDialog').style.display='none'">&times;</span>
     <form id="cou.formAdd" class="form-container" autocomplete="off" onsubmit="cou_submitAdd(); return false;">
-        <input id="cou.addId" name="id" type="text" value="$id" hidden/>
+        <input id="cou.addId" name="id" type="text" value="${course.id if course else None}" hidden/>
         <table id="cou.addFormTable">
             <tr>
                 <th class="input-header"><label for="cou_name">Name *</label></th>
-                <td><input id="cou_name" name="name" type="text" value="$name" required oninput="mark_label(this)"/></td>
+                <td><input id="cou_name" name="name" type="text" value="${course.name if course else ''}" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cou_length">Length</label></th>
-                <td><input id="cou_length" name="length" type="number" min="0" max="99999" placeholder="meters" value="$length" oninput="mark_label(this)"/></td>
+                <td><input id="cou_length" name="length" type="number" min="0" max="99999" placeholder="meters" value="${length}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cou_climb">Climb</label></th>
-                <td><input id="cou_climb" name="climb" type="number" min="0" max="99999" placeholder="meters" value="$climb" oninput="mark_label(this)"/></td>
+                <td><input id="cou_climb" name="climb" type="number" min="0" max="99999" placeholder="meters" value="${climb}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cou_controls">Controls</label></th>
-                <td><input id="cou_controls" name="controls" type="text" placeholder="c1 - c2 - c3" value="$controls" oninput="mark_label(this)"/></td>
+                <td><input id="cou_controls" name="controls" type="text" placeholder="c1 - c2 - c3" value="${controls}" oninput="mark_label(this)"/></td>
             </tr>
         </table>
         <p></p>

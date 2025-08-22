@@ -1,4 +1,5 @@
-$def with (events)
+## events: List[EventType]
+
 
 <!-- Modal content -->
 <div class="modal-content">
@@ -13,11 +14,12 @@ $def with (events)
             </tr>
         </thead>
         <tbody>
-        $for e in events:
-            <tr class="dt" id="$e.id">
-                <td class="dt">$e.name</td>
-                <td class="dt">$e.date</td>
-            </tr> 
+        % for e in events:
+            <tr class="dt" id="${e.id}">
+                <td class="dt">${e.name}</td>
+                <td class="dt">${e.date}</td>
+            </tr>
+        % endfor
         </tbody>
     </table>
     

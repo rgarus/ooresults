@@ -1,85 +1,74 @@
-$def with (class_, courses)
+## class_: ClassType
+## courses: List[CourseType]
 
 
-$def format_time(time):
-    $if time is not None:
-        $return minutes_seconds(time)
-    $else:
-        $return ''
-
-$def format_date(time):
-    $if time is not None:
-        $return time.strftime('%H:%M:%S')
-    $else:
-        $return ''
-
-$def format_int(value):
-    $return str(value) if value is not None else ''
-
-$def format_voided_legs(legs):
-    $ s = []
-    $for i in legs:
-        $s.append(i.control_1 + '-' + i.control_2)
-    $return ', '.join(s)
+<%!
+from ooresults.otypes.class_params import ClassParams
+from ooresults.utils.globals import format_time
+from ooresults.utils.globals import minutes_seconds
 
 
-$if class_:
-    $ id = str(class_.id)
-    $ name = class_.name
-    $ short_name = class_.short_name if class_.short_name is not None else ''
-    $ course_id = class_.course_id
-    $ params = class_.params
-$else:
-    $ id = ""
-    $ name = ""
-    $ short_name = ""
-    $ course_id = None
-    $ params = ClassParams()
+def format_voided_legs(legs):
+    s = []
+    for i in legs:
+        s.append(i.control_1 + "-" + i.control_2)
+    return ", ".join(s)
+%>
+
+
+<%
+params = class_.params if class_ else ClassParams()
+%>
 
 
 <!-- Modal content -->
 <div class="modal-content">
     <span class="close" onclick="document.getElementById('cls.addDialog').style.display='none'">&times;</span>
     <form id="cls.formAdd" class="form-container" autocomplete="off" onsubmit="cls_submitAdd(); return false;">
-        <input id="cls.addId" name="id" type="text" value="$id" hidden/>
+        <input id="cls.addId" name="id" type="text" value="${class_.id if class_ else None}" hidden/>
         <table id="cls.addFormTable">
             <tr>
                 <th class="input-header"><label for="cla_name">Name *</label></th>
-                <td><input id="cla_name" name="name" type="text" value="$name" required oninput="mark_label(this)"/></td>
+                <td><input id="cla_name" name="name" type="text" value="${class_.name if class_ else ''}" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_shortName">Short name</label></th>
-                <td><input id="cla_shortName" name="short_name" type="text" value="$short_name" oninput="mark_label(this)"/></td>
+                <td><input id="cla_shortName" name="short_name" type="text" value="${class_.short_name if class_ else ''}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_courseId">Course</label></th>
                 <td>
                     <select id="cla_courseId" name="course_id" oninput="mark_label(this)">
-                    $if course_id is None:
+                    % if class_ is None or class_.course_id is None:
                         <option value="" selected></option>
-                    $else:
+                    % else:
                         <option value=""></option>
-                    $for course in courses:
-                        $if course.id == course_id:
-                            <option value="$course.id" selected>$course.name</option>
-                        $else:
-                            <option value="$course.id">$course.name</option>
+                    % endif
+                    % for course in courses:
+                        % if class_ and course.id == class_.course_id:
+                            <option value="${course.id}" selected>${course.name}</option>
+                        % else:
+                            <option value="${course.id}">${course.name}</option>
+                        % endif
+                    % endfor
                     </select>
                 </td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_voidedLegs">Voided legs</label></th>
-                <td><input id="cla_voidedLegs" name="voided_legs" type="text" placeholder="c1-c2, c3-c4, ..." value="$format_voided_legs(params.voided_legs)" oninput="mark_label(this)"/></td>
+                <td><input id="cla_voidedLegs" name="voided_legs" type="text" placeholder="c1-c2, c3-c4, ..." value="${format_voided_legs(params.voided_legs)}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_type">Type</label></th>
                 <td>
                     <select id="cla_type" name="type" oninput="mark_label(this)">
-                        $for value, text in (('standard', 'Standard'), ('net', 'Net'), ('score', 'Score'))
-                            $if value == params.otype:
-                                <option value="$str(value)" selected>$text</option>
-                            $else:
-                                <option value="$str(value)">$text</option>
+                        % for value, text in (("standard", "Standard"), ("net", "Net"), ("score", "Score")):
+                            % if value == params.otype:
+                                <option value="${value}" selected>${text}</option>
+                            % else:
+                                <option value="${value}">${text}</option>
+                            % endif
+                        % endfor
                     </select>
                 </td>
             </tr>
@@ -87,33 +76,35 @@ $else:
                 <th class="input-header"><label for="cla_startControl">Using start control</label></th>
                 <td>
                     <select id="cla_startControl" name="startControl" oninput="mark_label(this)">
-                        $for value, text in (('if_punched', 'If punched'), ('no', 'No'), ('yes', 'Yes'))
-                            $if value == params.using_start_control:
-                                <option value="$str(value)" selected>$text</option>
-                            $else:
-                                <option value="$str(value)">$text</option>
+                        % for value, text in (("if_punched", "If punched"), ("no", "No"), ("yes", "Yes")):
+                            % if value == params.using_start_control:
+                                <option value="${value}" selected>${text}</option>
+                            % else:
+                                <option value="${value}">${text}</option>
+                            % endif
+                        % endfor
                     </select>
                 </td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_handicap">Apply handicap rule</label></th>
-                <td><input id="cla_handicap" name="handicap" type="checkbox" value="true" oninput="mark_label(this)" $('checked' if params and params.apply_handicap_rule else '')/></td>
+                <td><input id="cla_handicap" name="handicap" type="checkbox" value="true" oninput="mark_label(this)" ${"checked" if params.apply_handicap_rule else ""}/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_massStart">Mass start</label></th>
-                <td><input id="cla_massStart" name="massStart" type="time" step="1" value="$format_date(params.mass_start)" oninput="mark_label(this)"/></td>
+                <td><input id="cla_massStart" name="massStart" type="time" step="1" value="${format_time(params.mass_start)}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_timeLimit">Time limit</label></th>
-                <td><input id="cla_timeLimit" name="timeLimit" type="text" pattern="[0-9]+:[0-5][0-9]" placeholder="m:ss" value="$format_time(params.time_limit)" oninput="mark_label(this)"/></td>
+                <td><input id="cla_timeLimit" name="timeLimit" type="text" pattern="[0-9]+:[0-5][0-9]" placeholder="m:ss" value="${minutes_seconds(params.time_limit)}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_penaltyControls">Penalty controls</label></th>
-                <td><input id="cla_penaltyControls" name="penaltyControls" type="number" min="1" placeholder="seconds" value="$format_int(params.penalty_controls)" oninput="mark_label(this)"/></td>
+                <td><input id="cla_penaltyControls" name="penaltyControls" type="number" min="1" placeholder="seconds" value="${params.penalty_controls}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="cla_penaltyOvertime">Penalty time limit</label></th>
-                <td><input id="cla_penaltyOvertime" name="penaltyOvertime" type="number" min="1" placeholder="seconds" value="$format_int(params.penalty_overtime)" oninput="mark_label(this)"/></td>
+                <td><input id="cla_penaltyOvertime" name="penaltyOvertime" type="number" min="1" placeholder="seconds" value="${params.penalty_overtime}" oninput="mark_label(this)"/></td>
             </tr>
         </table>
         <p></p>

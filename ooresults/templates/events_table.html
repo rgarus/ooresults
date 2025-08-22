@@ -1,12 +1,18 @@
-$def with (events)
+## events: List[EventType]
 
-$def streaming_enabled(enabled):
-    $if enabled is None:
-        $return ""
-    $elif enabled:
-        $return "enabled"
-    $else:
-        $return "disabled"
+
+<%!
+from typing import Optional
+
+
+def streaming_enabled(enabled: Optional[bool]) -> str:
+    if enabled is None:
+        return ""
+    elif enabled:
+        return "enabled"
+    else:
+        return "disabled"
+%>
 
 
 <div id="evnt.event">
@@ -40,21 +46,22 @@ $def streaming_enabled(enabled):
         </tr>
     </thead>
     <tbody id="events_tbody">
-        $if events:
-            $ name = "Events&nbsp;&nbsp;(" + str(len(events)) + ")"
+        % if events:
             <tr class="dte h1">
-                <th class="dte h1" colspan="99">$:name</th>
+                <th class="dte h1" colspan="99">Events&nbsp;&nbsp;(${len(events)})</th>
             </tr>
-            $for event in events:
-                <tr class="dte" id="$event.id">
-                    <td class="dte">$event.name</td>
-                    <td class="dte">$event.date.isoformat()</td>
-                    <td class="dte">$('***' if event.key is not None else '')</td>
-                    <td class="dte">$('yes' if event.publish else '')</td>
-                    <td class="dte">$streaming_enabled(event.streaming_enabled)</td>
-                    <td class="dte">$(event.series if event.series is not None else '')</td>
-                    <td class="dte">$', '.join(event.fields)</td>
+            % for event in events:
+                <tr class="dte" id="${event.id}">
+                    <td class="dte">${event.name}</td>
+                    <td class="dte">${event.date.isoformat()}</td>
+                    <td class="dte">${"***" if event.key is not None else ""}</td>
+                    <td class="dte">${"yes" if event.publish else ""}</td>
+                    <td class="dte">${streaming_enabled(event.streaming_enabled)}</td>
+                    <td class="dte">${event.series if event.series is not None else ""}</td>
+                    <td class="dte">${", ".join(event.fields)}</td>
                 </tr>
+            % endfor
+        % endif
     </tbody>
 </table>
 

@@ -47,6 +47,7 @@ def test_event_id(event_id: Optional[int], value: str):
         (None, ""),
         ("", ""),
         ("abc", "abc"),
+        ("<&>", "<&>"),
     ],
 )
 def test_key(key: Optional[str], value: str):

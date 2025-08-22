@@ -1,4 +1,4 @@
-$def with (competitors)
+## competitors: List[CompetitorType]
 
 
 <!-- Modal content -->
@@ -19,16 +19,17 @@ $def with (competitors)
                 </tr>
             </thead>
             <tbody id="competitors_tbody" >
-            $for competitor in competitors:
-                <tr class="dt" id="$competitor.id">
-                    <td class="dt">$competitor.first_name</td>
-                    <td class="dt">$competitor.last_name</td>
-                    <td class="dt">$competitor.gender</td>
-                    <td class="dt">$(str(competitor.year) if competitor.year is not None else '')</td>
-                    <td class="dt" style="text-align:right">$competitor.chip</td>
-                    <td class="dt">$competitor.club_name</td>
-                    <td class="dt" hidden>$competitor.club_id</td>
+            % for competitor in competitors:
+                <tr class="dt" id="${competitor.id}">
+                    <td class="dt">${competitor.first_name}</td>
+                    <td class="dt">${competitor.last_name}</td>
+                    <td class="dt">${competitor.gender}</td>
+                    <td class="dt">${competitor.year}</td>
+                    <td class="dt" style="text-align:right">${competitor.chip}</td>
+                    <td class="dt">${competitor.club_name}</td>
+                    <td class="dt" hidden>${competitor.club_id}</td>
                 </tr>
+            % endfor
             </tbody>
         </table>
     </div>

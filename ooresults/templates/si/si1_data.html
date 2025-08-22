@@ -1,26 +1,35 @@
-$def with (message)
+## message: Dict[str, Any]
 
-$code
-    def format(status: str, time: int) -> str:
-        if status == ResultStatus.OK:
-            return MAP_STATUS[status] + ', ' + minutes_seconds(time) + ' min'
-        else:
-            return MAP_STATUS[status]
-    
-    def background(message) -> str:
-        if message.get('status', ResultStatus.INACTIVE) == ResultStatus.OK:
-            return "bgg"
-        else:
-            return "bgr"
 
-<div id="si1.div" class="$background(message)">
+<%!
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.utils.globals import MAP_STATUS
+from ooresults.utils.globals import minutes_seconds
+
+
+def format(status: str, time: int) -> str:
+    if status == ResultStatus.OK:
+        return MAP_STATUS[status] + ", " + minutes_seconds(time) + " min"
+    else:
+        return MAP_STATUS[status]
+
+
+def background(message) -> str:
+    if message.get('status', ResultStatus.INACTIVE) == ResultStatus.OK:
+        return "bgg"
+    else:
+        return "bgr"
+%>
+
+
+<div id="si1.div" class="${background(message)}">
     <div style="height: 37vh;" class="vertical-center">
-        <p class="s2">$message['lastName'], $message['firstName']</p>
+        <p class="s2">${message["lastName"]}, ${message["firstName"]}</p>
     </div>
     <div style="height: 26vh;" class="vertical-center">
-        <p class="s1">$message['controlCard'], $message.get('class', '')</p>
+        <p class="s1">${message["controlCard"]}, ${message.get("class", "")}</p>
     </div>
     <div style="height: 37vh;" class="vertical-center">
-        <p class="s2">$format(message.get('status', ResultStatus.INACTIVE), message.get('time', 0))</p>
+        <p class="s2">${format(message.get("status", ResultStatus.INACTIVE), message.get("time", 0))}</p>
     </div>
 </div>

@@ -1,5 +1,6 @@
-$def with (competitors_table)
- 
+## competitors_table: str
+
+
 <!-- Tab content -->
 <div id="Competitors" class="tabcontent">
   <div id="comp.actions" class="actions">
@@ -13,7 +14,7 @@ $def with (competitors_table)
   </div>
 
   <div id=comp.data class="data">
-    $:competitors_table
+    ${competitors_table | n}
   </div>
 
   <!-- The Modal -->

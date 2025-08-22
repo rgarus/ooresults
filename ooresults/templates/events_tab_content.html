@@ -1,5 +1,6 @@
-$def with (events_table)
- 
+## events_table: str
+
+
 <!-- Tab content -->
 <div id="Events" class="tabcontent">
   <div id="eve_actions" class="actions">
@@ -11,7 +12,7 @@ $def with (events_table)
   </div>
 
   <div id="evnt.results" class="data">
-    $:events_table
+    ${events_table | n}
   </div>
 
   <!-- The Modal -->

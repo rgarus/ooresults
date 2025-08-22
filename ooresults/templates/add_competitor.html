@@ -1,72 +1,60 @@
-$def with (competitor, clubs)
+## competitor: CompetitorType
+## clubs: List[ClubType
 
-$if competitor:
-    $ id = str(competitor.id)
-    $ first_name = competitor.first_name
-    $ last_name = competitor.last_name
-    $ club_id = competitor.club_id
-    $ club_name = competitor.club_name if competitor.club_name else ""
-    $ gender = competitor.gender if competitor.gender else ""
-    $ year = str(competitor.year) if competitor.year is not None else ""
-    $ chip = competitor.chip if competitor.chip else ""
-$else:
-    $ id = ""
-    $ first_name = ""
-    $ last_name = ""
-    $ club_id = None
-    $ club_name = ""
-    $ gender = ""
-    $ year = ""
-    $ chip = ""
 
 <!-- Modal content -->
 <div class="modal-content">
     <span class="close" onclick="document.getElementById('comp.addDialog').style.display='none'">&times;</span>
     <form id="comp.formAdd" class="form-container" autocomplete="off" onsubmit="comp_submitAdd(); return false;">
-        <input id="comp.addId" name="id" type="text" value="$id" hidden/>
+        <input id="comp.addId" name="id" type="text" value="${competitor.id if competitor else None}" hidden/>
         <table id="comp.addFormTable">
             <tr>
                 <th class="input-header"><label for="com_firstName">First name *</label></th>
-                <td><input id="com_firstName" name="first_name" type="text" value="$first_name" required oninput="mark_label(this)"/></td>
+                <td><input id="com_firstName" name="first_name" type="text" value="${competitor.first_name if competitor else ''}" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="com_lastName">Last name *</label></th>
-                <td><input id="com_lastName" name="last_name" type="text" value="$last_name" required oninput="mark_label(this)"/></td>
+                <td><input id="com_lastName" name="last_name" type="text" value="${competitor.last_name if competitor else ''}" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="com_gender">Gender</label></th>
                 <td>
                     <select id="com_gender" name="gender" oninput="mark_label(this)">
-                    $for value in ['', 'F', 'M']:
-                        $if value == gender:
-                            <option value="$value" selected>$value</option>
-                        $else:
-                            <option value="$value">$value</option>
+                    % for value in ["", "F", "M"]:
+                        % if value == (competitor.gender if competitor and competitor.gender else ""):
+                            <option value="${value}" selected>${value}</option>
+                        % else:
+                            <option value="${value}">${value}</option>
+                        % endif
+                    % endfor
                     </select>
                 </td>
             </tr>
             <tr>
                 <th class="input-header"><label for="com_year">Year</label></th>
                 <td><input id="com_year" name="year" type="number" min="1900" max="2099"
-                           value="$year" oninput="mark_label(this)"/></td>
+                           value="${competitor.year if competitor else None}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="com_chip">Chip</label></th>
-                <td><input id="com_chip" name="chip" type="text" value="$chip" oninput="mark_label(this)"/></td>
+                <td><input id="com_chip" name="chip" type="text" value="${competitor.chip if competitor else ''}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="com_clubId">Club</label></th>
                 <td>
                     <select id="com_clubId" name="club_id" oninput="mark_label(this)">
-                    $if club_id is None:
+                    % if competitor is None or competitor.club_id is None:
                         <option value="" selected></option>
-                    $else:
+                    % else:
                         <option value=""></option>
-                    $for club in clubs:
-                        $if competitor and competitor.club_id == club.id:
-                            <option value="$str(club.id)" selected>$club.name</option>
-                        $else:
-                            <option value="$str(club.id)">$club.name</option>
+                    % endif
+                    % for club in clubs:
+                        % if competitor and competitor.club_id == club.id:
+                            <option value="${club.id}" selected>${club.name}</option>
+                        % else:
+                            <option value="${club.id}">${club.name}</option>
+                        % endif
+                    % endfor
                     </select>
                 </td>
             </tr>

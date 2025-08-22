@@ -23,10 +23,9 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
-import web
+from mako.template import Template
 
 from ooresults.otypes.class_type import ClassInfoType
-from ooresults.otypes.class_type import ClassParams
 from ooresults.otypes.class_type import ClassType
 from ooresults.otypes.club_type import ClubType
 from ooresults.otypes.competitor_type import CompetitorType
@@ -34,66 +33,74 @@ from ooresults.otypes.course_type import CourseType
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
-from ooresults.otypes.result_type import PersonRaceResult
-from ooresults.otypes.result_type import ResultStatus
-from ooresults.otypes.result_type import SplitTime
-from ooresults.otypes.result_type import SpStatus
 from ooresults.otypes.series_type import PersonSeriesResult
 from ooresults.otypes.series_type import Settings
-from ooresults.otypes.start_type import PersonRaceStart
-from ooresults.utils.globals import MAP_STATUS
-from ooresults.utils.globals import STREAMING_STATUS
-from ooresults.utils.globals import build_columns
-from ooresults.utils.globals import minutes_seconds
-from ooresults.utils.globals import streaming_status_ok
-from ooresults.utils.rental_cards import format_card
 from ooresults.websocket_server.streaming_status import Status
 
 
-web.config.debug = False
-
-
-EXPERIMENTAL = False
-
-
-t_globals = {
-    "str": str,
-    "round": round,
-    "ClassParams": ClassParams,
-    "ResultStatus": ResultStatus,
-    "SplitTime": SplitTime,
-    "SpStatus": SpStatus,
-    "PersonRaceResult": PersonRaceResult,
-    "PersonRaceStart": PersonRaceStart,
-    "MAP_STATUS": MAP_STATUS,
-    "STREAMING_STATUS": STREAMING_STATUS,
-    "streaming_status_ok": streaming_status_ok,
-    "EXPERIMENTAL": EXPERIMENTAL,
-    "build_columns": build_columns,
-    "minutes_seconds": minutes_seconds,
-    "format_card": format_card,
-}
-
-
 _templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
-_render_base = web.template.render(_templates, base="base", globals={"str": str})
-_render = web.template.render(_templates, globals=t_globals)
+
+
+def t(name: str):
+    return Template(
+        filename=str(_templates / name),
+        default_filters=["f", "h"],
+        imports=["from ooresults.utils.globals import format as f"],
+    )
+
+
+_si__si1_data = t("si/si1_data.html")
+_si__si1_error = t("si/si1_error.html")
+_si__si1_page = t("si/si1_page.html")
+_si__si2_data = t("si/si2_data.html")
+_si__si2_page = t("si/si2_page.html")
+_add_class = t("add_class.html")
+_add_club = t("add_club.html")
+_add_competitor = t("add_competitor.html")
+_add_course = t("add_course.html")
+_add_entry = t("add_entry.html")
+_add_entry_competitors = t("add_entry_competitors.html")
+_add_entry_result = t("add_entry_result.html")
+_add_event = t("add_event.html")
+_base = t("base.html")
+_classes_tab_content = t("classes_tab_content.html")
+_classes_table = t("classes_table.html")
+_clubs_tab_content = t("clubs_tab_content.html")
+_clubs_table = t("clubs_table.html")
+_competitors_tab_content = t("competitors_tab_content.html")
+_competitors_table = t("competitors_table.html")
+_courses_tab_content = t("courses_tab_content.html")
+_courses_table = t("courses_table.html")
+_demo_reader = t("demo_reader.html")
+_entries_tab_content = t("entries_tab_content.html")
+_entries_table = t("entries_table.html")
+_events_tab_content = t("events_tab_content.html")
+_events_table = t("events_table.html")
+_main = t("main.html")
+_results_tab_content = t("results_tab_content.html")
+_results_table = t("results_table.html")
+_root = t("root.html")
+_select_event = t("select_event.html")
+_series_settings = t("series_settings.html")
+_series_tab_content = t("series_tab_content.html")
+_series_table = t("series_table.html")
+_unauthorized = t("unauthorized.html")
 
 
 def si1_page(event_id: Optional[int], key: Optional[str]) -> str:
-    return str(_render.si.si1_page(event_id=event_id, key=key))
+    return _si__si1_page.render(event_id=event_id, key=key)
 
 
 def si1_data(message: Dict) -> str:
-    return str(_render.si.si1_data(message=message))
+    return _si__si1_data.render(message=message)
 
 
 def si1_error(message: Dict) -> str:
-    return str(_render.si.si1_error(message=message))
+    return _si__si1_error.render(message=message)
 
 
 def si2_page(event_id: Optional[int], key: Optional[str]) -> str:
-    return str(_render.si.si2_page(event_id=event_id, key=key))
+    return _si__si2_page.render(event_id=event_id, key=key)
 
 
 def si2_data(
@@ -102,43 +109,41 @@ def si2_data(
     event: EventType,
     messages: List[Dict],
 ) -> str:
-    return str(
-        _render.si.si2_data(
-            status=status, stream_status=stream_status, event=event, messages=messages
-        )
+    return _si__si2_data.render(
+        status=status, stream_status=stream_status, event=event, messages=messages
     )
 
 
 def classes_table(event: Optional[EventType], classes: List[ClassInfoType]) -> str:
-    return str(_render.classes_table(event=event, classes=classes))
+    return _classes_table.render(event=event, classes=classes)
 
 
 def add_class(class_: Optional[ClassType], courses: List[CourseType]) -> str:
-    return str(_render.add_class(class_=class_, courses=courses))
+    return _add_class.render(class_=class_, courses=courses)
 
 
 def clubs_table(clubs: List[ClubType]) -> str:
-    return str(_render.clubs_table(clubs=clubs))
+    return _clubs_table.render(clubs=clubs)
 
 
 def add_club(club: Optional[ClubType]) -> str:
-    return str(_render.add_club(club=club))
+    return _add_club.render(club=club)
 
 
 def competitors_table(competitors: List[CompetitorType]) -> str:
-    return str(_render.competitors_table(competitors=competitors))
+    return _competitors_table.render(competitors=competitors)
 
 
 def add_competitor(competitor: Optional[CompetitorType], clubs: List[ClubType]) -> str:
-    return str(_render.add_competitor(competitor=competitor, clubs=clubs))
+    return _add_competitor.render(competitor=competitor, clubs=clubs)
 
 
 def courses_table(event: Optional[EventType], courses: List[CourseType]) -> str:
-    return str(_render.courses_table(event=event, courses=courses))
+    return _courses_table.render(event=event, courses=courses)
 
 
 def add_course(course: Optional[CourseType]) -> str:
-    return str(_render.add_course(course=course))
+    return _add_course.render(course=course)
 
 
 def entries_table(
@@ -146,10 +151,8 @@ def entries_table(
     view: str,
     view_entries_list: List[Tuple[Optional[str], List[EntryType]]],
 ) -> str:
-    return str(
-        _render.entries_table(
-            event=event, view=view, view_entries_list=view_entries_list
-        )
+    return _entries_table.render(
+        event=event, view=view, view_entries_list=view_entries_list
     )
 
 
@@ -160,88 +163,90 @@ def add_entry(
     unassigned_results: Dict[int, str],
     event_fields: List[str],
 ) -> str:
-    return str(
-        _render.add_entry(
-            entry=entry,
-            classes=classes,
-            clubs=clubs,
-            unassigned_results=unassigned_results,
-            event_fields=event_fields,
-        )
+    return _add_entry.render(
+        entry=entry,
+        classes=classes,
+        clubs=clubs,
+        unassigned_results=unassigned_results,
+        event_fields=event_fields,
     )
 
 
 def add_entry_competitors(competitors: List[CompetitorType]) -> str:
-    return str(_render.add_entry_competitors(competitors=competitors))
+    return _add_entry_competitors.render(competitors=competitors)
 
 
 def add_entry_result(entry: EntryType) -> str:
-    return str(_render.add_entry_result(entry=entry))
+    return _add_entry_result.render(entry=entry)
 
 
 def events_table(events: List[EventType]) -> str:
-    return str(_render.events_table(events=events))
+    return _events_table.render(events=events)
 
 
 def add_event(event: Optional[EventType]) -> str:
-    return str(_render.add_event(event=event))
+    return _add_event.render(event=event)
 
 
 def results_table(
     event: EventType,
     class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
 ) -> str:
-    return str(_render.results_table(event=event, class_results=class_results))
+    return _results_table.render(event=event, class_results=class_results)
 
 
 def series_table(
     events: List[EventType], results: List[Tuple[str, List[PersonSeriesResult]]]
 ) -> str:
-    return str(_render.series_table(events=events, results=results))
+    return _series_table.render(events=events, results=results)
 
 
 def series_settings(settings: Optional[Settings]) -> str:
-    return str(_render.series_settings(settings=settings))
+    return _series_settings.render(settings=settings)
 
 
 def unauthorized() -> str:
-    return str(_render.unauthorized())
+    return _unauthorized.render()
 
 
 def demo_reader() -> str:
-    return str(_render.demo_reader())
+    return _demo_reader.render()
 
 
 def root(results_table: Optional[str]) -> str:
-    return str(_render.root(results_table=results_table))
+    return _root.render(results_table=results_table)
 
 
 def main(events: List[EventType]) -> str:
-    events_table = _render.events_table(events=events)
-    events_tab_content = _render.events_tab_content(events_table)
-    entries_table = _render.entries_table(None, "entries", [])
-    entries_tab_content = _render.entries_tab_content(entries_table)
-    classes_table = _render.classes_table(None, [])
-    classes_tab_content = _render.classes_tab_content(classes_table)
-    courses_table = _render.courses_table(None, [])
-    courses_tab_content = _render.courses_tab_content(courses_table)
-    results_table = _render.results_table(None, [])
-    results_tab_content = _render.results_tab_content(results_table)
-    series_table = _render.series_table([], [])
-    series_tab_content = _render.series_tab_content(series_table)
-    competitors_table = _render.competitors_table([])
-    competitors_tab_content = _render.competitors_tab_content(competitors_table)
-    clubs_table = _render.clubs_table([])
-    clubs_tab_content = _render.clubs_tab_content(clubs_table)
-    return str(
-        _render_base.main(
-            events_tab_content,
-            entries_tab_content,
-            classes_tab_content,
-            courses_tab_content,
-            results_tab_content,
-            series_tab_content,
-            competitors_tab_content,
-            clubs_tab_content,
-        )
+    events_table = _events_table.render(events=events)
+    events_tab = _events_tab_content.render(events_table=events_table)
+    entries_table = _entries_table.render(
+        event=None, view="entries", view_entries_list=[]
     )
+    entries_tab = _entries_tab_content.render(entries_table=entries_table)
+    classes_table = _classes_table.render(event=None, classes=[])
+    classes_tab = _classes_tab_content.render(classes_table=classes_table)
+    courses_table = _courses_table.render(event=None, courses=[])
+    courses_tab = _courses_tab_content.render(courses_table=courses_table)
+    results_table = _results_table.render(event=None, class_results=[])
+    results_tab = _results_tab_content.render(results=results_table)
+    series_table = _series_table.render(events=[], results=[])
+    series_tab = _series_tab_content.render(results=series_table)
+    competitors_table = _competitors_table.render(competitors=[])
+    competitors_tab = _competitors_tab_content.render(
+        competitors_table=competitors_table
+    )
+    clubs_table = _clubs_table.render(clubs=[])
+    clubs_tab = _clubs_tab_content.render(clubs_table=clubs_table)
+
+    page = _main.render(
+        events_tab_content=events_tab,
+        entries_tab_content=entries_tab,
+        classes_tab_content=classes_tab,
+        courses_tab_content=courses_tab,
+        results_tab_content=results_tab,
+        series_tab_content=series_tab,
+        competitors_tab_content=competitors_tab,
+        clubs_tab_content=clubs_tab,
+    )
+    return _base.render(page=page)

@@ -1,102 +1,88 @@
-$def with (entry, classes, clubs, unassigned_results, event_fields)
-
-$def format_date(time):
-    $if time is not None:
-        $return time.strftime('%H:%M:%S')
-    $else:
-        $return ''
+## entry: Optional[EntryType]
+## classes: List[ClassType]
+## clubs: List[ClubType]
+## unassigned_results: Dict[int, str]
+## event_fields: List[str]
 
 
-$if entry:
-    $ id = entry.id
-    $ competitor_id = entry.competitor_id
-    $ first_name = entry.first_name
-    $ last_name = entry.last_name
-    $ class_id = entry.class_id
-    $ class_name = entry.class_name
-    $ club_id = entry.club_id
-    $ club_name = entry.club_name if entry.club_name else ""
-    $ gender = entry.gender if entry.gender else ""
-    $ year = str(entry.year) if entry.year is not None else ''
-    $ not_competing = entry.not_competing
-    $ chip = entry.chip
-    $ fields = entry.fields
-    $ result = entry.result
-    $ start = entry.start
+<%!
+from ooresults.otypes.result_type import PersonRaceResult
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.otypes.start_type import PersonRaceStart
+from ooresults.utils.globals import format_time
+from ooresults.utils.globals import MAP_STATUS
+%>
 
-$else:
-    $ id = ""
-    $ competitor_id = ""
-    $ first_name = ""
-    $ last_name = ""
-    $ class_id = ""
-    $ class_name = ""
-    $ club_id = None
-    $ club_name = ""
-    $ gender = ""
-    $ year = None
-    $ not_competing = False
-    $ chip = ""
-    $ fields = {}
-    $ result = PersonRaceResult()
-    $ start = PersonRaceStart()
 
-$ has_result = entry is not None and entry.result is not None and entry.result.has_punches()
+<%
+fields = entry.fields if entry else {}
+result = entry.result if entry else PersonRaceResult()
+start = entry.start if entry else PersonRaceStart()
+
+has_result = entry is not None and entry.result is not None and entry.result.has_punches()
+chip_readonly = "readonly" if has_result else ""
+chip_disabled = "disabled" if has_result else ""
+%>
+
 
 <!-- Modal content -->
 <div class="modal-content">
     <span class="close" onclick="document.getElementById('entr.addDialog').style.display='none'">&times;</span>
     <form id="entr.formAdd" class="form-container" autocomplete="off" onsubmit="entr_submitAdd(); return false;">
-        <input id="entr.addId" name="id" type="text" value="$id" hidden/>
-        <input id="entr.addCompId" name="competitor_id" type="text" value="$competitor_id" hidden/>
+        <input id="entr.addId" name="id" type="text" value="${entry.id if entry else None}" hidden/>
+        <input id="entr.addCompId" name="competitor_id" type="text" value="${entry.competitor_id if entry else None}" hidden/>
         <table id="entr.addFormTable">
             <tr>
                 <th class="input-header"><label for="ent_firstName">First name *</label></th>
-                <td><input id="ent_firstName" name="first_name" type="text" value="$first_name" oninput="mark_label(this)" required/>
-                    $if not id:
+                <td><input id="ent_firstName" name="first_name" type="text" value="${entry.first_name if entry else ''}" oninput="mark_label(this)" required/>
+                    % if entry is None:
                         <button type="button" id="entr.myBtnCompetitors" onclick="entr_myCompetitors()">Competitors ...</button>
+                    % endif
                 </td>
             </tr>
             <tr>
                 <th class="input-header"><label for="ent_lastName">Last name *</label></th>
-                <td><input id="ent_lastName" name="last_name" type="text" value="$last_name" oninput="mark_label(this)" required/></td>
+                <td><input id="ent_lastName" name="last_name" type="text" value="${entry.last_name if entry else ''}" oninput="mark_label(this)" required/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="ent_gender">Gender</label></th>
                 <td>
                     <select id="ent_gender" name="gender" oninput="mark_label(this)">
-                    $for g in ['', 'F', 'M']:
-                        $if g == gender:
-                            <option value="$g" selected>$g</option>
-                        $else:
-                            <option value="$g">$g</option>
+                    % for g in ["", "F", "M"]:
+                        % if g == (entry.gender if entry and entry.gender else ""):
+                            <option value="${g}" selected>${g}</option>
+                        % else:
+                            <option value="${g}">${g}</option>
+                        % endif
+                    % endfor
                     </select>
                 </td>
             </tr>
             <tr>
                 <th class="input-header"><label for="ent_year">Year</label></th>
                 <td><input id="ent_year" name="year" type="number" min="1900" max="2099"
-                           value="$year" oninput="mark_label(this)"/></td>
+                           value="${entry.year if entry else None}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                $ readonly = "readonly" if has_result else ""
-                $ disabled = "disabled" if has_result else ""
-                <th class="input-header"><label for="ent_chip" $disabled>Chip</label></th>
-                <td><input id="ent_chip" name="chip" type="text" value="$chip" oninput="mark_label(this)" $readonly/></td>
+                <th class="input-header"><label for="ent_chip" ${chip_disabled}>Chip</label></th>
+                <td><input id="ent_chip" name="chip" type="text" value="${entry.chip if entry else ''}" oninput="mark_label(this)" ${chip_readonly}/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="ent_clubId">Club</label></th>
                 <td>
                     <select id="ent_clubId" name="club_id" oninput="mark_label(this)">
-                    $if club_id is None:
+                    % if entry is None or entry.club_id is None:
                         <option value="" selected></option>
-                    $else:
+                    % else:
                         <option value=""></option>
-                    $for club in clubs:
-                        $if club.id == club_id:
-                            <option value="$club.id" selected>$club.name</option>
-                        $else:
-                            <option value="$club.id">$club.name</option>
+                    % endif
+                    % for club in clubs:
+                        % if entry and entry.club_id == club.id:
+                            <option value="${club.id}" selected>${club.name}</option>
+                        % else:
+                            <option value="${club.id}">${club.name}</option>
+                        % endif
+                    % endfor
                     </select>
                 </td>
             </tr>
@@ -104,53 +90,60 @@ $ has_result = entry is not None and entry.result is not None and entry.result.h
                 <th class="input-header"><label for="ent_classId">Class *</label></th>
                 <td>
                     <select id="ent_classId" name="class_id" oninput="mark_label(this)" required>
-                    $for class_ in classes:
-                        $if class_.id == class_id:
-                            <option value="$class_.id" selected>$class_.name</option>
-                        $else:
-                            <option value="$class_.id">$class_.name</option>
+                    % for class_ in classes:
+                        % if entry and entry.class_id == class_.id:
+                            <option value="${class_.id}" selected>${class_.name}</option>
+                        % else:
+                            <option value="${class_.id}">${class_.name}</option>
+                        % endif
+                    % endfor
                     </select>
                 </td>
             </tr>
-            $for i in range(len(event_fields)):
-                $ name = 'f' + str(i)
+            % for i in range(len(event_fields)):
                 <tr>
-                    <th class="input-header"><label for="entf_$name">$(event_fields[i])</label></th>
-                    <td><input id="entf_$name" name="$name" type="text" value="$fields.get(i, '')" oninput="mark_label(this)"/></td>
+                    <th class="input-header"><label for="entf_f${i}">${event_fields[i]}</label></th>
+                    <td><input id="entf_f${i}" name="f${i}" type="text" value="${fields.get(i, "")}" oninput="mark_label(this)"/></td>
                 </tr>
+            % endfor
             <tr>
                 <th class="input-header"><label for="ent_notCompeting">Not competing</label></th>
-                <td><input id="ent_notCompeting" name="not_competing" type="checkbox" value="true" oninput="mark_label(this)" $('checked' if not_competing else '')/></td>
+                <td><input id="ent_notCompeting" name="not_competing" type="checkbox" value="true" oninput="mark_label(this)" ${"checked" if entry and entry.not_competing else ""}/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="ent_startTime">Start time</label></th>
-                <td><input id="ent_startTime" name="start_time" type="time" step="1" value="$(format_date(start.start_time))" oninput="mark_label(this)"/></td>
+                <td><input id="ent_startTime" name="start_time" type="time" step="1" value="${format_time(start.start_time)}" oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="ent_status">Status</label></th>
                 <td>
                     <select id="ent_status" name="status" oninput="mark_label(this)">
-                    $for status in list(ResultStatus):
-                        $if status == result.status:
-                            <option value="$status.value" selected>$MAP_STATUS[status]</option>
-                        $elif not has_result or status not in (ResultStatus.INACTIVE, ResultStatus.ACTIVE, ResultStatus.DID_NOT_START):
-                            <option value="$status.value">$MAP_STATUS[status]</option>
+                    % for status in list(ResultStatus):
+                        % if status == result.status:
+                            <option value="${status.value}" selected>${MAP_STATUS[status]}</option>
+                        % elif not has_result or status not in (ResultStatus.INACTIVE, ResultStatus.ACTIVE, ResultStatus.DID_NOT_START):
+                            <option value="${status.value}">${MAP_STATUS[status]}</option>
+                        % endif
+                    % endfor
                     </select>
                 </td>
             </tr>
-            $if has_result or unassigned_results:
+            % if has_result or unassigned_results:
                 <tr>
                     <th class="input-header"><label for="ent_result">Result</label></th>
                     <td>
                         <select id="ent_result" name="result" oninput="mark_label(this)">
                             <option value="" selected></option>
-                            $if has_result:
+                            % if has_result:
                                 <option value="-1">Remove result</option>
-                            $for k, v in unassigned_results.items():
-                                <option value="$str(k)">$v</option>
+                            % endif
+                            % for k, v in unassigned_results.items():
+                                <option value="${k}">${v}</option>
+                            % endfor
                         </select>
                     </td>
                 </tr>
+            % endif
         </table>
         <p></p>
         <button type="submit" class="btn">Save</button>

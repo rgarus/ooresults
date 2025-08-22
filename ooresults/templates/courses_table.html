@@ -1,15 +1,16 @@
-$def with (event, courses)
+## event: EventType
+## courses: List[CourseType]
 
 
 <div id="cou.event">
     <table style="text-align: left">
         <tr>
             <th style="padding-right: 10px">Event name:</th>
-            <td id="cour.event_name">$(event.name if event is not None else '')</td>
+            <td id="cour.event_name">${event.name if event is not None else ""}</td>
         </tr>
         <tr>
             <th style="padding-right: 10px">Event date:</th>
-            <td id="cour.event_date">$(event.date.isoformat() if event is not None else '')</td>
+            <td id="cour.event_date">${event.date.isoformat() if event is not None else ""}</td>
         </tr>
     </table>
 </div>
@@ -30,18 +31,19 @@ $def with (event, courses)
             </tr>
         </thead>
         <tbody id="courses_tbody">
-            $if courses:
-                $ name = "Courses&nbsp;&nbsp;(" + str(len(courses)) + ")"
+            % if courses:
                 <tr class="dte h1">
-                    <th class="dte h1" colspan="99">$:name</th>
+                    <th class="dte h1" colspan="99">Courses&nbsp;&nbsp;(${len(courses)})</th>
                 </tr>
-                $for course in courses:
-                    <tr class="dte" id="$course.id">
-                        <td class="dte">$course.name</td>
-                        <td class="dte" style="text-align:right">$(str(round(course.length)) if course.length is not None else '')</td>
-                        <td class="dte" style="text-align:right">$(str(round(course.climb)) if course.climb is not None else '')</td>
-                        <td class="dte">$' - '.join(course.controls)</td>
+                % for course in courses:
+                    <tr class="dte" id="${course.id}">
+                        <td class="dte">${course.name}</td>
+                        <td class="dte" style="text-align:right">${round(course.length) if course.length is not None else ""}</td>
+                        <td class="dte" style="text-align:right">${round(course.climb) if course.climb is not None else ""}</td>
+                        <td class="dte">${" - ".join(course.controls)}</td>
                     </tr>
+                % endfor
+            % endif
         </tbody>
     </table>
 </div>

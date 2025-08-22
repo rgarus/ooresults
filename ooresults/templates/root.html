@@ -1,7 +1,9 @@
-$def with (results_table)
+## results_table: Optional[str]
+
 
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>ooresults</title>
     <link rel="stylesheet" href="mystatic/style.css"/>
     <link rel="stylesheet" href="mystatic/style-tab.css"/>
@@ -13,10 +15,11 @@ $def with (results_table)
 
 <a href="admin">Administration</a>
 
-$if results_table is None:
+% if results_table is None:
     <h2>No results available</h2>
-$else:
-    $:results_table
+% else:
+    ${results_table | n}
+% endif
 
 </body>
 </html>

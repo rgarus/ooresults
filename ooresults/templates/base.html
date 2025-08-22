@@ -1,7 +1,9 @@
-$def with (page)
+## page: str
+
 
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>ooresults</title>
     <link rel="stylesheet" href="mystatic/style.css"/>
     <link rel="stylesheet" href="mystatic/style-tab.css"/>
@@ -13,7 +15,7 @@ $def with (page)
 </head>
 <body style="margin: 0px;" onpageshow="myfunction()">
 
-$:page
+${page | n}
 
 </body>
 </html>

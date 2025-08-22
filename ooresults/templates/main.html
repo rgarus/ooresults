@@ -1,4 +1,12 @@
-$def with (events_tab_content, entries_tab_content, classes_tab_content, courses_tab_content, results_tab_content, series_tab_content, competitors_tab_content, clubs_tab_content)
+## events_tab_content: str
+## entries_tab_content: str
+## classes_tab_content: str
+## courses_tab_content: str
+## results_tab_content: str
+## series_tab_content: str
+## competitors_tab_content: str
+## clubs_tab_content: str
+
 
 <!-- Tab links -->
 <div id="tabs" class="tab">
@@ -25,28 +33,28 @@ $def with (events_tab_content, entries_tab_content, classes_tab_content, courses
 </script>
 
 <!-- Events tab content -->
-$:events_tab_content
+${events_tab_content | n}
 
 <!-- Entries tab content -->
-$:entries_tab_content
+${entries_tab_content | n}
 
 <!-- Classes tab content -->
-$:classes_tab_content
+${classes_tab_content | n}
 
 <!-- Courses tab content -->
-$:courses_tab_content
+${courses_tab_content | n}
 
 <!-- Results tab content -->
-$:results_tab_content
+${results_tab_content | n}
 
 <!-- Series tab content -->
-$:series_tab_content
+${series_tab_content | n}
 
 <!-- Competitors tab content -->
-$:competitors_tab_content
+${competitors_tab_content | n}
 
 <!-- Clubs tab content -->
-$:clubs_tab_content
+${clubs_tab_content | n}
 
 
 <script>

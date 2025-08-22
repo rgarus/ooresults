@@ -1,75 +1,66 @@
-$def with (entry)
+## entry: EntryType
 
-$def format(value):
-    $return value if value is not None else ''
 
-$def format_date(time):
-    $if time is not None:
-        $return time.strftime('%H:%M:%S')
-    $else:
-        $return ''
+<%!
+from ooresults.otypes.result_type import SplitTime
+from ooresults.otypes.result_type import SpStatus
+from ooresults.utils.globals import format_time
+from ooresults.utils.globals import MAP_STATUS
+from ooresults.utils.globals import minutes_seconds
+%>
 
-$def format_diff_time(t):
-    $if t is not None and entry.result.start_time is not None:
-        $ diff = t.replace(microsecond=0) - entry.result.start_time.replace(microsecond=0)
-        $return minutes_seconds(int(diff.total_seconds()))
-    $else:
-        $return ''
 
-$def checked(status):
-    $if status in (SpStatus.OK, SpStatus.ADDITIONAL):
-        $return 'checked'
-    $else:
-        $return ''
-
-$def visible(condition):
-    $if condition:
-        $return ''
-    $else:
-        $return 'style="visibility:hidden"'
+<%
+def format_diff_time(t):
+    if t is not None and entry.result.start_time is not None:
+        diff = t.replace(microsecond=0) - entry.result.start_time.replace(microsecond=0)
+        return minutes_seconds(int(diff.total_seconds()))
+    else:
+        return ""
+%>
 
 
 <!-- Modal content -->
 <div class="modal-content">
     <span class="close" onclick="entr_submitSplitTimes()">&times;</span>
     <form id="entr.formSplitTimes" class="form-container" autocomplete="off">
-        <input id="entr.spId" name="entry_id" type="text" value="$entry.id" hidden/>
+        <input id="entr.spId" name="entry_id" type="text" value="${entry.id}" hidden/>
         <table>
             <tr>
                 <th class="input-header">First name</th>
-                <td>$entry.first_name</td>
+                <td>${entry.first_name}</td>
             </tr>
             <tr>
                 <th class="input-header">Last name</th>
-                <td>$entry.last_name</td>
+                <td>${entry.last_name}</td>
             </tr>
             <tr>
                 <th class="input-header">Year</th>
-                <td>$entry.year</td>
+                <td>${entry.year}</td>
             </tr>
             <tr>
                 <th class="input-header">Class</th>
-                <td>$entry.class_name</td>
+                <td>${entry.class_name}</td>
             </tr>
             <tr>
                 <th class="input-header">Chip</th>
-                <td>$entry.chip</td>
+                <td>${entry.chip}</td>
             </tr>
             <tr>
                 <th class="input-header">Start time</th>
-                <td>$format_date(entry.result.start_time)</td>
+                <td>${format_time(entry.result.start_time)}</td>
             </tr>
             <tr>
                 <th class="input-header">Finish time</th>
-                <td>$format_date(entry.result.finish_time)</td>
+                <td>${format_time(entry.result.finish_time)}</td>
             </tr>
             <tr>
                 <th class="input-header">Status</th>
-                <td>$MAP_STATUS[entry.result.status]</td>
+                <td>${MAP_STATUS[entry.result.status]}</td>
             </tr>
             <tr>
                 <th class="input-header">Time</th>
-                <td>$minutes_seconds(entry.result.extensions.get('running_time', entry.result.time))</td>
+                <td>${minutes_seconds(entry.result.extensions.get("running_time", entry.result.time))}</td>
             </tr>
         </table>
             
@@ -83,61 +74,69 @@ $def visible(condition):
                     <th class="dt">Used time</th>
                     <th class="dt">Status</th>
                     <th class="dt">Time</th>
-                    $if entry.competitor_id is not None:
+                    % if entry.competitor_id is not None:
                         <th class="dt"></th>
+                    % endif
                 </tr>
             </thead>
             <tbody>
-                $if entry.result.punched_clear_time is not None:
+                % if entry.result.punched_clear_time is not None:
                     <tr class="dt">
                         <td class="dt" style="text-align:right">Clear</td>
                         <td class="dt" style="text-align:right">Clear</td>
-                        <td class="dt" style="text-align:right">$format_date(entry.result.punched_clear_time)</td>
-                        <td class="dt" style="text-align:right">$format_date(entry.result.punched_clear_time)</td>
+                        <td class="dt" style="text-align:right">${format_time(entry.result.punched_clear_time)}</td>
+                        <td class="dt" style="text-align:right">${format_time(entry.result.punched_clear_time)}</td>
                         <td class="dt"></td>
-                        <td class="dt" style="text-align:right">$format_diff_time(entry.result.punched_clear_time)</td>
-                        $if entry.competitor_id is not None:
+                        <td class="dt" style="text-align:right">${format_diff_time(entry.result.punched_clear_time)}</td>
+                        % if entry.competitor_id is not None:
                             <td class="dt"></td>
+                        % endif
                     </tr>
-                $if entry.result.punched_check_time is not None:
+                % endif
+                % if entry.result.punched_check_time is not None:
                     <tr class="dt">
                         <td class="dt" style="text-align:right">Check</td>
                         <td class="dt" style="text-align:right">Check</td>
-                        <td class="dt" style="text-align:right">$format_date(entry.result.punched_check_time)</td>
-                        <td class="dt" style="text-align:right">$format_date(entry.result.punched_check_time)</td>
+                        <td class="dt" style="text-align:right">${format_time(entry.result.punched_check_time)}</td>
+                        <td class="dt" style="text-align:right">${format_time(entry.result.punched_check_time)}</td>
                         <td class="dt"></td>
-                        <td class="dt" style="text-align:right">$format_diff_time(entry.result.punched_check_time)</td>
-                        $if entry.competitor_id is not None:
+                        <td class="dt" style="text-align:right">${format_diff_time(entry.result.punched_check_time)}</td>
+                        % if entry.competitor_id is not None:
                             <td class="dt"></td>
+                        % endif
                     </tr>
-                $if entry.result.punched_start_time is not None or entry.competitor_id is not None:
+                % endif
+                % if entry.result.punched_start_time is not None or entry.competitor_id is not None:
                     <tr class="dt" id="punched_start_time">
                         <td class="dt" style="text-align:right">Start</td>
                         <td class="dt" style="text-align:right">Start</td>
-                        <td class="dt" style="text-align:right">$format_date(entry.result.si_punched_start_time)</td>
-                        <td class="dt" id="entr.result.punched_start_time" style="text-align:right">$format_date(entry.result.punched_start_time)</td>
+                        <td class="dt" style="text-align:right">${format_time(entry.result.si_punched_start_time)}</td>
+                        <td class="dt" id="entr.result.punched_start_time" style="text-align:right">${format_time(entry.result.punched_start_time)}</td>
                         <td class="dt"></td>
-                        <td class="dt" style="text-align:right">$format_diff_time(entry.result.punched_start_time)</td>
-                        $if entry.competitor_id is not None:
+                        <td class="dt" style="text-align:right">${format_diff_time(entry.result.punched_start_time)}</td>
+                        % if entry.competitor_id is not None:
                             <td class="dt" style="padding-left:15px;padding-right:15px">
-                                <input type="button" name="$('edit_start')" value="Edit" onclick="entr_myPunchEdit(-1)"/>
+                                <input type="button" name="edit_start" value="Edit" onclick="entr_myPunchEdit(-1)"/>
                             </td>
+                        % endif
                     </tr>
+                % endif
                 <tr class="dt" id="punched_finish_time">
                     <td class="dt" style="text-align:right">Finish</td>
                     <td class="dt" style="text-align:right">Finish</td>
-                    <td class="dt" style="text-align:right">$format_date(entry.result.si_punched_finish_time)</td>
-                    <td class="dt" id="entr.result.punched_finish_time" style="text-align:right">$format_date(entry.result.punched_finish_time)</td>
+                    <td class="dt" style="text-align:right">${format_time(entry.result.si_punched_finish_time)}</td>
+                    <td class="dt" id="entr.result.punched_finish_time" style="text-align:right">${format_time(entry.result.punched_finish_time)}</td>
                     <td class="dt"></td>
-                    <td class="dt" style="text-align:right">$format_diff_time(entry.result.punched_finish_time)</td>
-                    $if entry.competitor_id is not None:
+                    <td class="dt" style="text-align:right">${format_diff_time(entry.result.punched_finish_time)}</td>
+                    % if entry.competitor_id is not None:
                         <td class="dt" style="padding-left:15px;padding-right:15px">
-                            <input id="entr.result.finish_time" type="button" name="$('edit_finish')" value="Edit" onclick="entr_myPunchEdit(-2)"/>
+                            <input id="entr.result.finish_time" type="button" name="edit_finish" value="Edit" onclick="entr_myPunchEdit(-2)"/>
                         </td>
+                    % endif
                 </tr>
             </tbody>
 
-            $if entry.result.split_times != []:
+            % if entry.result.split_times != []:
                 <thead>
                     <tr class="dt">
                     <tr><th colspan="2" style="padding-top:2em"></th></tr>
@@ -147,30 +146,39 @@ $def visible(condition):
                         <th class="dt">Used time</th>
                         <th class="dt">Status</th>
                         <th class="dt">Time</th>
-                        $if entry.competitor_id is not None:
+                        % if entry.competitor_id is not None:
                             <th class="dt"></th>
+                       % endif
                     </tr>
                 </thead>
                 <tbody id="punched_split_times">
-                    $ i = 0
-                    $for j, punch in enumerate(entry.result.split_times):
+                    <%
+                    i = 0
+                    %>
+                    % for j, punch in enumerate(entry.result.split_times):
                         <tr class="dt">
-                            $if punch.status in (SpStatus.OK, SpStatus.MISSING):
-                                $ i += 1
-                                <td class="dt" style="text-align:right">$str(i)</td>
-                            $else:
+                            % if punch.status in (SpStatus.OK, SpStatus.MISSING):
+                                <%
+                                i += 1
+                                %>
+                                <td class="dt" style="text-align:right">${i}</td>
+                            % else:
                                 <td class="dt" style="text-align:right"></td>
-                            <td class="dt" style="text-align:right">$format(punch.control_code)</td>
-                            <td class="dt" style="text-align:right">$format_date(punch.si_punch_time)</td>
-                            <td class="dt" style="text-align:right">$('Unknown' if punch.punch_time == SplitTime.NO_TIME else format_date(punch.punch_time))</td>
+                            % endif
+                            <td class="dt" style="text-align:right">${punch.control_code}</td>
+                            <td class="dt" style="text-align:right">${format_time(punch.si_punch_time)}</td>
+                            <td class="dt" style="text-align:right">${"Unknown" if punch.punch_time == SplitTime.NO_TIME else format_time(punch.punch_time)}</td>
                             <td class="dt"></td>
-                            <td class="dt" style="text-align:right">$minutes_seconds(punch.time)</td>
-                            $if entry.competitor_id is not None:
+                            <td class="dt" style="text-align:right">${minutes_seconds(punch.time)}</td>
+                            % if entry.competitor_id is not None:
                                 <td class="dt" style="padding-left:15px;padding-right:15px">
-                                    <input type="button" name="$('edit_' + str(j))" value="Edit" onclick="entr_myPunchEdit($j)"/>
+                                    <input type="button" name="edit_${j}" value="Edit" onclick="entr_myPunchEdit(${j})"/>
                                 </td>
+                            % endif
                         </tr>
+                    % endfor
                 </tbody>
+            % endif
         </table>
         <p></p>
         <button type="button" class="btn cancel" onclick="entr_submitSplitTimes()">Close</button>

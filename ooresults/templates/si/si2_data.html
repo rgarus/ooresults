@@ -1,52 +1,69 @@
-$def with (status, stream_status, event, messages)
+## status: str
+## stream_status: Optional[Status]
+## event: EventType
+## messages: List[Dict]
 
-$code
-    def format(time: int) -> str:
-        if time is not None and time > 0:
-            return minutes_seconds(time) + ' min'
-        else:
-            return ''
-    
-    def color(status: ResultStatus) -> str:
-        if status == ResultStatus.OK:
-            return '#70ff70'  # green
-        elif status in (ResultStatus.MISSING_PUNCH, ResultStatus.DID_NOT_FINISH, ResultStatus.OVER_TIME):
-            return '#ff7070'  # red
-        else:
-            return '#ffff00'  # yellow
 
-    def missing(status: str, missing_controls) -> str:
-        if status == ResultStatus.OK:
-            if missing_controls:
-                if len(missing_controls) == 1:
-                    return '1 control'
-                else:
-                    return str(len(missing_controls)) + ' controls'
-        else:
-            if missing_controls:
-                if 'FINISH' in missing_controls:
-                    return 'Finish time'
-                elif 'START' in missing_controls:
-                    return 'Start time'
-                elif len(missing_controls) == 1:
-                    return missing_controls[0]
-                elif len(missing_controls) == 2:
-                    return missing_controls[0] + ', ' + missing_controls[1]
-                elif len(missing_controls) == 3:
-                    return missing_controls[0] + ', ' + missing_controls[1] + ', ' + missing_controls[2]
-                elif len(missing_controls) >= 4:
-                    return str(len(missing_controls)) + ' controls'
+<%!
+from typing import List
+
+from ooresults.otypes.result_type import ResultStatus
+from ooresults.utils.globals import MAP_STATUS
+from ooresults.utils.globals import minutes_seconds
+from ooresults.utils.globals import STREAMING_STATUS
+from ooresults.utils.globals import streaming_status_ok
+from ooresults.utils.rental_cards import format_card
+
+
+def format(time: int) -> str:
+    if time is not None and time > 0:
+        return minutes_seconds(time) + " min"
+    else:
+        return ""
+
+
+def color(status: ResultStatus) -> str:
+    if status == ResultStatus.OK:
+        return "#70ff70"  # green
+    elif status in (ResultStatus.MISSING_PUNCH, ResultStatus.DID_NOT_FINISH, ResultStatus.OVER_TIME):
+        return "#ff7070"  # red
+    else:
+        return "#ffff00"  # yellow
+
+
+def missing(status: ResultStatus, missing_controls: List[str]) -> str:
+    if status == ResultStatus.OK:
+        if missing_controls:
+            if len(missing_controls) == 1:
+                return "1 control"
+            else:
+                return str(len(missing_controls)) + " controls"
+    else:
+        if missing_controls:
+            if "FINISH" in missing_controls:
+                return "Finish time"
+            elif "START" in missing_controls:
+                return "Start time"
+            elif len(missing_controls) == 1:
+                return missing_controls[0]
+            elif len(missing_controls) == 2:
+                return missing_controls[0] + ", " + missing_controls[1]
+            elif len(missing_controls) == 3:
+                return missing_controls[0] + ", " + missing_controls[1] + ", " + missing_controls[2]
+            elif len(missing_controls) >= 4:
+                return str(len(missing_controls)) + " controls"
+%>
 
 
 <div id="cls.event">
     <table style="text-align: left">
         <tr>
             <th style="padding-right: 10px">Event name:</th>
-            <td>$(event.name if event else '')</td>
+            <td>${event.name if event else ""}</td>
         </tr>
         <tr>
             <th style="padding-right: 10px">Event date:</th>
-            <td>$(event.date.isoformat() if event and event.date else '')</td>
+            <td>${event.date.isoformat() if event and event.date else ""}</td>
         </tr>
     </table>
 </div>
@@ -67,20 +84,23 @@ $code
             </tr>
         </thead>
         <tbody>
-        $for result in messages:
-            $if event and event.id == result.get('eventId', '-2'):
-                <tr class="dt" style="background-color: $color(result.get('status'))">
-                    <td class="dt">$result.get('entryTime', '')</td>
-                    <td class="dt" style="text-align:right">$format_card(result.get('controlCard'))</td>
-                    <td class="dt">$MAP_STATUS[result.get('status')]</td>
-                    <td class="dt" style="text-align:right">$format(result.get('time', 0))</td>
-                    $if result.get('status') in (ResultStatus.OK, ResultStatus.MISSING_PUNCH, ResultStatus.DID_NOT_FINISH, ResultStatus.OVER_TIME):
-                        <td class="dt">$result.get('lastName', ''), $result.get('firstName', '')</td>
-                        <td class="dt">$result.get('class', '')</td>
-                        <td class="dt">$missing(result.get('status'), result.get('missingControls', []))</td>
-                    $else:
-                        <td class="dt" colspan="3">$result.get('error', '')</td>
+        % for result in messages:
+            % if event and event.id == result.get("eventId", "-2"):
+                <tr class="dt" style="background-color: ${color(result.get("status"))}">
+                    <td class="dt">${result.get("entryTime", "")}</td>
+                    <td class="dt" style="text-align:right">${format_card(result.get("controlCard"))}</td>
+                    <td class="dt">${MAP_STATUS[result.get("status")]}</td>
+                    <td class="dt" style="text-align:right">${format(result.get("time", 0))}</td>
+                    % if result.get("status") in (ResultStatus.OK, ResultStatus.MISSING_PUNCH, ResultStatus.DID_NOT_FINISH, ResultStatus.OVER_TIME):
+                        <td class="dt">${result.get("lastName", "")}, ${result.get("firstName", "")}</td>
+                        <td class="dt">${result.get("class", "")}</td>
+                        <td class="dt">${missing(result.get("status"), result.get("missingControls", []))}</td>
+                    % else:
+                        <td class="dt" colspan="3">${result.get("error", "")}</td>
+                    % endif
                 </tr>
+            % endif
+        % endfor
         </tbody>
     </table>
 </div>
@@ -89,37 +109,40 @@ $code
 
 <div>
     <table id="si2.status" style="text-align: left">
-        $if status is None or status == 'readerOffline':
+        % if status is None or status == "readerOffline":
             <tr style="color:red;">
                 <th style="padding-right: 10px">Card reader status:</th>
                 <td>Offline</td>
             </tr>
-        $elif status in ['readerConnected', 'cardRead', 'cardRemoved']:
+        % elif status in ["readerConnected", "cardRead", "cardRemoved"]:
             <tr style="color:green;">
                 <th style="padding-right: 10px">Card reader status:</th>
                 <td>Connected</td>
             </tr>
-        $elif status == 'readerDisconnected':
+        % elif status == "readerDisconnected":
             <tr style="color:red;">
                 <th style="padding-right: 10px">Card reader status:</th>
                 <td>Disconnected</td>
             </tr>
-        $elif status == 'cardInserted':
+        % elif status == "cardInserted":
             <tr style="color:green;">
                 <th style="padding-right: 10px">Card reader status:</th>
                 <td>Reading card</td>
             </tr>
+        % endif
 
-        $if stream_status is not None:
-            $if streaming_status_ok(stream_status):
+        % if stream_status is not None:
+            % if streaming_status_ok(stream_status):
                 <tr style="color:green;">
                     <th style="padding-right: 10px">Stream status:</th>
-                    <td>$STREAMING_STATUS[stream_status]</td>
+                    <td>${STREAMING_STATUS[stream_status]}</td>
                 </tr>
-            $else:
+            % else:
                 <tr style="color:red;">
                     <th style="padding-right: 10px">Stream status:</th>
-                    <td>$STREAMING_STATUS[stream_status]</td>
+                    <td>${STREAMING_STATUS[stream_status]}</td>
                 </tr>
+            % endif
+        % endif
     </table>
 </div>

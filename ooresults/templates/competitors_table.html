@@ -1,4 +1,5 @@
-$def with (competitors)
+## competitors: List[CompetitorType]
+
 
 <input id="comp.filter" oninput="filter_table('comp.table', 'tr', this.value)" placeholder="Search ..."/>
 <p/>
@@ -15,20 +16,21 @@ $def with (competitors)
         </tr>
     </thead>
     <tbody id="competitors_tbody">
-        $if competitors:
-            $ name = "Competitors&nbsp;&nbsp;(" + str(len(competitors)) + ")"
+        % if competitors:
             <tr class="dte h1">
-                <th class="dte h1" colspan="99">$:name</th>
+                <th class="dte h1" colspan="99">Competitors&nbsp;&nbsp;(${len(competitors)})</th>
             </tr>
-            $for competitor in competitors:
-                <tr class="dte" id="$competitor.id">
-                    <td class="dte">$competitor.first_name</td>
-                    <td class="dte">$competitor.last_name</td>
-                    <td class="dte">$competitor.gender</td>
-                    <td class="dte">$(str(competitor.year) if competitor.year is not None else '')</td>
-                    <td class="dte" style="text-align:right">$(competitor.chip if competitor.chip else "")</td>
-                    <td class="dte">$(competitor.club_name if competitor.club_name else "")</td>
+            % for competitor in competitors:
+                <tr class="dte" id="${competitor.id}">
+                    <td class="dte">${competitor.first_name}</td>
+                    <td class="dte">${competitor.last_name}</td>
+                    <td class="dte">${competitor.gender}</td>
+                    <td class="dte">${competitor.year if competitor.year is not None else ""}</td>
+                    <td class="dte" style="text-align:right">${competitor.chip if competitor.chip else ""}</td>
+                    <td class="dte">${competitor.club_name if competitor.club_name else ""}</td>
                 </tr>
+            % endfor
+        % endif
     </tbody>
 </table>
 

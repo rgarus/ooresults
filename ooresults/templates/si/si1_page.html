@@ -1,8 +1,11 @@
-$def with (event_id, key)
+## event_id: Optional[int]
+## key: Optional[str]
+
 
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
         <title>SI reader</title>
         <style>
             .bgr {background-color: #ff7070;}
@@ -19,8 +22,8 @@ $def with (event_id, key)
     <body style="margin: 0">
         <div id="page"></div>
         <script>
-            var event_id = "$:(str(event_id) if event_id is not None else "")";
-            var key = "$:(key if key else "")";
+            var event_id = "${event_id}";
+            var key = "${key | f, n}";
 
             /* Function to open fullscreen mode */
             function openFullscreen() {

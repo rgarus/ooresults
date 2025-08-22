@@ -1,5 +1,6 @@
-$def with (classes_table)
- 
+## classes_table: str
+
+
 <!-- Tab content -->
 <div id="Classes" class="tabcontent">
   <div id="clas.actions" class="actions">
@@ -13,7 +14,7 @@ $def with (classes_table)
   </div>
 
   <div id=cls.data class="data">
-    $:classes_table
+    ${classes_table | n}
   </div>
 
   <div class="modal" id="cls.importDialog">

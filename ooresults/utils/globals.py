@@ -17,6 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from datetime import datetime
+from typing import Any
 from typing import List
 from typing import Optional
 from typing import Set
@@ -77,3 +79,17 @@ def minutes_seconds(time: Optional[int]) -> str:
 
 def streaming_status_ok(status: streaming_status.Status) -> bool:
     return status == streaming_status.Status.OK
+
+
+def format(value: Any) -> str:
+    if value is None:
+        return ""
+    else:
+        return str(value)
+
+
+def format_time(time: Optional[datetime]) -> str:
+    if time is not None:
+        return time.strftime("%H:%M:%S")
+    else:
+        return ""

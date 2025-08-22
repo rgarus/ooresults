@@ -1,4 +1,5 @@
-$def with (settings)
+## settings: Settings
+
 
 <!-- Modal content -->
 <div class="modal-content">
@@ -7,35 +8,37 @@ $def with (settings)
         <table id="ser.settingsFormTable">
             <tr>
                 <th class="input-header"><label for="ser_name">Name *</label></th>
-                <td><input id="ser_name" name="name" type="text" value="$settings.name" oninput="mark_label(this)" required/></td>
+                <td><input id="ser_name" name="name" type="text" value="${settings.name}" oninput="mark_label(this)" required/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="ser_nrOfBestResults">Nr of best results</label></th>
                 <td><input id="ser_nrOfBestResults" name="nr_of_best_results" type="number" min="1" max="99"
-                           value="$(settings.nr_of_best_results if settings.nr_of_best_results is not None else '')"
+                           value="${settings.nr_of_best_results if settings.nr_of_best_results is not None else ''}"
                            oninput="mark_label(this)"/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="ser_mode">Mode *</label></th>
                 <td>
                     <select id="ser_mode" name="mode" oninput="mark_label(this)">
-                    $for mode in ['Proportional']:
-                        $if str(mode) == str(settings.mode):
-                            <option value="$mode" selected>$mode</option>
-                        $else:
-                            <option value="$mode">$mode</option>
+                    % for mode in ["Proportional"]:
+                        % if mode == settings.mode:
+                            <option value="${mode}" selected>${mode}</option>
+                        % else:
+                            <option value="${mode}">${mode}</option>
+                        % endif
+                    % endfor
                     </select>
                 </td>
             </tr>
             <tr>
                 <th class="input-header"><label for="ser_maximumPoints">Maximum points *</label></th>
                 <td><input id="ser_maximumPoints" name="maximum_points" type="number" min="1" max="9999"
-                           value="$settings.maximum_points" oninput="mark_label(this)" required/></td>
+                           value="${settings.maximum_points}" oninput="mark_label(this)" required/></td>
             </tr>
             <tr>
                 <th class="input-header"><label for="ser_decimalPlaces">Decimal places *</label></th>
                 <td><input id="ser_decimalPlaces" name="decimal_places" type="number" min="1" max="3"
-                           value="$settings.decimal_places" oninput="mark_label(this)" required/></td>
+                           value="${settings.decimal_places}" oninput="mark_label(this)" required/></td>
             </tr>
         </table>
         <p></p>

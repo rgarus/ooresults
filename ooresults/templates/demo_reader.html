@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
         <title>ooresults Demo reader</title>
         <link rel="stylesheet" href="mystatic/style.css"/>
         <link rel="stylesheet" href="mystatic/style-tab.css"/>
@@ -42,11 +43,12 @@
                     <td class="dt" style="text-align:right"><input name="code" type="text" size="8" readonly value="Start" data-noreset="true"/></td>
                     <td class="dt" style="text-align:right"><input name="time" type="time" step="1" value=""/></td>
                 </tr>
-                $for i in range(8):
+                % for i in range(8):
                     <tr class="dt">
                         <td class="dt" style="text-align:right"><input name="code" type="number" size="8" min="20" max="999"/></td>
                         <td class="dt" style="text-align:right"><input name="time" type="time" step="1" value=""/></td>
                     </tr>
+                % endfor
                 <tr class="dt">
                     <td class="dt" style="text-align:right"><input name="code" type="text" size="8" readonly value="Finish" data-noreset="true"/></td>
                     <td class="dt" style="text-align:right"><input name="time" type="time" step="1" value=""/></td>

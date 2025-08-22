@@ -1,4 +1,5 @@
-$def with (clubs)
+## clubs: List[ClubType]
+
 
 <input id="club.filter" oninput="filter_table('clb.table', 'tr', this.value)" placeholder="Search ...">
 <p/>
@@ -10,15 +11,16 @@ $def with (clubs)
         </tr>
     </thead>
     <tbody id="clubs_tbody">
-        $if clubs:
-            $ name = "Clubs&nbsp;&nbsp;(" + str(len(clubs)) + ")"
+        % if clubs:
             <tr class="dte h1">
-                <th class="dte h1" colspan="99">$:name</th>
+                <th class="dte h1" colspan="99">Clubs&nbsp;&nbsp;(${len(clubs)})</th>
             </tr>
-            $for club in clubs:
-                <tr class="dte" id="$club.id">
-                    <td class="dte">$club.name</td>
+            % for club in clubs:
+                <tr class="dte" id="${club.id}">
+                    <td class="dte">${club.name}</td>
                 </tr>
+            % endfor
+        % endif
     </tbody>
 </table>
 
