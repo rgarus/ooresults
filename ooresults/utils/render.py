@@ -38,6 +38,9 @@ from ooresults.otypes.series_type import Settings
 from ooresults.websocket_server.streaming_status import Status
 
 
+EXPERIMENTAL = False
+
+
 _templates = pathlib.Path(__file__).resolve().parent.parent / "templates"
 
 
@@ -45,7 +48,10 @@ def t(name: str):
     return Template(
         filename=str(_templates / name),
         default_filters=["f", "h"],
-        imports=["from ooresults.utils.globals import format as f"],
+        imports=[
+            "from ooresults.utils.globals import format as f",
+            "from ooresults.utils.render import EXPERIMENTAL",
+        ],
     )
 
 

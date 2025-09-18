@@ -40,12 +40,13 @@
                  onchange="updateDisplayedParams('entr_import_3')" required/>
           <label for="entr_radio_import_3">OE2003 csv, OE12 csv</label>
         </div>
-        $if EXPERIMENTAL:
+        % if EXPERIMENTAL:
           <div>
             <input id="entr_radio_import_4" name="entr_import" type="radio" value="entr.import.4"
                    onchange="updateDisplayedParams('entr_import_4')" required/>
             <label for="entr_radio_import_4">Text</label>
           </div>
+        % endif
         <p>Settings</p>
         <div id="entr_import">
           <div id="entr_import_1" class="params">
