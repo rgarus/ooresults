@@ -214,9 +214,9 @@ def main() -> Optional[int]:
         "/series/csvResult",
         "ooresults.handler.series.CsvResult",
         "/si1",
-        "ooresults.handler.si.Si1",
+        "ooresults.handler.si1.Si1",
         "/si2",
-        "ooresults.handler.si.Si2",
+        "ooresults.handler.si2.Si2",
     )
 
     parser = argparse.ArgumentParser()

@@ -23,23 +23,6 @@ from ooresults import model
 from ooresults.utils import render
 
 
-class Si1:
-    def GET(self):
-        event_id = None
-        key = None
-
-        try:
-            for event in model.events.get_events():
-                if event.key:
-                    event_id = event.id
-                    key = event.key
-                    break
-        except Exception:
-            pass
-
-        return render.si1_page(event_id=event_id, key=key)
-
-
 class Si2:
     def GET(self):
         event_id = None
