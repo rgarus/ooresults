@@ -118,7 +118,7 @@ async def test_no_access_if_event_not_found(
     websocket_server: WebSocketServer,
 ):
     async with connect(uri="ws://localhost:8081/si1") as si1_client:
-        await si1_client.send("xxx,local")
+        await si1_client.send("xxx,local,false")
         response = await si1_client.recv()
         assert response == "__no_access__"
 
@@ -133,7 +133,7 @@ async def test_no_access_if_key_not_found(
     websocket_server: WebSocketServer,
 ):
     async with connect("ws://localhost:8081/si1") as si1_client:
-        await si1_client.send(f"{event_id},xxx")
+        await si1_client.send(f"{event_id},xxx,false")
         response = await si1_client.recv()
         assert response == "__no_access__"
 
@@ -148,7 +148,7 @@ async def test_reader_status_received_if_event_and_key_found(
     websocket_server: WebSocketServer,
 ):
     async with connect(uri="ws://localhost:8081/si1") as si1_client:
-        await si1_client.send(f"{event_id},local")
+        await si1_client.send(f"{event_id},local,false")
         response = await si1_client.recv()
         assert json.loads(response) == {"status": "readerOffline", "data": ""}
         await si1_client.close()
@@ -183,7 +183,7 @@ async def test_cardreader_event_key_found_and_reader_disconnected(
     websocket_server: WebSocketServer,
 ):
     async with connect(uri="ws://localhost:8081/si1") as si1_client:
-        await si1_client.send(f"{event_id},local")
+        await si1_client.send(f"{event_id},local,false")
         response = await si1_client.recv()
         assert json.loads(response) == {"status": "readerOffline", "data": ""}
 
@@ -254,7 +254,7 @@ async def si1_clients(
     async with connect_1 as c1, connect_2 as c2, connect_3 as c3, connect_4 as c4:
         si1_clients = [c1, c2, c3, c4]
         for c in si1_clients:
-            await c.send(f"{event_id},local")
+            await c.send(f"{event_id},local,false")
         for c in si1_clients:
             response = await c.recv()
             assert json.loads(response) == {"status": "readerDisconnected", "data": ""}

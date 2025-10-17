@@ -66,6 +66,7 @@ class WebSocketServer(threading.Thread):
             demo_reader=self.demo_reader, import_stream=self.import_stream
         )
         self.loop.create_task(self.start_server(ssl_context=ssl_context))
+        self.loop.create_task(self.handler.send_new_result())
         self.loop.run_forever()
 
     async def start_server(self, ssl_context: Optional[ssl.SSLContext] = None) -> None:

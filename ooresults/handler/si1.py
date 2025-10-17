@@ -17,6 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import web
+
 from ooresults import model
 from ooresults.utils import render
 
@@ -25,6 +27,11 @@ class Si1:
     def GET(self):
         event_id = None
         key = None
+        view = 0
+
+        data = web.input()
+        if "view" in data and data.view in ["0", "1"]:
+            view = int(data.view)
 
         try:
             for event in model.events.get_events():
@@ -35,4 +42,4 @@ class Si1:
         except Exception:
             pass
 
-        return render.si1_page(event_id=event_id, key=key)
+        return render.si1_page(event_id=event_id, key=key, view=view)

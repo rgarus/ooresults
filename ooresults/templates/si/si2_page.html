@@ -19,10 +19,28 @@
     </head>
     <body>
         <div id="page"></div>
+
+        <div class="modal" id="si2.tlsErrorDialog">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close" onclick="closeErrorDialog()">&times;</span>
+                <p>TLS handshake error, try to open <a id="si2.tlsErrorLink" target="_blank"></a></p>
+                <button type="button" class="btn cancel" onclick="closeErrorDialog()">Close</button>
+            </div>
+        </div>
+
         <script>
             var event_id = "${event_id}";
             var key = "${key | f, n}";
             var status = 'offline';
+
+            var ws_uri;
+            if (window.location.protocol === "https:") {
+                ws_uri = "wss:";
+            } else {
+                ws_uri = "ws:";
+            };
+            ws_uri += "//" + window.location.hostname + ":8081/si2";
 
             function statusMessage() {
                 var text = '';
@@ -41,26 +59,37 @@
                 document.getElementById('page').innerHTML = '<p class="s2">' + text + '</p>';
             };
 
+            function closeErrorDialog() {
+                document.getElementById('si2.tlsErrorDialog').style.display='none';
+                start(ws_uri);
+            };
+
             function start(websocketServerLocation){
                 var ws = new WebSocket(websocketServerLocation);
+                var tm = null;
+                var tp = null;
 
                 ws.onopen = function(event) {
-                    ws.send(event_id + ',' + key);
+                    ws.send(event_id + ',' + key + ',' + 'false');
                     tp = setTimeout(function() {ping()}, 10000);
                 };
-                ws.onerror = function(event) {
-                    status = 'error';
-                    statusMessage();
-                };
                 ws.onclose = function(event) {
-                    if (status != 'noAccess') {
+                    ws = null;
+                    clearTimeout(tm);
+                    clearTimeout(tp);
+
+                    if (event.code == 1015) {
+                        statusMessage();
+                        var uri = window.location.protocol + "//" + window.location.hostname + ":8081";
+                        document.getElementById('si2.tlsErrorLink').href = uri;
+                        document.getElementById('si2.tlsErrorLink').text = uri;
+                        document.getElementById('si2.tlsErrorDialog').style.display='block';
+                    } else if (status != 'noAccess') {
                         status = 'offline';
                         statusMessage();
                         // Try to reconnect in 5 seconds
-                        ws = null;
-                        clearTimeout(tp);
                         setTimeout(function(){start(websocketServerLocation)}, 5000);
-                    }
+                    };
                 };
                 ws.onmessage = function(event) {
                     var msg = event.data;
@@ -94,13 +123,6 @@
                 };
             };
 
-            var ws_uri;
-            if (window.location.protocol === "https:") {
-                ws_uri = "wss:";
-            } else {
-                ws_uri = "ws:";
-            };
-            ws_uri += "//" + window.location.hostname + ":8081/si2";
             start(ws_uri);
         </script>
     </body>

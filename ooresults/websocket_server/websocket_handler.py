@@ -20,6 +20,7 @@
 import asyncio
 import bz2
 import copy
+import dataclasses
 import datetime
 import functools
 import json
@@ -27,7 +28,7 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
-from typing import Tuple
+from typing import List
 
 import tzlocal
 import websockets.exceptions
@@ -43,14 +44,23 @@ from ooresults.utils import render
 from ooresults.websocket_server import streaming_status
 
 
+@dataclasses.dataclass
+class ConnectionParameter:
+    event_id: int
+    event_key: str
+    key_valid: bool
+    show_result: bool
+
+
 class WebSocketHandler:
     def __init__(self, demo_reader: bool = False, import_stream: bool = False):
         self.demo_reader = demo_reader
         self.import_stream = import_stream
-        self.connections: Dict[ServerConnection, Tuple[str, int, str]] = {}
+        self.connections: Dict[ServerConnection, ConnectionParameter] = {}
         self.messages = []
-        self.cardreader_status = {}  # type: Dict[int: str]
+        self.cardreader_status: Dict[int, str] = {}
         self.executor = ThreadPoolExecutor(max_workers=2)
+        self.update_result = asyncio.Event()
         streaming_status.status.register(awaitable=self.update_event)
 
         #
@@ -62,25 +72,83 @@ class WebSocketHandler:
         # cardInserted
         # cardRemoved
         # cardRead
+        # result
         #
 
+    async def send_new_result(self):
+        while True:
+            try:
+                await asyncio.wait_for(self.update_result.wait(), timeout=60)
+                self.update_result.clear()
+            except asyncio.TimeoutError:
+                pass
+
+            try:
+                d: Dict[int, List[ServerConnection]] = {}
+                for conn, v in self.connections.items():
+                    if conn.request.path == "/si1" and v.key_valid and v.show_result:
+                        if v.event_id not in d:
+                            d[v.event_id] = []
+                        d[v.event_id].append(conn)
+
+                for event_id, connections in d.items():
+                    try:
+                        (
+                            event,
+                            class_results,
+                        ) = await asyncio.get_event_loop().run_in_executor(
+                            executor=self.executor,
+                            func=functools.partial(
+                                model.results.event_class_results, event_id=event_id
+                            ),
+                        )
+
+                        # display only finished entries
+                        finished_class_results = []
+                        for class_, ranked_results in class_results:
+                            results = [
+                                r
+                                for r in ranked_results
+                                if r.entry.result.status
+                                not in (
+                                    ResultStatus.INACTIVE,
+                                    ResultStatus.ACTIVE,
+                                    ResultStatus.DID_NOT_START,
+                                )
+                            ]
+                            finished_class_results.append((class_, results))
+
+                        html_code = render.si1_results(
+                            event=event, class_results=finished_class_results
+                        )
+                        data = json.dumps({"status": "result", "data": html_code})
+
+                        for conn in connections:
+                            try:
+                                await conn.send(data)
+                            except websockets.exceptions.ConnectionClosed:
+                                pass
+                    except EventNotFoundError:
+                        pass
+
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:
+                logging.exception(e)
+
     async def update_event(self, event: EventType) -> None:
-        if event:
-            connections = {
-                k: v
-                for k, v in self.connections.items()
-                if v[0] == "/si2" and str(event.id) == v[1]
-            }
-            for conn in connections:
-                await self.send(conn=conn, event=copy.deepcopy(event), message={})
+        # update connections
+        for conn, value in self.connections.items():
+            if event.id == value.event_id:
+                value.key_valid = event.key == value.event_key
+
+                if conn.request.path == "/si2":
+                    await self.send(conn=conn, event=copy.deepcopy(event), message={})
 
     async def send_to_all(self, event: EventType, message: Dict) -> None:
-        if event:
-            connections = {
-                k: v for k, v in self.connections.items() if str(event.id) == v[1]
-            }
-            for conn in connections:
-                await self.send(conn=conn, event=copy.deepcopy(event), message=message)
+        connections = [c for c, v in self.connections.items() if event.id == v.event_id]
+        for conn in connections:
+            await self.send(conn=conn, event=copy.deepcopy(event), message=message)
 
     async def send(
         self, conn: ServerConnection, event: EventType, message: Dict
@@ -90,8 +158,7 @@ class WebSocketHandler:
             if event and event.id in self.cardreader_status
             else "readerOffline"
         )
-        path, event_id, event_key = self.connections[conn]
-        if path == "/si2":
+        if conn.request.path == "/si2":
             stream_status = streaming_status.status.get(id=event.id)
             print("stream_status:", stream_status)
             data = render.si2_data(
@@ -108,7 +175,7 @@ class WebSocketHandler:
             elif message.get("lastName", None) is not None:
                 data = render.si1_data(message=message)
             else:
-                return
+                data = ""
             data = json.dumps({"status": status, "data": str(data)})
         try:
             await conn.send(str(data))
@@ -265,6 +332,9 @@ class WebSocketHandler:
                                 res["status"] = res["status"].name
                             print(res)
 
+                            if status == "cardRead":
+                                self.update_result.set()
+
             except websockets.exceptions.ConnectionClosed:
                 pass
             except Exception as e:
@@ -332,6 +402,9 @@ class WebSocketHandler:
                     print(res)
                     await websocket.send(json.dumps(res))
 
+                    if status == "cardRead":
+                        self.update_result.set()
+
             except websockets.exceptions.ConnectionClosed:
                 pass
             except Exception as e:
@@ -349,7 +422,7 @@ class WebSocketHandler:
             try:
                 if websocket.request.path in ("/si1", "/si2"):
                     data = await websocket.recv()
-                    event_id, event_key = data.split(",")
+                    event_id, event_key, results = data.split(",")
 
                     # check event key
                     events = await asyncio.get_event_loop().run_in_executor(
@@ -357,12 +430,15 @@ class WebSocketHandler:
                     )
                     for e in events:
                         if str(e.id) == event_id and e.key == event_key:
-                            self.connections[websocket] = (
-                                websocket.request.path,
-                                event_id,
-                                event_key,
+                            self.connections[websocket] = ConnectionParameter(
+                                event_id=e.id,
+                                event_key=e.key,
+                                key_valid=True,
+                                show_result=results == "true",
                             )
                             await self.send(conn=websocket, event=e, message={})
+                            if websocket.request.path == "/si1":
+                                self.update_result.set()
                             async for message in websocket:
                                 # workaround to detect lost websocket connection in the browser
                                 # see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets

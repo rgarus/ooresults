@@ -1,5 +1,6 @@
 ## event_id: Optional[int]
 ## key: Optional[str]
+## view: int
 
 
 <!DOCTYPE html>
@@ -7,6 +8,8 @@
     <head>
         <meta charset="UTF-8">
         <title>SI reader</title>
+        <link rel="stylesheet" href="mystatic/style.css"/>
+        <link rel="stylesheet" href="mystatic/style-tab.css"/>
         <style>
             .bgr {background-color: #ff7070;}
             .bgy {background-color: #ffff00;}
@@ -21,9 +24,28 @@
     </head>
     <body style="margin: 0">
         <div id="page"></div>
+
+        <div class="modal" id="si1.tlsErrorDialog">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close" onclick="closeErrorDialog()">&times;</span>
+                <p>TLS handshake error, try to open <a id="si1.tlsErrorLink" target="_blank"></a></p>
+                <button type="button" class="btn cancel" onclick="closeErrorDialog()">Close</button>
+            </div>
+        </div>
+
         <script>
             var event_id = "${event_id}";
             var key = "${key | f, n}";
+            var view = ${view};  // 0: both, 1: only reader
+
+            var ws_uri;
+            if (window.location.protocol === "https:") {
+                ws_uri = "wss:";
+            } else {
+                ws_uri = "ws:";
+            };
+            ws_uri += "//" + window.location.hostname + ":8081" + window.location.pathname;
 
             /* Function to open fullscreen mode */
             function openFullscreen() {
@@ -35,7 +57,9 @@
             var timer = null;
             var status = 'offline';
             var data = '';
-            
+            var result_data = null;
+            var autoscrollTimer = null;
+
             function message () {
                 var text = '';
                 var color = 'black';
@@ -69,28 +93,62 @@
                         break;
 
                 }
+                if (autoscrollTimer != null) {
+                    clearTimeout(autoscrollTimer);
+                };
+
+                if (result_data && (status == 'readerConnected' || status == 'cardRemoved')) {
+                    showResult(result_data);
+                    autoscroll();
+                } else {
+                    showMessage(text, color);
+                }
+            };
+
+            function showMessage(text, color) {
                 document.getElementById('page').innerHTML =
                     '<p style="text-align: right; margin: 10px"><button onclick="openFullscreen();">' + window.wakeStatus + '</button></p>' +
                     '<p class="s2" style="padding-left: 4%; color: ' + color + '">' + text + '</p>';
             };
-            
+
+            function showResult(result_data) {
+                document.getElementById('page').innerHTML =
+                    '<p style="text-align: right; margin: 10px"><button onclick="openFullscreen();">' + window.wakeStatus + '</button></p>' +
+                    '<div style="padding-left: 4%; padding-bottom: 24px">' + result_data + '</div>';
+            };
+
+            function closeErrorDialog() {
+                document.getElementById('si1.tlsErrorDialog').style.display='none';
+                start(ws_uri);
+            };
+
             function start(websocketServerLocation) {
                 var ws = new WebSocket(websocketServerLocation);
+                var tm = null;
+                var tp = null;
                 var elem = document.getElementById('page')
 
                 ws.onopen = function(event) {
-                    ws.send(event_id + ',' + key);
+                    ws.send(event_id + ',' + key + ',' + (view == 0).toString());
                     status = 'online';
                     message();
                     tp = setTimeout(function() {ping()}, 10000);
                 };
                 ws.onclose = function(event) {
-                    if (status != 'noAccess') {
+                    ws = null;
+                    clearTimeout(tm);
+                    clearTimeout(tp);
+
+                    if (event.code == 1015) {
+                        message();
+                        var uri = window.location.protocol + "//" + window.location.hostname + ":8081";
+                        document.getElementById('si1.tlsErrorLink').href = uri;
+                        document.getElementById('si1.tlsErrorLink').text = uri;
+                        document.getElementById('si1.tlsErrorDialog').style.display='block';
+                    } else if (status != 'noAccess') {
                         status = 'offline';
                         message();
                         // Try to reconnect in 5 seconds
-                        ws = null;
-                        clearTimeout(tp);
                         setTimeout(function() {start(websocketServerLocation)}, 5000);
                     }
                 };
@@ -107,6 +165,17 @@
                         return;
                     }
                     const obj = JSON.parse(event.data)
+                    if (obj.status == 'result') {
+                        if (view == 0) {
+                            first_result = !result_data
+                            result_data = obj.data;
+                            if (first_result && (status == 'readerConnected' || status == 'cardRemoved')) {
+                                showResult(result_data);
+                                autoscroll();
+                            }
+                        }
+                        return;
+                    }
                     clearTimeout(timer);
                     if (obj.status == 'cardRead') {
                         status = 'readerConnected';
@@ -134,15 +203,19 @@
                 };
             };
 
-            var ws_uri;
-            if (window.location.protocol === "https:") {
-                ws_uri = "wss:";
-            } else {
-                ws_uri = "ws:";
-            };
-            ws_uri += "//" + window.location.hostname + ":8081" + window.location.pathname;
             start(ws_uri);
+
+            function autoscroll() {
+                if (window.scrollY == 0) {
+                    autoscrollTimer = setTimeout(function() {window.scrollBy(0, 2); autoscroll()}, 2000);
+                } else if (window.scrollY + 1 < document.documentElement.scrollHeight - window.innerHeight) {
+                    autoscrollTimer = setTimeout(function() {window.scrollBy(0, 2); autoscroll()}, 25);
+                } else {
+                    autoscrollTimer = setTimeout(function() {showResult(result_data); window.scrollTo(0, 0); autoscroll()}, 2000);
+                };
+            };
         </script>
+
         <script>
             // prevent screen from dimming or locking
             // see https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API

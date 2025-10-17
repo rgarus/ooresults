@@ -57,6 +57,7 @@ def t(name: str):
 
 _si__si1_data = t("si/si1_data.html")
 _si__si1_error = t("si/si1_error.html")
+_si__si1_results = t("si/si1_results.html")
 _si__si1_page = t("si/si1_page.html")
 _si__si2_data = t("si/si2_data.html")
 _si__si2_page = t("si/si2_page.html")
@@ -93,8 +94,8 @@ _series_table = t("series_table.html")
 _unauthorized = t("unauthorized.html")
 
 
-def si1_page(event_id: Optional[int], key: Optional[str]) -> str:
-    return _si__si1_page.render(event_id=event_id, key=key)
+def si1_page(event_id: Optional[int], key: Optional[str], view: int) -> str:
+    return _si__si1_page.render(event_id=event_id, key=key, view=view)
 
 
 def si1_data(message: Dict) -> str:
@@ -103,6 +104,13 @@ def si1_data(message: Dict) -> str:
 
 def si1_error(message: Dict) -> str:
     return _si__si1_error.render(message=message)
+
+
+def si1_results(
+    event: EventType,
+    class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
+) -> str:
+    return _si__si1_results.render(event=event, class_results=class_results)
 
 
 def si2_page(event_id: Optional[int], key: Optional[str]) -> str:

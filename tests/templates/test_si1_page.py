@@ -33,7 +33,7 @@ from ooresults.utils import render
     ],
 )
 def test_event_id(event_id: Optional[int], value: str):
-    html = etree.HTML(render.si1_page(event_id=event_id, key=None))
+    html = etree.HTML(render.si1_page(event_id=event_id, key=None, view=0))
     assert html is not None
 
     script = html.find("body/script").text.splitlines()
@@ -51,9 +51,25 @@ def test_event_id(event_id: Optional[int], value: str):
     ],
 )
 def test_key(key: Optional[str], value: str):
-    html = etree.HTML(render.si1_page(event_id=None, key=key))
+    html = etree.HTML(render.si1_page(event_id=None, key=key, view=0))
     assert html is not None
 
     script = html.find("body/script").text.splitlines()
     script = [line.strip() for line in script]
     assert f'var key = "{value}";' in script
+
+
+@pytest.mark.parametrize(
+    "view, value",
+    [
+        (0, "0"),
+        (1, "1"),
+    ],
+)
+def test_view(view: int, value: str):
+    html = etree.HTML(render.si1_page(event_id=None, key=None, view=view))
+    assert html is not None
+
+    script = html.find("body/script").text.splitlines()
+    script = [line.strip() for line in script]
+    assert f"var view = {value};  // 0: both, 1: only reader" in script
