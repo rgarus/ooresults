@@ -256,9 +256,11 @@ def create_pdf(
 
                         pre(
                             pdf=doc,
-                            t1=f(ranked_result.rank)
-                            if not entry.not_competing
-                            else "AK",
+                            t1=(
+                                f(ranked_result.rank)
+                                if not entry.not_competing
+                                else "AK"
+                            ),
                             t2=f(entry.last_name) + " " + f(entry.first_name),
                             t3=format_time(running_time, result.status),
                         )

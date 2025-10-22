@@ -849,9 +849,9 @@ class SqliteRepo(Repo):
                 last_name=last_name,
                 gender=gender,
                 year=year,
-                club_id=competitor.club_id
-                if competitor.club_id is not None
-                else club_id,
+                club_id=(
+                    competitor.club_id if competitor.club_id is not None else club_id
+                ),
                 chip=competitor.chip if competitor.chip != "" else chip,
             )
             return self.db.insert(
@@ -1062,9 +1062,11 @@ class SqliteRepo(Repo):
                     where="id=" + web.db.sqlquote(entry.id),
                     class_id=class_id,
                     club_id=club_id,
-                    not_competing=c["not_competing"]
-                    if "not_competing" in c
-                    else entry.not_competing,
+                    not_competing=(
+                        c["not_competing"]
+                        if "not_competing" in c
+                        else entry.not_competing
+                    ),
                     chip=c["chip"] if "chip" in c else entry.chip,
                     fields=json.dumps(fields),
                     result=result.to_json(),
@@ -1085,9 +1087,9 @@ class SqliteRepo(Repo):
                         "competitor_id": competitor_id,
                         "class_id": class_id,
                         "club_id": club_id,
-                        "not_competing": c["not_competing"]
-                        if "not_competing" in c
-                        else False,
+                        "not_competing": (
+                            c["not_competing"] if "not_competing" in c else False
+                        ),
                         "chip": c["chip"] if "chip" in c else "",
                         "fields": json.dumps(c["fields"] if "fields" in c else {}),
                         "result": result.to_json(),

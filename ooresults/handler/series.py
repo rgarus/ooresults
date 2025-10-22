@@ -44,9 +44,11 @@ class Settings:
         try:
             settings = series_type.Settings(
                 name=data.name,
-                nr_of_best_results=int(data.nr_of_best_results)
-                if data.nr_of_best_results != ""
-                else None,
+                nr_of_best_results=(
+                    int(data.nr_of_best_results)
+                    if data.nr_of_best_results != ""
+                    else None
+                ),
                 mode=data.mode,
                 maximum_points=int(data.maximum_points),
                 decimal_places=int(data.decimal_places),

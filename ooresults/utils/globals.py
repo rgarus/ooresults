@@ -53,7 +53,7 @@ STREAMING_STATUS = {
 
 
 def build_columns(
-    class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]]
+    class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
 ) -> Set[str]:
     columns = set()
     for class_, _ in class_results:

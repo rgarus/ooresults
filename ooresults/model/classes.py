@@ -48,9 +48,11 @@ def import_classes(event_id: int, classes: List[Dict]) -> None:
                     model.db.update_class(
                         id=cl.id,
                         name=cl.name,
-                        short_name=c["short_name"]
-                        if c.get("short_name", None) is not None
-                        else cl.short_name,
+                        short_name=(
+                            c["short_name"]
+                            if c.get("short_name", None) is not None
+                            else cl.short_name
+                        ),
                         course_id=cl.course_id,
                         params=cl.params,
                     )

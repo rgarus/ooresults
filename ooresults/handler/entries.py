@@ -263,9 +263,9 @@ class Add:
             model.entries.add_or_update_entry(
                 id=int(data.id) if data.id != "" else None,
                 event_id=event_id,
-                competitor_id=int(data.competitor_id)
-                if data.competitor_id != ""
-                else None,
+                competitor_id=(
+                    int(data.competitor_id) if data.competitor_id != "" else None
+                ),
                 first_name=data.first_name,
                 last_name=data.last_name,
                 gender=data.gender,

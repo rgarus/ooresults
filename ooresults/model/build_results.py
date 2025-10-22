@@ -56,9 +56,11 @@ def build_results(
             )
             if class_info.params.otype == "score":
                 class_entries.sort(
-                    key=lambda e: e.result.extensions["score"]
-                    if e.result.extensions.get("score", None) is not None
-                    else -999999,
+                    key=lambda e: (
+                        e.result.extensions["score"]
+                        if e.result.extensions.get("score", None) is not None
+                        else -999999
+                    ),
                     reverse=True,
                 )
 

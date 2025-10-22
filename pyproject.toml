@@ -85,7 +85,7 @@ packages = [
 asyncio_default_fixture_loop_scope = "function"
 
 [tool.black]
-required-version = "23"
+required-version = "25"
 
 [tool.isort]
 profile = "black"
