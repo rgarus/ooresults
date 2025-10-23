@@ -294,7 +294,7 @@ def parse(content: bytes) -> list[dict]:
             fields = {}
 
             for column, nr in column_nr.items():
-                item = values[nr]
+                item = values[nr].strip()
                 if column == "status":
                     mapping = {
                         "0": ResultStatus.OK,

@@ -21,6 +21,16 @@
   <button id="tab.reader" disabled class="tablinks" onclick="evnt_mySIReader()">SI Reader ...</button>
 </div>
 
+<!-- The Modal -->
+<div class="modal" id="statusDialog">
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close" onclick="document.getElementById('statusDialog').style.display='none'">&times;</span>
+    <div id="statusDialogContent"></div>
+    <button type="button" class="btn cancel" onclick="document.getElementById('statusDialog').style.display='none'">Close</button>
+  </div>
+</div>
+
 <script>
     function myfunction() {
         document.getElementById("tab.entries").disabled = true;

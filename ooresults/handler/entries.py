@@ -18,10 +18,13 @@
 
 
 import datetime
+import json
 import logging
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Set
+from typing import Tuple
 
 import tzlocal
 import web
@@ -137,10 +140,8 @@ class Import:
         try:
             if data.entr_import == "entr.import.1":
                 _, entries = iof_entry_list.parse_entry_list(data.browse1)
-                model.entries.import_entries(event_id=event_id, entries=entries)
             elif data.entr_import == "entr.import.2":
                 _, entries, _ = iof_result_list.parse_result_list(data.browse2)
-                model.entries.import_entries(event_id=event_id, entries=entries)
             elif data.entr_import == "entr.import.3":
                 event = model.events.get_event(id=event_id)
                 entries = oe2003.parse(content=data.browse3)
@@ -173,20 +174,39 @@ class Import:
                                 event.date, i.punch_time.time(), tzinfo=tz
                             )
 
-                model.entries.import_entries(event_id=event_id, entries=entries)
             elif data.entr_import == "entr.import.4":
                 entries = text.parse(content=data.browse4)
-                model.entries.import_entries(event_id=event_id, entries=entries)
+            else:
+                raise web.conflict("Internal server error")
+
+            # import only the first entry of the entries with same last and first name
+            entries_1: List[Dict] = []
+            names_1: Set[Tuple[str, str]] = set()
+            names_2: Set[Tuple[str, str]] = set()
+            for e in entries:
+                name = (e["last_name"], e["first_name"])
+                if name in names_1:
+                    names_2.add(name)
+                else:
+                    names_1.add(name)
+                    entries_1.append(e)
+
+            model.entries.import_entries(event_id=event_id, entries=entries_1)
 
         except EventNotFoundError:
             raise web.conflict("Event deleted")
         except Exception as e:
-            raise web.conflict(str(e))
-        except:
             logging.exception("Internal server error")
-            raise
+            raise web.conflict(str(e))
 
-        return update(event_id=event_id, view=data.view)
+        answer = {"table": update(event_id=event_id, view=data.view)}
+        if names_2:
+            answer["status"] = render.entries_import_status(
+                number_of_imported_entries=len(entries_1),
+                number_of_entries=len(entries),
+                names=names_2,
+            )
+        return json.dumps(answer)
 
 
 class Export:

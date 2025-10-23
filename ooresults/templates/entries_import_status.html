@@ -1,0 +1,19 @@
+## number_of_imported_entries: int
+## number_of_entries: int
+## names: Set[Tuple[str, str]]
+
+
+<p>${number_of_imported_entries} of ${number_of_entries} entries imported.</p>
+% if names:
+    <p></p>
+    <p style="color:red">Warning:</p>
+    <p></p>
+    <p></p>
+    <p style="color:red">For the following names with several entries only the first entry was imported:</p>
+    <p></p>
+    <ul>
+    % for n in names:
+        <li style="color:red">${n[0]}, ${n[1]}</li>
+    % endfor
+    </ul>
+% endif

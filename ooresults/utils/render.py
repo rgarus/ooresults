@@ -21,6 +21,7 @@ import pathlib
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Set
 from typing import Tuple
 
 from mako.template import Template
@@ -79,6 +80,7 @@ _competitors_table = t("competitors_table.html")
 _courses_tab_content = t("courses_tab_content.html")
 _courses_table = t("courses_table.html")
 _demo_reader = t("demo_reader.html")
+_entries_import_status = t("entries_import_status.html")
 _entries_tab_content = t("entries_tab_content.html")
 _entries_table = t("entries_table.html")
 _events_tab_content = t("events_tab_content.html")
@@ -192,6 +194,16 @@ def add_entry_competitors(competitors: List[CompetitorType]) -> str:
 
 def add_entry_result(entry: EntryType) -> str:
     return _add_entry_result.render(entry=entry)
+
+
+def entries_import_status(
+    number_of_imported_entries: int, number_of_entries: int, names: Set[Tuple[str, str]]
+) -> str:
+    return _entries_import_status.render(
+        number_of_imported_entries=number_of_imported_entries,
+        number_of_entries=number_of_entries,
+        names=names,
+    )
 
 
 def events_table(events: List[EventType]) -> str:
