@@ -2,6 +2,22 @@ Changelog
 =========
 
 
+[0.4.4] - 2025-10-27
+--------------------
+
+Added
+^^^^^
+
+- Instead of the status "Card reader connected", the current results list is displayed on the si1 page.
+- Python 3.12 and Python 3.13 are now supported.
+
+Fixed
+^^^^^
+
+- Previously, it was not possible to import an entry list if it contained entries with the same first and last name.
+  Now the list is imported, but only the first of the entries with the same first and last name is imported.
+
+
 [0.4.3] - 2025-07-18
 --------------------
 
