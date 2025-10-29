@@ -2,6 +2,18 @@ Changelog
 =========
 
 
+[0.4.5] - 2025-10-29
+--------------------
+
+Changed
+^^^^^^^
+
+- Support for Python 3.12 and Python 3.13 was removed, otherwise the package can not be uploaded to pypi.org.
+
+  | If you wish to use ooresults with Python 3.12 or Python 3.13, install version 0.4.4 using the following command:
+  | python -m pip install https://github.com/rgarus/ooresults/archive/refs/tags/0.4.4.zip.
+
+
 [0.4.4] - 2025-10-27
 --------------------
 

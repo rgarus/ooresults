@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ooresults"
-version = "0.4.4"
+version = "0.4.5"
 authors = [
   {name="Rainer Garus"},
 ]
@@ -57,6 +57,7 @@ ooresults-reader = "ooresults._reader:main"
 [project.urls]
 Repository = "https://github.com/rgarus/ooresults"
 Documentation = "https://ooresults.readthedocs.io/en/latest"
+Changelog = "https://github.com/rgarus/ooresults/blob/main/CHANGELOG.rst"
 
 [tool.setuptools]
 packages = [
