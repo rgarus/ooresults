@@ -47,66 +47,72 @@ def db() -> SqliteRepo:
 
 @pytest.fixture
 def event_id(db: SqliteRepo) -> int:
-    return db.add_event(
-        name="Event",
-        date=datetime.date(year=2020, month=1, day=1),
-        key=None,
-        publish=False,
-        series=None,
-        fields=[],
-    )
+    with db.transaction():
+        return db.add_event(
+            name="Event",
+            date=datetime.date(year=2020, month=1, day=1),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        )
 
 
 @pytest.fixture
 def course_1_id(db: SqliteRepo, event_id: int) -> int:
-    return db.add_course(
-        event_id=event_id,
-        name="Bahn A",
-        length=4500,
-        climb=90,
-        controls=["101", "102", "103"],
-    )
+    with db.transaction():
+        return db.add_course(
+            event_id=event_id,
+            name="Bahn A",
+            length=4500,
+            climb=90,
+            controls=["101", "102", "103"],
+        )
 
 
 @pytest.fixture
 def course_2_id(db: SqliteRepo, event_id: int) -> int:
-    return db.add_course(
-        event_id=event_id,
-        name="Bahn B",
-        length=4300,
-        climb=70,
-        controls=["101", "104", "103"],
-    )
+    with db.transaction():
+        return db.add_course(
+            event_id=event_id,
+            name="Bahn B",
+            length=4300,
+            climb=70,
+            controls=["101", "104", "103"],
+        )
 
 
 @pytest.fixture
 def class_1_id(db: SqliteRepo, event_id: int, course_1_id: int) -> int:
-    return db.add_class(
-        event_id=event_id,
-        name="Elite",
-        short_name="E",
-        course_id=course_1_id,
-        params=ClassParams(),
-    )
+    with db.transaction():
+        return db.add_class(
+            event_id=event_id,
+            name="Elite",
+            short_name="E",
+            course_id=course_1_id,
+            params=ClassParams(),
+        )
 
 
 @pytest.fixture
-def club_id(db) -> int:
-    return db.add_club(
-        name="OL Bundestag",
-    )
+def club_id(db: SqliteRepo) -> int:
+    with db.transaction():
+        return db.add_club(
+            name="OL Bundestag",
+        )
 
 
 @pytest.fixture
-def competitor_id(db, club_id):
-    return db.add_competitor(
-        first_name="Angela",
-        last_name="Merkel",
-        club_id=club_id,
-        gender="F",
-        year=1957,
-        chip="1234567",
-    )
+def competitor_id(db: SqliteRepo, club_id):
+    with db.transaction():
+        return db.add_competitor(
+            first_name="Angela",
+            last_name="Merkel",
+            club_id=club_id,
+            gender="F",
+            year=1957,
+            chip="1234567",
+        )
 
 
 S1 = datetime.datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
@@ -118,108 +124,112 @@ F1 = datetime.datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
 
 @pytest.fixture
 def entry_1(db: SqliteRepo, event_id: int, class_1_id: int, club_id: int) -> EntryType:
-    id = db.add_entry(
-        event_id=event_id,
-        competitor_id=None,
-        first_name="Angela",
-        last_name="Merkel",
-        gender="F",
-        year=1957,
-        class_id=class_1_id,
-        club_id=club_id,
-        not_competing=False,
-        chip="4711",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    result = PersonRaceResult(
-        punched_start_time=S1,
-        punched_finish_time=F1,
-        si_punched_start_time=S1,
-        si_punched_finish_time=None,
-        status=ResultStatus.INACTIVE,
-        time=None,
-        split_times=[
-            SplitTime(
-                control_code="101",
-                punch_time=C1,
-                si_punch_time=None,
-                status=SpStatus.ADDITIONAL,
-            ),
-            SplitTime(
-                control_code="103",
-                punch_time=C3,
-                si_punch_time=C3,
-                status=SpStatus.ADDITIONAL,
-            ),
-        ],
-    )
-    result.compute_result(controls=["101", "102", "103"], class_params=ClassParams())
-    db.update_entry_result(
-        id=id,
-        chip="4711",
-        start_time=None,
-        result=result,
-    )
-    item = db.get_entry(id=id)
-    return copy.deepcopy(item)
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_id,
+            competitor_id=None,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1957,
+            class_id=class_1_id,
+            club_id=club_id,
+            not_competing=False,
+            chip="4711",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        result = PersonRaceResult(
+            punched_start_time=S1,
+            punched_finish_time=F1,
+            si_punched_start_time=S1,
+            si_punched_finish_time=None,
+            status=ResultStatus.INACTIVE,
+            time=None,
+            split_times=[
+                SplitTime(
+                    control_code="101",
+                    punch_time=C1,
+                    si_punch_time=None,
+                    status=SpStatus.ADDITIONAL,
+                ),
+                SplitTime(
+                    control_code="103",
+                    punch_time=C3,
+                    si_punch_time=C3,
+                    status=SpStatus.ADDITIONAL,
+                ),
+            ],
+        )
+        result.compute_result(
+            controls=["101", "102", "103"], class_params=ClassParams()
+        )
+        db.update_entry_result(
+            id=id,
+            chip="4711",
+            start_time=None,
+            result=result,
+        )
+        item = db.get_entry(id=id)
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
 def entry_2(db: SqliteRepo, event_id: int, class_1_id: int) -> EntryType:
-    id = db.add_entry(
-        event_id=event_id,
-        competitor_id=None,
-        first_name="",
-        last_name="",
-        gender="",
-        year=None,
-        class_id=class_1_id,
-        club_id=None,
-        not_competing=False,
-        chip="4748495",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    result = PersonRaceResult(
-        punched_start_time=S1,
-        punched_finish_time=F1,
-        si_punched_start_time=S1,
-        si_punched_finish_time=F1,
-        status=ResultStatus.INACTIVE,
-        time=None,
-        split_times=[
-            SplitTime(
-                control_code="101",
-                punch_time=C1,
-                si_punch_time=C1,
-                status=SpStatus.ADDITIONAL,
-            ),
-            SplitTime(
-                control_code="102",
-                punch_time=C2,
-                si_punch_time=C2,
-                status=SpStatus.ADDITIONAL,
-            ),
-            SplitTime(
-                control_code="103",
-                punch_time=C3,
-                si_punch_time=C3,
-                status=SpStatus.ADDITIONAL,
-            ),
-        ],
-    )
-    result.compute_result(controls=[], class_params=ClassParams())
-    db.update_entry_result(
-        id=id,
-        chip="4748495",
-        start_time=None,
-        result=result,
-    )
-    item = db.get_entry(id=id)
-    return copy.deepcopy(item)
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_id,
+            competitor_id=None,
+            first_name="",
+            last_name="",
+            gender="",
+            year=None,
+            class_id=class_1_id,
+            club_id=None,
+            not_competing=False,
+            chip="4748495",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        result = PersonRaceResult(
+            punched_start_time=S1,
+            punched_finish_time=F1,
+            si_punched_start_time=S1,
+            si_punched_finish_time=F1,
+            status=ResultStatus.INACTIVE,
+            time=None,
+            split_times=[
+                SplitTime(
+                    control_code="101",
+                    punch_time=C1,
+                    si_punch_time=C1,
+                    status=SpStatus.ADDITIONAL,
+                ),
+                SplitTime(
+                    control_code="102",
+                    punch_time=C2,
+                    si_punch_time=C2,
+                    status=SpStatus.ADDITIONAL,
+                ),
+                SplitTime(
+                    control_code="103",
+                    punch_time=C3,
+                    si_punch_time=C3,
+                    status=SpStatus.ADDITIONAL,
+                ),
+            ],
+        )
+        result.compute_result(controls=[], class_params=ClassParams())
+        db.update_entry_result(
+            id=id,
+            chip="4748495",
+            start_time=None,
+            result=result,
+        )
+        item = db.get_entry(id=id)
+        return copy.deepcopy(item)
 
 
 def test_add_entry_without_result(

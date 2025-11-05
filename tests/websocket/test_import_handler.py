@@ -64,44 +64,47 @@ def db() -> SqliteRepo:
 
 @pytest.fixture
 def event_id(db: SqliteRepo) -> int:
-    return db.add_event(
-        name="Event",
-        date=datetime.date(year=2020, month=1, day=1),
-        key="local",
-        publish=False,
-        series=None,
-        fields=[],
-    )
+    with db.transaction():
+        return db.add_event(
+            name="Event",
+            date=datetime.date(year=2020, month=1, day=1),
+            key="local",
+            publish=False,
+            series=None,
+            fields=[],
+        )
 
 
 @pytest.fixture
 def class_id(db: SqliteRepo, event_id: int) -> int:
-    return db.add_class(
-        event_id=event_id,
-        name="Elite",
-        short_name="E",
-        course_id=None,
-        params=ClassParams(),
-    )
+    with db.transaction():
+        return db.add_class(
+            event_id=event_id,
+            name="Elite",
+            short_name="E",
+            course_id=None,
+            params=ClassParams(),
+        )
 
 
 @pytest.fixture
 def entry_id(db: SqliteRepo, event_id: int, class_id: int) -> int:
-    return db.add_entry(
-        event_id=event_id,
-        competitor_id=None,
-        first_name="Robert",
-        last_name="Lewandowski",
-        gender="",
-        year=None,
-        class_id=class_id,
-        club_id=None,
-        not_competing=False,
-        chip="9999999",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
+    with db.transaction():
+        return db.add_entry(
+            event_id=event_id,
+            competitor_id=None,
+            first_name="Robert",
+            last_name="Lewandowski",
+            gender="",
+            year=None,
+            class_id=class_id,
+            club_id=None,
+            not_competing=False,
+            chip="9999999",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
 
 
 class WebSocketServer(threading.Thread):

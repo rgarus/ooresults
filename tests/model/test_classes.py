@@ -42,47 +42,51 @@ def db() -> SqliteRepo:
 
 @pytest.fixture
 def event_id(db: SqliteRepo) -> int:
-    return db.add_event(
-        name="Event",
-        date=datetime.date(year=2020, month=1, day=1),
-        key=None,
-        publish=False,
-        series=None,
-        fields=[],
-    )
+    with db.transaction():
+        return db.add_event(
+            name="Event",
+            date=datetime.date(year=2020, month=1, day=1),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        )
 
 
 @pytest.fixture
 def course_1_id(db: SqliteRepo, event_id: int) -> int:
-    return db.add_course(
-        event_id=event_id,
-        name="Bahn A",
-        length=4500,
-        climb=90,
-        controls=["101", "102", "103"],
-    )
+    with db.transaction():
+        return db.add_course(
+            event_id=event_id,
+            name="Bahn A",
+            length=4500,
+            climb=90,
+            controls=["101", "102", "103"],
+        )
 
 
 @pytest.fixture
 def course_2_id(db: SqliteRepo, event_id: int) -> int:
-    return db.add_course(
-        event_id=event_id,
-        name="Bahn B",
-        length=4300,
-        climb=70,
-        controls=["101", "104", "103"],
-    )
+    with db.transaction():
+        return db.add_course(
+            event_id=event_id,
+            name="Bahn B",
+            length=4300,
+            climb=70,
+            controls=["101", "104", "103"],
+        )
 
 
 @pytest.fixture
 def class_1_id(db: SqliteRepo, event_id: int, course_1_id: int) -> int:
-    return db.add_class(
-        event_id=event_id,
-        name="Elite Men",
-        short_name="E Men",
-        course_id=course_1_id,
-        params=ClassParams(),
-    )
+    with db.transaction():
+        return db.add_class(
+            event_id=event_id,
+            name="Elite Men",
+            short_name="E Men",
+            course_id=course_1_id,
+            params=ClassParams(),
+        )
 
 
 S1 = datetime.datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
@@ -94,41 +98,50 @@ F1 = datetime.datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
 
 @pytest.fixture
 def entry_1(db: SqliteRepo, event_id: int, class_1_id: int) -> EntryType:
-    id = db.add_entry(
-        event_id=event_id,
-        competitor_id=None,
-        first_name="Claudia",
-        last_name="Merkel",
-        gender="",
-        year=None,
-        class_id=class_1_id,
-        club_id=None,
-        not_competing=False,
-        chip="",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    result = PersonRaceResult(
-        punched_start_time=S1,
-        punched_finish_time=F1,
-        status=ResultStatus.INACTIVE,
-        time=None,
-        split_times=[
-            SplitTime(control_code="101", punch_time=C1, status=SpStatus.ADDITIONAL),
-            SplitTime(control_code="102", punch_time=C2, status=SpStatus.ADDITIONAL),
-            SplitTime(control_code="103", punch_time=C3, status=SpStatus.ADDITIONAL),
-        ],
-    )
-    result.compute_result(controls=["101", "102", "103"], class_params=ClassParams())
-    db.update_entry_result(
-        id=id,
-        chip="7411",
-        start_time=None,
-        result=result,
-    )
-    item = db.get_entry(id=id)
-    return copy.deepcopy(item)
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_id,
+            competitor_id=None,
+            first_name="Claudia",
+            last_name="Merkel",
+            gender="",
+            year=None,
+            class_id=class_1_id,
+            club_id=None,
+            not_competing=False,
+            chip="",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        result = PersonRaceResult(
+            punched_start_time=S1,
+            punched_finish_time=F1,
+            status=ResultStatus.INACTIVE,
+            time=None,
+            split_times=[
+                SplitTime(
+                    control_code="101", punch_time=C1, status=SpStatus.ADDITIONAL
+                ),
+                SplitTime(
+                    control_code="102", punch_time=C2, status=SpStatus.ADDITIONAL
+                ),
+                SplitTime(
+                    control_code="103", punch_time=C3, status=SpStatus.ADDITIONAL
+                ),
+            ],
+        )
+        result.compute_result(
+            controls=["101", "102", "103"], class_params=ClassParams()
+        )
+        db.update_entry_result(
+            id=id,
+            chip="7411",
+            start_time=None,
+            result=result,
+        )
+        item = db.get_entry(id=id)
+        return copy.deepcopy(item)
 
 
 def test_import_class_data_update_existing_class(

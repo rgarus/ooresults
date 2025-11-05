@@ -51,14 +51,15 @@ def db() -> SqliteRepo:
 
 @pytest.fixture
 def event_id(db: SqliteRepo) -> int:
-    return db.add_event(
-        name="Event",
-        date=datetime.date(year=2020, month=1, day=1),
-        key="local",
-        publish=False,
-        series=None,
-        fields=[],
-    )
+    with db.transaction():
+        return db.add_event(
+            name="Event",
+            date=datetime.date(year=2020, month=1, day=1),
+            key="local",
+            publish=False,
+            series=None,
+            fields=[],
+        )
 
 
 class WebSocketServer(threading.Thread):
@@ -371,7 +372,7 @@ async def test_cardreader_card_removed(
 
 @pytest.mark.asyncio
 async def test_cardreader_card_read(
-    db,
+    db: SqliteRepo,
     event_id: int,
     reader: ClientConnection,
     si1_clients: List[ClientConnection],
@@ -420,7 +421,8 @@ async def test_cardreader_card_read(
     c1 = datetime.datetime.fromisoformat("2021-05-18T16:31:25+02:00")
     c2 = datetime.datetime.fromisoformat("2021-05-18T16:31:31+02:00")
 
-    data = db.get_entries(event_id=event_id)
+    with db.transaction():
+        data = db.get_entries(event_id=event_id)
     assert data == [
         EntryType(
             id=data[0].id,

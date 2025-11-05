@@ -38,227 +38,237 @@ from ooresults.repo.sqlite_repo import SqliteRepo
 
 
 @pytest.fixture
-def db():
+def db() -> SqliteRepo:
     model.db = SqliteRepo(db=":memory:")
     return model.db
 
 
 @pytest.fixture
-def settings(db):
-    settings = Settings(
-        name="Series 1",
-        nr_of_best_results=4,
-        mode="Proportional 1",
-        maximum_points=500,
-        decimal_places=3,
-    )
-    db.update_series_settings(settings=settings)
-    item = db.get_series_settings()
-    return copy.deepcopy(item)
+def settings(db: SqliteRepo) -> Settings:
+    with db.transaction():
+        settings = Settings(
+            name="Series 1",
+            nr_of_best_results=4,
+            mode="Proportional 1",
+            maximum_points=500,
+            decimal_places=3,
+        )
+        db.update_series_settings(settings=settings)
+        item = db.get_series_settings()
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
-def event_1(db) -> EventType:
-    id = db.add_event(
-        name="Event 1",
-        date=datetime.date(year=2015, month=1, day=1),
-        key=None,
-        publish=False,
-        series="Lauf 1",
-        fields=[],
-    )
-    item = db.get_event(id=id)
-    return copy.deepcopy(item)
+def event_1(db: SqliteRepo) -> EventType:
+    with db.transaction():
+        id = db.add_event(
+            name="Event 1",
+            date=datetime.date(year=2015, month=1, day=1),
+            key=None,
+            publish=False,
+            series="Lauf 1",
+            fields=[],
+        )
+        item = db.get_event(id=id)
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
-def event_2(db) -> EventType:
-    id = db.add_event(
-        name="Event 2",
-        date=datetime.date(year=2015, month=1, day=1),
-        key=None,
-        publish=False,
-        series="Lauf 2",
-        fields=[],
-    )
-    item = db.get_event(id=id)
-    return copy.deepcopy(item)
+def event_2(db: SqliteRepo) -> EventType:
+    with db.transaction():
+        id = db.add_event(
+            name="Event 2",
+            date=datetime.date(year=2015, month=1, day=1),
+            key=None,
+            publish=False,
+            series="Lauf 2",
+            fields=[],
+        )
+        item = db.get_event(id=id)
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
-def course_a(db, event_1: EventType) -> CourseType:
-    id = db.add_course(
-        event_id=event_1.id,
-        name="Bahn A",
-        length=4500,
-        climb=90,
-        controls=["101", "102", "103"],
-    )
-    item = db.get_course(id=id)
-    return copy.deepcopy(item)
+def course_a(db: SqliteRepo, event_1: EventType) -> CourseType:
+    with db.transaction():
+        id = db.add_course(
+            event_id=event_1.id,
+            name="Bahn A",
+            length=4500,
+            climb=90,
+            controls=["101", "102", "103"],
+        )
+        item = db.get_course(id=id)
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
-def course_b(db, event_1: EventType) -> CourseType:
-    id = db.add_course(
-        event_id=event_1.id,
-        name="Bahn B",
-        length=4500,
-        climb=90,
-        controls=["101", "102", "103"],
-    )
-    item = db.get_course(id=id)
-    return copy.deepcopy(item)
+def course_b(db: SqliteRepo, event_1: EventType) -> CourseType:
+    with db.transaction():
+        id = db.add_course(
+            event_id=event_1.id,
+            name="Bahn B",
+            length=4500,
+            climb=90,
+            controls=["101", "102", "103"],
+        )
+        item = db.get_course(id=id)
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
-def class_a(db, event_1: EventType, course_a: CourseType) -> ClassType:
-    id = db.add_class(
-        event_id=event_1.id,
-        name="Bahn A - Lang",
-        short_name="Bahn A - Lang",
-        course_id=course_a.id,
-        params=ClassParams(),
-    )
-    item = db.get_class(id=id)
-    return copy.deepcopy(item)
+def class_a(db: SqliteRepo, event_1: EventType, course_a: CourseType) -> ClassType:
+    with db.transaction():
+        id = db.add_class(
+            event_id=event_1.id,
+            name="Bahn A - Lang",
+            short_name="Bahn A - Lang",
+            course_id=course_a.id,
+            params=ClassParams(),
+        )
+        item = db.get_class(id=id)
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
-def class_b(db, event_1: EventType, course_b: CourseType) -> ClassType:
-    id = db.add_class(
-        event_id=event_1.id,
-        name="Bahn B - Mittel",
-        short_name="Bahn B - Mittel",
-        course_id=course_b.id,
-        params=ClassParams(),
-    )
-    item = db.get_class(id=id)
-    return copy.deepcopy(item)
+def class_b(db: SqliteRepo, event_1: EventType, course_b: CourseType) -> ClassType:
+    with db.transaction():
+        id = db.add_class(
+            event_id=event_1.id,
+            name="Bahn B - Mittel",
+            short_name="Bahn B - Mittel",
+            course_id=course_b.id,
+            params=ClassParams(),
+        )
+        item = db.get_class(id=id)
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_1(db, event_1: EventType, class_a: ClassType) -> EntryType:
-    id = db.add_entry(
-        event_id=event_1.id,
-        competitor_id=None,
-        first_name="Angela",
-        last_name="Merkel",
-        gender="",
-        year=None,
-        class_id=class_a.id,
-        club_id=None,
-        not_competing=False,
-        chip="",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    db.update_entry_result(
-        id=id,
-        chip="7410",
-        start_time=None,
-        result=PersonRaceResult(
-            status=ResultStatus.OK,
-            time=9876,
-        ),
-    )
-    item = db.get_entry(id=id)
-    return copy.deepcopy(item)
+def entry_1(db: SqliteRepo, event_1: EventType, class_a: ClassType) -> EntryType:
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_1.id,
+            competitor_id=None,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="",
+            year=None,
+            class_id=class_a.id,
+            club_id=None,
+            not_competing=False,
+            chip="",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        db.update_entry_result(
+            id=id,
+            chip="7410",
+            start_time=None,
+            result=PersonRaceResult(
+                status=ResultStatus.OK,
+                time=9876,
+            ),
+        )
+        item = db.get_entry(id=id)
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_2(db, event_1: EventType, class_b: ClassType) -> EntryType:
-    id = db.add_entry(
-        event_id=event_1.id,
-        competitor_id=None,
-        first_name="Claudia",
-        last_name="Merkel",
-        gender="",
-        year=None,
-        class_id=class_b.id,
-        club_id=None,
-        not_competing=False,
-        chip="",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    db.update_entry_result(
-        id=id,
-        chip="7411",
-        start_time=None,
-        result=PersonRaceResult(
-            status=ResultStatus.OK,
-            time=2001,
-        ),
-    )
-    item = db.get_entry(id=id)
-    return copy.deepcopy(item)
+def entry_2(db: SqliteRepo, event_1: EventType, class_b: ClassType) -> EntryType:
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_1.id,
+            competitor_id=None,
+            first_name="Claudia",
+            last_name="Merkel",
+            gender="",
+            year=None,
+            class_id=class_b.id,
+            club_id=None,
+            not_competing=False,
+            chip="",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        db.update_entry_result(
+            id=id,
+            chip="7411",
+            start_time=None,
+            result=PersonRaceResult(
+                status=ResultStatus.OK,
+                time=2001,
+            ),
+        )
+        item = db.get_entry(id=id)
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_3(db, event_1: EventType, class_b: ClassType) -> EntryType:
-    id = db.add_entry(
-        event_id=event_1.id,
-        competitor_id=None,
-        first_name="Birgit",
-        last_name="Merkel",
-        gender="",
-        year=None,
-        class_id=class_b.id,
-        club_id=None,
-        not_competing=False,
-        chip="",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    db.update_entry_result(
-        id=id,
-        chip="7412",
-        start_time=None,
-        result=PersonRaceResult(
-            status=ResultStatus.OK,
-            time=2113,
-        ),
-    )
-    item = db.get_entry(id=id)
-    return copy.deepcopy(item)
+def entry_3(db: SqliteRepo, event_1: EventType, class_b: ClassType) -> EntryType:
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_1.id,
+            competitor_id=None,
+            first_name="Birgit",
+            last_name="Merkel",
+            gender="",
+            year=None,
+            class_id=class_b.id,
+            club_id=None,
+            not_competing=False,
+            chip="",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        db.update_entry_result(
+            id=id,
+            chip="7412",
+            start_time=None,
+            result=PersonRaceResult(
+                status=ResultStatus.OK,
+                time=2113,
+            ),
+        )
+        item = db.get_entry(id=id)
+        return copy.deepcopy(item)
 
 
 @pytest.fixture
-def entry_4(db, event_1: EventType, class_a: ClassType) -> EntryType:
-    id = db.add_entry(
-        event_id=event_1.id,
-        competitor_id=None,
-        first_name="Birgit",
-        last_name="Derkel",
-        gender="",
-        year=None,
-        class_id=class_a.id,
-        club_id=None,
-        not_competing=False,
-        chip="",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    db.update_entry_result(
-        id=id,
-        chip="7413",
-        start_time=None,
-        result=PersonRaceResult(
-            status=ResultStatus.OK,
-            time=3333,
-        ),
-    )
-    item = db.get_entry(id=id)
-    return copy.deepcopy(item)
+def entry_4(db: SqliteRepo, event_1: EventType, class_a: ClassType) -> EntryType:
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_1.id,
+            competitor_id=None,
+            first_name="Birgit",
+            last_name="Derkel",
+            gender="",
+            year=None,
+            class_id=class_a.id,
+            club_id=None,
+            not_competing=False,
+            chip="",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        db.update_entry_result(
+            id=id,
+            chip="7413",
+            start_time=None,
+            result=PersonRaceResult(
+                status=ResultStatus.OK,
+                time=3333,
+            ),
+        )
+        item = db.get_entry(id=id)
+        return copy.deepcopy(item)
 
 
 def test_build_series_result(
-    db,
     settings: Settings,
     event_1: EventType,
     event_2: EventType,

@@ -49,226 +49,244 @@ def t(a: datetime, b: datetime) -> int:
 
 
 @pytest.fixture
-def db():
+def db() -> SqliteRepo:
     model.db = SqliteRepo(db=":memory:")
     return model.db
 
 
 @pytest.fixture
-def event_id(db):
-    return db.add_event(
-        name="Event",
-        date=datetime.date(year=2015, month=1, day=1),
-        key="4711",
-        publish=False,
-        series=None,
-        fields=[],
-    )
+def event_id(db: SqliteRepo) -> int:
+    with db.transaction():
+        return db.add_event(
+            name="Event",
+            date=datetime.date(year=2015, month=1, day=1),
+            key="4711",
+            publish=False,
+            series=None,
+            fields=[],
+        )
 
 
 @pytest.fixture
-def course_id(db, event_id):
-    return db.add_course(
-        event_id=event_id,
-        name="Bahn A",
-        length=4500,
-        climb=90,
-        controls=["101", "102", "103"],
-    )
+def course_id(db: SqliteRepo, event_id: int) -> int:
+    with db.transaction():
+        return db.add_course(
+            event_id=event_id,
+            name="Bahn A",
+            length=4500,
+            climb=90,
+            controls=["101", "102", "103"],
+        )
 
 
 @pytest.fixture
-def class_id(db, event_id, course_id):
-    return db.add_class(
-        event_id=event_id,
-        name="Elite",
-        short_name="E",
-        course_id=course_id,
-        params=ClassParams(),
-    )
+def class_id(db: SqliteRepo, event_id: int, course_id: int) -> int:
+    with db.transaction():
+        return db.add_class(
+            event_id=event_id,
+            name="Elite",
+            short_name="E",
+            course_id=course_id,
+            params=ClassParams(),
+        )
 
 
 @pytest.fixture
-def class_id_without_course(db, event_id):
-    return db.add_class(
-        event_id=event_id,
-        name="Elite",
-        short_name="E",
-        course_id=None,
-        params=ClassParams(),
-    )
+def class_id_without_course(db: SqliteRepo, event_id: int) -> int:
+    with db.transaction():
+        return db.add_class(
+            event_id=event_id,
+            name="Elite",
+            short_name="E",
+            course_id=None,
+            params=ClassParams(),
+        )
 
 
 @pytest.fixture
-def entry_1(db, event_id, class_id) -> EntryType:
-    id = db.add_entry(
-        event_id=event_id,
-        competitor_id=None,
-        first_name="Robert",
-        last_name="Lewandowski",
-        gender="",
-        year=None,
-        class_id=class_id,
-        club_id=None,
-        not_competing=False,
-        chip="12734",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    entry = db.get_entry(id=id)
-    return copy.deepcopy(entry)
+def entry_1(db: SqliteRepo, event_id: int, class_id: int) -> EntryType:
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_id,
+            competitor_id=None,
+            first_name="Robert",
+            last_name="Lewandowski",
+            gender="",
+            year=None,
+            class_id=class_id,
+            club_id=None,
+            not_competing=False,
+            chip="12734",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        entry = db.get_entry(id=id)
+        return copy.deepcopy(entry)
 
 
 @pytest.fixture
-def entry_1_without_course(db, event_id, class_id_without_course) -> EntryType:
-    id = db.add_entry(
-        event_id=event_id,
-        competitor_id=None,
-        first_name="Robert",
-        last_name="Lewandowski",
-        gender="",
-        year=None,
-        class_id=class_id_without_course,
-        club_id=None,
-        not_competing=False,
-        chip="12734",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    entry = db.get_entry(id=id)
-    return copy.deepcopy(entry)
+def entry_1_without_course(
+    db: SqliteRepo, event_id: int, class_id_without_course: int
+) -> EntryType:
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_id,
+            competitor_id=None,
+            first_name="Robert",
+            last_name="Lewandowski",
+            gender="",
+            year=None,
+            class_id=class_id_without_course,
+            club_id=None,
+            not_competing=False,
+            chip="12734",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        entry = db.get_entry(id=id)
+        return copy.deepcopy(entry)
 
 
 @pytest.fixture
-def entry_2(db, event_id, class_id) -> EntryType:
-    id = db.add_entry(
-        event_id=event_id,
-        competitor_id=None,
-        first_name="Yogi",
-        last_name="Löw",
-        gender="N",
-        year=None,
-        class_id=class_id,
-        club_id=None,
-        not_competing=False,
-        chip="7410",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    entry = db.get_entry(id=id)
-    return copy.deepcopy(entry)
+def entry_2(db: SqliteRepo, event_id: int, class_id: int) -> EntryType:
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_id,
+            competitor_id=None,
+            first_name="Yogi",
+            last_name="Löw",
+            gender="N",
+            year=None,
+            class_id=class_id,
+            club_id=None,
+            not_competing=False,
+            chip="7410",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        entry = db.get_entry(id=id)
+        return copy.deepcopy(entry)
 
 
 @pytest.fixture
-def entry_2_with_result(db, event_id, class_id, entry_2) -> EntryType:
-    db.update_entry_result(
-        id=entry_2.id,
-        chip=entry_2.chip,
-        start_time=entry_2.start.start_time,
-        result=PersonRaceResult(
-            status=ResultStatus.OK,
-            start_time=s1,
-            finish_time=f1,
+def entry_2_with_result(
+    db: SqliteRepo, event_id: int, class_id: int, entry_2: EntryType
+) -> EntryType:
+    with db.transaction():
+        db.update_entry_result(
+            id=entry_2.id,
+            chip=entry_2.chip,
+            start_time=entry_2.start.start_time,
+            result=PersonRaceResult(
+                status=ResultStatus.OK,
+                start_time=s1,
+                finish_time=f1,
+                punched_start_time=s1,
+                punched_finish_time=f1,
+                si_punched_start_time=s1,
+                si_punched_finish_time=f1,
+                time=t(s1, f1),
+                split_times=[
+                    SplitTime(
+                        control_code="101",
+                        punch_time=c1,
+                        si_punch_time=c1,
+                        time=t(s1, c1),
+                        status=SpStatus.OK,
+                    ),
+                    SplitTime(
+                        control_code="102",
+                        punch_time=c2,
+                        si_punch_time=c2,
+                        time=t(s1, c2),
+                        status=SpStatus.OK,
+                    ),
+                    SplitTime(
+                        control_code="103",
+                        punch_time=c3,
+                        si_punch_time=c3,
+                        time=t(s1, c3),
+                        status=SpStatus.OK,
+                    ),
+                ],
+            ),
+        )
+        entry = db.get_entry(id=entry_2.id)
+        return copy.deepcopy(entry)
+
+
+@pytest.fixture
+def entry_3(db: SqliteRepo, event_id: int, class_id: int) -> EntryType:
+    with db.transaction():
+        id = db.add_entry(
+            event_id=event_id,
+            competitor_id=None,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1957,
+            class_id=class_id,
+            club_id=None,
+            not_competing=False,
+            chip="12734",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
+        entry = db.get_entry(id=id)
+        return copy.deepcopy(entry)
+
+
+@pytest.fixture
+def unassigned_entry(db: SqliteRepo, event_id: int) -> EntryType:
+    with db.transaction():
+        result = PersonRaceResult(
+            status=ResultStatus.FINISHED,
             punched_start_time=s1,
             punched_finish_time=f1,
             si_punched_start_time=s1,
             si_punched_finish_time=f1,
-            time=t(s1, f1),
+            time=None,
             split_times=[
                 SplitTime(
                     control_code="101",
                     punch_time=c1,
                     si_punch_time=c1,
-                    time=t(s1, c1),
-                    status=SpStatus.OK,
+                    status=SpStatus.ADDITIONAL,
                 ),
                 SplitTime(
                     control_code="102",
                     punch_time=c2,
                     si_punch_time=c2,
-                    time=t(s1, c2),
-                    status=SpStatus.OK,
+                    status=SpStatus.ADDITIONAL,
                 ),
                 SplitTime(
                     control_code="103",
                     punch_time=c3,
                     si_punch_time=c3,
-                    time=t(s1, c3),
-                    status=SpStatus.OK,
+                    status=SpStatus.ADDITIONAL,
                 ),
             ],
-        ),
-    )
-    entry = db.get_entry(id=entry_2.id)
-    return copy.deepcopy(entry)
-
-
-@pytest.fixture
-def entry_3(db, event_id, class_id) -> EntryType:
-    id = db.add_entry(
-        event_id=event_id,
-        competitor_id=None,
-        first_name="Angela",
-        last_name="Merkel",
-        gender="F",
-        year=1957,
-        class_id=class_id,
-        club_id=None,
-        not_competing=False,
-        chip="12734",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
-    entry = db.get_entry(id=id)
-    return copy.deepcopy(entry)
-
-
-@pytest.fixture
-def unassigned_entry(db, event_id) -> EntryType:
-    result = PersonRaceResult(
-        status=ResultStatus.FINISHED,
-        punched_start_time=s1,
-        punched_finish_time=f1,
-        si_punched_start_time=s1,
-        si_punched_finish_time=f1,
-        time=None,
-        split_times=[
-            SplitTime(
-                control_code="101",
-                punch_time=c1,
-                si_punch_time=c1,
-                status=SpStatus.ADDITIONAL,
-            ),
-            SplitTime(
-                control_code="102",
-                punch_time=c2,
-                si_punch_time=c2,
-                status=SpStatus.ADDITIONAL,
-            ),
-            SplitTime(
-                control_code="103",
-                punch_time=c3,
-                si_punch_time=c3,
-                status=SpStatus.ADDITIONAL,
-            ),
-        ],
-    )
-    id = db.add_entry_result(
-        event_id=event_id,
-        chip="7410",
-        result=result,
-        start_time=None,
-    )
-    entry = db.get_entry(id=id)
-    return copy.deepcopy(entry)
+        )
+        id = db.add_entry_result(
+            event_id=event_id,
+            chip="7410",
+            result=result,
+            start_time=None,
+        )
+        entry = db.get_entry(id=id)
+        return copy.deepcopy(entry)
 
 
 def test_assign_to_entry_if_cardnumber_is_unique(
-    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
+    db: SqliteRepo,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -325,7 +343,8 @@ def test_assign_to_entry_if_cardnumber_is_unique(
         "missingControls": [],
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
     entry_2.result = PersonRaceResult(
@@ -368,7 +387,11 @@ def test_assign_to_entry_if_cardnumber_is_unique(
 
 
 def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
-    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
+    db: SqliteRepo,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -425,7 +448,8 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
         "missingControls": ["FINISH"],
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
     entry_2.result = PersonRaceResult(
@@ -468,7 +492,11 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
 
 
 def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
-    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
+    db: SqliteRepo,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -525,7 +553,8 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
         "missingControls": ["START"],
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
     entry_2.result = PersonRaceResult(
@@ -568,7 +597,11 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
 
 
 def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
-    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
+    db: SqliteRepo,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -613,7 +646,8 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
         "missingControls": ["102", "103"],
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
     entry_2.result = PersonRaceResult(
@@ -656,7 +690,7 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
 
 
 def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
-    db,
+    db: SqliteRepo,
     event_id: int,
     entry_1: EntryType,
     entry_2: EntryType,
@@ -719,7 +753,8 @@ def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
         "missingControls": [],
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
     entry_2.result = PersonRaceResult(
@@ -762,7 +797,7 @@ def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
 
 
 def test_store_as_new_entry_if_another_result_exists(
-    db,
+    db: SqliteRepo,
     event_id: int,
     entry_1: EntryType,
     entry_2: EntryType,
@@ -817,7 +852,8 @@ def test_store_as_new_entry_if_another_result_exists(
         "error": "There are other results for this card",
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 5
 
     result = PersonRaceResult(
@@ -878,7 +914,7 @@ def test_store_as_new_entry_if_another_result_exists(
 
 
 def test_do_not_store_as_new_entry_if_result_already_exists(
-    db,
+    db: SqliteRepo,
     event_id: int,
     entry_1: EntryType,
     entry_3: EntryType,
@@ -938,7 +974,8 @@ def test_do_not_store_as_new_entry_if_result_already_exists(
         "error": "Control card unknown",
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
     assert entries[0] == unassigned_entry
@@ -947,7 +984,11 @@ def test_do_not_store_as_new_entry_if_result_already_exists(
 
 
 def test_store_as_new_entry_if_cardnumber_is_unknown(
-    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
+    db: SqliteRepo,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -1003,7 +1044,8 @@ def test_store_as_new_entry_if_cardnumber_is_unknown(
         "error": "Control card unknown",
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 4
 
     result = PersonRaceResult(
@@ -1066,7 +1108,11 @@ def test_store_as_new_entry_if_cardnumber_is_unknown(
 
 
 def test_store_as_new_entry_if_cardnumber_exist_several_times(
-    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
+    db: SqliteRepo,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -1122,7 +1168,8 @@ def test_store_as_new_entry_if_cardnumber_exist_several_times(
         "error": "There are several entries for this card",
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 4
 
     result = PersonRaceResult(
@@ -1185,7 +1232,7 @@ def test_store_as_new_entry_if_cardnumber_exist_several_times(
 
 
 def test_use_already_assigned_entry_if_it_has_the_same_result(
-    db,
+    db: SqliteRepo,
     event_id: int,
     entry_1: EntryType,
     entry_2_with_result: EntryType,
@@ -1246,7 +1293,8 @@ def test_use_already_assigned_entry_if_it_has_the_same_result(
         "missingControls": [],
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
     assert entries[0] == entry_1
@@ -1255,7 +1303,7 @@ def test_use_already_assigned_entry_if_it_has_the_same_result(
 
 
 def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
-    db,
+    db: SqliteRepo,
     event_id: int,
     entry_1: EntryType,
     entry_2_with_result: EntryType,
@@ -1315,7 +1363,8 @@ def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
         "error": "There are other results for this card",
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 4
 
     result = PersonRaceResult(
@@ -1382,7 +1431,7 @@ def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
 
 
 def test_use_empty_control_list_if_course_is_undefined(
-    db, event_id: int, entry_1_without_course: EntryType
+    db: SqliteRepo, event_id: int, entry_1_without_course: EntryType
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -1439,7 +1488,8 @@ def test_use_empty_control_list_if_course_is_undefined(
         "missingControls": [],
     }
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 1
 
     entry_1_without_course.result = PersonRaceResult(
@@ -1480,7 +1530,11 @@ def test_use_empty_control_list_if_course_is_undefined(
 
 
 def test_raise_exception_if_event_key_is_unknown(
-    db, event_id: int, entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
+    db: SqliteRepo,
+    event_id: int,
+    entry_1: EntryType,
+    entry_2: EntryType,
+    entry_3: EntryType,
 ):
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
@@ -1520,7 +1574,8 @@ def test_raise_exception_if_event_key_is_unknown(
     with pytest.raises(repo.EventNotFoundError, match='Event for key "4712" not found'):
         model.results.store_cardreader_result(event_key="4712", item=item)
 
-    entries = db.get_entries(event_id=event_id)
+    with db.transaction():
+        entries = db.get_entries(event_id=event_id)
     assert len(entries) == 3
 
     assert entries[0] == entry_1
