@@ -20,7 +20,7 @@
 from typing import List
 
 from ooresults import model
-from ooresults.handler import cached_result
+from ooresults.model import cached_result
 from ooresults.otypes.club_type import ClubType
 from ooresults.repo.repo import TransactionMode
 

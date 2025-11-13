@@ -22,7 +22,7 @@ from typing import List
 from typing import Optional
 
 from ooresults import model
-from ooresults.handler import cached_result
+from ooresults.model import cached_result
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.course_type import CourseType
 from ooresults.repo.repo import TransactionMode

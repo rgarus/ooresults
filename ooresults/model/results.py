@@ -29,8 +29,8 @@ import iso8601
 import jsonschema
 
 from ooresults import model
-from ooresults.handler import cached_result
 from ooresults.model import build_results
+from ooresults.model import cached_result
 from ooresults.model.build_results import PersonSeriesResult
 from ooresults.otypes import result_type
 from ooresults.otypes.class_params import ClassParams

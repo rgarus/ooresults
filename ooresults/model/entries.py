@@ -28,7 +28,7 @@ from typing import Union
 import tzlocal
 
 from ooresults import model
-from ooresults.handler import cached_result
+from ooresults.model import cached_result
 from ooresults.otypes import result_type
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.entry_type import EntryType

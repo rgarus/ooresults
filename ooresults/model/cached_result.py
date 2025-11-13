@@ -21,54 +21,57 @@ import dataclasses
 import threading
 import typing
 from collections import OrderedDict
+from typing import Callable
 from typing import Optional
+from typing import Set
 
 from ooresults import model
-from ooresults.utils import render
 
 
 @dataclasses.dataclass
 class Data:
-    content: Optional[str] = None
+    content = None
     lock: threading.Lock = threading.Lock()
     valid: bool = True
 
 
-maxsize = 4
+MAX_SIZE = 4
+
 lock = threading.Lock()
-caches: typing.OrderedDict[int, Data] = OrderedDict()
+cache: typing.OrderedDict[int, Data] = OrderedDict()
+callbacks: Set[Callable[[Optional[int]], None]] = set()
 
 
 def get_cached_data(event_id: int):
     with lock:
-        cached_data = caches.get(event_id, None)
+        cached_data = cache.get(event_id, None)
 
         if cached_data is None:
             cached_data = Data()
-            caches[event_id] = cached_data
+            cache[event_id] = cached_data
         elif not cached_data.valid:
             cached_data.valid = True
             cached_data.content = None
         elif cached_data.content is not None:
-            caches.move_to_end(key=event_id)
+            cache.move_to_end(key=event_id)
             return cached_data.content
 
         event_lock = cached_data.lock
 
     with event_lock:
-        cached_data = caches.get(event_id, None)
+        with lock:
+            cached_data = cache.get(event_id, None)
 
         if not (cached_data and cached_data.content is not None and cached_data.valid):
-            event, class_results = model.results.event_class_results(event_id=event_id)
-            content = render.results_table(event=event, class_results=class_results)
+            content = model.results.event_class_results(event_id=event_id)
 
             with lock:
-                cached_data = caches.get(event_id, None)
+                cached_data = cache.get(event_id, None)
                 if cached_data:
                     cached_data.content = content
-                    caches.move_to_end(key=event_id)
-                    if len(caches) > maxsize:
-                        caches.popitem(last=False)
+                    cache.move_to_end(key=event_id)
+                    if len(cache) > MAX_SIZE:
+                        cache.popitem(last=False)
 
         return cached_data.content
 
@@ -76,8 +79,20 @@ def get_cached_data(event_id: int):
 def clear_cache(event_id: Optional[int] = None, entry_id: Optional[int] = None) -> None:
     with lock:
         if event_id is None:
-            for d in caches.values():
+            for d in cache.values():
                 d.valid = False
+        elif event_id in cache:
+            cache[event_id].valid = False
 
-        elif event_id in caches:
-            caches[event_id].valid = False
+        for c in callbacks:
+            c(event_id)
+
+
+def register(callback: Callable[[Optional[int]], None]) -> None:
+    with lock:
+        callbacks.add(callback)
+
+
+def unregister(callback: Callable[[Optional[int]], None]) -> None:
+    with lock:
+        callbacks.remove(callback)

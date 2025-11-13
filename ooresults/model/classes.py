@@ -22,7 +22,7 @@ from typing import List
 from typing import Optional
 
 from ooresults import model
-from ooresults.handler import cached_result
+from ooresults.model import cached_result
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.class_type import ClassType

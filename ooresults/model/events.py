@@ -23,7 +23,7 @@ from typing import List
 from typing import Optional
 
 from ooresults import model
-from ooresults.handler import cached_result
+from ooresults.model import cached_result
 from ooresults.otypes.event_type import EventType
 from ooresults.repo.repo import TransactionMode
 

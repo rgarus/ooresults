@@ -24,7 +24,6 @@ import pathlib
 import re
 import sqlite3
 import sys
-import time
 from typing import Optional
 
 import web
@@ -33,7 +32,6 @@ from cheroot.ssl.builtin import BuiltinSSLAdapter
 
 from ooresults import configuration
 from ooresults import model
-from ooresults.handler import cached_result
 from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.user import Users
 from ooresults.utils import render
@@ -42,19 +40,6 @@ from ooresults.websocket_server.websocket_server import WebSocketServer
 
 
 web.config.debug = False
-
-
-class Root:
-    def GET(self):
-        t1 = time.time()
-        events = model.events.get_events()
-        for event in events:
-            if event.publish:
-                results_table = cached_result.get_cached_data(event_id=event.id)
-                t2 = time.time()
-                logging.info(f"Requesting result, {web.ctx['ip']}, {t2 - t1:.3f}")
-                return render.root(results_table=results_table)
-        return render.root(results_table=None)
 
 
 class Login:
@@ -116,7 +101,7 @@ def main() -> Optional[int]:
     ### Url mappings
     urls = (
         "/",
-        "Root",
+        "ooresults.handler.root.Root",
         "/admin",
         "Admin",
         "/login",
