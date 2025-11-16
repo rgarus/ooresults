@@ -24,7 +24,7 @@ import sqlite3
 VERSION = 13
 
 
-def update(path: str = "ooresults.sqlite"):
+def update(db: sqlite3.Connection) -> None:
     # old:
 
     # 0 'id INTEGER PRIMARY KEY,'
@@ -48,9 +48,8 @@ def update(path: str = "ooresults.sqlite"):
     # 8 'streaming_key TEXT'
     # 9 'streaming_enabled BOOL'
 
-    conn = sqlite3.connect(database=path)
+    c = db.cursor()
     try:
-        c = conn.cursor()
         c.execute("BEGIN EXCLUSIVE TRANSACTION")
 
         c.execute("ALTER TABLE events ADD COLUMN streaming_address TEXT")
@@ -58,17 +57,17 @@ def update(path: str = "ooresults.sqlite"):
         c.execute("ALTER TABLE events ADD COLUMN streaming_enabled BOOL")
 
         # version
-        sql = "UPDATE version SET value = ?"
+        sql = "UPDATE version SET value=?"
         c.execute(sql, [VERSION])
-        conn.commit()
+        db.commit()
 
         # compress database
         c.execute("VACUUM")
-        conn.commit()
+        db.commit()
 
     except:
         logging.exception(f"Error during DB update to version {VERSION}")
-        conn.rollback()
+        db.rollback()
         raise
     finally:
-        conn.close()
+        c.close()

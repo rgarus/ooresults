@@ -18,6 +18,7 @@
 
 
 import logging
+import sqlite3
 
 from ooresults.repo.update import update_013
 
@@ -25,16 +26,16 @@ from ooresults.repo.update import update_013
 VERSION = 13
 
 
-def update_tables(db, path: str = "ooresults.sqlite") -> None:
-    t = db.transaction()
-    db.ctx.db.execute("BEGIN EXCLUSIVE TRANSACTION;")
+def update_tables(db: sqlite3.Connection) -> None:
+    db.execute("BEGIN EXCLUSIVE TRANSACTION")
 
-    values = list(db.query("SELECT value FROM version"))
-    if not values:
+    cur = db.execute("SELECT value FROM version")
+    c = cur.fetchone()
+    if not c:
         raise RuntimeError("DB error - table version is empty")
 
     else:
-        version = values[0].value
+        version = c["value"]
         logging.info(f"DB version is {version}")
 
         if version > VERSION:
@@ -43,7 +44,7 @@ def update_tables(db, path: str = "ooresults.sqlite") -> None:
             )
 
         elif version < VERSION:
-            t.rollback()
+            db.rollback()
 
             if version <= 11:
                 raise RuntimeError(
@@ -51,8 +52,8 @@ def update_tables(db, path: str = "ooresults.sqlite") -> None:
                 )
             if version <= 12:
                 logging.info("Update DB to version 13 ...")
-                update_013.update(path=path)
+                update_013.update(db=db)
 
             logging.info(f"DB updated to version {VERSION}")
         else:
-            t.rollback()
+            db.rollback()

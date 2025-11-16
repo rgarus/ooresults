@@ -22,12 +22,10 @@ import datetime
 import json
 import logging
 import sqlite3
+import threading
 from typing import Dict
 from typing import List
 from typing import Optional
-
-import web
-import web.db
 
 from ooresults.otypes import result_type
 from ooresults.otypes import series_type
@@ -53,156 +51,173 @@ from ooresults.repo.update import update_tables
 
 
 class SqliteRepo(Repo):
-    def __init__(self, db: str = "ooresults.sqlite"):
-        self.db = web.database(dbn="sqlite", db=db)
+    def __init__(self, db: str = "ooresults.sqlite") -> None:
+        self.database = db
+        self._ctx = threading.local()
 
         # sqlite3.register_adapter(bool, int)
         # sqlite3.register_converter("BOOLEAN", lambda v: v != '0')
 
-        values = list(
-            self.db.query(
-                "SELECT name FROM sqlite_schema WHERE type="
-                + web.db.sqlquote("table")
-                + " AND name="
-                + web.db.sqlquote("version")
-                + ";"
-            )
+        cur = self.db.execute(
+            "SELECT name FROM sqlite_schema WHERE type='table' AND name='version'",
         )
+        c = cur.fetchone()
 
-        if not values:
+        if not c:
             # create and initialize database tables
-            t = self.db.transaction()
-            self.db.ctx.db.execute("BEGIN EXCLUSIVE TRANSACTION;")
-            try:
-                self.db.query("CREATE TABLE version (value INTEGER PRIMARY KEY);")
-                self.db.query(
-                    "CREATE TABLE classes ("
-                    "id INTEGER PRIMARY KEY,"
-                    "event_id INTEGER NOT NULL,"
-                    "name TEXT NOT NULL,"
-                    "short_name TEXT,"
-                    "course_id INTEGER,"
-                    "params BLOB NOT NULL,"
-                    "UNIQUE (event_id, name)"
-                    ");"
-                )
-                self.db.query(
-                    "CREATE TABLE courses ("
-                    "id INTEGER PRIMARY KEY,"
-                    "event_id INTEGER NOT NULL,"
-                    "name TEXT NOT NULL,"
-                    "length FLOAT,"
-                    "climb FLOAT,"
-                    "controls BLOB NOT NULL,"
-                    "UNIQUE (event_id, name)"
-                    ");"
-                )
-                self.db.query(
-                    "CREATE TABLE clubs ("
-                    "id INTEGER PRIMARY KEY,"
-                    "name TEXT UNIQUE"
-                    ");"
-                )
-                self.db.query(
-                    "CREATE TABLE competitors ("
-                    "id INTEGER PRIMARY KEY,"
-                    "first_name TEXT NOT NULL,"
-                    "last_name TEXT NOT NULL,"
-                    "club_id INTEGER,"
-                    "gender TEXT,"
-                    "year INTEGER,"
-                    "chip TEXT,"
-                    "UNIQUE (first_name, last_name)"
-                    ");"
-                )
-                self.db.query(
-                    "CREATE TABLE events ("
-                    "id INTEGER PRIMARY KEY,"
-                    "name TEXT NOT NULL UNIQUE,"
-                    "date TEXT,"
-                    "key TEXT UNIQUE,"
-                    "publish BOOL NOT NULL,"
-                    "series TEXT,"
-                    "fields BLOB NOT NULL,"
-                    "streaming_address TEXT,"
-                    "streaming_key TEXT,"
-                    "streaming_enabled BOOL"
-                    ");"
-                )
-                self.db.query(
-                    "CREATE TABLE entries ("
-                    "id INTEGER PRIMARY KEY,"
-                    "event_id INTEGER NOT NULL,"
-                    "competitor_id INTEGER,"
-                    "class_id INTEGER,"
-                    "club_id INTEGER,"
-                    "not_competing BOOL NOT NULL,"
-                    "result BLOB NOT NULL,"
-                    "start BLOB NOT NULL,"
-                    "chip TEXT,"
-                    "fields BLOB NOT NULL,"
-                    "UNIQUE (event_id, competitor_id)"
-                    ");"
-                )
-                self.db.query(
-                    "CREATE TABLE settings ("
-                    "name TEXT NOT NULL,"
-                    "nr_of_best_results INTEGER,"
-                    "mode TEXT NOT NULL,"
-                    "maximum_points INTEGER NOT NULL,"
-                    "decimal_places INTEGER NOT NULL"
-                    ");"
-                )
+            with self.transaction(mode=TransactionMode.EXCLUSIVE):
+                cur = self.db.cursor()
+                try:
+                    cur.execute(
+                        """
+                        CREATE TABLE version (
+                            value INTEGER PRIMARY KEY
+                        )""",
+                    )
+                    cur.execute(
+                        """
+                        CREATE TABLE classes (
+                            id INTEGER PRIMARY KEY,
+                            event_id INTEGER NOT NULL,
+                            name TEXT NOT NULL,
+                            short_name TEXT,
+                            course_id INTEGER,
+                            params BLOB NOT NULL,
+                            UNIQUE (event_id, name)
+                        )""",
+                    )
+                    cur.execute(
+                        """
+                        CREATE TABLE courses (
+                            id INTEGER PRIMARY KEY,
+                            event_id INTEGER NOT NULL,
+                            name TEXT NOT NULL,
+                            length FLOAT,
+                            climb FLOAT,
+                            controls BLOB NOT NULL,
+                            UNIQUE (event_id, name)
+                        )""",
+                    )
+                    cur.execute(
+                        """
+                        CREATE TABLE clubs (
+                            id INTEGER PRIMARY KEY,
+                            name TEXT UNIQUE
+                        )""",
+                    )
+                    cur.execute(
+                        """
+                        CREATE TABLE competitors (
+                            id INTEGER PRIMARY KEY,
+                            first_name TEXT NOT NULL,
+                            last_name TEXT NOT NULL,
+                            club_id INTEGER,
+                            gender TEXT,
+                            year INTEGER,
+                            chip TEXT,
+                            UNIQUE (first_name, last_name)
+                        )""",
+                    )
+                    cur.execute(
+                        """
+                        CREATE TABLE events (
+                            id INTEGER PRIMARY KEY,
+                            name TEXT NOT NULL UNIQUE,
+                            date TEXT,
+                            key TEXT UNIQUE,
+                            publish BOOL NOT NULL,
+                            series TEXT,
+                            fields BLOB NOT NULL,
+                            streaming_address TEXT,
+                            streaming_key TEXT,
+                            streaming_enabled BOOL
+                        )""",
+                    )
+                    cur.execute(
+                        """
+                        CREATE TABLE entries (
+                            id INTEGER PRIMARY KEY,
+                            event_id INTEGER NOT NULL,
+                            competitor_id INTEGER,
+                            class_id INTEGER,
+                            club_id INTEGER,
+                            not_competing BOOL NOT NULL,
+                            result BLOB NOT NULL,
+                            start BLOB NOT NULL,
+                            chip TEXT,
+                            fields BLOB NOT NULL,
+                            UNIQUE (event_id, competitor_id)
+                        )""",
+                    )
+                    cur.execute(
+                        """
+                        CREATE TABLE settings (
+                            name TEXT NOT NULL,
+                            nr_of_best_results INTEGER,
+                            mode TEXT NOT NULL,
+                            maximum_points INTEGER NOT NULL,
+                            decimal_places INTEGER NOT NULL
+                        )""",
+                    )
 
-                self.db.insert("version", value=update_tables.VERSION)
-                t.commit()
-                logging.info(f"DB version initialized to {update_tables.VERSION}")
-            except:
-                t.rollback()
-                logging.exception(
-                    f"Error during DB initialization to version {update_tables.VERSION}"
-                )
-                raise
+                    cur.execute(
+                        "INSERT INTO version VALUES(?)",
+                        (update_tables.VERSION,),
+                    )
+                    logging.info(f"DB version initialized to {update_tables.VERSION}")
+                except:
+                    logging.exception(
+                        f"Error during DB initialization to version {update_tables.VERSION}"
+                    )
+                    raise
+                finally:
+                    cur.close()
         else:
-            update_tables.update_tables(db=self.db, path=db)
+            update_tables.update_tables(db=self.db)
+
+    @property
+    def db(self) -> sqlite3.Connection:
+        if not hasattr(self._ctx, "db"):
+            self._ctx.db = sqlite3.connect(database=self.database)
+            self._ctx.db.row_factory = sqlite3.Row
+            self._ctx.db.execute("PRAGMA foreign_keys = on")
+
+        return self._ctx.db
 
     def start_transaction(self, mode: TransactionMode = TransactionMode.DEFERRED):
-        self.t = self.db.transaction()
         try:
-            self.db.ctx.db.execute(f"BEGIN {mode.value} TRANSACTION;")
+            self.db.execute(f"BEGIN {mode.value} TRANSACTION")
         except sqlite3.OperationalError as e:
             raise OperationalError(str(e))
 
     def commit(self):
-        self.t.commit()
+        self.db.commit()
 
     def rollback(self):
-        self.t.rollback()
+        self.db.rollback()
 
     def get_classes(self, event_id: int) -> List[ClassInfoType]:
-        values = self.db.query(
-            "SELECT "
-            "classes.id,"
-            "classes.name,"
-            "classes.short_name,"
-            "courses.id,"
-            "courses.name,"
-            "courses.length,"
-            "courses.climb,"
-            "courses.controls,"
-            "classes.params "
-            "FROM classes "
-            "LEFT JOIN courses ON classes.course_id = courses.id "
-            "WHERE classes.event_id = " + web.db.sqlquote(event_id) + " "
-            "ORDER BY classes.name ASC;"
+        cur = self.db.execute(
+            """
+            SELECT
+                classes.id,
+                classes.name,
+                classes.short_name,
+                courses.id AS course_id,
+                courses.name AS course_name,
+                courses.length AS course_length,
+                courses.climb AS course_climb,
+                courses.controls,
+                classes.params
+            FROM classes
+            LEFT JOIN courses ON classes.course_id=courses.id
+            WHERE classes.event_id=?
+            ORDER BY classes.name ASC""",
+            (event_id,),
         )
-        values.names[values.names.index("id", 1)] = "course_id"
-        values.names[values.names.index("name", 2)] = "course_name"
-        values.names[values.names.index("length", 1)] = "course_length"
-        values.names[values.names.index("climb", 1)] = "course_climb"
 
         classes = []
-        for c in values:
+        for c in cur:
             number_of_controls = None
             if c["controls"] is not None:
                 controls = json.loads(c["controls"])
@@ -223,15 +238,26 @@ class SqliteRepo(Repo):
         return classes
 
     def get_class(self, id: int) -> ClassType:
-        values = self.db.where("classes", id=id)
-        if values:
-            c = values[0]
+        cur = self.db.execute(
+            """
+            SELECT
+                id,
+                event_id,
+                name,
+                short_name,
+                course_id,
+                params
+            FROM classes WHERE id=?""",
+            (id,),
+        )
+        c = cur.fetchone()
+        if c:
             return ClassType(
-                id=c.id,
-                event_id=c.event_id,
-                name=c.name,
-                short_name=c.short_name,
-                course_id=c.course_id,
+                id=c["id"],
+                event_id=c["event_id"],
+                name=c["name"],
+                short_name=c["short_name"],
+                course_id=c["course_id"],
                 params=ClassParams.from_json(json_data=c["params"]),
             )
         else:
@@ -249,14 +275,26 @@ class SqliteRepo(Repo):
         self.get_event(id=event_id)
 
         try:
-            return self.db.insert(
-                "classes",
-                event_id=event_id,
-                name=name,
-                short_name=short_name,
-                course_id=course_id,
-                params=params.to_json(),
+            cur = self.db.execute(
+                """
+                INSERT into classes (
+                    event_id,
+                    name,
+                    short_name,
+                    course_id,
+                    params
+                )
+                VALUES(?, ?, ?, ?, ?)""",
+                (
+                    event_id,
+                    name,
+                    short_name,
+                    course_id,
+                    params.to_json(),
+                ),
             )
+            return cur.lastrowid
+
         except sqlite3.IntegrityError:
             raise ConstraintError("Class already exist")
 
@@ -269,62 +307,106 @@ class SqliteRepo(Repo):
         params: ClassParams,
     ):
         try:
-            nr_of_rows = self.db.update(
-                "classes",
-                where="id=" + web.db.sqlquote(id),
-                name=name,
-                short_name=short_name,
-                course_id=course_id,
-                params=params.to_json(),
+            cur = self.db.execute(
+                """
+                UPDATE classes SET
+                    name=?,
+                    short_name=?,
+                    course_id=?,
+                    params=?
+                WHERE id=?""",
+                (
+                    name,
+                    short_name,
+                    course_id,
+                    params.to_json(),
+                    id,
+                ),
             )
-            if nr_of_rows == 0:
+            if cur.rowcount == 0:
                 raise KeyError
+
         except sqlite3.IntegrityError:
             raise ConstraintError("Class already exist")
 
     def delete_classes(self, event_id: int):
-        if self.db.where("entries", event_id=event_id).first() is None:
-            self.db.delete("classes", where="event_id=" + web.db.sqlquote(event_id))
-        else:
+        cur = self.db.execute(
+            "SELECT id FROM entries WHERE event_id=?",
+            (event_id,),
+        )
+        if cur.fetchone():
             raise ClassUsedError
+        else:
+            self.db.execute(
+                "DELETE FROM classes WHERE event_id=?",
+                (event_id,),
+            )
 
     def delete_class(self, id: int):
-        if self.db.where("entries", class_id=id).first() is None:
-            self.db.delete("classes", where="id=" + web.db.sqlquote(id))
-        else:
+        cur = self.db.execute(
+            "SELECT id FROM entries WHERE class_id=?",
+            (id,),
+        )
+        if cur.fetchone():
             raise ClassUsedError
+        else:
+            self.db.execute(
+                "DELETE FROM classes WHERE id=?",
+                (id,),
+            )
 
     def get_courses(self, event_id: int) -> List[CourseType]:
-        values = self.db.select(
-            "courses",
-            where="event_id=" + web.db.sqlquote(event_id),
-            order="name ASC",
+        cur = self.db.execute(
+            """
+            SELECT
+                id,
+                event_id,
+                name,
+                length,
+                climb,
+                controls
+            FROM courses
+            WHERE event_id=?
+            ORDER BY name ASC""",
+            (event_id,),
         )
+
         courses = []
-        for c in values:
+        for c in cur:
             courses.append(
                 CourseType(
-                    id=c.id,
-                    event_id=c.event_id,
-                    name=c.name,
-                    length=c.length,
-                    climb=c.climb,
-                    controls=json.loads(c.controls),
+                    id=c["id"],
+                    event_id=c["event_id"],
+                    name=c["name"],
+                    length=c["length"],
+                    climb=c["climb"],
+                    controls=json.loads(c["controls"]),
                 )
             )
         return courses
 
     def get_course(self, id: int) -> CourseType:
-        values = self.db.where("courses", id=id)
-        if values:
-            c = values[0]
+        cur = self.db.execute(
+            """
+            SELECT
+                id,
+                event_id,
+                name,
+                length,
+                climb,
+                controls
+            FROM courses WHERE id=?""",
+            (id,),
+        )
+        c = cur.fetchone()
+        if c:
             return CourseType(
-                id=c.id,
-                event_id=c.event_id,
-                name=c.name,
-                length=c.length,
-                climb=c.climb,
-                controls=json.loads(c.controls),
+                id=c["id"],
+                event_id=c["event_id"],
+                name=c["name"],
+                length=c["length"],
+                climb=c["climb"],
+                controls=json.loads(c["controls"]),
             )
         else:
             raise KeyError
@@ -341,14 +423,26 @@ class SqliteRepo(Repo):
         self.get_event(id=event_id)
 
         try:
-            return self.db.insert(
-                "courses",
-                event_id=event_id,
-                name=name,
-                length=length,
-                climb=climb,
-                controls=json.dumps(controls),
+            cur = self.db.execute(
+                """
+                INSERT into courses (
+                    event_id,
+                    name,
+                    length,
+                    climb,
+                    controls
+                )
+                VALUES(?, ?, ?, ?, ?)""",
+                (
+                    event_id,
+                    name,
+                    length,
+                    climb,
+                    json.dumps(controls),
+                ),
             )
+            return cur.lastrowid
+
         except sqlite3.IntegrityError:
             raise ConstraintError("Course already exist")
 
@@ -361,99 +455,141 @@ class SqliteRepo(Repo):
         controls: List[str],
     ):
         try:
-            nr_of_rows = self.db.update(
-                "courses",
-                where="id=" + web.db.sqlquote(id),
-                name=name,
-                length=length,
-                climb=climb,
-                controls=json.dumps(controls),
+            cur = self.db.execute(
+                """
+                UPDATE courses SET
+                    name=?,
+                    length=?,
+                    climb=?,
+                    controls=?
+                WHERE id=?""",
+                (
+                    name,
+                    length,
+                    climb,
+                    json.dumps(controls),
+                    id,
+                ),
             )
-            if nr_of_rows == 0:
+            if cur.rowcount == 0:
                 raise KeyError
+
         except sqlite3.IntegrityError:
             raise ConstraintError("Course already exist")
 
     def delete_courses(self, event_id: int):
-        if (
-            self.db.select(
-                "classes",
-                where="event_id="
-                + web.db.sqlquote(event_id)
-                + " and course_id is not null",
-            ).first()
-            is None
-        ):
-            self.db.delete("courses", where="event_id=" + web.db.sqlquote(event_id))
-        else:
+        cur = self.db.execute(
+            "SELECT id FROM classes WHERE event_id=? and course_id is not null",
+            (event_id,),
+        )
+        if cur.fetchone():
             raise CourseUsedError
+        else:
+            self.db.execute(
+                "DELETE FROM courses WHERE event_id=?",
+                (event_id,),
+            )
 
     def delete_course(self, id: int):
-        if self.db.where("classes", course_id=id).first() is None:
-            self.db.delete("courses", where="id=" + web.db.sqlquote(id))
-        else:
+        cur = self.db.execute(
+            "SELECT id FROM classes WHERE course_id=?",
+            (id,),
+        )
+        if cur.fetchone():
             raise CourseUsedError
+        else:
+            self.db.execute(
+                "DELETE FROM courses WHERE id=?",
+                (id,),
+            )
 
     def get_clubs(self) -> List[ClubType]:
-        values = self.db.select("clubs", order="name ASC")
+        cur = self.db.execute(
+            "SELECT id, name FROM clubs ORDER BY name ASC",
+            (),
+        )
         clubs = []
-        for c in values:
+        for c in cur:
             clubs.append(
                 ClubType(
-                    id=c.id,
-                    name=c.name,
+                    id=c["id"],
+                    name=c["name"],
                 )
             )
         return clubs
 
     def get_club(self, id: int) -> ClubType:
-        values = self.db.where("clubs", id=id)
-        if values:
-            c = values[0]
+        cur = self.db.execute(
+            "SELECT id, name FROM clubs WHERE id=?",
+            (id,),
+        )
+        c = cur.fetchone()
+        if c:
             return ClubType(
-                id=c.id,
-                name=c.name,
+                id=c["id"],
+                name=c["name"],
             )
         else:
             raise KeyError
 
     def add_club(self, name: str) -> int:
         try:
-            return self.db.insert("clubs", name=name)
+            cur = self.db.execute(
+                "INSERT into clubs (name) VALUES(?)",
+                (name,),
+            )
+            return cur.lastrowid
         except sqlite3.IntegrityError:
             raise ConstraintError("Club already exist")
 
     def update_club(self, id: int, name: str) -> None:
         try:
-            nr_of_rows = self.db.update(
-                "clubs", where="id=" + web.db.sqlquote(id), name=name
+            cur = self.db.execute(
+                "UPDATE clubs SET name=? WHERE id=?",
+                (name, id),
             )
-            if nr_of_rows == 0:
+            if cur.rowcount == 0:
                 raise KeyError
+
         except sqlite3.IntegrityError:
             raise ConstraintError("Club already exist")
 
     def delete_club(self, id: int) -> None:
-        if (
-            self.db.where("competitors", club_id=id).first() is None
-            and self.db.where("entries", club_id=id).first() is None
-        ):
-            self.db.delete("clubs", where="id=" + web.db.sqlquote(id))
-        else:
+        cur1 = self.db.execute(
+            "SELECT id FROM competitors WHERE club_id=?",
+            (id,),
+        )
+        cur2 = self.db.execute(
+            "SELECT id FROM entries WHERE club_id=?",
+            (id,),
+        )
+        if cur1.fetchone() or cur2.fetchone():
             raise ClubUsedError
+        else:
+            self.db.execute(
+                "DELETE FROM clubs WHERE id=?",
+                (id,),
+            )
 
     def get_competitors(self) -> List[CompetitorType]:
-        values = self.db.query(
-            "SELECT competitors.*, clubs.* "
-            "FROM competitors "
-            "LEFT JOIN clubs ON competitors.club_id = clubs.id "
-            "ORDER BY competitors.last_name ASC, competitors.first_name ASC;"
+        cur = self.db.execute(
+            """
+            SELECT
+                competitors.id,
+                competitors.first_name,
+                competitors.last_name,
+                competitors.gender,
+                competitors.year,
+                competitors.chip,
+                clubs.id AS club_id,
+                clubs.name AS club_name
+            FROM competitors
+            LEFT JOIN clubs ON competitors.club_id = clubs.id
+            ORDER BY competitors.last_name ASC, competitors.first_name ASC""",
         )
-        values.names[values.names.index("id", 1)] = "club_id"
-        values.names[values.names.index("name")] = "club_name"
 
         competitors = []
-        for c in values:
+        for c in cur:
             competitors.append(
                 CompetitorType(
                     id=c["id"],
@@ -469,17 +605,24 @@ class SqliteRepo(Repo):
         return competitors
 
     def get_competitor(self, id) -> CompetitorType:
-        values = self.db.query(
-            "SELECT competitors.*, clubs.* "
-            "FROM competitors "
-            "LEFT JOIN clubs ON competitors.club_id = clubs.id "
-            "WHERE competitors.id = " + web.db.sqlquote(id) + ";"
+        cur = self.db.execute(
+            """
+            SELECT
+                competitors.id,
+                competitors.first_name,
+                competitors.last_name,
+                competitors.gender,
+                competitors.year,
+                competitors.chip,
+                clubs.id AS club_id,
+                clubs.name AS club_name
+            FROM competitors
+            LEFT JOIN clubs ON competitors.club_id=clubs.id
+            WHERE competitors.id=?""",
+            (id,),
         )
-        values.names[values.names.index("id", 1)] = "club_id"
-        values.names[values.names.index("name")] = "club_name"
-
-        if values:
-            c = values[0]
+        c = cur.fetchone()
+        if c:
             return CompetitorType(
                 id=c["id"],
                 first_name=c["first_name"],
@@ -494,21 +637,28 @@ class SqliteRepo(Repo):
             raise KeyError
 
     def get_competitor_by_name(self, first_name: str, last_name: str) -> CompetitorType:
-        values = self.db.query(
-            "SELECT competitors.*, clubs.* "
-            "FROM competitors "
-            "LEFT JOIN clubs ON competitors.club_id = clubs.id "
-            "WHERE competitors.first_name = "
-            + web.db.sqlquote(first_name)
-            + "AND competitors.last_name = "
-            + web.db.sqlquote(last_name)
-            + ";"
+        cur = self.db.execute(
+            """
+            SELECT
+                competitors.id,
+                competitors.first_name,
+                competitors.last_name,
+                competitors.gender,
+                competitors.year,
+                competitors.chip,
+                clubs.id AS club_id,
+                clubs.name AS club_name
+            FROM competitors
+            LEFT JOIN clubs ON competitors.club_id=clubs.id
+            WHERE competitors.first_name=? AND competitors.last_name=?""",
+            (
+                first_name,
+                last_name,
+            ),
         )
-        values.names[values.names.index("id", 1)] = "club_id"
-        values.names[values.names.index("name")] = "club_name"
 
-        if values:
-            c = values[0]
+        c = cur.fetchone()
+        if c:
             return CompetitorType(
                 id=c["id"],
                 first_name=c["first_name"],
@@ -532,15 +682,28 @@ class SqliteRepo(Repo):
         chip: str,
     ) -> int:
         try:
-            return self.db.insert(
-                "competitors",
-                first_name=first_name,
-                last_name=last_name,
-                club_id=club_id,
-                gender=gender,
-                year=year,
-                chip=chip,
+            cur = self.db.execute(
+                """
+                INSERT into competitors (
+                    first_name,
+                    last_name,
+                    club_id,
+                    gender,
+                    year,
+                    chip
+                )
+                VALUES(?, ?, ?, ?, ?, ?)""",
+                (
+                    first_name,
+                    last_name,
+                    club_id,
+                    gender,
+                    year,
+                    chip,
+                ),
             )
+            return cur.lastrowid
+
         except sqlite3.IntegrityError:
             raise ConstraintError("Competitor already exist")
 
@@ -555,26 +718,44 @@ class SqliteRepo(Repo):
         chip: str,
     ) -> None:
         try:
-            nr_of_rows = self.db.update(
-                "competitors",
-                where="id=" + web.db.sqlquote(id),
-                first_name=first_name,
-                last_name=last_name,
-                club_id=club_id,
-                gender=gender,
-                year=year,
-                chip=chip,
+            cur = self.db.execute(
+                """
+                UPDATE competitors SET
+                    first_name=?,
+                    last_name=?,
+                    club_id=?,
+                    gender=?,
+                    year=?,
+                    chip=?
+                WHERE id=?""",
+                (
+                    first_name,
+                    last_name,
+                    club_id,
+                    gender,
+                    year,
+                    chip,
+                    id,
+                ),
             )
-            if nr_of_rows == 0:
+            if cur.rowcount == 0:
                 raise KeyError
+
         except sqlite3.IntegrityError:
             raise ConstraintError("Competitor already exist")
 
     def delete_competitor(self, id: int) -> None:
-        if self.db.where("entries", competitor_id=id).first() is None:
-            self.db.delete("competitors", where="id=" + web.db.sqlquote(id))
-        else:
+        cur = self.db.execute(
+            "SELECT id FROM entries WHERE competitor_id=?",
+            (id,),
+        )
+        if cur.fetchone():
             raise CompetitorUsedError
+        else:
+            self.db.execute(
+                "DELETE FROM competitors WHERE id=?",
+                (id,),
+            )
 
     def import_competitors(self, competitors: List[Dict]) -> None:
         list_of_competitors = []
@@ -595,14 +776,14 @@ class SqliteRepo(Repo):
                 )
             except KeyError:
                 list_of_competitors.append(
-                    {
-                        "last_name": c["last_name"],
-                        "first_name": c["first_name"],
-                        "club_id": club_id,
-                        "gender": c["gender"] if "gender" in c else "",
-                        "year": c["year"] if "year" in c else "",
-                        "chip": c["chip"] if "chip" in c else "",
-                    }
+                    (
+                        c["first_name"],
+                        c["last_name"],
+                        club_id,
+                        c["gender"] if "gender" in c else "",
+                        c["year"] if "year" in c else "",
+                        c["chip"] if "chip" in c else "",
+                    )
                 )
             else:
                 gender = c_name.gender
@@ -624,44 +805,56 @@ class SqliteRepo(Repo):
                     chip=chip,
                 )
 
-        self.db.supports_multiple_insert = True
         if list_of_competitors:
-            self.db.multiple_insert("competitors", list_of_competitors)
+            self.db.executemany(
+                """
+                INSERT into competitors (
+                    first_name,
+                    last_name,
+                    club_id,
+                    gender,
+                    year,
+                    chip
+                )
+                VALUES(?, ?, ?, ?, ?, ?)""",
+                list_of_competitors,
+            )
 
     def get_entries(self, event_id: int) -> List[EntryType]:
-        values = self.db.query(
-            "SELECT "
-            "entries.id,"
-            "entries.event_id,"
-            "competitors.id,"
-            "competitors.first_name,"
-            "competitors.last_name,"
-            "competitors.gender,"
-            "competitors.year,"
-            "entries.class_id,"
-            "classes.name,"
-            "entries.not_competing,"
-            "entries.chip,"
-            "entries.fields,"
-            "entries.result,"
-            "entries.start,"
-            "entries.club_id,"
-            "clubs.name "
-            "FROM entries "
-            "LEFT JOIN competitors ON entries.competitor_id = competitors.id "
-            "LEFT JOIN classes ON entries.class_id = classes.id "
-            "LEFT JOIN clubs ON entries.club_id = clubs.id "
-            "WHERE entries.event_id = " + web.db.sqlquote(event_id) + " "
-            "ORDER BY competitors.last_name ASC, competitors.first_name ASC, entries.chip ASC;"
+        cur = self.db.execute(
+            """
+            SELECT
+                entries.id,
+                entries.event_id,
+                competitors.id AS competitor_id,
+                competitors.first_name,
+                competitors.last_name,
+                competitors.gender,
+                competitors.year,
+                entries.class_id,
+                classes.name AS class_name,
+                entries.not_competing,
+                entries.chip,
+                entries.fields,
+                entries.result,
+                entries.start,
+                entries.club_id,
+                clubs.name AS club_name
+            FROM entries
+            LEFT JOIN competitors ON entries.competitor_id=competitors.id
+            LEFT JOIN classes ON entries.class_id=classes.id
+            LEFT JOIN clubs ON entries.club_id=clubs.id
+            WHERE entries.event_id=?
+            ORDER BY
+                competitors.last_name ASC,
+                competitors.first_name ASC,
+                entries.chip ASC""",
+            (event_id,),
         )
-        values.names[values.names.index("id", 1)] = "competitor_id"
-        values.names[values.names.index("name")] = "class_name"
-        values.names[values.names.index("name")] = "club_name"
 
         entries = []
-        for c in values:
-            fields = {int(key): value for key, value in json.loads(c.fields).items()}
-
+        for c in cur:
+            fields = {int(key): value for key, value in json.loads(c["fields"]).items()}
             entries.append(
                 EntryType(
                     id=c["id"],
@@ -673,11 +866,13 @@ class SqliteRepo(Repo):
                     year=c["year"],
                     class_id=c["class_id"],
                     class_name=c["class_name"],
-                    not_competing=bool(c.not_competing),
+                    not_competing=bool(c["not_competing"]),
                     chip=c["chip"],
                     fields=fields,
-                    result=result_type.PersonRaceResult.from_json(json_data=c.result),
-                    start=start_type.PersonRaceStart.from_json(json_data=c.start),
+                    result=result_type.PersonRaceResult.from_json(
+                        json_data=c["result"]
+                    ),
+                    start=start_type.PersonRaceStart.from_json(json_data=c["start"]),
                     club_id=c["club_id"],
                     club_name=c["club_name"],
                 )
@@ -685,39 +880,36 @@ class SqliteRepo(Repo):
         return entries
 
     def get_entry(self, id: int) -> EntryType:
-        values = self.db.query(
-            "SELECT "
-            "entries.id,"
-            "entries.event_id,"
-            "competitors.id,"
-            "competitors.first_name,"
-            "competitors.last_name,"
-            "competitors.gender,"
-            "competitors.year,"
-            "classes.id,"
-            "classes.name,"
-            "clubs.id,"
-            "clubs.name,"
-            "entries.not_competing,"
-            "entries.chip,"
-            "entries.fields,"
-            "entries.result,"
-            "entries.start "
-            "FROM entries "
-            "LEFT JOIN competitors ON entries.competitor_id = competitors.id "
-            "LEFT JOIN classes ON entries.class_id = classes.id "
-            "LEFT JOIN clubs ON entries.club_id = clubs.id "
-            "WHERE entries.id = " + web.db.sqlquote(id) + ";"
+        cur = self.db.execute(
+            """
+            SELECT
+                entries.id,
+                entries.event_id,
+                competitors.id AS competitor_id,
+                competitors.first_name,
+                competitors.last_name,
+                competitors.gender,
+                competitors.year,
+                classes.id AS class_id,
+                classes.name AS class_name,
+                clubs.id AS club_id,
+                clubs.name AS club_name,
+                entries.not_competing,
+                entries.chip,
+                entries.fields,
+                entries.result,
+                entries.start
+            FROM entries
+            LEFT JOIN competitors ON entries.competitor_id=competitors.id
+            LEFT JOIN classes ON entries.class_id=classes.id
+            LEFT JOIN clubs ON entries.club_id=clubs.id
+            WHERE entries.id=?""",
+            (id,),
         )
-        values.names[values.names.index("id", 1)] = "competitor_id"
-        values.names[values.names.index("id", 1)] = "class_id"
-        values.names[values.names.index("id", 1)] = "club_id"
-        values.names[values.names.index("name")] = "class_name"
-        values.names[values.names.index("name")] = "club_name"
 
-        if values:
-            c = values[0]
-            fields = {int(key): value for key, value in json.loads(c.fields).items()}
+        c = cur.fetchone()
+        if c:
+            fields = {int(key): value for key, value in json.loads(c["fields"]).items()}
 
             return EntryType(
                 id=c["id"],
@@ -729,11 +921,11 @@ class SqliteRepo(Repo):
                 year=c["year"],
                 class_id=c["class_id"],
                 class_name=c["class_name"],
-                not_competing=bool(c.not_competing),
+                not_competing=bool(c["not_competing"]),
                 chip=c["chip"],
                 fields=fields,
-                result=result_type.PersonRaceResult.from_json(json_data=c.result),
-                start=start_type.PersonRaceStart.from_json(json_data=c.start),
+                result=result_type.PersonRaceResult.from_json(json_data=c["result"]),
+                start=start_type.PersonRaceStart.from_json(json_data=c["start"]),
                 club_id=c["club_id"],
                 club_name=c["club_name"],
             )
@@ -743,41 +935,42 @@ class SqliteRepo(Repo):
     def get_entry_by_name(
         self, event_id: int, first_name: str, last_name: str
     ) -> EntryType:
-        values = self.db.query(
-            "SELECT "
-            "entries.id,"
-            "entries.event_id,"
-            "competitors.id,"
-            "competitors.first_name,"
-            "competitors.last_name,"
-            "competitors.gender,"
-            "competitors.year,"
-            "classes.id,"
-            "classes.name,"
-            "clubs.id,"
-            "clubs.name,"
-            "entries.not_competing,"
-            "entries.chip,"
-            "entries.fields,"
-            "entries.result,"
-            "entries.start "
-            "FROM entries "
-            "LEFT JOIN competitors ON entries.competitor_id = competitors.id "
-            "LEFT JOIN classes ON entries.class_id = classes.id "
-            "LEFT JOIN clubs ON entries.club_id = clubs.id "
-            "WHERE entries.event_id = " + web.db.sqlquote(event_id) + " AND "
-            "competitors.first_name = " + web.db.sqlquote(first_name) + " AND "
-            "competitors.last_name = " + web.db.sqlquote(last_name) + ";"
+        cur = self.db.execute(
+            """
+            SELECT
+                entries.id,
+                entries.event_id,
+                competitors.id AS competitor_id,
+                competitors.first_name,
+                competitors.last_name,
+                competitors.gender,
+                competitors.year,
+                classes.id AS class_id,
+                classes.name AS class_name,
+                clubs.id AS club_id,
+                clubs.name AS club_name,
+                entries.not_competing,
+                entries.chip,
+                entries.fields,
+                entries.result,
+                entries.start
+            FROM entries
+            LEFT JOIN competitors ON entries.competitor_id=competitors.id
+            LEFT JOIN classes ON entries.class_id=classes.id
+            LEFT JOIN clubs ON entries.club_id=clubs.id
+            WHERE entries.event_id=?
+                AND competitors.first_name=?
+                AND competitors.last_name=?""",
+            (
+                event_id,
+                first_name,
+                last_name,
+            ),
         )
-        values.names[values.names.index("id", 1)] = "competitor_id"
-        values.names[values.names.index("id", 1)] = "class_id"
-        values.names[values.names.index("id", 1)] = "club_id"
-        values.names[values.names.index("name")] = "class_name"
-        values.names[values.names.index("name")] = "club_name"
 
-        if values:
-            c = values[0]
-            fields = {int(key): value for key, value in json.loads(c.fields).items()}
+        c = cur.fetchone()
+        if c:
+            fields = {int(key): value for key, value in json.loads(c["fields"]).items()}
 
             return EntryType(
                 id=c["id"],
@@ -789,11 +982,11 @@ class SqliteRepo(Repo):
                 year=c["year"],
                 class_id=c["class_id"],
                 class_name=c["class_name"],
-                not_competing=bool(c.not_competing),
+                not_competing=bool(c["not_competing"]),
                 chip=c["chip"],
                 fields=fields,
-                result=result_type.PersonRaceResult.from_json(json_data=c.result),
-                start=start_type.PersonRaceStart.from_json(json_data=c.start),
+                result=result_type.PersonRaceResult.from_json(json_data=c["result"]),
+                start=start_type.PersonRaceStart.from_json(json_data=c["start"]),
                 club_id=c["club_id"],
                 club_name=c["club_name"],
             )
@@ -854,18 +1047,34 @@ class SqliteRepo(Repo):
                 ),
                 chip=competitor.chip if competitor.chip != "" else chip,
             )
-            return self.db.insert(
-                "entries",
-                event_id=event_id,
-                competitor_id=competitor_id,
-                class_id=class_id,
-                club_id=club_id,
-                not_competing=not_competing,
-                result=result_type.PersonRaceResult(status=status).to_json(),
-                start=start_type.PersonRaceStart(start_time=start_time).to_json(),
-                chip=chip,
-                fields=json.dumps(fields),
+            cur = self.db.execute(
+                """
+                INSERT into entries (
+                    event_id,
+                    competitor_id,
+                    class_id,
+                    club_id,
+                    not_competing,
+                    result,
+                    start,
+                    chip,
+                    fields
+                )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    event_id,
+                    competitor_id,
+                    class_id,
+                    club_id,
+                    not_competing,
+                    result_type.PersonRaceResult(status=status).to_json(),
+                    start_type.PersonRaceStart(start_time=start_time).to_json(),
+                    chip,
+                    json.dumps(fields),
+                ),
             )
+            return cur.lastrowid
+
         except sqlite3.IntegrityError:
             raise ConstraintError("Competitor already registered for this event")
 
@@ -880,18 +1089,34 @@ class SqliteRepo(Repo):
         self.get_event(id=event_id)
 
         try:
-            return self.db.insert(
-                "entries",
-                event_id=event_id,
-                competitor_id=None,
-                class_id=None,
-                club_id=None,
-                not_competing=False,
-                result=result.to_json(),
-                start=start_type.PersonRaceStart(start_time=start_time).to_json(),
-                chip=chip,
-                fields=json.dumps({}),
+            cur = self.db.execute(
+                """
+                INSERT into entries (
+                    event_id,
+                    competitor_id,
+                    class_id,
+                    club_id,
+                    not_competing,
+                    result,
+                    start,
+                    chip,
+                    fields
+                )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    event_id,
+                    None,
+                    None,
+                    None,
+                    False,
+                    result.to_json(),
+                    start_type.PersonRaceStart(start_time=start_time).to_json(),
+                    chip,
+                    json.dumps({}),
+                ),
             )
+            return cur.lastrowid
+
         except sqlite3.IntegrityError:
             raise ConstraintError("Competitor already registered for this event")
 
@@ -926,17 +1151,30 @@ class SqliteRepo(Repo):
         result.status = status
         start = entry.start
         start.start_time = start_time
-        self.db.update(
-            "entries",
-            where="id=" + web.db.sqlquote(id),
-            class_id=class_id,
-            club_id=club_id,
-            not_competing=not_competing,
-            chip=chip,
-            fields=json.dumps(fields),
-            result=result.to_json(),
-            start=start.to_json(),
+        cur = self.db.execute(
+            """
+            UPDATE entries SET
+                class_id=?,
+                club_id=?,
+                not_competing=?,
+                chip=?,
+                fields=?,
+                result=?,
+                start=?
+            WHERE id=?""",
+            (
+                class_id,
+                club_id,
+                not_competing,
+                chip,
+                json.dumps(fields),
+                result.to_json(),
+                start.to_json(),
+                id,
+            ),
         )
+        if cur.rowcount == 0:
+            raise KeyError
 
     def update_entry_result(
         self,
@@ -948,19 +1186,34 @@ class SqliteRepo(Repo):
         entry = self.get_entry(id=id)
         start = entry.start
         start.start_time = start_time
-        self.db.update(
-            "entries",
-            where="id=" + web.db.sqlquote(id),
-            chip=chip,
-            result=result.to_json(),
-            start=start.to_json(),
+        cur = self.db.execute(
+            """
+            UPDATE entries SET
+                chip=?,
+                result=?,
+                start=?
+            WHERE id=?""",
+            (
+                chip,
+                result.to_json(),
+                start.to_json(),
+                id,
+            ),
         )
+        if cur.rowcount == 0:
+            raise KeyError
 
     def delete_entries(self, event_id: int) -> None:
-        self.db.delete("entries", where="event_id=" + web.db.sqlquote(event_id))
+        self.db.execute(
+            "DELETE FROM entries WHERE event_id=?",
+            (event_id,),
+        )
 
     def delete_entry(self, id: int) -> None:
-        self.db.delete("entries", where="id=" + web.db.sqlquote(id))
+        self.db.execute(
+            "DELETE FROM entries WHERE id=?",
+            (id,),
+        )
 
     def import_entries(self, event_id: int, entries: List[Dict]) -> None:
         # check if the event still exists
@@ -1057,20 +1310,32 @@ class SqliteRepo(Repo):
                 start = entry.start
                 if "start" in c:
                     start = copy.deepcopy(c["start"])
-                self.db.update(
-                    "entries",
-                    where="id=" + web.db.sqlquote(entry.id),
-                    class_id=class_id,
-                    club_id=club_id,
-                    not_competing=(
-                        c["not_competing"]
-                        if "not_competing" in c
-                        else entry.not_competing
+
+                self.db.execute(
+                    """
+                    UPDATE entries SET
+                        class_id=?,
+                        club_id=?,
+                        not_competing=?,
+                        chip=?,
+                        fields=?,
+                        result=?,
+                        start=?
+                    WHERE id=?""",
+                    (
+                        class_id,
+                        club_id,
+                        (
+                            c["not_competing"]
+                            if "not_competing" in c
+                            else entry.not_competing
+                        ),
+                        c["chip"] if "chip" in c else entry.chip,
+                        json.dumps(fields),
+                        result.to_json(),
+                        start.to_json(),
+                        entry.id,
                     ),
-                    chip=c["chip"] if "chip" in c else entry.chip,
-                    fields=json.dumps(fields),
-                    result=result.to_json(),
-                    start=start.to_json(),
                 )
             except KeyError:
                 if "result" in c:
@@ -1082,83 +1347,109 @@ class SqliteRepo(Repo):
                 else:
                     start = start_type.PersonRaceStart()
                 list_of_entries.append(
-                    {
-                        "event_id": event_id,
-                        "competitor_id": competitor_id,
-                        "class_id": class_id,
-                        "club_id": club_id,
-                        "not_competing": (
-                            c["not_competing"] if "not_competing" in c else False
-                        ),
-                        "chip": c["chip"] if "chip" in c else "",
-                        "fields": json.dumps(c["fields"] if "fields" in c else {}),
-                        "result": result.to_json(),
-                        "start": start.to_json(),
-                    }
+                    (
+                        event_id,
+                        competitor_id,
+                        class_id,
+                        club_id,
+                        c["not_competing"] if "not_competing" in c else False,
+                        result.to_json(),
+                        start.to_json(),
+                        c["chip"] if "chip" in c else "",
+                        json.dumps(c["fields"] if "fields" in c else {}),
+                    )
                 )
 
-        self.db.supports_multiple_insert = True
-        for i in range(0, len(entries), 25):
-            self.db.multiple_insert(
-                "entries", list_of_entries[i : min(i + 25, len(entries))]
+        if list_of_entries:
+            self.db.executemany(
+                """
+                INSERT into entries (
+                    event_id,
+                    competitor_id,
+                    class_id,
+                    club_id,
+                    not_competing,
+                    result,
+                    start,
+                    chip,
+                    fields
+                )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                list_of_entries,
             )
 
     def get_events(self) -> List[EventType]:
-        values = self.db.query(
-            "SELECT "
-            "events.id,"
-            "events.name,"
-            "events.date,"
-            "events.key,"
-            "events.publish,"
-            "events.series,"
-            "events.fields,"
-            "events.streaming_address,"
-            "events.streaming_key,"
-            "events.streaming_enabled "
-            "FROM events "
-            "ORDER BY events.name ASC;"
+        values = self.db.execute(
+            """
+            SELECT
+                id,
+                name,
+                date,
+                key,
+                publish,
+                series,
+                fields,
+                streaming_address,
+                streaming_key,
+                streaming_enabled
+            FROM events
+            ORDER BY events.name ASC""",
         )
         events = []
         for e in values:
             streaming_enabled = None
-            if e.streaming_enabled is not None:
-                streaming_enabled = bool(e.streaming_enabled)
+            if e["streaming_enabled"] is not None:
+                streaming_enabled = bool(e["streaming_enabled"])
 
             events.append(
                 EventType(
-                    id=e.id,
-                    name=e.name,
-                    date=datetime.datetime.strptime(e.date, "%Y-%m-%d").date(),
-                    key=e.key,
-                    publish=bool(e.publish),
-                    series=e.series,
-                    fields=json.loads(e.fields),
-                    streaming_address=e.streaming_address,
-                    streaming_key=e.streaming_key,
+                    id=e["id"],
+                    name=e["name"],
+                    date=datetime.datetime.strptime(e["date"], "%Y-%m-%d").date(),
+                    key=e["key"],
+                    publish=bool(e["publish"]),
+                    series=e["series"],
+                    fields=json.loads(e["fields"]),
+                    streaming_address=e["streaming_address"],
+                    streaming_key=e["streaming_key"],
                     streaming_enabled=streaming_enabled,
                 )
             )
         return events
 
     def get_event(self, id: int) -> EventType:
-        values = self.db.where("events", id=id)
-        if values:
-            e = values[0]
+        cur = self.db.execute(
+            """
+            SELECT
+                id,
+                name,
+                date,
+                key,
+                publish,
+                series,
+                fields,
+                streaming_address,
+                streaming_key,
+                streaming_enabled
+            FROM events WHERE id=?""",
+            (id,),
+        )
+        e = cur.fetchone()
+        if e:
             streaming_enabled = None
-            if e.streaming_enabled is not None:
-                streaming_enabled = bool(e.streaming_enabled)
+            if e["streaming_enabled"] is not None:
+                streaming_enabled = bool(e["streaming_enabled"])
 
             return EventType(
-                id=e.id,
-                name=e.name,
-                date=datetime.datetime.strptime(e.date, "%Y-%m-%d").date(),
-                key=e.key,
-                publish=bool(e.publish),
-                series=e.series,
-                fields=json.loads(e.fields),
-                streaming_address=e.streaming_address,
-                streaming_key=e.streaming_key,
+                id=e["id"],
+                name=e["name"],
+                date=datetime.datetime.strptime(e["date"], "%Y-%m-%d").date(),
+                key=e["key"],
+                publish=bool(e["publish"]),
+                series=e["series"],
+                fields=json.loads(e["fields"]),
+                streaming_address=e["streaming_address"],
+                streaming_key=e["streaming_key"],
                 streaming_enabled=streaming_enabled,
             )
         else:
@@ -1177,18 +1468,33 @@ class SqliteRepo(Repo):
         streaming_enabled: Optional[bool] = None,
     ) -> int:
         try:
-            return self.db.insert(
-                "events",
-                name=name,
-                date=date.isoformat(),
-                key=key,
-                publish=publish,
-                series=series,
-                fields=json.dumps(fields),
-                streaming_address=streaming_address,
-                streaming_key=streaming_key,
-                streaming_enabled=streaming_enabled,
+            cur = self.db.execute(
+                """
+                INSERT into events (
+                    name,
+                    date,
+                    key,
+                    publish,
+                    series,
+                    fields,
+                    streaming_address,
+                    streaming_key,
+                    streaming_enabled
+                )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    name,
+                    date.isoformat(),
+                    key,
+                    publish,
+                    series,
+                    json.dumps(fields),
+                    streaming_address,
+                    streaming_key,
+                    streaming_enabled,
+                ),
             )
+            return cur.lastrowid
 
         except sqlite3.IntegrityError:
             raise ConstraintError("Event or event key already exist")
@@ -1207,59 +1513,100 @@ class SqliteRepo(Repo):
         streaming_enabled: Optional[bool] = None,
     ) -> None:
         try:
-            nr_of_rows = self.db.update(
-                "events",
-                where="id=" + web.db.sqlquote(id),
-                name=name,
-                date=date.isoformat(),
-                key=key,
-                publish=publish,
-                series=series,
-                fields=json.dumps(fields),
-                streaming_address=streaming_address,
-                streaming_key=streaming_key,
-                streaming_enabled=streaming_enabled,
+            cur = self.db.execute(
+                """
+                UPDATE events SET
+                    name=?,
+                    date=?,
+                    key=?,
+                    publish=?,
+                    series=?,
+                    fields=?,
+                    streaming_address=?,
+                    streaming_key=?,
+                    streaming_enabled=?
+                WHERE id=?""",
+                (
+                    name,
+                    date.isoformat(),
+                    key,
+                    publish,
+                    series,
+                    json.dumps(fields),
+                    streaming_address,
+                    streaming_key,
+                    streaming_enabled,
+                    id,
+                ),
             )
-            if nr_of_rows == 0:
+            if cur.rowcount == 0:
                 raise KeyError
         except sqlite3.IntegrityError:
             raise ConstraintError("Event or event key already exist")
 
     def delete_event(self, id: int) -> None:
-        self.db.delete("events", where="id=" + web.db.sqlquote(id))
+        self.db.execute(
+            "DELETE FROM events WHERE id=?",
+            (id,),
+        )
 
     def get_series_settings(self) -> series_type.Settings:
-        values = self.db.query(
-            "SELECT name, nr_of_best_results, mode, maximum_points, decimal_places FROM settings;"
+        cur = self.db.execute(
+            """
+            SELECT
+                name,
+                nr_of_best_results,
+                mode,
+                maximum_points,
+                decimal_places
+            FROM settings""",
         )
-        if values:
-            s = values[0]
+        s = cur.fetchone()
+        if s:
             return series_type.Settings(
-                name=s.name,
-                nr_of_best_results=s.nr_of_best_results,
-                mode=s.mode,
-                maximum_points=s.maximum_points,
-                decimal_places=s.decimal_places,
+                name=s["name"],
+                nr_of_best_results=s["nr_of_best_results"],
+                mode=s["mode"],
+                maximum_points=s["maximum_points"],
+                decimal_places=s["decimal_places"],
             )
         else:
             return series_type.Settings()
 
     def update_series_settings(self, settings: series_type.Settings) -> None:
-        nr_of_rows = self.db.update(
-            tables="settings",
-            where="True",
-            name=settings.name,
-            nr_of_best_results=settings.nr_of_best_results,
-            mode=settings.mode,
-            maximum_points=settings.maximum_points,
-            decimal_places=settings.decimal_places,
+        cur = self.db.execute(
+            """
+            UPDATE settings SET
+                name=?,
+                nr_of_best_results=?,
+                mode=?,
+                maximum_points=?,
+                decimal_places=?""",
+            (
+                settings.name,
+                settings.nr_of_best_results,
+                settings.mode,
+                settings.maximum_points,
+                settings.decimal_places,
+            ),
         )
-        if nr_of_rows == 0:
-            self.db.insert(
-                tablename="settings",
-                name=settings.name,
-                nr_of_best_results=settings.nr_of_best_results,
-                mode=settings.mode,
-                maximum_points=settings.maximum_points,
-                decimal_places=settings.decimal_places,
+        if cur.rowcount == 0:
+            cur = self.db.execute(
+                """
+                INSERT into settings (
+                    name,
+                    nr_of_best_results,
+                    mode,
+                    maximum_points,
+                    decimal_places
+                )
+                VALUES(?, ?, ?, ?, ?)""",
+                (
+                    settings.name,
+                    settings.nr_of_best_results,
+                    settings.mode,
+                    settings.maximum_points,
+                    settings.decimal_places,
+                ),
             )
+            return cur.lastrowid
