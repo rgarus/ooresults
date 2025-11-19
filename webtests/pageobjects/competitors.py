@@ -17,6 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from pathlib import Path
 from typing import List
 from typing import Optional
 from typing import TypeVar
@@ -114,8 +115,14 @@ class ImportCompetitorDialog:
         self.page = page
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "comp.formImport")
+        elem = self.page.find_element(By.ID, "comp.import.form")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
+        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+
+    def import_(self, path: Path) -> None:
+        elem = self.page.find_element(By.ID, "comp.import.form")
+        elem.find_element(By.ID, "file1").send_keys(str(path))
+        elem.find_element(By.XPATH, "button[text()='Import']").click()
         WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
 
 
