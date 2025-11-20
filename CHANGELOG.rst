@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Fixed
+^^^^^
+
+- Sometimes the event result on the si1 page is not updated if the result does not need to be scrolled.
+
+
 [0.4.5] - 2025-10-29
 --------------------
 

@@ -57,7 +57,8 @@
             var timer = null;
             var status = 'offline';
             var data = '';
-            var result_data = null;
+            var resultData = null;
+            var newResultReceived = false;
             var autoscrollTimer = null;
 
             function message () {
@@ -97,8 +98,8 @@
                     clearTimeout(autoscrollTimer);
                 };
 
-                if (result_data && (status == 'readerConnected' || status == 'cardRemoved')) {
-                    showResult(result_data);
+                if (resultData && (status == 'readerConnected' || status == 'cardRemoved')) {
+                    showResult(resultData);
                     autoscroll();
                 } else {
                     showMessage(text, color);
@@ -111,10 +112,13 @@
                     '<p class="s2" style="padding-left: 4%; color: ' + color + '">' + text + '</p>';
             };
 
-            function showResult(result_data) {
-                document.getElementById('page').innerHTML =
-                    '<p style="text-align: right; margin: 10px"><button onclick="openFullscreen();">' + window.wakeStatus + '</button></p>' +
-                    '<div style="padding-left: 4%; padding-bottom: 24px">' + result_data + '</div>';
+            function showResult(resultData) {
+                if (newResultReceived) {
+                    newResultReceived = false;
+                    document.getElementById('page').innerHTML =
+                        '<p style="text-align: right; margin: 10px"><button onclick="openFullscreen();">' + window.wakeStatus + '</button></p>' +
+                        '<div style="padding-left: 4%; padding-bottom: 24px">' + resultData + '</div>';
+                }
             };
 
             function closeErrorDialog() {
@@ -167,10 +171,11 @@
                     const obj = JSON.parse(event.data)
                     if (obj.status == 'result') {
                         if (view == 0) {
-                            first_result = !result_data
-                            result_data = obj.data;
-                            if (first_result && (status == 'readerConnected' || status == 'cardRemoved')) {
-                                showResult(result_data);
+                            var firstResult = !resultData
+                            resultData = obj.data;
+                            newResultReceived = true;
+                            if (firstResult && (status == 'readerConnected' || status == 'cardRemoved')) {
+                                showResult(resultData);
                                 autoscroll();
                             }
                         }
@@ -207,11 +212,12 @@
 
             function autoscroll() {
                 if (window.scrollY == 0) {
+                    showResult(resultData);
                     autoscrollTimer = setTimeout(function() {window.scrollBy(0, 2); autoscroll()}, 2000);
                 } else if (window.scrollY + 1 < document.documentElement.scrollHeight - window.innerHeight) {
                     autoscrollTimer = setTimeout(function() {window.scrollBy(0, 2); autoscroll()}, 25);
                 } else {
-                    autoscrollTimer = setTimeout(function() {showResult(result_data); window.scrollTo(0, 0); autoscroll()}, 2000);
+                    autoscrollTimer = setTimeout(function() {window.scrollTo(0, 0); autoscroll()}, 2000);
                 };
             };
         </script>
