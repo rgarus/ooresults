@@ -36,79 +36,86 @@ def db():
 
 @pytest.fixture
 def club_id(db):
-    return db.add_club(
-        name="OL Bundestag",
-    )
+    with db.transaction():
+        return db.add_club(
+            name="OL Bundestag",
+        )
 
 
 @pytest.fixture
 def event_id(db):
-    return db.add_event(
-        name="Event",
-        date=datetime.date(year=2020, month=1, day=1),
-        key=None,
-        publish=False,
-        series=None,
-        fields=[],
-    )
+    with db.transaction():
+        return db.add_event(
+            name="Event",
+            date=datetime.date(year=2020, month=1, day=1),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        )
 
 
 @pytest.fixture
 def class_id(db, event_id):
-    return db.add_class(
-        event_id=event_id,
-        name="Class",
-        short_name=None,
-        course_id=None,
-        params=ClassParams(),
-    )
+    with db.transaction():
+        return db.add_class(
+            event_id=event_id,
+            name="Class",
+            short_name=None,
+            course_id=None,
+            params=ClassParams(),
+        )
 
 
 @pytest.fixture
 def entry_id(db, event_id, class_id, competitor_1_id):
-    return db.add_entry(
-        event_id=event_id,
-        competitor_id=None,
-        first_name="Jogi",
-        last_name="Löw",
-        gender="M",
-        year=None,
-        class_id=class_id,
-        club_id=None,
-        not_competing=False,
-        chip="",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
+    with db.transaction():
+        return db.add_entry(
+            event_id=event_id,
+            competitor_id=None,
+            first_name="Jogi",
+            last_name="Löw",
+            gender="M",
+            year=None,
+            class_id=class_id,
+            club_id=None,
+            not_competing=False,
+            chip="",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
 
 
 @pytest.fixture
 def competitor_1_id(db, club_id):
-    return db.add_competitor(
-        first_name="Jogi",
-        last_name="Löw",
-        club_id=None,
-        gender="M",
-        year=None,
-        chip="",
-    )
+    with db.transaction():
+        return db.add_competitor(
+            first_name="Jogi",
+            last_name="Löw",
+            club_id=None,
+            gender="M",
+            year=None,
+            chip="",
+        )
 
 
 @pytest.fixture
 def competitor_2_id(db, club_id):
-    return db.add_competitor(
-        first_name="Angela",
-        last_name="Merkel",
-        club_id=club_id,
-        gender="F",
-        year=1957,
-        chip="1234567",
-    )
+    with db.transaction():
+        return db.add_competitor(
+            first_name="Angela",
+            last_name="Merkel",
+            club_id=club_id,
+            gender="F",
+            year=1957,
+            chip="1234567",
+        )
 
 
 def test_get_competitors_after_adding_one_competitor(db, competitor_1_id, club_id):
-    c = db.get_competitors()
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 1
     assert c[0] == CompetitorType(
         id=competitor_1_id,
@@ -125,7 +132,8 @@ def test_get_competitors_after_adding_one_competitor(db, competitor_1_id, club_i
 def test_get_competitors_after_adding_two_competitors(
     db, competitor_1_id, competitor_2_id, club_id
 ):
-    c = db.get_competitors()
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -152,7 +160,8 @@ def test_get_competitors_after_adding_two_competitors(
 
 
 def test_get_first_added_competitor(db, competitor_1_id, competitor_2_id, club_id):
-    c = db.get_competitor(id=competitor_1_id)
+    with db.transaction():
+        c = db.get_competitor(id=competitor_1_id)
     assert c == CompetitorType(
         id=competitor_1_id,
         first_name="Jogi",
@@ -166,7 +175,8 @@ def test_get_first_added_competitor(db, competitor_1_id, competitor_2_id, club_i
 
 
 def test_get_last_added_competitor(db, competitor_1_id, competitor_2_id, club_id):
-    c = db.get_competitor(id=competitor_2_id)
+    with db.transaction():
+        c = db.get_competitor(id=competitor_2_id)
     assert c == CompetitorType(
         id=competitor_2_id,
         first_name="Angela",
@@ -180,7 +190,8 @@ def test_get_last_added_competitor(db, competitor_1_id, competitor_2_id, club_id
 
 
 def test_get_competitor_by_name(db, competitor_1_id, competitor_2_id, club_id):
-    c = db.get_competitor_by_name(first_name="Angela", last_name="Merkel")
+    with db.transaction():
+        c = db.get_competitor_by_name(first_name="Angela", last_name="Merkel")
     assert c == CompetitorType(
         id=competitor_2_id,
         first_name="Angela",
@@ -194,16 +205,18 @@ def test_get_competitor_by_name(db, competitor_1_id, competitor_2_id, club_id):
 
 
 def test_update_first_added_competitor(db, competitor_1_id, competitor_2_id, club_id):
-    db.update_competitor(
-        id=competitor_1_id,
-        first_name="Anton",
-        last_name="Berkel",
-        club_id=club_id,
-        gender="M",
-        year=1958,
-        chip="",
-    )
-    c = db.get_competitors()
+    with db.transaction():
+        db.update_competitor(
+            id=competitor_1_id,
+            first_name="Anton",
+            last_name="Berkel",
+            club_id=club_id,
+            gender="M",
+            year=1958,
+            chip="",
+        )
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -230,16 +243,18 @@ def test_update_first_added_competitor(db, competitor_1_id, competitor_2_id, clu
 
 
 def test_update_last_added_competitor(db, competitor_1_id, competitor_2_id, club_id):
-    db.update_competitor(
-        id=competitor_2_id,
-        first_name="Anton",
-        last_name="Berkel",
-        club_id=None,
-        gender="M",
-        year=1958,
-        chip="",
-    )
-    c = db.get_competitors()
+    with db.transaction():
+        db.update_competitor(
+            id=competitor_2_id,
+            first_name="Anton",
+            last_name="Berkel",
+            club_id=None,
+            gender="M",
+            year=1958,
+            chip="",
+        )
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -266,15 +281,17 @@ def test_update_last_added_competitor(db, competitor_1_id, competitor_2_id, club
 
 
 def test_add_competitor_with_same_first_name(db, competitor_1_id, club_id):
-    competitor_2_id = db.add_competitor(
-        first_name="Jogi",
-        last_name="Berkel",
-        club_id=None,
-        gender="M",
-        year=1958,
-        chip="",
-    )
-    c = db.get_competitors()
+    with db.transaction():
+        competitor_2_id = db.add_competitor(
+            first_name="Jogi",
+            last_name="Berkel",
+            club_id=None,
+            gender="M",
+            year=1958,
+            chip="",
+        )
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -301,15 +318,17 @@ def test_add_competitor_with_same_first_name(db, competitor_1_id, club_id):
 
 
 def test_add_competitor_with_same_last_name(db, competitor_1_id, club_id):
-    competitor_2_id = db.add_competitor(
-        first_name="Norbert",
-        last_name="Löw",
-        club_id=None,
-        gender="M",
-        year=1958,
-        chip="",
-    )
-    c = db.get_competitors()
+    with db.transaction():
+        competitor_2_id = db.add_competitor(
+            first_name="Norbert",
+            last_name="Löw",
+            club_id=None,
+            gender="M",
+            year=1958,
+            chip="",
+        )
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -336,8 +355,10 @@ def test_add_competitor_with_same_last_name(db, competitor_1_id, club_id):
 
 
 def test_delete_first_added_competitor(db, competitor_1_id, competitor_2_id, club_id):
-    db.delete_competitor(id=competitor_1_id)
-    c = db.get_competitors()
+    with db.transaction():
+        db.delete_competitor(id=competitor_1_id)
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 1
     assert c[0] == CompetitorType(
         id=competitor_2_id,
@@ -352,8 +373,10 @@ def test_delete_first_added_competitor(db, competitor_1_id, competitor_2_id, clu
 
 
 def test_delete_last_added_competitor(db, competitor_1_id, competitor_2_id, club_id):
-    db.delete_competitor(id=competitor_2_id)
-    c = db.get_competitors()
+    with db.transaction():
+        db.delete_competitor(id=competitor_2_id)
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 1
     assert c[0] == CompetitorType(
         id=competitor_1_id,
@@ -369,45 +392,50 @@ def test_delete_last_added_competitor(db, competitor_1_id, competitor_2_id, club
 
 def test_add_existing_name_raises_exception(db, competitor_1_id):
     with pytest.raises(repo.ConstraintError, match="Competitor already exist"):
-        db.add_competitor(
-            first_name="Jogi",
-            last_name="Löw",
-            club_id=None,
-            gender="M",
-            year=1958,
-            chip="",
-        )
+        with db.transaction():
+            db.add_competitor(
+                first_name="Jogi",
+                last_name="Löw",
+                club_id=None,
+                gender="M",
+                year=1958,
+                chip="",
+            )
 
 
 def test_change_to_existing_name_raises_exception(db, competitor_1_id, competitor_2_id):
     with pytest.raises(repo.ConstraintError, match="Competitor already exist"):
-        db.update_competitor(
-            id=competitor_1_id,
-            first_name="Angela",
-            last_name="Merkel",
-            club_id=None,
-            gender="F",
-            year=None,
-            chip="",
-        )
+        with db.transaction():
+            db.update_competitor(
+                id=competitor_1_id,
+                first_name="Angela",
+                last_name="Merkel",
+                club_id=None,
+                gender="F",
+                year=None,
+                chip="",
+            )
 
 
 def test_update_with_unknown_id_raises_exception(db, competitor_1_id):
     with pytest.raises(KeyError):
-        db.update_competitor(
-            id=competitor_1_id + 1,
-            first_name="Anton",
-            last_name="Berkel",
-            club_id=None,
-            gender="M",
-            year=1958,
-            chip="",
-        )
+        with db.transaction():
+            db.update_competitor(
+                id=competitor_1_id + 1,
+                first_name="Anton",
+                last_name="Berkel",
+                club_id=None,
+                gender="M",
+                year=1958,
+                chip="",
+            )
 
 
 def test_delete_competitor_with_unknown_id_do_not_change_anything(db, competitor_1_id):
-    db.delete_competitor(id=competitor_1_id + 1)
-    c = db.get_competitors()
+    with db.transaction():
+        db.delete_competitor(id=competitor_1_id + 1)
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 1
     assert c[0] == CompetitorType(
         id=competitor_1_id,
@@ -425,32 +453,35 @@ def test_delete_competitor_used_in_entry_raises_exception(
     db, entry_id, competitor_1_id
 ):
     with pytest.raises(repo.CompetitorUsedError):
-        db.delete_competitor(id=competitor_1_id)
+        with db.transaction():
+            db.delete_competitor(id=competitor_1_id)
 
 
 def test_import_competitors(db):
-    db.import_competitors(
-        competitors=[
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": None,
-                "club": "OL Bundestag",
-                "chip": "",
-            },
-            {
-                "first_name": "Jogi",
-                "last_name": "Löw",
-                "gender": "M",
-                "year": 1960,
-                "club": "",
-                "chip": "1234",
-            },
-        ],
-    )
+    with db.transaction():
+        db.import_competitors(
+            competitors=[
+                {
+                    "first_name": "Angela",
+                    "last_name": "Merkel",
+                    "gender": "",
+                    "year": None,
+                    "club": "OL Bundestag",
+                    "chip": "",
+                },
+                {
+                    "first_name": "Jogi",
+                    "last_name": "Löw",
+                    "gender": "M",
+                    "year": 1960,
+                    "club": "",
+                    "chip": "1234",
+                },
+            ],
+        )
 
-    clubs = db.get_clubs()
+    with db.transaction():
+        clubs = db.get_clubs()
     assert len(clubs) == 1
 
     assert ClubType(
@@ -458,7 +489,8 @@ def test_import_competitors(db):
         name="OL Bundestag",
     )
 
-    c = db.get_competitors()
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -487,19 +519,21 @@ def test_import_competitors(db):
 def test_import_competitors_new_competitors_are_added(
     db, competitor_1_id, competitor_2_id, club_id
 ):
-    db.import_competitors(
-        competitors=[
-            {
-                "first_name": "Birgit",
-                "last_name": "Merkel",
-                "gender": "F",
-                "year": 1958,
-                "club": "OL Bundestag",
-                "chip": "4455",
-            },
-        ],
-    )
-    clubs = db.get_clubs()
+    with db.transaction():
+        db.import_competitors(
+            competitors=[
+                {
+                    "first_name": "Birgit",
+                    "last_name": "Merkel",
+                    "gender": "F",
+                    "year": 1958,
+                    "club": "OL Bundestag",
+                    "chip": "4455",
+                },
+            ],
+        )
+    with db.transaction():
+        clubs = db.get_clubs()
     assert len(clubs) == 1
 
     assert ClubType(
@@ -507,7 +541,8 @@ def test_import_competitors_new_competitors_are_added(
         name="OL Bundestag",
     )
 
-    c = db.get_competitors()
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 3
     assert c[0].id != c[1].id
     assert c[0].id != c[2].id
@@ -548,19 +583,21 @@ def test_import_competitors_new_competitors_are_added(
 def test_import_competitors_imported_values_overwrite_existing_values(
     db, competitor_2_id, club_id
 ):
-    db.import_competitors(
-        competitors=[
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "gender": "M",
-                "year": 2001,
-                "club": "Team Angela",
-                "chip": "4455",
-            },
-        ],
-    )
-    clubs = db.get_clubs()
+    with db.transaction():
+        db.import_competitors(
+            competitors=[
+                {
+                    "first_name": "Angela",
+                    "last_name": "Merkel",
+                    "gender": "M",
+                    "year": 2001,
+                    "club": "Team Angela",
+                    "chip": "4455",
+                },
+            ],
+        )
+    with db.transaction():
+        clubs = db.get_clubs()
     assert len(clubs) == 2
     assert clubs[0].id != clubs[1].id
 
@@ -573,7 +610,8 @@ def test_import_competitors_imported_values_overwrite_existing_values(
         name="Team Angela",
     )
 
-    c = db.get_competitors()
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 1
 
     assert c[0] == CompetitorType(
@@ -591,19 +629,21 @@ def test_import_competitors_imported_values_overwrite_existing_values(
 def test_import_competitors_missing_values_do_not_change_anything(
     db, competitor_2_id, club_id
 ):
-    db.import_competitors(
-        competitors=[
-            {
-                "first_name": "Angela",
-                "last_name": "Merkel",
-                "gender": "",
-                "year": None,
-                "club": "",
-                "chip": "",
-            },
-        ],
-    )
-    clubs = db.get_clubs()
+    with db.transaction():
+        db.import_competitors(
+            competitors=[
+                {
+                    "first_name": "Angela",
+                    "last_name": "Merkel",
+                    "gender": "",
+                    "year": None,
+                    "club": "",
+                    "chip": "",
+                },
+            ],
+        )
+    with db.transaction():
+        clubs = db.get_clubs()
     assert len(clubs) == 1
 
     assert clubs[0] == ClubType(
@@ -611,7 +651,8 @@ def test_import_competitors_missing_values_do_not_change_anything(
         name="OL Bundestag",
     )
 
-    c = db.get_competitors()
+    with db.transaction():
+        c = db.get_competitors()
     assert len(c) == 1
 
     assert c[0] == CompetitorType(

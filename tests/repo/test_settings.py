@@ -29,7 +29,8 @@ def db():
 
 
 def test_series_settings_defaults(db):
-    s = db.get_series_settings()
+    with db.transaction():
+        s = db.get_series_settings()
     assert s == Settings()
 
 
@@ -41,8 +42,10 @@ def test_series_settings_update_1(db):
         maximum_points=500,
         decimal_places=3,
     )
-    db.update_series_settings(settings=settings)
-    s = db.get_series_settings()
+    with db.transaction():
+        db.update_series_settings(settings=settings)
+    with db.transaction():
+        s = db.get_series_settings()
     print(s.name, s.nr_of_best_results, s.mode, s.maximum_points, s.decimal_places)
     assert db.get_series_settings() == settings
 
@@ -55,8 +58,10 @@ def test_series_settings_update_2(db):
         maximum_points=600,
         decimal_places=4,
     )
-    db.update_series_settings(settings=settings)
-    assert db.get_series_settings() == settings
+    with db.transaction():
+        db.update_series_settings(settings=settings)
+    with db.transaction():
+        assert db.get_series_settings() == settings
 
 
 def test_series_settings_updates(db):
@@ -67,7 +72,8 @@ def test_series_settings_updates(db):
         maximum_points=500,
         decimal_places=3,
     )
-    db.update_series_settings(settings=settings)
+    with db.transaction():
+        db.update_series_settings(settings=settings)
     settings = Settings(
         name="Series 2",
         nr_of_best_results=None,
@@ -75,5 +81,6 @@ def test_series_settings_updates(db):
         maximum_points=600,
         decimal_places=4,
     )
-    db.update_series_settings(settings=settings)
+    with db.transaction():
+        db.update_series_settings(settings=settings)
     assert db.get_series_settings() == settings

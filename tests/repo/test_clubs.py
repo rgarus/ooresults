@@ -35,80 +35,88 @@ def db():
 
 @pytest.fixture
 def club_1_id(db):
-    return db.add_club(
-        name="Club 1",
-    )
+    with db.transaction():
+        return db.add_club(
+            name="Club 1",
+        )
 
 
 @pytest.fixture
 def club_2_id(db):
-    return db.add_club(
-        name="Club 2",
-    )
+    with db.transaction():
+        return db.add_club(
+            name="Club 2",
+        )
 
 
 @pytest.fixture
 def competitor_id(db, club_1_id):
-    return db.add_competitor(
-        first_name="A",
-        last_name="B",
-        club_id=club_1_id,
-        gender="",
-        year=None,
-        chip="",
-    )
+    with db.transaction():
+        return db.add_competitor(
+            first_name="A",
+            last_name="B",
+            club_id=club_1_id,
+            gender="",
+            year=None,
+            chip="",
+        )
 
 
 @pytest.fixture
 def event_id(db):
-    return db.add_event(
-        name="Event",
-        date=datetime.date(year=2020, month=1, day=1),
-        key=None,
-        publish=False,
-        series=None,
-        fields=[],
-    )
+    with db.transaction():
+        return db.add_event(
+            name="Event",
+            date=datetime.date(year=2020, month=1, day=1),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        )
 
 
 @pytest.fixture
 def class_id(db, event_id):
-    return db.add_class(
-        event_id=event_id,
-        name="Class",
-        short_name=None,
-        course_id=None,
-        params=ClassParams(),
-    )
+    with db.transaction():
+        return db.add_class(
+            event_id=event_id,
+            name="Class",
+            short_name=None,
+            course_id=None,
+            params=ClassParams(),
+        )
 
 
 @pytest.fixture
 def entry_id(db, event_id, class_id, club_1_id):
-    return db.add_entry(
-        event_id=event_id,
-        competitor_id=None,
-        first_name="A",
-        last_name="B",
-        gender="",
-        year=None,
-        class_id=class_id,
-        club_id=club_1_id,
-        not_competing=False,
-        chip="",
-        fields={},
-        status=ResultStatus.INACTIVE,
-        start_time=None,
-    )
+    with db.transaction():
+        return db.add_entry(
+            event_id=event_id,
+            competitor_id=None,
+            first_name="A",
+            last_name="B",
+            gender="",
+            year=None,
+            class_id=class_id,
+            club_id=club_1_id,
+            not_competing=False,
+            chip="",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+        )
 
 
 def test_get_clubs_after_adding_one_club(db, club_1_id):
-    c = db.get_clubs()
+    with db.transaction():
+        c = db.get_clubs()
     assert len(c) == 1
     assert c[0] == ClubType(id=club_1_id, name="Club 1")
 
 
 def test_get_clubs_after_adding_two_clubs(db, club_1_id, club_2_id):
-    c = db.get_clubs()
+    with db.transaction():
+        c = db.get_clubs()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -117,18 +125,22 @@ def test_get_clubs_after_adding_two_clubs(db, club_1_id, club_2_id):
 
 
 def test_get_first_added_club(db, club_1_id, club_2_id):
-    c = db.get_club(id=club_1_id)
+    with db.transaction():
+        c = db.get_club(id=club_1_id)
     assert c == ClubType(id=club_1_id, name="Club 1")
 
 
 def test_get_last_added_club(db, club_1_id, club_2_id):
-    c = db.get_club(id=club_2_id)
+    with db.transaction():
+        c = db.get_club(id=club_2_id)
     assert c == ClubType(id=club_2_id, name="Club 2")
 
 
 def test_update_first_added_club(db, club_1_id, club_2_id):
-    db.update_club(id=club_1_id, name="Club 3")
-    c = db.get_clubs()
+    with db.transaction():
+        db.update_club(id=club_1_id, name="Club 3")
+    with db.transaction():
+        c = db.get_clubs()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -137,8 +149,10 @@ def test_update_first_added_club(db, club_1_id, club_2_id):
 
 
 def test_update_last_added_club(db, club_1_id, club_2_id):
-    db.update_club(id=club_2_id, name="Club 3")
-    c = db.get_clubs()
+    with db.transaction():
+        db.update_club(id=club_2_id, name="Club 3")
+    with db.transaction():
+        c = db.get_clubs()
     assert len(c) == 2
     assert c[0].id != c[1].id
 
@@ -147,46 +161,57 @@ def test_update_last_added_club(db, club_1_id, club_2_id):
 
 
 def test_delete_first_added_club(db, club_1_id, club_2_id):
-    db.delete_club(id=club_1_id)
-    c = db.get_clubs()
+    with db.transaction():
+        db.delete_club(id=club_1_id)
+    with db.transaction():
+        c = db.get_clubs()
     assert len(c) == 1
     assert c[0] == ClubType(id=club_2_id, name="Club 2")
 
 
 def test_delete_last_added_club(db, club_1_id, club_2_id):
-    db.delete_club(id=club_2_id)
-    c = db.get_clubs()
+    with db.transaction():
+        db.delete_club(id=club_2_id)
+    with db.transaction():
+        c = db.get_clubs()
     assert len(c) == 1
     assert c[0] == ClubType(id=club_1_id, name="Club 1")
 
 
 def test_add_existing_name_raises_exception(db, club_1_id):
     with pytest.raises(repo.ConstraintError, match="Club already exist"):
-        db.add_club(name="Club 1")
+        with db.transaction():
+            db.add_club(name="Club 1")
 
 
 def test_change_to_existing_name_raises_exception(db, club_1_id, club_2_id):
     with pytest.raises(repo.ConstraintError, match="Club already exist"):
-        db.update_club(id=club_1_id, name="Club 2")
+        with db.transaction():
+            db.update_club(id=club_1_id, name="Club 2")
 
 
 def test_update_with_unknown_id_raises_exception(db, club_1_id):
     with pytest.raises(KeyError):
-        db.update_club(id=club_1_id + 1, name="Club 2")
+        with db.transaction():
+            db.update_club(id=club_1_id + 1, name="Club 2")
 
 
 def test_delete_club_with_unknown_id_do_not_change_anything(db, club_1_id):
-    db.delete_club(id=club_1_id + 1)
-    c = db.get_clubs()
+    with db.transaction():
+        db.delete_club(id=club_1_id + 1)
+    with db.transaction():
+        c = db.get_clubs()
     assert len(c) == 1
     assert c[0] == ClubType(id=club_1_id, name="Club 1")
 
 
 def test_delete_club_used_in_competitor_raises_exception(db, competitor_id, club_1_id):
     with pytest.raises(repo.ClubUsedError):
-        db.delete_club(id=club_1_id)
+        with db.transaction():
+            db.delete_club(id=club_1_id)
 
 
 def test_delete_club_used_in_entry_raises_exception(db, entry_id, club_1_id):
     with pytest.raises(repo.ClubUsedError):
-        db.delete_club(id=club_1_id)
+        with db.transaction():
+            db.delete_club(id=club_1_id)

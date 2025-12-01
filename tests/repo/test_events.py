@@ -39,30 +39,33 @@ def db():
 
 @pytest.fixture
 def event_1_id(db):
-    return db.add_event(
-        name="XX",
-        date=D_2021_03_02,
-        key="4711",
-        publish=False,
-        series="Run 1",
-        fields=[],
-    )
+    with db.transaction():
+        return db.add_event(
+            name="XX",
+            date=D_2021_03_02,
+            key="4711",
+            publish=False,
+            series="Run 1",
+            fields=[],
+        )
 
 
 @pytest.fixture
 def event_2_id(db):
-    return db.add_event(
-        name="YY",
-        date=D_2021_03_18,
-        key=None,
-        publish=True,
-        series=None,
-        fields=["f1", "f2"],
-    )
+    with db.transaction():
+        return db.add_event(
+            name="YY",
+            date=D_2021_03_18,
+            key=None,
+            publish=True,
+            series=None,
+            fields=["f1", "f2"],
+        )
 
 
 def test_get_events_after_adding_one_event(db, event_1_id):
-    c = db.get_events()
+    with db.transaction():
+        c = db.get_events()
     assert c == [
         EventType(
             id=event_1_id,
@@ -77,7 +80,8 @@ def test_get_events_after_adding_one_event(db, event_1_id):
 
 
 def test_get_events_after_adding_two_events(db, event_1_id, event_2_id):
-    c = db.get_events()
+    with db.transaction():
+        c = db.get_events()
     assert c[0].id != c[1].id
 
     assert c == [
@@ -103,7 +107,8 @@ def test_get_events_after_adding_two_events(db, event_1_id, event_2_id):
 
 
 def test_get_first_added_event(db, event_1_id, event_2_id):
-    c = db.get_event(id=event_1_id)
+    with db.transaction():
+        c = db.get_event(id=event_1_id)
     assert c == EventType(
         id=event_1_id,
         name="XX",
@@ -116,7 +121,8 @@ def test_get_first_added_event(db, event_1_id, event_2_id):
 
 
 def test_get_last_added_event(db, event_1_id, event_2_id):
-    c = db.get_event(id=event_2_id)
+    with db.transaction():
+        c = db.get_event(id=event_2_id)
     assert c == EventType(
         id=event_2_id,
         name="YY",
@@ -129,16 +135,18 @@ def test_get_last_added_event(db, event_1_id, event_2_id):
 
 
 def test_update_first_added_event(db, event_1_id, event_2_id):
-    db.update_event(
-        id=event_1_id,
-        name="ZZ",
-        date=D_2020_02_14,
-        key=None,
-        publish=True,
-        series=None,
-        fields=["x"],
-    )
-    c = db.get_events()
+    with db.transaction():
+        db.update_event(
+            id=event_1_id,
+            name="ZZ",
+            date=D_2020_02_14,
+            key=None,
+            publish=True,
+            series=None,
+            fields=["x"],
+        )
+    with db.transaction():
+        c = db.get_events()
     assert c[0].id != c[1].id
 
     assert c == [
@@ -164,16 +172,18 @@ def test_update_first_added_event(db, event_1_id, event_2_id):
 
 
 def test_update_last_added_event(db, event_1_id, event_2_id):
-    db.update_event(
-        id=event_2_id,
-        name="ZZ",
-        date=D_2020_02_14,
-        key="0000",
-        publish=False,
-        series="Run 1",
-        fields=["x"],
-    )
-    c = db.get_events()
+    with db.transaction():
+        db.update_event(
+            id=event_2_id,
+            name="ZZ",
+            date=D_2020_02_14,
+            key="0000",
+            publish=False,
+            series="Run 1",
+            fields=["x"],
+        )
+    with db.transaction():
+        c = db.get_events()
     assert c[0].id != c[1].id
 
     assert c == [
@@ -199,8 +209,10 @@ def test_update_last_added_event(db, event_1_id, event_2_id):
 
 
 def test_delete_first_added_event(db, event_1_id, event_2_id):
-    db.delete_event(id=event_1_id)
-    c = db.get_events()
+    with db.transaction():
+        db.delete_event(id=event_1_id)
+    with db.transaction():
+        c = db.get_events()
     assert c == [
         EventType(
             id=event_2_id,
@@ -215,8 +227,10 @@ def test_delete_first_added_event(db, event_1_id, event_2_id):
 
 
 def test_delete_last_added_event(db, event_1_id, event_2_id):
-    db.delete_event(id=event_2_id)
-    c = db.get_events()
+    with db.transaction():
+        db.delete_event(id=event_2_id)
+    with db.transaction():
+        c = db.get_events()
     assert c == [
         EventType(
             id=event_1_id,
@@ -232,75 +246,83 @@ def test_delete_last_added_event(db, event_1_id, event_2_id):
 
 def test_add_existing_name_raises_exception(db, event_1_id):
     with pytest.raises(repo.ConstraintError, match="Event or event key already exist"):
-        db.add_event(
-            name="XX",
-            date=D_2020_02_03,
-            key=None,
-            publish=False,
-            series=None,
-            fields=[],
-        )
+        with db.transaction():
+            db.add_event(
+                name="XX",
+                date=D_2020_02_03,
+                key=None,
+                publish=False,
+                series=None,
+                fields=[],
+            )
 
 
 def test_add_existing_key_raises_exception(db, event_1_id):
     with pytest.raises(repo.ConstraintError, match="Event or event key already exist"):
-        db.add_event(
-            name="ZZ",
-            date=D_2020_02_03,
-            key="4711",
-            publish=True,
-            series=None,
-            fields=[],
-        )
+        with db.transaction():
+            db.add_event(
+                name="ZZ",
+                date=D_2020_02_03,
+                key="4711",
+                publish=True,
+                series=None,
+                fields=[],
+            )
 
 
 def test_change_to_existing_name_raises_exception(db, event_1_id, event_2_id):
     with pytest.raises(repo.ConstraintError, match="Event or event key already exist"):
-        db.update_event(
-            id=event_1_id,
-            name="YY",
-            date=D_2020_02_03,
-            key=None,
-            publish=False,
-            series=None,
-            fields=[],
-        )
+        with db.transaction():
+            db.update_event(
+                id=event_1_id,
+                name="YY",
+                date=D_2020_02_03,
+                key=None,
+                publish=False,
+                series=None,
+                fields=[],
+            )
 
 
 def test_change_to_existing_key_raises_exception(db, event_1_id, event_2_id):
     with pytest.raises(repo.ConstraintError, match="Event or event key already exist"):
-        db.update_event(
-            id=event_2_id,
-            name="ZZ",
-            date=D_2020_02_03,
-            key="4711",
-            publish=True,
-            series=None,
-            fields=[],
-        )
+        with db.transaction():
+            db.update_event(
+                id=event_2_id,
+                name="ZZ",
+                date=D_2020_02_03,
+                key="4711",
+                publish=True,
+                series=None,
+                fields=[],
+            )
 
 
 def test_update_with_unknown_id_raises_exception(db, event_1_id):
     with pytest.raises(KeyError):
-        db.update_event(
-            id=event_1_id + 1,
-            name="YY",
-            date=D_2020_02_03,
-            key=None,
-            publish=False,
-            series=None,
-            fields=[],
-        )
+        with db.transaction():
+            db.update_event(
+                id=event_1_id + 1,
+                name="YY",
+                date=D_2020_02_03,
+                key=None,
+                publish=False,
+                series=None,
+                fields=[],
+            )
 
 
 def test_get_event_with_unknown_id_raises_exception(db, event_1_id):
     with pytest.raises(repo.EventNotFoundError):
-        db.get_event(id=event_1_id + 1)
+        with db.transaction():
+            db.get_event(id=event_1_id + 1)
 
 
 def test_delete_event_with_unknown_id_do_not_change_anything(db, event_1_id):
-    db.delete_event(id=event_1_id + 1)
-    c = db.get_events()
+    with db.transaction():
+        db.delete_event(id=event_1_id + 1)
+    with db.transaction():
+        c = db.get_events()
     assert c == [
         EventType(
             id=event_1_id,
