@@ -40,7 +40,7 @@ class WebSocketServer(threading.Thread):
         ssl_key=None,
     ):
         super().__init__()
-        self.daemon = True
+        self.server = None
         self.demo_reader = demo_reader
         self.import_stream = import_stream
         self.handler: Optional[WebSocketHandler] = None
@@ -49,7 +49,7 @@ class WebSocketServer(threading.Thread):
         self.port = port
         self.ssl_cert = ssl_cert
         self.ssl_key = ssl_key
-        self.loop = None
+        self.loop = asyncio.new_event_loop()
 
     def run(self):
         if self.ssl_cert is None:
@@ -58,7 +58,6 @@ class WebSocketServer(threading.Thread):
             ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
 
-        self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop=self.loop)
 
         self.streaming = Streaming(loop=self.loop)
@@ -67,10 +66,13 @@ class WebSocketServer(threading.Thread):
         )
         self.loop.create_task(self.start_server(ssl_context=ssl_context))
         self.loop.create_task(self.handler.send_new_result())
-        self.loop.run_forever()
+        try:
+            self.loop.run_forever()
+        finally:
+            self.loop.close()
 
     async def start_server(self, ssl_context: Optional[ssl.SSLContext] = None) -> None:
-        await serve(
+        self.server = await serve(
             handler=self.handler.handler,
             host=self.host,
             port=self.port,
@@ -86,3 +88,8 @@ class WebSocketServer(threading.Thread):
             await self.handler.update_event(event=event)
         if self.streaming:
             await self.streaming.update_event(event=event)
+
+    def close(self) -> None:
+        if self.loop:
+            self.server.close()
+            self.loop.call_soon_threadsafe(self.loop.stop)

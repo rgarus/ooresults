@@ -71,20 +71,21 @@ class WebSocketServer(threading.Thread):
     ):
         super().__init__()
         self.barrier = barrier
-        self.daemon = True
         self.handler = None
         self.streaming = None
         self.host = host
         self.port = port
         self.server = None
-        self.loop = None
+        self.loop = asyncio.new_event_loop()
 
     def run(self):
-        self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop=self.loop)
-        self.handler = WebSocketHandler()
+        self.handler = WebSocketHandler(import_stream=True)
         self.loop.create_task(self.start_server())
-        self.loop.run_forever()
+        try:
+            self.loop.run_forever()
+        finally:
+            self.loop.close()
 
     async def start_server(self) -> None:
         self.server = await serve(
@@ -94,23 +95,24 @@ class WebSocketServer(threading.Thread):
         )
         self.barrier.wait()
 
-    async def close(self):
-        self.server.close()
-        await self.server.wait_closed()
+    def close(self):
+        if self.loop:
+            self.server.close()
+            future = asyncio.run_coroutine_threadsafe(
+                coro=self.server.wait_closed(), loop=self.loop
+            )
+            future.result()
+            self.loop.call_soon_threadsafe(self.loop.stop)
 
 
 @pytest.fixture
 def websocket_server():
-    barrier = threading.Barrier(parties=2)
+    barrier = threading.Barrier(parties=2, timeout=10)
     model.results.websocket_server = WebSocketServer(barrier=barrier)
     model.results.websocket_server.start()
     barrier.wait()
     yield model.results.websocket_server
-    future = asyncio.run_coroutine_threadsafe(
-        coro=model.results.websocket_server.close(),
-        loop=model.results.websocket_server.loop,
-    )
-    future.result()
+    model.results.websocket_server.close()
 
 
 @pytest.mark.asyncio

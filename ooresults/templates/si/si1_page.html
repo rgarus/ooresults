@@ -93,10 +93,8 @@
                         text = 'Reading card ' + data + ' ...';
                         break;
 
-                }
-                if (autoscrollTimer != null) {
-                    clearTimeout(autoscrollTimer);
                 };
+                clearTimeout(autoscrollTimer);
 
                 if (resultData && (status == 'readerConnected' || status == 'cardRemoved')) {
                     showResult(resultData);
@@ -107,6 +105,7 @@
             };
 
             function showMessage(text, color) {
+                newResultReceived = true;
                 document.getElementById('page').innerHTML =
                     '<p style="text-align: right; margin: 10px"><button onclick="openFullscreen();">' + window.wakeStatus + '</button></p>' +
                     '<p class="s2" style="padding-left: 4%; color: ' + color + '">' + text + '</p>';
@@ -171,7 +170,7 @@
                     const obj = JSON.parse(event.data)
                     if (obj.status == 'result') {
                         if (view == 0) {
-                            var firstResult = !resultData
+                            var firstResult = !resultData;
                             resultData = obj.data;
                             newResultReceived = true;
                             if (firstResult && (status == 'readerConnected' || status == 'cardRemoved')) {
@@ -182,6 +181,7 @@
                         return;
                     }
                     clearTimeout(timer);
+                    clearTimeout(autoscrollTimer);
                     if (obj.status == 'cardRead') {
                         status = 'readerConnected';
                         document.getElementById('page').innerHTML = obj.data;

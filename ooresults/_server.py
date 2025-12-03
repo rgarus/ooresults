@@ -257,22 +257,22 @@ def main() -> Optional[int]:
         private_key=config.ssl_key,
     )
 
+    app.add_processor(my_processor)
     try:
-        app.add_processor(my_processor)
-        try:
-            model.results.websocket_server = WebSocketServer(
-                demo_reader=config.demo_reader,
-                import_stream=config.import_stream,
-                ssl_cert=config.ssl_cert,
-                ssl_key=config.ssl_key,
-            )
-        except Exception:
-            model.results.websocket_server = WebSocketServer(
-                demo_reader=config.demo_reader,
-                import_stream=config.import_stream,
-            )
-        model.results.websocket_server.start()
-        logging.info("Webserver started")
-        app.run()
-    except KeyboardInterrupt:
-        logging.info("Webserver stopped")
+        model.results.websocket_server = WebSocketServer(
+            demo_reader=config.demo_reader,
+            import_stream=config.import_stream,
+            ssl_cert=config.ssl_cert,
+            ssl_key=config.ssl_key,
+        )
+    except Exception:
+        model.results.websocket_server = WebSocketServer(
+            demo_reader=config.demo_reader,
+            import_stream=config.import_stream,
+        )
+    model.results.websocket_server.start()
+    logging.info("WebSocketServer started")
+    app.run()
+
+    model.results.websocket_server.close()
+    logging.info("WebSocketServer stopped")

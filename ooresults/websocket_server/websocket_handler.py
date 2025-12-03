@@ -176,6 +176,10 @@ class WebSocketHandler:
                 data = render.si1_data(message=message)
             else:
                 data = ""
+                # Cardreader status cardRead does not switch back to readerConnected.
+                # Send readerConnected if no data exist.
+                if status == "cardRead":
+                    status = "readerConnected"
             data = json.dumps({"status": status, "data": str(data)})
         try:
             await conn.send(str(data))
