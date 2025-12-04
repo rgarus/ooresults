@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Generator
+from typing import Iterator
 from unittest import mock
 
 import pytest
@@ -26,7 +26,7 @@ from ooresults.model import cached_result
 
 
 @pytest.fixture
-def m() -> Generator[mock.Mock, None, None]:
+def m() -> Iterator[mock.Mock]:
     with mock.patch(target="ooresults.model.results.event_class_results") as obj:
         yield obj
 

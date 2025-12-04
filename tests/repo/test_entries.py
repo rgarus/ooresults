@@ -20,6 +20,7 @@
 import datetime
 from datetime import timedelta
 from datetime import timezone
+from typing import Iterator
 
 import pytest
 
@@ -41,8 +42,10 @@ S3 = datetime.datetime(2021, 8, 17, 10, 12, 14, tzinfo=timezone(timedelta(hours=
 
 
 @pytest.fixture
-def db():
-    return SqliteRepo(db=":memory:")
+def db() -> Iterator[SqliteRepo]:
+    _db = SqliteRepo(db=":memory:")
+    yield _db
+    _db.close()
 
 
 @pytest.fixture

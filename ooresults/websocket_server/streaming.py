@@ -46,6 +46,7 @@ class Streaming:
         self.executor = ThreadPoolExecutor(max_workers=5)
 
         events = model.events.get_events()
+        model.db.close()
         for event in events:
             if event.streaming_enabled:
                 e = copy.deepcopy(event)
@@ -227,8 +228,9 @@ class Streaming:
                                     status=streaming_status.Status.PROTOCOL_ERROR,
                                 )
                         await asyncio.sleep(delay=wait_time)
-                        if websocket.state == State.CLOSED:
-                            break
+
+                    if websocket.state == State.CLOSED:
+                        break
 
         except asyncio.CancelledError:
             raise

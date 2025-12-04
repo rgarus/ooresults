@@ -26,6 +26,7 @@ import tempfile
 import threading
 from datetime import timedelta
 from datetime import timezone
+from typing import Iterator
 
 import jsonschema
 import pytest
@@ -56,10 +57,11 @@ with open(data_path, "r") as file:
 
 
 @pytest.fixture
-def db() -> SqliteRepo:
+def db() -> Iterator[SqliteRepo]:
     with tempfile.NamedTemporaryFile() as db_file:
         model.db = SqliteRepo(db=db_file.name)
         yield model.db
+        model.db.close()
 
 
 @pytest.fixture

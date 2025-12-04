@@ -99,6 +99,9 @@ class Repo:
     def rollback(self):
         raise NotImplementedError
 
+    def close(self):
+        raise NotImplementedError
+
     def get_classes(self, event_id: int):
         raise NotImplementedError
 

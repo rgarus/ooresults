@@ -19,6 +19,7 @@
 
 import copy
 import datetime
+from typing import Iterator
 
 import pytest
 
@@ -36,9 +37,10 @@ from ooresults.repo.sqlite_repo import SqliteRepo
 
 
 @pytest.fixture
-def db():
+def db() -> Iterator[SqliteRepo]:
     model.db = SqliteRepo(db=":memory:")
-    return model.db
+    yield model.db
+    model.db.close()
 
 
 @pytest.fixture

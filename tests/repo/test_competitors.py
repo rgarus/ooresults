@@ -18,6 +18,7 @@
 
 
 import datetime
+from typing import Iterator
 
 import pytest
 
@@ -30,8 +31,10 @@ from ooresults.repo.sqlite_repo import SqliteRepo
 
 
 @pytest.fixture
-def db():
-    return SqliteRepo(db=":memory:")
+def db() -> Iterator[SqliteRepo]:
+    _db = SqliteRepo(db=":memory:")
+    yield _db
+    _db.close()
 
 
 @pytest.fixture

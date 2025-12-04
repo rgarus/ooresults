@@ -86,8 +86,10 @@ def my_processor(handler):
             web.ctx.status = "401 Unauthorized"
             return render.unauthorized()
 
-    result = handler()
-    return result
+    try:
+        return handler()
+    finally:
+        model.db.close()
 
 
 def main() -> Optional[int]:

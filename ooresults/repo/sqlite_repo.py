@@ -196,6 +196,12 @@ class SqliteRepo(Repo):
     def rollback(self):
         self.db.rollback()
 
+    def close(self):
+        if hasattr(self._ctx, "db"):
+            self.db.rollback()
+            self.db.close()
+            del self._ctx.db
+
     def get_classes(self, event_id: int) -> List[ClassInfoType]:
         cur = self.db.execute(
             """

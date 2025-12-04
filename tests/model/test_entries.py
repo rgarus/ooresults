@@ -20,6 +20,7 @@
 import copy
 import datetime
 from datetime import timezone
+from typing import Iterator
 
 import pytest
 
@@ -40,9 +41,10 @@ def t(a: datetime, b: datetime) -> int:
 
 
 @pytest.fixture
-def db() -> SqliteRepo:
+def db() -> Iterator[SqliteRepo]:
     model.db = SqliteRepo(db=":memory:")
-    return model.db
+    yield model.db
+    model.db.close()
 
 
 @pytest.fixture

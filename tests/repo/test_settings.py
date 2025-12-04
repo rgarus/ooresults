@@ -17,6 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import Iterator
+
 import pytest
 
 from ooresults.otypes.series_type import Settings
@@ -24,8 +26,10 @@ from ooresults.repo.sqlite_repo import SqliteRepo
 
 
 @pytest.fixture
-def db():
-    return SqliteRepo(db=":memory:")
+def db() -> Iterator[SqliteRepo]:
+    _db = SqliteRepo(db=":memory:")
+    yield _db
+    _db.close()
 
 
 def test_series_settings_defaults(db):

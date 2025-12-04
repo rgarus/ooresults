@@ -18,6 +18,7 @@
 
 
 import datetime
+from typing import Iterator
 
 import pytest
 
@@ -33,8 +34,10 @@ D_2020_02_03 = datetime.date(year=2020, month=2, day=3)
 
 
 @pytest.fixture
-def db():
-    return SqliteRepo(db=":memory:")
+def db() -> Iterator[SqliteRepo]:
+    _db = SqliteRepo(db=":memory:")
+    yield _db
+    _db.close()
 
 
 @pytest.fixture

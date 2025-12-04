@@ -18,9 +18,9 @@
 
 
 import datetime
-import tempfile
 from datetime import timedelta
 from datetime import timezone
+from typing import Iterator
 
 import pytest
 
@@ -36,10 +36,10 @@ from ooresults.repo.sqlite_repo import SqliteRepo
 
 
 @pytest.fixture
-def db() -> SqliteRepo:
-    with tempfile.NamedTemporaryFile() as db_file:
-        model.db = SqliteRepo(db=db_file.name)
-        yield model.db
+def db() -> Iterator[SqliteRepo]:
+    model.db = SqliteRepo(db=":memory:")
+    yield model.db
+    model.db.close()
 
 
 @pytest.fixture

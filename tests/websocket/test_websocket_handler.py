@@ -23,6 +23,7 @@ import datetime
 import json
 import tempfile
 import threading
+from typing import Iterator
 from typing import List
 
 import pytest
@@ -43,10 +44,11 @@ from ooresults.websocket_server.websocket_handler import WebSocketHandler
 
 
 @pytest.fixture
-def db() -> SqliteRepo:
+def db() -> Iterator[SqliteRepo]:
     with tempfile.NamedTemporaryFile() as db_file:
         model.db = SqliteRepo(db=db_file.name)
         yield model.db
+        model.db.close()
 
 
 @pytest.fixture
