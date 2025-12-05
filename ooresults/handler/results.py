@@ -17,9 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import logging
-
-import web
+import bottle
 
 import ooresults.pdf.result
 import ooresults.pdf.splittimes
@@ -29,64 +27,64 @@ from ooresults.utils import globals
 from ooresults.utils import render
 
 
-class Update:
-    def POST(self):
-        """Update data"""
-        data = web.input()
-        event_id = int(data.event_id) if data.event_id != "" else -1
+"""
+Handler for the result routes.
 
-        try:
-            event, class_results = model.results.event_class_results(event_id=event_id)
-            return render.results_table(event=event, class_results=class_results)
-        except EventNotFoundError:
-            raise web.conflict("Event deleted")
-        except:
-            logging.exception("Internal server error")
-            raise
+/result/update
+/result/pdfResult
+/result/pdfSplittimes
+"""
 
 
-class PdfResult:
-    def POST(self) -> bytes:
-        """Print results"""
-        data = web.input()
-        event_id = int(data.event_id) if data.event_id != "" else -1
-        include_dns = "res_include_dns" in data
+@bottle.post("/result/update")
+def post_update():
+    """Update data"""
+    data = bottle.request.forms
+    event_id = int(data.event_id) if data.event_id != "" else -1
 
-        try:
-            event, class_results = model.results.event_class_results(event_id=event_id)
-            content = ooresults.pdf.result.create_pdf(
-                event=event,
-                results=class_results,
-                include_dns=include_dns,
-                landscape=len(globals.build_columns(class_results)) > 0,
-            )
-            return content
-
-        except EventNotFoundError:
-            raise web.conflict("Event deleted")
-        except:
-            logging.exception("Internal server error")
-            raise
+    try:
+        event, class_results = model.results.event_class_results(event_id=event_id)
+        return render.results_table(event=event, class_results=class_results)
+    except EventNotFoundError:
+        return bottle.HTTPResponse(status=409, body="Event deleted")
 
 
-class PdfSplittimes:
-    def POST(self) -> bytes:
-        """Print results"""
-        data = web.input()
-        event_id = int(data.event_id) if data.event_id != "" else -1
-        landscape = "res_landscape" in data
+@bottle.post("/result/pdfResult")
+def post_pdf_result() -> bytes:
+    """Print results"""
+    data = bottle.request.forms
+    event_id = int(data.event_id) if data.event_id != "" else -1
+    include_dns = "res_include_dns" in data
 
-        try:
-            event, class_results = model.results.event_class_results(event_id=event_id)
-            content = ooresults.pdf.splittimes.create_pdf(
-                event=event,
-                results=class_results,
-                landscape=landscape,
-            )
-            return content
+    try:
+        event, class_results = model.results.event_class_results(event_id=event_id)
+        content = ooresults.pdf.result.create_pdf(
+            event=event,
+            results=class_results,
+            include_dns=include_dns,
+            landscape=len(globals.build_columns(class_results)) > 0,
+        )
+        return content
 
-        except EventNotFoundError:
-            raise web.conflict("Event deleted")
-        except:
-            logging.exception("Internal server error")
-            raise
+    except EventNotFoundError:
+        return bottle.HTTPResponse(status=409, body="Event deleted")
+
+
+@bottle.post("/result/pdfSplittimes")
+def post_pdf_splittimes() -> bytes:
+    """Print results"""
+    data = bottle.request.forms
+    event_id = int(data.event_id) if data.event_id != "" else -1
+    landscape = "res_landscape" in data
+
+    try:
+        event, class_results = model.results.event_class_results(event_id=event_id)
+        content = ooresults.pdf.splittimes.create_pdf(
+            event=event,
+            results=class_results,
+            landscape=landscape,
+        )
+        return content
+
+    except EventNotFoundError:
+        return bottle.HTTPResponse(status=409, body="Event deleted")

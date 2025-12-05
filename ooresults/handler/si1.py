@@ -17,29 +17,36 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import web
+import bottle
 
 from ooresults import model
 from ooresults.utils import render
 
 
-class Si1:
-    def GET(self):
-        event_id = None
-        key = None
-        view = 0
+"""
+Handler for the si1 routes.
 
-        data = web.input()
-        if "view" in data and data.view in ["0", "1"]:
-            view = int(data.view)
+/si1
+"""
 
-        try:
-            for event in model.events.get_events():
-                if event.key:
-                    event_id = event.id
-                    key = event.key
-                    break
-        except Exception:
-            pass
 
-        return render.si1_page(event_id=event_id, key=key, view=view)
+@bottle.get("/si1")
+def get_si1():
+    event_id = None
+    key = None
+    view = 0
+
+    data = bottle.request.params
+    if "view" in data and data.view in ["0", "1"]:
+        view = int(data.view)
+
+    try:
+        for event in model.events.get_events():
+            if event.key:
+                event_id = event.id
+                key = event.key
+                break
+    except Exception:
+        pass
+
+    return render.si1_page(event_id=event_id, key=key, view=view)

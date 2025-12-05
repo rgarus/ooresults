@@ -5,6 +5,16 @@ Changelog
 [Unreleased]
 ------------
 
+Added
+^^^^^
+
+- Python 3.12 and Python 3.13 are now supported.
+
+Changed
+^^^^^^^
+
+- WSGI framework web.py has been replaced by bottle to support current Python versions.
+
 Fixed
 ^^^^^
 

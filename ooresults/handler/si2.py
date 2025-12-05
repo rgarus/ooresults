@@ -17,24 +17,31 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import web
+import bottle
 
 from ooresults import model
 from ooresults.utils import render
 
 
-class Si2:
-    def GET(self):
-        event_id = None
-        key = None
-        data = web.input()
+"""
+Handler for the si2 routes.
 
-        try:
-            for event in model.events.get_events():
-                if str(event.id) == data.id:
-                    event_id = event.id
-                    key = event.key
-        except Exception:
-            pass
+/si2
+"""
 
-        return render.si2_page(event_id=event_id, key=key)
+
+@bottle.get("/si2")
+def get_si2():
+    event_id = None
+    key = None
+    data = bottle.request.params
+
+    try:
+        for event in model.events.get_events():
+            if str(event.id) == data.id:
+                event_id = event.id
+                key = event.key
+    except Exception:
+        pass
+
+    return render.si2_page(event_id=event_id, key=key)

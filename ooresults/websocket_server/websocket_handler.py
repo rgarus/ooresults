@@ -188,8 +188,7 @@ class WebSocketHandler:
 
     async def handler(self, websocket: ServerConnection) -> None:
         addr = f"addr: {websocket.remote_address}, path: {websocket.request.path}"
-        print(f"WEBSOCKET CONNECTED, {addr}")
-        print("websocket.request.headers:", websocket.request.headers)
+        logging.info(f"WebSocket connected, {addr}")
 
         if websocket.request.path == "/import":
             event_key = websocket.request.headers.get("X-Event-Key", "")
@@ -225,7 +224,7 @@ class WebSocketHandler:
                 await websocket.send(json.dumps({"result": "error"}))
             finally:
                 await websocket.close()
-                print(f"WEBSOCKET CLOSED, {addr}")
+                logging.info(f"WebSocket closed, {addr}")
 
         elif websocket.request.path == "/demo":
             event = None
@@ -345,7 +344,7 @@ class WebSocketHandler:
                 logging.exception(e)
                 await websocket.close()
             finally:
-                print(f"WEBSOCKET CLOSED, {addr}")
+                logging.info(f"WebSocket closed, {addr}")
                 if event:
                     if event.id in self.cardreader_status:
                         del self.cardreader_status[event.id]
@@ -355,7 +354,7 @@ class WebSocketHandler:
             event = None
             event_key = websocket.request.headers.get("X-Event-Key", "")
             try:
-                print(">>>>>>>>>>> cardreader", event_key)
+                print(f">>>>>> cardreader, key: {event_key}, {addr}")
                 async for message in websocket:
                     try:
                         data = bz2.decompress(message)
@@ -416,7 +415,7 @@ class WebSocketHandler:
                 await websocket.send(str(e))
                 await websocket.close()
             finally:
-                print(f"WEBSOCKET CLOSED, {addr}")
+                logging.info(f"WebSocket closed, {addr}")
                 if event:
                     if event.id in self.cardreader_status:
                         del self.cardreader_status[event.id]
@@ -427,6 +426,7 @@ class WebSocketHandler:
                 if websocket.request.path in ("/si1", "/si2"):
                     data = await websocket.recv()
                     event_id, event_key, results = data.split(",")
+                    print(f">>>>>> websocket, id: {event_id}, key: {event_key}, {addr}")
 
                     # check event key
                     events = await asyncio.get_event_loop().run_in_executor(
@@ -458,4 +458,4 @@ class WebSocketHandler:
                 if websocket in self.connections:
                     del self.connections[websocket]
                 await websocket.close()
-                print(f"WEBSOCKET CLOSED, {addr}")
+                logging.info(f"WebSocket closed, {addr}")

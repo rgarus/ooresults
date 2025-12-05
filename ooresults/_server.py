@@ -24,12 +24,23 @@ import pathlib
 import re
 import sqlite3
 import sys
+import warnings
 from typing import Optional
 
-import web
-from cheroot.server import HTTPServer
-from cheroot.ssl.builtin import BuiltinSSLAdapter
+import bottle
 
+import ooresults.handler.classes
+import ooresults.handler.clubs
+import ooresults.handler.competitors
+import ooresults.handler.courses
+import ooresults.handler.demo_reader
+import ooresults.handler.entries
+import ooresults.handler.events
+import ooresults.handler.results
+import ooresults.handler.root
+import ooresults.handler.series
+import ooresults.handler.si1
+import ooresults.handler.si2
 from ooresults import configuration
 from ooresults import model
 from ooresults.repo.sqlite_repo import SqliteRepo
@@ -39,57 +50,68 @@ from ooresults.utils import rental_cards
 from ooresults.websocket_server.websocket_server import WebSocketServer
 
 
-web.config.debug = False
+bottle.debug(False)
 
 
-class Login:
-    def GET(self):
-        try:
-            Users.update()
-        except Exception as e:
-            return str(e)
-        raise web.seeother("/")
-
-
-class Admin:
-    def GET(self):
-        return render.main(events=model.events.get_events())
-
-
-class Static:
-    def GET(self, filename):
-        """searches for and returns a requested static file or 404s out"""
-        try:
-            file = pathlib.Path(__file__).parent / "static" / filename
-            with open(file, "r") as f:
-                return f.read()
-        except FileNotFoundError:
-            raise web.notfound()  # file not found
-
-
-def my_processor(handler):
-    if web.ctx.env.get("PATH_INFO") not in (
-        "/",
-        "/favicon.ico",
-    ) and not web.ctx.env.get("PATH_INFO").startswith("/mystatic/"):
-        auth = web.ctx.env.get("HTTP_AUTHORIZATION")
-        if auth is not None:
-            auth = re.sub("^Basic ", "", auth)
-            auth = base64.b64decode(auth.encode("ascii")).decode("utf8")
-            username, password = auth.split(":")
-            if not Users.check(username=username, password=password):
-                web.header("WWW-Authenticate", 'Basic realm="Authentication required"')
-                web.ctx.status = "401 Unauthorized"
-                return render.unauthorized()
-        else:
-            web.header("WWW-Authenticate", 'Basic realm="Authentication required"')
-            web.ctx.status = "401 Unauthorized"
-            return render.unauthorized()
-
+@bottle.route("/login", method="GET")
+def login():
     try:
-        return handler()
-    finally:
-        model.db.close()
+        Users.update()
+    except Exception as e:
+        return str(e)
+    raise bottle.redirect("/")
+
+
+@bottle.route("/admin", method="GET")
+def admin():
+    return render.main(events=model.events.get_events())
+
+
+@bottle.route("/mystatic/<filepath:path>")
+def server_static(filepath):
+    return bottle.static_file(filepath, root=pathlib.Path(__file__).parent / "static")
+
+
+def unauthorized() -> bottle.HTTPResponse:
+    return bottle.HTTPResponse(
+        status=401,
+        headers={"WWW-Authenticate": 'Basic realm="Authentication required"'},
+        body=render.unauthorized(),
+    )
+
+
+@bottle.hook("after_request")
+def after_request():
+    logging.info(
+        f"{bottle.request.method}  {bottle.request.remote_addr}  {bottle.request.path}  {bottle.response.status_line}"
+    )
+
+
+def my_plugin(callback):
+    def wrapper(*args, **kwargs):
+        path = bottle.request.environ["PATH_INFO"]
+        if path not in ("/", "/favicon.ico") and not path.startswith("/mystatic/"):
+            auth = bottle.request.environ.get("HTTP_AUTHORIZATION", None)
+            if auth is not None:
+                auth = re.sub("^Basic ", "", auth)
+                auth = base64.b64decode(auth.encode("ascii")).decode("utf8")
+                username, password = auth.split(":")
+                if not Users.check(username=username, password=password):
+                    return unauthorized()
+            else:
+                return unauthorized()
+        try:
+            return callback(*args, **kwargs)
+        except bottle.MultipartError as e:
+            logging.error(f"Exception: {type(e)}, {e}")
+            return bottle.HTTPResponse(status=413, body="Content too large")
+        except Exception:
+            logging.exception("Internal server error")
+            return bottle.HTTPResponse(status=500, body="Internal server error")
+        finally:
+            model.db.close()
+
+    return wrapper
 
 
 def main() -> Optional[int]:
@@ -99,118 +121,12 @@ def main() -> Optional[int]:
         level=logging.INFO,
     )
     logging.info("-------- ooresults.server --------")
-
-    ### Url mappings
-    urls = (
-        "/",
-        "ooresults.handler.root.Root",
-        "/admin",
-        "Admin",
-        "/login",
-        "Login",
-        "/mystatic/(.*)",
-        "Static",
-        "/event/update",
-        "ooresults.handler.events.Update",
-        "/event/add",
-        "ooresults.handler.events.Add",
-        "/event/fill_edit_form",
-        "ooresults.handler.events.FillEditForm",
-        "/event/delete",
-        "ooresults.handler.events.Delete",
-        "/entry/update",
-        "ooresults.handler.entries.Update",
-        "/entry/import",
-        "ooresults.handler.entries.Import",
-        "/entry/export",
-        "ooresults.handler.entries.Export",
-        "/entry/add",
-        "ooresults.handler.entries.Add",
-        "/entry/fill_edit_form",
-        "ooresults.handler.entries.FillEditForm",
-        "/entry/fill_competitors_form",
-        "ooresults.handler.entries.FillCompetitorsForm",
-        "/entry/fill_result_form",
-        "ooresults.handler.entries.FillResultForm",
-        "/entry/delete",
-        "ooresults.handler.entries.Delete",
-        "/entry/splitTimes",
-        "ooresults.handler.entries.SplitTimes",
-        "/entry/editPunch",
-        "ooresults.handler.entries.EditPunch",
-        "/result/update",
-        "ooresults.handler.results.Update",
-        "/result/pdfResult",
-        "ooresults.handler.results.PdfResult",
-        "/result/pdfSplittimes",
-        "ooresults.handler.results.PdfSplittimes",
-        "/result/pdfTeamResult",
-        "ooresults.handler.results.PdfTeamResult",
-        "/class/update",
-        "ooresults.handler.classes.Update",
-        "/class/import",
-        "ooresults.handler.classes.Import",
-        "/class/export",
-        "ooresults.handler.classes.Export",
-        "/class/add",
-        "ooresults.handler.classes.Add",
-        "/class/fill_edit_form",
-        "ooresults.handler.classes.FillEditForm",
-        "/class/delete",
-        "ooresults.handler.classes.Delete",
-        "/course/update",
-        "ooresults.handler.courses.Update",
-        "/course/import",
-        "ooresults.handler.courses.Import",
-        "/course/export",
-        "ooresults.handler.courses.Export",
-        "/course/add",
-        "ooresults.handler.courses.Add",
-        "/course/fill_edit_form",
-        "ooresults.handler.courses.FillEditForm",
-        "/course/delete",
-        "ooresults.handler.courses.Delete",
-        "/competitor/update",
-        "ooresults.handler.competitors.Update",
-        "/competitor/import",
-        "ooresults.handler.competitors.Import",
-        "/competitor/export",
-        "ooresults.handler.competitors.Export",
-        "/competitor/add",
-        "ooresults.handler.competitors.Add",
-        "/competitor/fill_edit_form",
-        "ooresults.handler.competitors.FillEditForm",
-        "/competitor/delete",
-        "ooresults.handler.competitors.Delete",
-        "/club/update",
-        "ooresults.handler.clubs.Update",
-        "/club/add",
-        "ooresults.handler.clubs.Add",
-        "/club/fill_edit_form",
-        "ooresults.handler.clubs.FillEditForm",
-        "/club/delete",
-        "ooresults.handler.clubs.Delete",
-        "/series/update",
-        "ooresults.handler.series.Update",
-        "/series/fill_settings_form",
-        "ooresults.handler.series.FillSettingsForm",
-        "/series/settings",
-        "ooresults.handler.series.Settings",
-        "/series/pdfResult",
-        "ooresults.handler.series.PdfResult",
-        "/series/csvResult",
-        "ooresults.handler.series.CsvResult",
-        "/si1",
-        "ooresults.handler.si1.Si1",
-        "/si2",
-        "ooresults.handler.si2.Si2",
-    )
+    logging.info(f"{sys.version}, {sys.platform}")
+    logging.info(f"{sys.executable}")
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--path", type=pathlib.Path, dest="main_path")
     parser.add_argument("-d", "--database", type=pathlib.Path, dest="database")
-    # web.application().run() use sys.argv to determine
-    # the port number of the http server
     # we remove parsed arguments from sys.argv
     args, left = parser.parse_known_args()
     sys.argv = sys.argv[:1] + left
@@ -249,17 +165,10 @@ def main() -> Optional[int]:
         return 2
 
     if config.demo_reader:
-        urls += ("/demo", "ooresults.handler.demo_reader.Update")
+        bottle.route("/demo")(ooresults.handler.demo_reader.get_update)
 
     Users.update(path=main_path / "users.json")
 
-    app = web.application(urls, globals())
-    HTTPServer.ssl_adapter = BuiltinSSLAdapter(
-        certificate=config.ssl_cert,
-        private_key=config.ssl_key,
-    )
-
-    app.add_processor(my_processor)
     try:
         model.results.websocket_server = WebSocketServer(
             demo_reader=config.demo_reader,
@@ -274,7 +183,19 @@ def main() -> Optional[int]:
         )
     model.results.websocket_server.start()
     logging.info("WebSocketServer started")
-    app.run()
 
+    bottle.install(my_plugin)
+    bottle.run(
+        server="cheroot",
+        host="0.0.0.0",
+        port=8080,
+        debug=True,
+        certfile=config.ssl_cert,
+        keyfile=config.ssl_key,
+    )
     model.results.websocket_server.close()
-    logging.info("WebSocketServer stopped")
+    logging.info("WebSockerServer stopped")
+
+    # Suppress ResourceWarning message:
+    # ResourceWarning: unclosed database in <sqlite3.Connection object at ...>
+    warnings.filterwarnings("ignore", category=ResourceWarning)

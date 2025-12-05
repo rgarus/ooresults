@@ -16,6 +16,8 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: OS Independent",
     "Intended Audience :: End Users/Desktop",
@@ -23,7 +25,9 @@ classifiers = [
 ]
 keywords = ["orienteering", "sportident"]
 dependencies = [
+    "bottle == 0.13.4",
     "case-converter",
+    "cheroot >= 11.1.2",
     "clevercsv",
     "fastclasses-json",
     "fpdf2 == 2.6.1",
@@ -37,7 +41,6 @@ dependencies = [
     "sireader",
     "tzlocal",
     "unidecode",
-    "web.py",
     "websocket-client",
     "websockets >= 14.2",
 ]

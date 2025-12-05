@@ -20,7 +20,13 @@
 from ooresults.utils import render
 
 
-class Update:
-    def GET(self):
-        """Update data"""
-        return render.demo_reader()
+"""
+Handler for the demo_reader routes.
+
+/demo_reader
+"""
+
+
+def get_update():
+    """Update data"""
+    return render.demo_reader()

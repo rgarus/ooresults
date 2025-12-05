@@ -17,9 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import logging
-
-import web
+import bottle
 
 from ooresults import model
 from ooresults.repo.repo import ClubUsedError
@@ -27,61 +25,64 @@ from ooresults.repo.repo import ConstraintError
 from ooresults.utils import render
 
 
-class Update:
-    def POST(self):
-        """Update data"""
+"""
+Handler for the club routes.
+
+/club/update
+/club/add
+/club/fill_edit_form
+/club/delete
+"""
+
+
+@bottle.post("/club/update")
+def post_update():
+    """Update data"""
+    return render.clubs_table(clubs=model.clubs.get_clubs())
+
+
+@bottle.post("/club/add")
+def post_add():
+    """Add or edit entry"""
+    data = bottle.request.forms
+    print(data)
+    try:
+        if data.id == "":
+            model.clubs.add_club(data.name)
+        else:
+            model.clubs.update_club(int(data.id), data.name)
+    except ConstraintError as e:
+        return bottle.HTTPResponse(status=409, body=str(e))
+    except KeyError:
+        return bottle.HTTPResponse(status=409, body="Club deleted")
+
+    return render.clubs_table(clubs=model.clubs.get_clubs())
+
+
+@bottle.post("/club/delete")
+def post_delete():
+    """Delete entry"""
+    data = bottle.request.forms
+    print(data)
+    try:
+        model.clubs.delete_club(int(data.id))
         return render.clubs_table(clubs=model.clubs.get_clubs())
+    except ClubUsedError:
+        return bottle.HTTPResponse(
+            status=409, body="Club used in competitors or entries"
+        )
 
 
-class Add:
-    def POST(self):
-        """Add or edit entry"""
-        data = web.input()
-        print(data)
-        try:
-            if data.id == "":
-                model.clubs.add_club(data.name)
-            else:
-                model.clubs.update_club(int(data.id), data.name)
-        except ConstraintError as e:
-            raise web.conflict(str(e))
-        except KeyError:
-            raise web.conflict("Club deleted")
-        except:
-            logging.exception("Internal server error")
-            raise
+@bottle.post("/club/fill_edit_form")
+def post_fill_edit_form():
+    """Query data to fill add or edit form"""
+    data = bottle.request.forms
+    try:
+        if data.id == "":
+            club = None
+        else:
+            club = model.clubs.get_club(int(data.id))
+    except KeyError:
+        return bottle.HTTPResponse(status=409, body="Club deleted")
 
-        return render.clubs_table(clubs=model.clubs.get_clubs())
-
-
-class Delete:
-    def POST(self):
-        """Delete entry"""
-        data = web.input()
-        print(data)
-        try:
-            model.clubs.delete_club(int(data.id))
-            return render.clubs_table(clubs=model.clubs.get_clubs())
-        except ClubUsedError:
-            raise web.conflict("Club used in competitors or entries")
-        except:
-            logging.exception("Internal server error")
-            raise
-
-
-class FillEditForm:
-    def POST(self):
-        """Query data to fill add or edit form"""
-        data = web.input()
-        try:
-            if data.id == "":
-                club = None
-            else:
-                club = model.clubs.get_club(int(data.id))
-        except KeyError:
-            raise web.conflict("Club deleted")
-        except:
-            logging.exception("Internal server error")
-            raise
-
-        return render.add_club(club=club)
+    return render.add_club(club=club)

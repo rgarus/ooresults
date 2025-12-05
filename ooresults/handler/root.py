@@ -25,11 +25,18 @@ import typing
 from collections import OrderedDict
 from typing import Optional
 
-import web
+import bottle
 
 from ooresults import model
 from ooresults.model import cached_result
 from ooresults.utils import render
+
+
+"""
+Handler for the root routes.
+
+/
+"""
 
 
 @dataclasses.dataclass
@@ -53,52 +60,54 @@ def callback(event_id: Optional[int]) -> None:
             cache[event_id].valid = False
 
 
-class Root:
-    def GET(self):
-        t1 = time.time()
+@bottle.get("/")
+def get_root():
+    t1 = time.time()
 
-        events = model.events.get_events()
-        for event in events:
-            if event.publish:
+    events = model.events.get_events()
+    for event in events:
+        if event.publish:
 
-                with lock:
-                    cached_data = cache.get(event.id, None)
+            with lock:
+                cached_data = cache.get(event.id, None)
 
-                    if cached_data is None:
-                        cached_data = Data()
-                        cache[event.id] = cached_data
-                    elif not cached_data.valid:
-                        cached_data.valid = True
-                        cached_data.content = None
-                    elif cached_data.content is not None:
-                        content = cached_data.content
-                        cache.move_to_end(key=event.id)
-                        break
+                if cached_data is None:
+                    cached_data = Data()
+                    cache[event.id] = cached_data
+                elif not cached_data.valid:
+                    cached_data.valid = True
+                    cached_data.content = None
+                elif cached_data.content is not None:
+                    content = cached_data.content
+                    cache.move_to_end(key=event.id)
+                    break
 
-                event, class_results = cached_result.get_cached_data(event_id=event.id)
-                results_table = render.results_table(
-                    event=event, class_results=class_results
-                )
-                content = render.root(results_table=results_table)
+            event, class_results = cached_result.get_cached_data(event_id=event.id)
+            results_table = render.results_table(
+                event=event, class_results=class_results
+            )
+            content = render.root(results_table=results_table)
 
-                with lock:
-                    cached_data = cache.get(event.id, None)
-                    if not (
-                        cached_data
-                        and cached_data.content is not None
-                        and cached_data.valid
-                    ):
-                        cached_data.content = content
-                        cache.move_to_end(key=event.id)
-                    if len(cache) > MAX_SIZE:
-                        cache.popitem(last=False)
-                break
-        else:
-            content = render.root(results_table=None)
+            with lock:
+                cached_data = cache.get(event.id, None)
+                if not (
+                    cached_data
+                    and cached_data.content is not None
+                    and cached_data.valid
+                ):
+                    cached_data.content = content
+                    cache.move_to_end(key=event.id)
+                if len(cache) > MAX_SIZE:
+                    cache.popitem(last=False)
+            break
+    else:
+        content = render.root(results_table=None)
 
-        t2 = time.time()
-        logging.info(f"Rendering result, {web.ctx['ip']}, {t2 - t1:.4f}")
-        return content
+    t2 = time.time()
+    logging.info(
+        f"Rendering result, {bottle.request.environ['REMOTE_ADDR']}, {t2 - t1:.4f}"
+    )
+    return content
 
 
 cached_result.register(callback=callback)
