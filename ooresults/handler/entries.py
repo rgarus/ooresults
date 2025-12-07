@@ -20,6 +20,7 @@
 import datetime
 import io
 import json
+from collections import defaultdict
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -74,30 +75,21 @@ def update(event_id: int, view: str = "entries"):
             else:
                 view_entries_list = []
         elif view == "classes":
-            view_entries: Dict[str, List[EntryType]] = {}
+            view_entries: defaultdict[str, List[EntryType]] = defaultdict(list)
             for e in entry_list[unassigned_results:]:
-                if e.class_name in view_entries:
-                    view_entries[e.class_name].append(e)
-                else:
-                    view_entries[e.class_name] = [e]
+                view_entries[e.class_name].append(e)
             view_entries_list = list(view_entries.items())
             view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
         elif view == "clubs":
-            view_entries: Dict[str, List[EntryType]] = {}
+            view_entries: defaultdict[str, List[EntryType]] = defaultdict(list)
             for e in entry_list[unassigned_results:]:
-                if e.club_name in view_entries:
-                    view_entries[e.club_name].append(e)
-                else:
-                    view_entries[e.club_name] = [e]
+                view_entries[e.club_name].append(e)
             view_entries_list = list(view_entries.items())
             view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
         elif view == "states":
-            view_entries: Dict[ResultStatus, List[EntryType]] = {}
+            view_entries: defaultdict[ResultStatus, List[EntryType]] = defaultdict(list)
             for e in entry_list[unassigned_results:]:
-                if e.result.status in view_entries:
-                    view_entries[e.result.status].append(e)
-                else:
-                    view_entries[e.result.status] = [e]
+                view_entries[e.result.status].append(e)
             view_entries_list = list(view_entries.items())
             f_order = {
                 ResultStatus.INACTIVE: 0,

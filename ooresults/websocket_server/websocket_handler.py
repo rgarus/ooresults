@@ -26,6 +26,7 @@ import functools
 import json
 import logging
 import time
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
 from typing import List
@@ -84,11 +85,9 @@ class WebSocketHandler:
                 pass
 
             try:
-                d: Dict[int, List[ServerConnection]] = {}
+                d: defaultdict[int, List[ServerConnection]] = defaultdict(list)
                 for conn, v in self.connections.items():
                     if conn.request.path == "/si1" and v.key_valid and v.show_result:
-                        if v.event_id not in d:
-                            d[v.event_id] = []
                         d[v.event_id].append(conn)
 
                 for event_id, connections in d.items():
