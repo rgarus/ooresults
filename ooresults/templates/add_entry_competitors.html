@@ -2,9 +2,9 @@
 
 
 <!-- Modal content -->
-<div class="modal-content" style="margin: 5% auto">
+<div class="modal-content" style="margin: 3% 3%">
     <span class="close" onclick="document.getElementById('entr.competitorsDialog').style.display='none'">&times;</span>
-    <input oninput="w3.filterHTML('#competitors_tbody', 'tr', this.value)" placeholder="Search ..."/>
+    <input id="entr.comp.filter" oninput="w3.filterHTML('#competitors_tbody', 'tr', this.value)" placeholder="Search ..."/>
     <p/>
     <div style="display: block; height: 50%; overflow: auto">
         <table class="dt" id="entry.comp.table" onclick="entr_comp_highlight(event)" ondblclick="entr_comp_highlight(event)" onmousedown="table_mousedown(event)" >

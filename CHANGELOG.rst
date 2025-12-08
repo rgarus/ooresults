@@ -14,6 +14,7 @@ Changed
 ^^^^^^^
 
 - WSGI framework web.py has been replaced by bottle to support current Python versions.
+- The dialog for selecting competitors in the “Add Entry” dialog is opened with the focus on the search filter.
 
 Fixed
 ^^^^^

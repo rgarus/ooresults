@@ -263,7 +263,8 @@
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 document.getElementById('entr.competitorsDialog').innerHTML = this.responseText;
-                document.getElementById('entr.competitorsDialog').style.display='block'
+                document.getElementById('entr.competitorsDialog').style.display='block';
+                document.getElementById('entr.comp.filter').focus()
             }
             if (this.readyState == 4 && this.status == 409) {
                 window.alert(this.responseText);
