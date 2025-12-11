@@ -21,9 +21,10 @@ import logging
 import sqlite3
 
 from ooresults.repo.update import update_013
+from ooresults.repo.update import update_014
 
 
-VERSION = 13
+VERSION = 14
 
 
 def update_tables(db: sqlite3.Connection) -> None:
@@ -53,6 +54,10 @@ def update_tables(db: sqlite3.Connection) -> None:
             if version <= 12:
                 logging.info("Update DB to version 13 ...")
                 update_013.update(db=db)
+
+            if version <= 13:
+                logging.info("Update DB to version 14 ...")
+                update_014.update(db=db)
 
             logging.info(f"DB updated to version {VERSION}")
         else:

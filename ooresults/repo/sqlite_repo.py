@@ -76,30 +76,6 @@ class SqliteRepo(Repo):
                     )
                     cur.execute(
                         """
-                        CREATE TABLE classes (
-                            id INTEGER PRIMARY KEY,
-                            event_id INTEGER NOT NULL,
-                            name TEXT NOT NULL,
-                            short_name TEXT,
-                            course_id INTEGER,
-                            params BLOB NOT NULL,
-                            UNIQUE (event_id, name)
-                        )""",
-                    )
-                    cur.execute(
-                        """
-                        CREATE TABLE courses (
-                            id INTEGER PRIMARY KEY,
-                            event_id INTEGER NOT NULL,
-                            name TEXT NOT NULL,
-                            length FLOAT,
-                            climb FLOAT,
-                            controls BLOB NOT NULL,
-                            UNIQUE (event_id, name)
-                        )""",
-                    )
-                    cur.execute(
-                        """
                         CREATE TABLE clubs (
                             id INTEGER PRIMARY KEY,
                             name TEXT UNIQUE
@@ -111,7 +87,7 @@ class SqliteRepo(Repo):
                             id INTEGER PRIMARY KEY,
                             first_name TEXT NOT NULL,
                             last_name TEXT NOT NULL,
-                            club_id INTEGER,
+                            club_id INTEGER REFERENCES clubs(id),
                             gender TEXT,
                             year INTEGER,
                             chip TEXT,
@@ -135,18 +111,48 @@ class SqliteRepo(Repo):
                     )
                     cur.execute(
                         """
+                        CREATE TABLE courses (
+                            id INTEGER PRIMARY KEY,
+                            event_id INTEGER NOT NULL REFERENCES events(id),
+                            name TEXT NOT NULL,
+                            length FLOAT,
+                            climb FLOAT,
+                            controls BLOB NOT NULL,
+                            UNIQUE (event_id, name)
+                        )""",
+                    )
+                    cur.execute(
+                        """
+                        CREATE TABLE classes (
+                            id INTEGER PRIMARY KEY,
+                            event_id INTEGER NOT NULL REFERENCES events(id),
+                            name TEXT NOT NULL,
+                            short_name TEXT,
+                            course_id INTEGER REFERENCES courses(id),
+                            params BLOB NOT NULL,
+                            UNIQUE (event_id, name)
+                        )""",
+                    )
+                    cur.execute(
+                        """
                         CREATE TABLE entries (
                             id INTEGER PRIMARY KEY,
-                            event_id INTEGER NOT NULL,
-                            competitor_id INTEGER,
-                            class_id INTEGER,
-                            club_id INTEGER,
+                            event_id INTEGER NOT NULL REFERENCES events(id),
+                            competitor_id INTEGER REFERENCES competitors(id),
+                            class_id INTEGER REFERENCES classes(id),
+                            club_id INTEGER REFERENCES clubs(id),
                             not_competing BOOL NOT NULL,
                             result BLOB NOT NULL,
                             start BLOB NOT NULL,
                             chip TEXT,
-                            fields BLOB NOT NULL,
-                            UNIQUE (event_id, competitor_id)
+                            fields BLOB NOT NULL
+                        )""",
+                    )
+                    cur.execute(
+                        """
+                        CREATE INDEX entries_idx1 ON entries(
+                            event_id,
+                            competitor_id
                         )""",
                     )
                     cur.execute(
@@ -938,6 +944,21 @@ class SqliteRepo(Repo):
         else:
             raise KeyError
 
+    def get_entry_ids_by_competitor(
+        self, event_id: int, competitor_id: int
+    ) -> List[int]:
+        cur = self.db.execute(
+            """
+            SELECT id
+            FROM entries
+            WHERE event_id=? AND competitor_id=?""",
+            (
+                event_id,
+                competitor_id,
+            ),
+        )
+        return [row[0] for row in cur]
+
     def get_entry_by_name(
         self, event_id: int, first_name: str, last_name: str
     ) -> EntryType:
@@ -1040,49 +1061,53 @@ class SqliteRepo(Repo):
                     year=year,
                     chip=chip,
                 )
-        try:
-            competitor = self.get_competitor(id=competitor_id)
-            self.update_competitor(
-                id=competitor.id,
-                first_name=first_name,
-                last_name=last_name,
-                gender=gender,
-                year=year,
-                club_id=(
-                    competitor.club_id if competitor.club_id is not None else club_id
-                ),
-                chip=competitor.chip if competitor.chip != "" else chip,
-            )
-            cur = self.db.execute(
-                """
-                INSERT into entries (
-                    event_id,
-                    competitor_id,
-                    class_id,
-                    club_id,
-                    not_competing,
-                    result,
-                    start,
-                    chip,
-                    fields
-                )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    event_id,
-                    competitor_id,
-                    class_id,
-                    club_id,
-                    not_competing,
-                    result_type.PersonRaceResult(status=status).to_json(),
-                    start_type.PersonRaceStart(start_time=start_time).to_json(),
-                    chip,
-                    json.dumps(fields),
-                ),
-            )
-            return cur.lastrowid
 
-        except sqlite3.IntegrityError:
+        competitor = self.get_competitor(id=competitor_id)
+        self.update_competitor(
+            id=competitor.id,
+            first_name=first_name,
+            last_name=last_name,
+            gender=gender,
+            year=year,
+            club_id=(competitor.club_id if competitor.club_id is not None else club_id),
+            chip=competitor.chip if competitor.chip != "" else chip,
+        )
+
+        # check if competitor is already entered for this event
+        entry_ids = self.get_entry_ids_by_competitor(
+            event_id=event_id,
+            competitor_id=competitor_id,
+        )
+        if entry_ids != []:
             raise ConstraintError("Competitor already registered for this event")
+
+        cur = self.db.execute(
+            """
+            INSERT into entries (
+                event_id,
+                competitor_id,
+                class_id,
+                club_id,
+                not_competing,
+                result,
+                start,
+                chip,
+                fields
+            )
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                event_id,
+                competitor_id,
+                class_id,
+                club_id,
+                not_competing,
+                result_type.PersonRaceResult(status=status).to_json(),
+                start_type.PersonRaceStart(start_time=start_time).to_json(),
+                chip,
+                json.dumps(fields),
+            ),
+        )
+        return cur.lastrowid
 
     def add_entry_result(
         self,
@@ -1094,37 +1119,33 @@ class SqliteRepo(Repo):
         # check if the event still exists
         self.get_event(id=event_id)
 
-        try:
-            cur = self.db.execute(
-                """
-                INSERT into entries (
-                    event_id,
-                    competitor_id,
-                    class_id,
-                    club_id,
-                    not_competing,
-                    result,
-                    start,
-                    chip,
-                    fields
-                )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    event_id,
-                    None,
-                    None,
-                    None,
-                    False,
-                    result.to_json(),
-                    start_type.PersonRaceStart(start_time=start_time).to_json(),
-                    chip,
-                    json.dumps({}),
-                ),
+        cur = self.db.execute(
+            """
+            INSERT into entries (
+                event_id,
+                competitor_id,
+                class_id,
+                club_id,
+                not_competing,
+                result,
+                start,
+                chip,
+                fields
             )
-            return cur.lastrowid
-
-        except sqlite3.IntegrityError:
-            raise ConstraintError("Competitor already registered for this event")
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                event_id,
+                None,
+                None,
+                None,
+                False,
+                result.to_json(),
+                start_type.PersonRaceStart(start_time=start_time).to_json(),
+                chip,
+                json.dumps({}),
+            ),
+        )
+        return cur.lastrowid
 
     def update_entry(
         self,
@@ -1365,6 +1386,14 @@ class SqliteRepo(Repo):
                         json.dumps(c["fields"] if "fields" in c else {}),
                     )
                 )
+
+        # check that each competitor has only one entry
+        competitor_ids: set[int] = set()
+        for e in list_of_entries:
+            if e[1] in competitor_ids:
+                raise ConstraintError("Competitor already registered for this event")
+            else:
+                competitor_ids.add(e[1])
 
         if list_of_entries:
             self.db.executemany(

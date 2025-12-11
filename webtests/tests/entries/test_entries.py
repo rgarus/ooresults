@@ -20,6 +20,7 @@
 import pytest
 from selenium import webdriver
 
+from webtests.controls.alert_window import AlertWindow
 from webtests.pageobjects.classes import ClassPage
 from webtests.pageobjects.competitors import CompetitorPage
 from webtests.pageobjects.entries import EntryPage
@@ -272,6 +273,23 @@ def test_if_an_entry_is_added_with_all_data_then_an_additional_entry_is_displaye
         "",
         "",
     ]
+
+
+def test_if_an_already_registered_competitor_is_added_then_an_error_message_is_displayed(
+    page: webdriver.Remote, entry_page: EntryPage, entry: None
+):
+    dialog = entry_page.actions.add()
+    dialog.enter_values(
+        first_name="Annalena",
+        last_name="Baerbock",
+        class_name="Bahn A - Frauen",
+        not_competing=True,
+    )
+    dialog.submit(wait_until_closed=False)
+    alert = AlertWindow(page=page)
+    assert alert.get_text() == "Competitor already registered for this event"
+    alert.accept()
+    dialog.cancel()
 
 
 @pytest.mark.parametrize("gender", ["", "F", "M"])

@@ -32,6 +32,7 @@ from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SplitTime
 from ooresults.otypes.result_type import SpStatus
 from ooresults.otypes.start_type import PersonRaceStart
+from ooresults.repo import repo
 from ooresults.repo.sqlite_repo import SqliteRepo
 
 
@@ -286,6 +287,50 @@ def test_add_entry_without_result(
             club_name="OL Bundestag",
         ),
     ]
+
+
+def test_if_an_already_registered_competitor_is_added_then_an_exception_is_raised(
+    event_id: int,
+    class_1_id: int,
+):
+    model.entries.add_or_update_entry(
+        id=None,
+        event_id=event_id,
+        competitor_id=None,
+        first_name="Angela",
+        last_name="Merkel",
+        gender="F",
+        year=None,
+        class_id=class_1_id,
+        club_id=None,
+        not_competing=False,
+        chip="4748495",
+        fields={},
+        status=ResultStatus.INACTIVE,
+        start_time=None,
+        result_id=None,
+    )
+
+    with pytest.raises(
+        repo.ConstraintError, match="Competitor already registered for this event"
+    ):
+        model.entries.add_or_update_entry(
+            id=None,
+            event_id=event_id,
+            competitor_id=None,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=None,
+            class_id=class_1_id,
+            club_id=None,
+            not_competing=False,
+            chip="4748495",
+            fields={},
+            status=ResultStatus.INACTIVE,
+            start_time=None,
+            result_id=None,
+        )
 
 
 def test_add_entry_with_result(

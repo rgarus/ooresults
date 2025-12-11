@@ -135,11 +135,12 @@ class AddEntryDialog:
         if result is not None:
             ComboboxControl(page=p, id="ent_result").select_by_text(text=result)
 
-    def submit(self) -> None:
+    def submit(self, wait_until_closed: bool = True) -> None:
         elem = self.page.find_element(By.ID, "entr.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Save']")
         elem.click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        if wait_until_closed:
+            WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
 
     def cancel(self) -> None:
         elem = self.page.find_element(By.ID, "entr.formAdd")

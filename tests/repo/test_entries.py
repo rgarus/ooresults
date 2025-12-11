@@ -665,6 +665,46 @@ def test_add_existing_competitor_and_update_competitors_chip_and_club_if_undefin
     )
 
 
+@pytest.mark.parametrize("number", [0, 1])
+def test_number_of_competitors(
+    number: int,
+    db: SqliteRepo,
+    event_1_id: int,
+    class_1_id: int,
+    competitor_1_id: int,
+    club_id: int,
+):
+    ids = []
+    with db.transaction():
+        for i in range(number):
+            ids.append(
+                db.add_entry(
+                    event_id=event_1_id,
+                    competitor_id=competitor_1_id,
+                    first_name="Angela",
+                    last_name="Merkel",
+                    gender="",
+                    year=None,
+                    class_id=class_1_id,
+                    club_id=club_id,
+                    not_competing=False,
+                    chip="1234567",
+                    fields={},
+                    status=result_type.ResultStatus.INACTIVE,
+                    start_time=None,
+                )
+            )
+
+    with db.transaction():
+        data = db.get_entry_ids_by_competitor(
+            event_id=event_1_id, competitor_id=competitor_1_id
+        )
+    assert len(data) == number
+    assert len(set(data)) == number
+    for i in ids:
+        assert i in data
+
+
 def test_add_entry_result(db, event_2_id, class_2_id, club_id, entry_2_id):
     with db.transaction():
         entry_id_1_result = db.add_entry_result(

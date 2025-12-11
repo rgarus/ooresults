@@ -253,6 +253,11 @@ class Repo:
     ) -> None:
         raise NotImplementedError
 
+    def get_entry_ids_by_competitor(
+        self, event_id: int, competitor_id: int
+    ) -> List[int]:
+        raise NotImplementedError
+
     def add_entry_result(
         self,
         event_id: int,
