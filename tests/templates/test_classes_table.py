@@ -152,7 +152,7 @@ def test_class_list_is_not_empty(event: EventType, classes: List[ClassInfoType])
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "109"
+    assert rows[1].attrib["data-id"] == "109"
     assert [td.text for td in rows[1].findall(".//td")] == [
         "Elite",
         None,
@@ -168,7 +168,7 @@ def test_class_list_is_not_empty(event: EventType, classes: List[ClassInfoType])
     ]
 
     # row 3
-    assert rows[2].attrib["id"] == "110"
+    assert rows[2].attrib["data-id"] == "110"
     assert [td.text for td in rows[2].findall(".//td")] == [
         "Elite F",
         None,
@@ -184,7 +184,7 @@ def test_class_list_is_not_empty(event: EventType, classes: List[ClassInfoType])
     ]
 
     # row 4
-    assert rows[3].attrib["id"] == "111"
+    assert rows[3].attrib["data-id"] == "111"
     assert [td.text for td in rows[3].findall(".//td")] == [
         "Elite M",
         None,

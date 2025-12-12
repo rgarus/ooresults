@@ -76,13 +76,13 @@ def test_club_list_is_not_empty(clubs: List[ClubType]):
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "145"
+    assert rows[1].attrib["data-id"] == "145"
     assert [td.text for td in rows[1].findall(".//td")] == [
         "OL Bundestag",
     ]
 
     # row 3
-    assert rows[2].attrib["id"] == "146"
+    assert rows[2].attrib["data-id"] == "146"
     assert [td.text for td in rows[2].findall(".//td")] == [
         "Orieentering club",
     ]

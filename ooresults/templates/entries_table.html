@@ -76,10 +76,10 @@ t = {"entries": "Entries", "classes": "Unassigned results", "clubs": "Individual
                         <th class="dte h1" colspan="99">${group_name if group_name is not None else t[view]}&nbsp;&nbsp;(${len(entries)})</th>
                     </tr>
                     % for entry in entries:
-                        <tr class="dte" id="${entry.id}">
+                        <tr class="dte" data-id="${entry.id}" data-assigned=${"true" if entry.last_name else "false"}>
                             <td class="dte" style="text-align: center;">${"X" if entry.not_competing else ""}</td>
                             <td class="dte">${entry.first_name}</td>
-                            <td class="dte" id="entr_table_lastname">${entry.last_name}</td>
+                            <td class="dte">${entry.last_name}</td>
                             <td class="dte">${entry.gender}</td>
                             <td class="dte">${entry.year}</td>
                             <td class="dte" style="text-align:right;">${format_card(entry.chip)}</td>

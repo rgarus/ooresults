@@ -36,7 +36,7 @@
                     <th class="dte h1" colspan="99">Courses&nbsp;&nbsp;(${len(courses)})</th>
                 </tr>
                 % for course in courses:
-                    <tr class="dte" id="${course.id}">
+                    <tr class="dte" data-id="${course.id}">
                         <td class="dte">${course.name}</td>
                         <td class="dte" style="text-align:right">${round(course.length) if course.length is not None else ""}</td>
                         <td class="dte" style="text-align:right">${round(course.climb) if course.climb is not None else ""}</td>

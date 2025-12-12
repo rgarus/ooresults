@@ -51,7 +51,7 @@ def streaming_enabled(enabled: Optional[bool]) -> str:
                 <th class="dte h1" colspan="99">Events&nbsp;&nbsp;(${len(events)})</th>
             </tr>
             % for event in events:
-                <tr class="dte" id="${event.id}">
+                <tr class="dte" data-id="${event.id}">
                     <td class="dte">${event.name}</td>
                     <td class="dte">${event.date.isoformat()}</td>
                     <td class="dte">${"***" if event.key is not None else ""}</td>

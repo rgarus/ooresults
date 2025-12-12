@@ -149,7 +149,7 @@
         var table = document.getElementById('cls.table');
         for (var i = 1; i < table.rows.length; i++) {
             if (table.rows[i].className == "selected") {
-                document.getElementById('cls.deleteId').value=table.rows[i].id
+                document.getElementById('cls.deleteId').value=table.rows[i].dataset.id
                 document.getElementById('cls.deleteDialog').style.display='block'
             }
         }
@@ -179,7 +179,7 @@
                 xhr.open("POST", "class/fill_edit_form", true);
                 var data = new FormData();
                 data.append('event_id', window.event_id);
-                data.append('id', table.rows[i].id);
+                data.append('id', table.rows[i].dataset.id);
                 xhr.send(data);
             }
         }

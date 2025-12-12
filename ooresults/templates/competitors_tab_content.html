@@ -136,7 +136,7 @@
         var table = document.getElementById('comp.table');
         for (var i = 1; i < table.rows.length; i++) {
             if (table.rows[i].className == "selected") {
-                document.getElementById('comp.deleteId').value=table.rows[i].id
+                document.getElementById('comp.deleteId').value=table.rows[i].dataset.id
                 document.getElementById('comp.deleteDialog').style.display='block'
             }
         }
@@ -177,7 +177,7 @@
                 };
                 xhr.open("POST", "competitor/fill_edit_form", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-                xhr.send("id=".concat(table.rows[i].id));
+                xhr.send("id=".concat(table.rows[i].dataset.id));
             }
         }
     }

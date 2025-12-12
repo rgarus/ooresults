@@ -121,7 +121,7 @@ def test_events_list_is_not_empty(events: List[EventType]):
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "3"
+    assert rows[1].attrib["data-id"] == "3"
     assert [td.text for td in rows[1].findall(".//td")] == [
         "Test-Lauf 1",
         "2023-12-29",
@@ -133,7 +133,7 @@ def test_events_list_is_not_empty(events: List[EventType]):
     ]
 
     # row 3
-    assert rows[2].attrib["id"] == "2"
+    assert rows[2].attrib["data-id"] == "2"
     assert [td.text for td in rows[2].findall(".//td")] == [
         "ABC Event",
         "2023-07-19",
@@ -145,7 +145,7 @@ def test_events_list_is_not_empty(events: List[EventType]):
     ]
 
     # row 4
-    assert rows[3].attrib["id"] == "99"
+    assert rows[3].attrib["data-id"] == "99"
     assert [td.text for td in rows[3].findall(".//td")] == [
         "Test-Lauf 2",
         "2023-12-29",

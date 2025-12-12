@@ -16,7 +16,7 @@
                 <th class="dte h1" colspan="99">Clubs&nbsp;&nbsp;(${len(clubs)})</th>
             </tr>
             % for club in clubs:
-                <tr class="dte" id="${club.id}">
+                <tr class="dte" data-id="${club.id}">
                     <td class="dte">${club.name}</td>
                 </tr>
             % endfor

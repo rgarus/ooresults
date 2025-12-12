@@ -159,7 +159,8 @@ def test_entry_list_with_one_group(event: EventType, entries: List[EntryType]):
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "123"
+    assert rows[1].attrib["data-id"] == "123"
+    assert rows[1].attrib["data-assigned"] == "false"
     assert [td.text for td in rows[1].findall(".//td")] == [
         None,
         None,
@@ -175,7 +176,8 @@ def test_entry_list_with_one_group(event: EventType, entries: List[EntryType]):
     ]
 
     # row 3
-    assert rows[2].attrib["id"] == "456"
+    assert rows[2].attrib["data-id"] == "456"
+    assert rows[2].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[2].findall(".//td")] == [
         None,
         "Barbara",
@@ -191,7 +193,8 @@ def test_entry_list_with_one_group(event: EventType, entries: List[EntryType]):
     ]
 
     # row 4
-    assert rows[3].attrib["id"] == "789"
+    assert rows[3].attrib["data-id"] == "789"
+    assert rows[3].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[3].findall(".//td")] == [
         None,
         "Angela",
@@ -250,7 +253,8 @@ def test_entry_list_with_two_groups(
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "456"
+    assert rows[1].attrib["data-id"] == "456"
+    assert rows[1].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[1].findall(".//td")] == [
         None,
         "Barbara",
@@ -266,7 +270,8 @@ def test_entry_list_with_two_groups(
     ]
 
     # row 3
-    assert rows[2].attrib["id"] == "789"
+    assert rows[2].attrib["data-id"] == "789"
+    assert rows[2].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[2].findall(".//td")] == [
         None,
         "Angela",
@@ -287,7 +292,8 @@ def test_entry_list_with_two_groups(
     ]
 
     # row 5
-    assert rows[4].attrib["id"] == "123"
+    assert rows[4].attrib["data-id"] == "123"
+    assert rows[4].attrib["data-assigned"] == "false"
     assert [td.text for td in rows[4].findall(".//td")] == [
         None,
         None,
@@ -347,7 +353,8 @@ def test_entry_list_with_three_groups(
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "123"
+    assert rows[1].attrib["data-id"] == "123"
+    assert rows[1].attrib["data-assigned"] == "false"
     assert [td.text for td in rows[1].findall(".//td")] == [
         None,
         None,
@@ -368,7 +375,8 @@ def test_entry_list_with_three_groups(
     ]
 
     # row 4
-    assert rows[3].attrib["id"] == "456"
+    assert rows[3].attrib["data-id"] == "456"
+    assert rows[3].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[3].findall(".//td")] == [
         None,
         "Barbara",
@@ -389,7 +397,8 @@ def test_entry_list_with_three_groups(
     ]
 
     # row 6
-    assert rows[5].attrib["id"] == "789"
+    assert rows[5].attrib["data-id"] == "789"
+    assert rows[5].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[5].findall(".//td")] == [
         None,
         "Angela",
@@ -622,7 +631,8 @@ def test_entry_list_with_fields(event: EventType, entries: List[EntryType]):
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "123"
+    assert rows[1].attrib["data-id"] == "123"
+    assert rows[1].attrib["data-assigned"] == "false"
     assert [td.text for td in rows[1].findall(".//td")] == [
         None,
         None,
@@ -640,7 +650,8 @@ def test_entry_list_with_fields(event: EventType, entries: List[EntryType]):
     ]
 
     # row 3
-    assert rows[2].attrib["id"] == "456"
+    assert rows[2].attrib["data-id"] == "456"
+    assert rows[2].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[2].findall(".//td")] == [
         None,
         "Barbara",
@@ -658,7 +669,8 @@ def test_entry_list_with_fields(event: EventType, entries: List[EntryType]):
     ]
 
     # row 4
-    assert rows[3].attrib["id"] == "789"
+    assert rows[3].attrib["data-id"] == "789"
+    assert rows[3].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[3].findall(".//td")] == [
         None,
         "Angela",

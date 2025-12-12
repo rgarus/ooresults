@@ -54,7 +54,7 @@
             document.getElementById('tab.results').disabled = false;
             document.getElementById('tab.reader').disabled = (evnt_selected.getElementsByTagName('TD')[2].innerHTML == '');
 
-            window.event_id = evnt_selected.id;
+            window.event_id = evnt_selected.dataset.id;
             element = document.getElementById('evnt.event_name');
             element.innerHTML = evnt_selected.getElementsByTagName('TD')[0].innerHTML;
             element = document.getElementById('evnt.event_date');
@@ -93,7 +93,7 @@
         var table = document.getElementById('evnt.table');
         for (var i = 1; i < table.rows.length; i++) {
             if (table.rows[i].className == "selected") {
-                document.getElementById('evnt.deleteId').value=table.rows[i].id
+                document.getElementById('evnt.deleteId').value=table.rows[i].dataset.id
                 document.getElementById('evnt.deleteDialog').style.display='block'
             }
         }
@@ -122,7 +122,7 @@
                 };
                 xhr.open("POST", "event/fill_edit_form", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-                xhr.send("id=".concat(table.rows[i].id));
+                xhr.send("id=".concat(table.rows[i].dataset.id));
             }
         }
     }
@@ -218,8 +218,8 @@
 
         var table = document.getElementById('evnt.table');
         for (var i = 1; i < table.rows.length; i++) {
-            if (table.rows[i].id == window.event_id) {
-                evnt_selected = table.rows[i]
+            if (table.rows[i].dataset.id === window.event_id) {
+                evnt_selected = table.rows[i];
                 evnt_selected.className = 'selected';
                 document.getElementById('evnt.myBtnEdit').disabled = false;
                 document.getElementById('evnt.myBtnDelete').disabled = false;

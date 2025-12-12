@@ -20,7 +20,7 @@
             </thead>
             <tbody id="competitors_tbody" >
             % for competitor in competitors:
-                <tr class="dt" id="${competitor.id}">
+                <tr class="dt" data-id="${competitor.id}">
                     <td class="dt">${competitor.first_name}</td>
                     <td class="dt">${competitor.last_name}</td>
                     <td class="dt">${competitor.gender}</td>

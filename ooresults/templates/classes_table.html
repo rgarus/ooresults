@@ -56,7 +56,7 @@ def format_voided_legs(legs):
                     <th class="dte h1" colspan="99">Classes&nbsp;&nbsp;(${len(classes)})</th>
                 </tr>
                 % for class_ in classes:
-                    <tr class="dte" id="${class_.id}">
+                    <tr class="dte" data-id="${class_.id}">
                         <td class="dte">${class_.name}</td>
                         <td class="dte">${class_.short_name if class_.short_name is not None else ""}</td>
                         <td class="dte">${class_.course_name if class_.course_name is not None else ""}</td>

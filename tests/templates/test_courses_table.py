@@ -112,7 +112,7 @@ def test_courses_list_is_not_empty(event: EventType, courses: List[CourseType]):
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "110"
+    assert rows[1].attrib["data-id"] == "110"
     assert [td.text for td in rows[1].findall(".//td")] == [
         "Bahn B",
         None,
@@ -121,7 +121,7 @@ def test_courses_list_is_not_empty(event: EventType, courses: List[CourseType]):
     ]
 
     # row 3
-    assert rows[2].attrib["id"] == "109"
+    assert rows[2].attrib["data-id"] == "109"
     assert [td.text for td in rows[2].findall(".//td")] == [
         "Bahn A",
         None,

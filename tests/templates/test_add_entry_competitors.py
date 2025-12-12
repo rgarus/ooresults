@@ -58,7 +58,7 @@ def test_competitor_list_is_not_empty(competitors: List[CompetitorType]):
     trs = html.findall(".//tbody/tr")
     assert len(trs) == 2
 
-    assert html.find(".//tbody/tr[1]").attrib["id"] == "7"
+    assert html.find(".//tbody/tr[1]").attrib["data-id"] == "7"
     assert html.find(".//tbody/tr[1]/td[1]").text == "Angela"
     assert html.find(".//tbody/tr[1]/td[2]").text == "Merkel"
     assert html.find(".//tbody/tr[1]/td[3]").text is None
@@ -67,7 +67,7 @@ def test_competitor_list_is_not_empty(competitors: List[CompetitorType]):
     assert html.find(".//tbody/tr[1]/td[6]").text is None
     assert html.find(".//tbody/tr[1]/td[7]").text is None
 
-    assert html.find(".//tbody/tr[2]").attrib["id"] == "17"
+    assert html.find(".//tbody/tr[2]").attrib["data-id"] == "17"
     assert html.find(".//tbody/tr[2]/td[1]").text == "Birgit"
     assert html.find(".//tbody/tr[2]/td[2]").text == "Derkel"
     assert html.find(".//tbody/tr[2]/td[3]").text is None

@@ -21,7 +21,7 @@
                 <th class="dte h1" colspan="99">Competitors&nbsp;&nbsp;(${len(competitors)})</th>
             </tr>
             % for competitor in competitors:
-                <tr class="dte" id="${competitor.id}">
+                <tr class="dte" data-id="${competitor.id}">
                     <td class="dte">${competitor.first_name}</td>
                     <td class="dte">${competitor.last_name}</td>
                     <td class="dte">${competitor.gender}</td>

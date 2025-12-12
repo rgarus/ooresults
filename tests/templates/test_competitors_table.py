@@ -108,7 +108,7 @@ def test_competitor_list_is_not_empty(competitors: List[CompetitorType]):
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "112"
+    assert rows[1].attrib["data-id"] == "112"
     assert [td.text for td in rows[1].findall(".//td")] == [
         "Barbara",
         "Merkel",
@@ -119,7 +119,7 @@ def test_competitor_list_is_not_empty(competitors: List[CompetitorType]):
     ]
 
     # row 3
-    assert rows[2].attrib["id"] == "113"
+    assert rows[2].attrib["data-id"] == "113"
     assert [td.text for td in rows[2].findall(".//td")] == [
         "Angela",
         "Merkel",
@@ -130,7 +130,7 @@ def test_competitor_list_is_not_empty(competitors: List[CompetitorType]):
     ]
 
     # row 4
-    assert rows[3].attrib["id"] == "114"
+    assert rows[3].attrib["data-id"] == "114"
     assert [td.text for td in rows[3].findall(".//td")] == [
         "Manfred",
         "Merkel",

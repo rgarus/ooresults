@@ -126,7 +126,8 @@ def test_entry_list_with_view_is_entries(event: EventType, entry_full: EntryType
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "789"
+    assert rows[1].attrib["data-id"] == "789"
+    assert rows[1].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[1].findall(".//td")] == [
         "X",
         "Angela",
@@ -193,7 +194,8 @@ def test_entry_list_with_view_is_classes(event: EventType, entry_full: EntryType
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "789"
+    assert rows[1].attrib["data-id"] == "789"
+    assert rows[1].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[1].findall(".//td")] == [
         "X",
         "Angela",
@@ -259,7 +261,8 @@ def test_entry_list_with_view_is_clubs(event: EventType, entry_full: EntryType):
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "789"
+    assert rows[1].attrib["data-id"] == "789"
+    assert rows[1].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[1].findall(".//td")] == [
         "X",
         "Angela",
@@ -326,7 +329,8 @@ def test_entry_list_with_view_is_states(event: EventType, entry_full: EntryType)
     ]
 
     # row 2
-    assert rows[1].attrib["id"] == "789"
+    assert rows[1].attrib["data-id"] == "789"
+    assert rows[1].attrib["data-assigned"] == "true"
     assert [td.text for td in rows[1].findall(".//td")] == [
         "X",
         "Angela",

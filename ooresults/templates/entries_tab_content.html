@@ -194,7 +194,7 @@
     }
 
     function entr_comp_save() {
-        document.getElementById('entr.addCompId').value = entr_comp_selected.id;
+        document.getElementById('entr.addCompId').value = entr_comp_selected.dataset.id;
         document.getElementById('ent_firstName').value = entr_comp_selected.getElementsByTagName('TD')[0].innerHTML;
         document.getElementById('ent_lastName').value = entr_comp_selected.getElementsByTagName('TD')[1].innerHTML;
         document.getElementById('ent_gender').value = entr_comp_selected.getElementsByTagName('TD')[2].innerHTML;
@@ -213,9 +213,9 @@
             entr_selected.className = 'selected';
             document.getElementById('entr.myBtnDelete').disabled = false;
             document.getElementById('entr.myBtnResult').disabled = false;
-            ln = entr_selected.querySelector('[id="entr_table_lastname"]').innerHTML == '';
-            document.getElementById('entr.myBtnEdit').disabled = ln;
-            if (e.type == "dblclick" && !ln) {
+            const assigned = entr_selected.dataset.assigned === "true";
+            document.getElementById('entr.myBtnEdit').disabled = !assigned;
+            if (e.type == "dblclick" && assigned) {
                 entr_myEdit();
             }
         }
@@ -305,7 +305,7 @@
                 xhr.open("POST", "entry/fill_edit_form", true);
                 var data = new FormData();
                 data.append('event_id', window.event_id);
-                data.append('id', table.rows[i].id);
+                data.append('id', table.rows[i].dataset.id);
                 xhr.send(data);
             }
         }
@@ -315,7 +315,7 @@
         var table = document.getElementById('entr.table');
         for (var i = 1; i < table.rows.length; i++) {
             if (table.rows[i].className == "selected") {
-                document.getElementById('entr.deleteId').value=table.rows[i].id;
+                document.getElementById('entr.deleteId').value=table.rows[i].dataset.id;
                 document.getElementById('entr.deleteDialog').style.display='block'
             }
         }
@@ -346,7 +346,7 @@
                 //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
                 var data = new FormData();
                 data.append('event_id', window.event_id);
-                data.append('id', table.rows[i].id);
+                data.append('id', table.rows[i].dataset.id);
                 xhr.send(data);
             }
         }
