@@ -365,9 +365,14 @@ def parse(content: bytes) -> list[dict]:
                         except Exception:
                             t = None
 
+                        punch_time = None
+                        if r["start"].start_time and t is not None:
+                            punch_time = r["start"].start_time + timedelta(seconds=t)
+
                         status = SpStatus.MISSING if control_time == "-----" else None
                         r["result"].split_times.append(
                             result_type.SplitTime(
+                                punch_time=punch_time,
                                 control_code=control_code,
                                 time=t,
                                 status=status,

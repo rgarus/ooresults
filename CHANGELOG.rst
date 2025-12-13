@@ -20,6 +20,7 @@ Fixed
 ^^^^^
 
 - Sometimes the event result on the si1 page is not updated if the result does not need to be scrolled.
+- Fixed an error when importing OE2003 or OE12 CSV files with split times.
 
 
 [0.4.5] - 2025-10-29
