@@ -35,14 +35,14 @@ from webtests.pageobjects.actions import Actions
 from webtests.pageobjects.table import Table
 
 
-T = TypeVar("T", bound="AddEntryDialog")
+T1 = TypeVar("T1", bound="AddEntryDialog")
 
 
 class AddEntryDialog:
     def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
 
-    def wait(self: T) -> T:
+    def wait(self: T1) -> T1:
         WebDriverWait(self.page, 10).until(
             EC.visibility_of_element_located(locator=(By.ID, "entr.formAdd"))
         )
@@ -149,6 +149,31 @@ class AddEntryDialog:
         WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
 
 
+T2 = TypeVar("T2", bound="StatusDialog")
+
+
+class StatusDialog:
+    modal_dialog_id = "statusDialog"
+
+    def __init__(self, page: webdriver.Remote) -> None:
+        self.page = page
+
+    def wait(self: T2) -> T2:
+        WebDriverWait(self.page, 10).until(
+            EC.visibility_of_element_located(locator=(By.ID, self.modal_dialog_id))
+        )
+        return self
+
+    def get_text(self) -> str:
+        elem = self.page.find_element(By.ID, "statusDialogContent")
+        return elem.find_element(By.XPATH, "p[1]").text
+
+    def close(self) -> None:
+        elem = self.page.find_element(By.ID, self.modal_dialog_id)
+        elem.find_element(By.XPATH, ".//button[text()='Close']").click()
+        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+
+
 class ImportEntryDialog:
     def __init__(self, page: webdriver.Remote) -> None:
         self.page = page
@@ -158,11 +183,13 @@ class ImportEntryDialog:
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
         WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
 
-    def import_(self, path: Path) -> None:
+    def import_(self, path: Path, info_dialog: bool = False) -> Optional[StatusDialog]:
         elem = self.page.find_element(By.ID, "entr.import.form")
         elem.find_element(By.ID, "file1").send_keys(str(path))
         elem.find_element(By.XPATH, "button[text()='Import']").click()
         WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        if info_dialog:
+            return StatusDialog(page=self.page).wait()
 
 
 class ExportEntryDialog:
