@@ -28,7 +28,9 @@ import ssl
 import threading
 import time
 from typing import Dict
+from typing import Literal
 from typing import Optional
+from typing import TypeAlias
 
 import jsonschema
 import serial.tools.list_ports
@@ -52,6 +54,14 @@ import websocket
 #
 
 
+EntryType: TypeAlias = Literal[
+    "readerConnected",
+    "readerDisconnected",
+    "cardInserted",
+    "cardRemoved",
+]
+
+
 class WebSocketClient(threading.Thread):
     def __init__(
         self,
@@ -71,9 +81,9 @@ class WebSocketClient(threading.Thread):
         self.ws = None
         self.opened = False
         self.queue = queue.Queue()
-        self.entry_type = "readerDisconnected"
+        self.entry_type: EntryType = "readerDisconnected"
         self.entry_time = datetime.datetime.now()
-        self.card = None
+        self.card: Optional[str] = None
 
     def run(self):
         headers = {
@@ -105,7 +115,10 @@ class WebSocketClient(threading.Thread):
             time.sleep(5)
 
     def set_state(
-        self, entry_type: str, entry_time: datetime.datetime, card: Optional[str] = None
+        self,
+        entry_type: EntryType,
+        entry_time: datetime.datetime,
+        card: Optional[str] = None,
     ) -> Dict:
         self.entry_type = entry_type
         self.entry_time = entry_time
@@ -115,7 +128,7 @@ class WebSocketClient(threading.Thread):
             "entryType": self.entry_type,
             "entryTime": self.entry_time.astimezone().isoformat(),
         }
-        if self.card is not None:
+        if self.entry_type == "cardInserted" and self.card is not None:
             item["controlCard"] = self.card
         return self.send_and_receive(item=item)
 
@@ -154,6 +167,8 @@ class WebSocketClient(threading.Thread):
                 "entryType": self.entry_type,
                 "entryTime": self.entry_time.astimezone().isoformat(),
             }
+            if self.entry_type == "cardInserted" and self.card is not None:
+                item["controlCard"] = self.card
             data = bz2.compress(json.dumps(item).encode())
             self.send(data=data)
 
@@ -289,6 +304,10 @@ class Cardreader:
                         print(r["status"])
                         # beep
                         si.ack_sicard()
+
+                    self.webSocketClient.entry_type = "readerConnected"
+                    self.webSocketClient.entry_time = datetime.datetime.now()
+
                 except sireader.SIReaderCardChanged:
                     self.webSocketClient.set_state(
                         entry_type="cardRemoved",
@@ -366,6 +385,9 @@ class Cardreader:
                     print(f"{str(item.get('controlCard', item['entryType']))} ...")
 
                     r = self.webSocketClient.send_and_receive(item=item)
+                    self.webSocketClient.entry_type = "readerConnected"
+                    self.webSocketClient.entry_time = datetime.datetime.now()
+
                     print(r)
 
 
