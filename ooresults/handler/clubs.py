@@ -37,15 +37,15 @@ Handler for the club routes.
 
 @bottle.post("/club/update")
 def post_update():
-    """Update data"""
+    """Update data."""
     return render.clubs_table(clubs=model.clubs.get_clubs())
 
 
 @bottle.post("/club/add")
 def post_add():
-    """Add or edit entry"""
+    """Add or edit club."""
     data = bottle.request.forms
-    print(data)
+    print(dict(data))
     try:
         if data.id == "":
             model.clubs.add_club(data.name)
@@ -61,9 +61,9 @@ def post_add():
 
 @bottle.post("/club/delete")
 def post_delete():
-    """Delete entry"""
+    """Delete club."""
     data = bottle.request.forms
-    print(data)
+    print(dict(data))
     try:
         model.clubs.delete_club(int(data.id))
         return render.clubs_table(clubs=model.clubs.get_clubs())
@@ -75,7 +75,7 @@ def post_delete():
 
 @bottle.post("/club/fill_edit_form")
 def post_fill_edit_form():
-    """Query data to fill add or edit form"""
+    """Query data to fill add or edit form."""
     data = bottle.request.forms
     try:
         if data.id == "":

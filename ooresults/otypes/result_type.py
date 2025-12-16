@@ -36,19 +36,18 @@ from ooresults.otypes.class_params import VoidedLeg
 
 
 class SpStatus(enum.Enum):
-    """
-    SplitTime status according to IOF XML 3.0:
+    """SplitTime status according to IOF XML 3.0.
 
-        OK:
-            Control belongs to the course and has been punched
-            (either by electronical punching or pin punching).
-            If the time is not available or invalid, omit the Time element.
+    OK:
+        Control belongs to the course and has been punched
+        (either by electronical punching or pin punching).
+        If the time is not available or invalid, omit the Time element.
 
-        MISSING:
-            Control belongs to the course but has not been punched.
+    MISSING:
+        Control belongs to the course but has not been punched.
 
-        ADDITIONAL:
-            Control does not belong to the course, but the competitor has punched it.
+    ADDITIONAL:
+        Control does not belong to the course, but the competitor has punched it.
 
     """
 
@@ -70,9 +69,7 @@ class SplitTime:
     leg_voided: bool = False
 
     def recalculate_time(self, start_time: Optional[datetime]) -> None:
-        """
-        set time as difference between start_time and punch_time
-        """
+        """Set self.time as difference between start_time and self.punch_time."""
         if start_time is None:
             self.time = None
         elif self.punch_time is None or self.punch_time == self.NO_TIME:
@@ -85,36 +82,35 @@ class SplitTime:
 
 
 class ResultStatus(enum.Enum):
-    """
-    Result status according to IOF XML 3.0:
+    """Result status according to IOF XML 3.0.
 
-        INACTIVE:
-            Has not yet started.
+    INACTIVE:
+        Has not yet started.
 
-        ACTIVE:
-            Currently on course.
+    ACTIVE:
+        Currently on course.
 
-        FINISHED:
-            Finished but not yet validated.
+    FINISHED:
+        Finished but not yet validated.
 
-        OK:
-            Finished and validated.
+    OK:
+        Finished and validated.
 
-        MISSING_PUNCH:
-            Missing punch.
+    MISSING_PUNCH:
+        Missing punch.
 
-        DID_NOT_START:
-             Did not start (in this race).
+    DID_NOT_START:
+         Did not start (in this race).
 
-        DID_NOT_FINISHED:
-            Did not finish (i.e. conciously cancelling the race after having started,
-            in contrast to MissingPunch).
+    DID_NOT_FINISHED:
+        Did not finish (i.e. conciously cancelling the race after having started,
+        in contrast to MissingPunch).
 
-        OVER_TIME:
-            Overtime, i.e. did not finish within the maximum time set by the organiser.
+    OVER_TIME:
+        Overtime, i.e. did not finish within the maximum time set by the organiser.
 
-        DISQUALIFIED:
-            Disqualified (for some other reason than a missing punch).
+    DISQUALIFIED:
+        Disqualified (for some other reason than a missing punch).
 
     """
 

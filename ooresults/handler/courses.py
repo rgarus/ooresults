@@ -52,7 +52,7 @@ def update(event_id: int):
 
 @bottle.post("/course/update")
 def post_update():
-    """Update data"""
+    """Update data."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     return update(event_id=event_id)
@@ -60,7 +60,7 @@ def post_update():
 
 @bottle.post("/course/import")
 def post_import():
-    """Import entries"""
+    """Import courses."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     try:
@@ -84,7 +84,7 @@ def post_import():
 
 @bottle.post("/course/export")
 def post_export():
-    """Export entries"""
+    """Export courses."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     try:
@@ -102,9 +102,9 @@ def post_export():
 
 @bottle.post("/course/add")
 def post_add():
-    """Add or edit entry"""
+    """Add or edit course."""
     data = bottle.request.forms
-    print(data)
+    print(dict(data))
     event_id = int(data.event_id) if data.event_id != "" else -1
     length = int(data.length) if data.length != "" else None
     climb = int(data.climb) if data.climb != "" else None
@@ -141,9 +141,9 @@ def post_add():
 
 @bottle.post("/course/delete")
 def post_delete():
-    """Delete entry"""
+    """Delete course."""
     data = bottle.request.forms
-    print(data)
+    print(dict(data))
     event_id = int(data.event_id) if data.event_id != "" else -1
     try:
         model.courses.delete_course(id=int(data.id))
@@ -154,7 +154,7 @@ def post_delete():
 
 @bottle.post("/course/fill_edit_form")
 def post_fill_edit_form():
-    """Query data to fill add or edit form"""
+    """Query data to fill add or edit form."""
     data = bottle.request.forms
     try:
         if data.id == "":

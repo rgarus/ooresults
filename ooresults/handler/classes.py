@@ -57,7 +57,7 @@ def update(event_id: int):
 
 @bottle.post("/class/update")
 def post_update():
-    """Update data"""
+    """Update data."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     return update(event_id=event_id)
@@ -65,7 +65,7 @@ def post_update():
 
 @bottle.post("/class/import")
 def post_import():
-    """Import classes"""
+    """Import classes."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     try:
@@ -85,7 +85,7 @@ def post_import():
 
 @bottle.post("/class/export")
 def post_export():
-    """Export classes"""
+    """Export classes."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     try:
@@ -118,9 +118,9 @@ def parse_start_time(
 
 @bottle.post("/class/add")
 def post_add():
-    """Add or edit entry"""
+    """Add or edit class."""
     data = bottle.request.forms
-    print(data)
+    print(dict(data))
     event_id = int(data.event_id) if data.event_id != "" else -1
 
     params = ClassParams()
@@ -201,9 +201,9 @@ def post_add():
 
 @bottle.post("/class/delete")
 def post_delete():
-    """Delete entry"""
+    """Delete class."""
     data = bottle.request.forms
-    print(data)
+    print(dict(data))
     event_id = int(data.event_id) if data.event_id != "" else -1
     try:
         model.classes.delete_class(id=int(data.id))
@@ -215,7 +215,7 @@ def post_delete():
 
 @bottle.post("/class/fill_edit_form")
 def post_fill_edit_form():
-    """Query data to fill add or edit form"""
+    """Query data to fill add or edit form."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     try:

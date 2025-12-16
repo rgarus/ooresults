@@ -41,16 +41,16 @@ Handler for the series routes.
 
 @bottle.post("/series/update")
 def post_update():
-    """Update data"""
+    """Update data."""
     settings, events, results = model.results.build_series_result()
     return render.series_table(events=events, results=results)
 
 
 @bottle.post("/series/settings")
 def post_settings():
-    """Update series settings"""
+    """Update series settings."""
     data = bottle.request.forms
-    print(data)
+    print(dict(data))
     try:
         settings = series_type.Settings(
             name=data.name,
@@ -71,7 +71,7 @@ def post_settings():
 
 @bottle.post("/series/pdfResult")
 def post_pdf_result():
-    """Print results"""
+    """Print series results."""
     data = bottle.request.forms
     landscape = "ser_landscape" in data
 
@@ -88,7 +88,7 @@ def post_pdf_result():
 
 @bottle.post("/series/csvResult")
 def post_csv_result():
-    """Export results as csv for creating diplomas"""
+    """Export results as csv for creating diplomas."""
     try:
         settings, events, results = model.results.build_series_result()
 
@@ -146,6 +146,6 @@ def post_csv_result():
 
 @bottle.post("/series/fill_settings_form")
 def post_fill_settings_form():
-    """Query data to fill settings form"""
+    """Query data to fill settings form."""
     settings = model.results.get_series_settings()
     return render.series_settings(settings=settings)

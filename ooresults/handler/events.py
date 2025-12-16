@@ -43,15 +43,15 @@ def update():
 
 @bottle.post("/event/update")
 def post_update():
-    """Update data"""
+    """Update data."""
     return update()
 
 
 @bottle.post("/event/add")
 def post_add():
-    """Add or edit entry"""
+    """Add or edit event."""
     data = bottle.request.forms
-    print(data)
+    print(dict(data))
     try:
         fields = data.fields.split(",") if data.fields != "" else []
         fields = [f.strip() for f in fields]
@@ -96,7 +96,7 @@ def post_add():
 
 @bottle.post("/event/delete")
 def post_delete():
-    """Delete entry"""
+    """Delete event."""
     data = bottle.request.forms
     model.events.delete_event(int(data.id))
     return update()
@@ -104,7 +104,7 @@ def post_delete():
 
 @bottle.post("/event/fill_edit_form")
 def post_fill_edit_form():
-    """Query data to fill add or edit form"""
+    """Query data to fill add or edit form."""
     data = bottle.request.forms
     try:
         if data.id == "":

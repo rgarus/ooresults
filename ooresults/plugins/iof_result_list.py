@@ -47,16 +47,18 @@ namespaces = {None: iof_namespace}
 
 
 class ResultListStatus(Enum):
-    """
-    Complete:
+    """Result list status according to IOF XML 3.0.
+
+    COMPLETE:
         The result list is complete, i.e. all competitors are included.
         Used for official results after the event.
-    Delta:
+    DELTA:
         The result list only contains changes since last list.
         Used for frequent exchange of results.
-    Snapshot:
+    SNAPSHOT:
         The result list is a snapshot of the current standings.
         Used while the event is under way.
+
     """
 
     COMPLETE = "Complete"

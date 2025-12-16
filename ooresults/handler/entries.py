@@ -131,7 +131,7 @@ def update(event_id: int, view: str = "entries"):
 
 @bottle.post("/entry/update")
 def post_update():
-    """Update data"""
+    """Update data."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     return update(event_id=event_id, view=data.view)
@@ -139,7 +139,7 @@ def post_update():
 
 @bottle.post("/entry/import")
 def post_import():
-    """Import entries"""
+    """Import entries."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     try:
@@ -223,7 +223,7 @@ def post_import():
 
 @bottle.post("/entry/export")
 def post_export():
-    """Export entries"""
+    """Export entries."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     try:
@@ -273,10 +273,10 @@ def parse_start_time(
 
 @bottle.post("/entry/add")
 def post_add():
-    """Add or edit entry"""
+    """Add or edit entry."""
     try:
         data = bottle.request.forms
-        print({key: value for key, value in data.items()})
+        print(dict(data))
         event_id = int(data.event_id) if data.event_id != "" else -1
         event = model.events.get_event(id=event_id)
 
@@ -343,7 +343,7 @@ def collect_unassigned_si_results(entries: List[EntryType]) -> Dict[int, str]:
 
 @bottle.post("/entry/fill_edit_form")
 def post_fill_edit_form():
-    """Query data to fill add or edit form"""
+    """Query data to fill add or edit form."""
     try:
         data = bottle.request.forms
         event_id = int(data.event_id) if data.event_id != "" else -1
@@ -375,7 +375,7 @@ def post_fill_edit_form():
 
 @bottle.post("/entry/fill_competitors_form")
 def post_fill_competitors_form():
-    """Query data to fill add or edit form"""
+    """Query data to fill competitor selection form."""
     competitors = model.competitors.get_competitors()
 
     return render.add_entry_competitors(competitors=competitors)
@@ -383,7 +383,7 @@ def post_fill_competitors_form():
 
 @bottle.post("/entry/fill_result_form")
 def post_fill_result_form():
-    """Query data to fill result form"""
+    """Query data to fill result form."""
     data = bottle.request.forms
     try:
         entry = model.entries.get_entry(int(data.id))
@@ -397,7 +397,7 @@ def post_fill_result_form():
 
 @bottle.post("/entry/delete")
 def post_delete():
-    """Delete entry"""
+    """Delete entry."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     model.entries.delete_entry(int(data.id))
@@ -413,7 +413,7 @@ def post_split_times():
 
 @bottle.post("/entry/editPunch")
 def post_edit_punch():
-    """Change split times"""
+    """Change split times."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     entry_id = int(data.entry_id) if data.entry_id != "" else -1

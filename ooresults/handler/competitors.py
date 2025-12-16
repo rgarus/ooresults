@@ -42,13 +42,13 @@ Handler for the competitor routes.
 
 @bottle.post("/competitor/update")
 def post_update():
-    """Update data"""
+    """Update data."""
     return render.competitors_table(competitors=model.competitors.get_competitors())
 
 
 @bottle.post("/competitor/add")
 def post_add():
-    """Add or edit entry"""
+    """Add or edit competitor."""
     data = bottle.request.forms
     try:
         if data.id == "":
@@ -78,7 +78,7 @@ def post_add():
 
 @bottle.post("/competitor/import")
 def post_import():
-    """Import entries"""
+    """Import competitors."""
     data = bottle.request.forms
     try:
         if data.comp_import == "comp.import.1":
@@ -97,7 +97,7 @@ def post_import():
 
 @bottle.post("/competitor/export")
 def post_export():
-    """Export entries"""
+    """Export competitors."""
     data = bottle.request.forms
     if data.comp_export == "comp.export.1":
         competitors = model.competitors.get_competitors()
@@ -108,7 +108,7 @@ def post_export():
 
 @bottle.post("/competitor/delete")
 def post_delete():
-    """Delete entry"""
+    """Delete competitor."""
     data = bottle.request.forms
     try:
         model.competitors.delete_competitor(int(data.id))
@@ -119,7 +119,7 @@ def post_delete():
 
 @bottle.post("/competitor/fill_edit_form")
 def post_fill_edit_form():
-    """Query data to fill add or edit form"""
+    """Query data to fill add or edit form."""
     data = bottle.request.forms
     if data.id == "":
         competitor = None
