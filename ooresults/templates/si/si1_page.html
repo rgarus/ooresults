@@ -204,6 +204,8 @@
                     tp = setTimeout(function() {ping()}, 15000);
                 };
                 function nopong() {
+                    status = 'offline';
+                    message();
                     ws.close();
                 };
             };
