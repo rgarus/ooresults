@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 import pytest
 from lxml import etree
 
@@ -28,7 +26,7 @@ from ooresults.utils import render
 
 
 @pytest.fixture()
-def clubs() -> List[ClubType]:
+def clubs() -> list[ClubType]:
     return [ClubType(id=3, name="OC Bundestag"), ClubType(id=2, name="OL Bundestag")]
 
 
@@ -46,7 +44,7 @@ def competitor() -> CompetitorType:
     )
 
 
-def test_competitor_is_none(clubs: List[ClubType]):
+def test_competitor_is_none(clubs: list[ClubType]):
     html = etree.HTML(render.add_competitor(competitor=None, clubs=clubs))
 
     input_id = html.find(".//input[@name='id']")
@@ -83,7 +81,7 @@ def test_competitor_is_none(clubs: List[ClubType]):
     assert option_club[2].text == "OL Bundestag"
 
 
-def test_competitor_is_not_none(competitor: CompetitorType, clubs: List[ClubType]):
+def test_competitor_is_not_none(competitor: CompetitorType, clubs: list[ClubType]):
     html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
     input_id = html.find(".//input[@name='id']")
@@ -120,7 +118,7 @@ def test_competitor_is_not_none(competitor: CompetitorType, clubs: List[ClubType
     assert option_club[2].text == "OL Bundestag"
 
 
-def test_gender_is_unknown(competitor: CompetitorType, clubs: List[ClubType]):
+def test_gender_is_unknown(competitor: CompetitorType, clubs: list[ClubType]):
     competitor.gender = ""
     html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
@@ -134,7 +132,7 @@ def test_gender_is_unknown(competitor: CompetitorType, clubs: List[ClubType]):
     assert options_gender[2].text == "M"
 
 
-def test_gender_is_female(competitor: CompetitorType, clubs: List[ClubType]):
+def test_gender_is_female(competitor: CompetitorType, clubs: list[ClubType]):
     competitor.gender = "F"
     html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
@@ -148,7 +146,7 @@ def test_gender_is_female(competitor: CompetitorType, clubs: List[ClubType]):
     assert options_gender[2].text == "M"
 
 
-def test_gender_is_male(competitor: CompetitorType, clubs: List[ClubType]):
+def test_gender_is_male(competitor: CompetitorType, clubs: list[ClubType]):
     competitor.gender = "M"
     html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
@@ -162,7 +160,7 @@ def test_gender_is_male(competitor: CompetitorType, clubs: List[ClubType]):
     assert options_gender[2].text == "M"
 
 
-def test_year_is_defined(competitor: CompetitorType, clubs: List[ClubType]):
+def test_year_is_defined(competitor: CompetitorType, clubs: list[ClubType]):
     competitor.year = 1957
     html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
@@ -170,7 +168,7 @@ def test_year_is_defined(competitor: CompetitorType, clubs: List[ClubType]):
     assert input_year.attrib["value"] == "1957"
 
 
-def test_chip_is_defined(competitor: CompetitorType, clubs: List[ClubType]):
+def test_chip_is_defined(competitor: CompetitorType, clubs: list[ClubType]):
     competitor.chip = "1234567"
     html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
 
@@ -178,7 +176,7 @@ def test_chip_is_defined(competitor: CompetitorType, clubs: List[ClubType]):
     assert input_year.attrib["value"] == "1234567"
 
 
-def test_club_id_is_2(competitor: CompetitorType, clubs: List[ClubType]):
+def test_club_id_is_2(competitor: CompetitorType, clubs: list[ClubType]):
     competitor.club_id = 2
     competitor.club_name = "OL Bundestag"
     html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))
@@ -193,7 +191,7 @@ def test_club_id_is_2(competitor: CompetitorType, clubs: List[ClubType]):
     assert option_club[2].text == "OL Bundestag"
 
 
-def test_club_id_is_3(competitor: CompetitorType, clubs: List[ClubType]):
+def test_club_id_is_3(competitor: CompetitorType, clubs: list[ClubType]):
     competitor.club_id = 3
     competitor.club_name = "OC Bundestag"
     html = etree.HTML(render.add_competitor(competitor=competitor, clubs=clubs))

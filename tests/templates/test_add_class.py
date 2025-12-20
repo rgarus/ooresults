@@ -19,7 +19,6 @@
 
 from datetime import datetime
 from datetime import timezone
-from typing import List
 
 import pytest
 from lxml import etree
@@ -32,7 +31,7 @@ from ooresults.utils import render
 
 
 @pytest.fixture()
-def courses() -> List[CourseType]:
+def courses() -> list[CourseType]:
     return [
         CourseType(
             id=3,
@@ -65,7 +64,7 @@ def class_() -> ClassType:
     )
 
 
-def test_class_is_none(courses: List[CourseType]):
+def test_class_is_none(courses: list[CourseType]):
     html = etree.HTML(render.add_class(class_=None, courses=courses))
 
     input_id = html.find(".//input[@name='id']")
@@ -124,7 +123,7 @@ def test_class_is_none(courses: List[CourseType]):
     assert input_penalty_overtime.attrib["value"] == ""
 
 
-def test_class_is_not_none(class_: ClassType, courses: List[CourseType]):
+def test_class_is_not_none(class_: ClassType, courses: list[CourseType]):
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
     input_id = html.find(".//input[@name='id']")
@@ -183,7 +182,7 @@ def test_class_is_not_none(class_: ClassType, courses: List[CourseType]):
     assert input_penalty_overtime.attrib["value"] == ""
 
 
-def test_short_name_is_defined(class_: ClassType, courses: List[CourseType]):
+def test_short_name_is_defined(class_: ClassType, courses: list[CourseType]):
     class_.short_name = "E Men"
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -191,7 +190,7 @@ def test_short_name_is_defined(class_: ClassType, courses: List[CourseType]):
     assert input_short_name.attrib["value"] == "E Men"
 
 
-def test_course_id_is_2(class_: ClassType, courses: List[CourseType]):
+def test_course_id_is_2(class_: ClassType, courses: list[CourseType]):
     class_.course_id = 2
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -205,7 +204,7 @@ def test_course_id_is_2(class_: ClassType, courses: List[CourseType]):
     assert options_course_id[2].text == "Bahn B"
 
 
-def test_course_id_is_3(class_: ClassType, courses: List[CourseType]):
+def test_course_id_is_3(class_: ClassType, courses: list[CourseType]):
     class_.course_id = 3
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -219,7 +218,7 @@ def test_course_id_is_3(class_: ClassType, courses: List[CourseType]):
     assert options_course_id[2].text == "Bahn B"
 
 
-def test_otype_is_net(class_: ClassType, courses: List[CourseType]):
+def test_otype_is_net(class_: ClassType, courses: list[CourseType]):
     class_.params.otype = "net"
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -233,7 +232,7 @@ def test_otype_is_net(class_: ClassType, courses: List[CourseType]):
     assert option_type[2].text == "Score"
 
 
-def test_otype_is_score(class_: ClassType, courses: List[CourseType]):
+def test_otype_is_score(class_: ClassType, courses: list[CourseType]):
     class_.params.otype = "score"
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -247,7 +246,7 @@ def test_otype_is_score(class_: ClassType, courses: List[CourseType]):
     assert option_type[2].text == "Score"
 
 
-def test_start_control_is_yes(class_: ClassType, courses: List[CourseType]):
+def test_start_control_is_yes(class_: ClassType, courses: list[CourseType]):
     class_.params.using_start_control = "yes"
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -261,7 +260,7 @@ def test_start_control_is_yes(class_: ClassType, courses: List[CourseType]):
     assert option_start[2].text == "Yes"
 
 
-def test_start_control_is_no(class_: ClassType, courses: List[CourseType]):
+def test_start_control_is_no(class_: ClassType, courses: list[CourseType]):
     class_.params.using_start_control = "no"
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -275,7 +274,7 @@ def test_start_control_is_no(class_: ClassType, courses: List[CourseType]):
     assert option_start[2].text == "Yes"
 
 
-def test_mass_start_is_defined(class_: ClassType, courses: List[CourseType]):
+def test_mass_start_is_defined(class_: ClassType, courses: list[CourseType]):
     class_.params.mass_start = datetime(
         year=2023,
         month=7,
@@ -291,7 +290,7 @@ def test_mass_start_is_defined(class_: ClassType, courses: List[CourseType]):
     assert input_mass_start.attrib["value"] == "14:30:00"
 
 
-def test_time_limit_is_defined(class_: ClassType, courses: List[CourseType]):
+def test_time_limit_is_defined(class_: ClassType, courses: list[CourseType]):
     class_.params.time_limit = 2700
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -299,7 +298,7 @@ def test_time_limit_is_defined(class_: ClassType, courses: List[CourseType]):
     assert input_time_limit.attrib["value"] == "45:00"
 
 
-def test_penalty_controls_is_defined(class_: ClassType, courses: List[CourseType]):
+def test_penalty_controls_is_defined(class_: ClassType, courses: list[CourseType]):
     class_.params.penalty_controls = 240
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -307,7 +306,7 @@ def test_penalty_controls_is_defined(class_: ClassType, courses: List[CourseType
     assert input_penalty_controls.attrib["value"] == "240"
 
 
-def test_penalty_overtime_is_defined(class_: ClassType, courses: List[CourseType]):
+def test_penalty_overtime_is_defined(class_: ClassType, courses: list[CourseType]):
     class_.params.penalty_overtime = 180
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -315,7 +314,7 @@ def test_penalty_overtime_is_defined(class_: ClassType, courses: List[CourseType
     assert input_penalty_overtime.attrib["value"] == "180"
 
 
-def test_apply_handicap_role_is_true(class_: ClassType, courses: List[CourseType]):
+def test_apply_handicap_role_is_true(class_: ClassType, courses: list[CourseType]):
     class_.params.apply_handicap_rule = True
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -324,7 +323,7 @@ def test_apply_handicap_role_is_true(class_: ClassType, courses: List[CourseType
     assert "checked" in input_handicap.attrib
 
 
-def test_one_voided_leg(class_: ClassType, courses: List[CourseType]):
+def test_one_voided_leg(class_: ClassType, courses: list[CourseType]):
     class_.params.voided_legs = [VoidedLeg("113", "115")]
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 
@@ -332,7 +331,7 @@ def test_one_voided_leg(class_: ClassType, courses: List[CourseType]):
     assert input_voided_legs.attrib["value"] == "113-115"
 
 
-def test_two_voided_legs(class_: ClassType, courses: List[CourseType]):
+def test_two_voided_legs(class_: ClassType, courses: list[CourseType]):
     class_.params.voided_legs = [VoidedLeg("113", "115"), VoidedLeg("114", "126")]
     html = etree.HTML(render.add_class(class_=class_, courses=courses))
 

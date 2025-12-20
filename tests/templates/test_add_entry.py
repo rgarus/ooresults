@@ -20,8 +20,6 @@
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from typing import Dict
-from typing import List
 
 import pytest
 from lxml import etree
@@ -42,7 +40,7 @@ S1 = datetime(2021, 8, 19, 18, 43, 33, tzinfo=timezone(timedelta(hours=2)))
 
 
 @pytest.fixture()
-def classes() -> List[ClassType]:
+def classes() -> list[ClassType]:
     return [
         ClassType(
             id=7,
@@ -64,7 +62,7 @@ def classes() -> List[ClassType]:
 
 
 @pytest.fixture()
-def clubs() -> List[ClubType]:
+def clubs() -> list[ClubType]:
     return [
         ClubType(
             id=3,
@@ -78,7 +76,7 @@ def clubs() -> List[ClubType]:
 
 
 @pytest.fixture()
-def unassigned_results() -> Dict[int, str]:
+def unassigned_results() -> dict[int, str]:
     return {
         15: "15:34:12   --   34578",
         37: "15:18:19   --   34578",
@@ -87,7 +85,7 @@ def unassigned_results() -> Dict[int, str]:
 
 
 @pytest.fixture()
-def event_fields() -> List[str]:
+def event_fields() -> list[str]:
     return []
 
 
@@ -102,7 +100,7 @@ def entry() -> EntryType:
     )
 
 
-def test_entry_is_none(classes: List[ClassType], clubs: List[ClubType]):
+def test_entry_is_none(classes: list[ClassType], clubs: list[ClubType]):
     html = etree.HTML(
         render.add_entry(
             entry=None,
@@ -190,8 +188,8 @@ def test_entry_is_none(classes: List[ClassType], clubs: List[ClubType]):
 
 def test_entry_is_not_none(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     html = etree.HTML(
         render.add_entry(
@@ -280,8 +278,8 @@ def test_entry_is_not_none(
 
 def test_competitor_id_is_defined(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.competitor_id = 3
     html = etree.HTML(
@@ -301,8 +299,8 @@ def test_competitor_id_is_defined(
 
 def test_first_name_is_defined(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.first_name = "Angela"
     html = etree.HTML(
@@ -321,8 +319,8 @@ def test_first_name_is_defined(
 
 def test_last_name_is_defined(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.last_name = "Merkel"
     html = etree.HTML(
@@ -341,8 +339,8 @@ def test_last_name_is_defined(
 
 def test_gender_is_unknown(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.gender = ""
     html = etree.HTML(
@@ -367,8 +365,8 @@ def test_gender_is_unknown(
 
 def test_gender_is_female(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.gender = "F"
     html = etree.HTML(
@@ -393,8 +391,8 @@ def test_gender_is_female(
 
 def test_gender_is_male(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.gender = "M"
     html = etree.HTML(
@@ -419,8 +417,8 @@ def test_gender_is_male(
 
 def test_year_is_defined(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.year = 1957
     html = etree.HTML(
@@ -439,8 +437,8 @@ def test_year_is_defined(
 
 def test_class_id_is_7(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.class_id = 7
     entry.class_name = "Elite Men"
@@ -464,8 +462,8 @@ def test_class_id_is_7(
 
 def test_class_id_is_3(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.class_id = 8
     entry.class_name = "Elite Women"
@@ -489,8 +487,8 @@ def test_class_id_is_3(
 
 def test_not_competing_is_true(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.not_competing = True
     html = etree.HTML(
@@ -510,8 +508,8 @@ def test_not_competing_is_true(
 
 def test_chip_is_defined(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.chip = "1234567"
     html = etree.HTML(
@@ -530,8 +528,8 @@ def test_chip_is_defined(
 
 def test_club_id_is_2(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.club_id = 2
     entry.club_name = "OL Bundestag"
@@ -557,8 +555,8 @@ def test_club_id_is_2(
 
 def test_club_id_is_3(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.club_id = 3
     entry.club_name = "OC Bundestag"
@@ -584,8 +582,8 @@ def test_club_id_is_3(
 
 def test_with_one_field(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.fields = {0: "1024"}
     html = etree.HTML(
@@ -604,8 +602,8 @@ def test_with_one_field(
 
 def test_with_two_fields(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.fields = {0: "1024", 1: "Thüringen"}
     html = etree.HTML(
@@ -627,8 +625,8 @@ def test_with_two_fields(
 
 def test_start_time_is_defined(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.start = PersonRaceStart(start_time=S1)
     html = etree.HTML(
@@ -661,8 +659,8 @@ def test_start_time_is_defined(
 )
 def test_status(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
     status: ResultStatus,
     position: int,
 ):
@@ -699,8 +697,8 @@ def test_status(
 
 def test_without_result_and_without_unassigned_results(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.result = PersonRaceResult()
     html = etree.HTML(
@@ -721,9 +719,9 @@ def test_without_result_and_without_unassigned_results(
 
 def test_without_result_but_with_unassigned_results(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
-    unassigned_results: Dict[int, str],
+    classes: list[ClassType],
+    clubs: list[ClubType],
+    unassigned_results: dict[int, str],
 ):
     entry.result = PersonRaceResult()
     html = etree.HTML(
@@ -753,8 +751,8 @@ def test_without_result_but_with_unassigned_results(
 
 def test_with_results_but_without_unassigned_results(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
+    classes: list[ClassType],
+    clubs: list[ClubType],
 ):
     entry.result = PersonRaceResult(
         start_time=datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))),
@@ -809,9 +807,9 @@ def test_with_results_but_without_unassigned_results(
 
 def test_with_results_and_with_unassigned_results(
     entry: EntryType,
-    classes: List[ClassType],
-    clubs: List[ClubType],
-    unassigned_results: Dict[int, str],
+    classes: list[ClassType],
+    clubs: list[ClubType],
+    unassigned_results: dict[int, str],
 ):
     entry.result = PersonRaceResult(
         start_time=datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))),

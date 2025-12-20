@@ -19,7 +19,6 @@
 
 import dataclasses
 from datetime import datetime
-from typing import List
 from typing import Optional
 
 import caseconverter
@@ -43,7 +42,7 @@ class ClassParams:
     penalty_controls: Optional[int] = None
     penalty_overtime: Optional[int] = None
     apply_handicap_rule: bool = False
-    voided_legs: List[VoidedLeg] = dataclasses.field(default_factory=list)
+    voided_legs: list[VoidedLeg] = dataclasses.field(default_factory=list)
 
     #
     # possible values for using_start_control

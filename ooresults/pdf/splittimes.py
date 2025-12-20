@@ -18,9 +18,7 @@
 
 
 from datetime import datetime
-from typing import List
 from typing import Optional
-from typing import Tuple
 from typing import Union
 
 from ooresults.otypes.class_type import ClassInfoType
@@ -125,7 +123,7 @@ def format_result(result: PersonRaceResult, standard: bool):
 
 def create_pdf(
     event: EventType,
-    results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
+    results: list[tuple[ClassInfoType, list[RankedEntryType]]],
     landscape: bool = False,
 ) -> bytes:
     # Instantiation of inherited class
@@ -248,7 +246,7 @@ def create_pdf(
 
                 sp = 0
 
-                def print_line_1(sp: int, line_1: List[str]) -> None:
+                def print_line_1(sp: int, line_1: list[str]) -> None:
                     if sp <= nr_split_times:
                         running_time = result.extensions.get(
                             "running_time", result.time
@@ -271,7 +269,7 @@ def create_pdf(
                     for i in line_1:
                         cell(pdf=doc, w=10, h=None, txt=i, align="R")
 
-                def print_line_2(sp: int, line_2: List[str]) -> None:
+                def print_line_2(sp: int, line_2: list[str]) -> None:
                     if sp <= nr_split_times:
                         doc.ln()
                         # first line: rank, lastname+firstname, time, splittimes
@@ -283,7 +281,7 @@ def create_pdf(
                     for i in line_2:
                         cell(pdf=doc, w=10, h=None, txt=i, align="R")
 
-                def print_line_3(sp: int, line_3: List[str]) -> None:
+                def print_line_3(sp: int, line_3: list[str]) -> None:
                     doc.ln()
                     pre(pdf=doc)
 

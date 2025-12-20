@@ -17,15 +17,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 from ooresults import model
 from ooresults.model import cached_result
 from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.repo.repo import TransactionMode
 
 
-def get_competitors() -> List[CompetitorType]:
+def get_competitors() -> list[CompetitorType]:
     with model.db.transaction():
         return model.db.get_competitors()
 

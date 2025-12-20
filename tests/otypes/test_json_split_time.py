@@ -20,7 +20,6 @@
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from typing import Dict
 
 from pytest import fixture
 
@@ -34,7 +33,7 @@ def c_min() -> SplitTime:
 
 
 @fixture
-def d_min() -> Dict:
+def d_min() -> dict:
     return {
         "controlCode": "144",
         "legVoided": False,
@@ -46,7 +45,7 @@ def j_min() -> str:
     return "{" '"controlCode":"144",' '"legVoided":false' "}"
 
 
-def test_min_to_dict(c_min: SplitTime, d_min: Dict):
+def test_min_to_dict(c_min: SplitTime, d_min: dict):
     assert c_min.to_dict() == d_min
 
 
@@ -54,7 +53,7 @@ def test_min_to_json(c_min: SplitTime, j_min: str):
     assert c_min.to_json() == j_min
 
 
-def test_min_from_dict(d_min: Dict, c_min: SplitTime):
+def test_min_from_dict(d_min: dict, c_min: SplitTime):
     assert SplitTime.from_dict(d_min) == c_min
 
 
@@ -77,7 +76,7 @@ def c_max() -> SplitTime:
 
 
 @fixture
-def d_max() -> Dict:
+def d_max() -> dict:
     return {
         "controlCode": "257",
         "punchTime": "1970-01-01T00:00:00+00:00",
@@ -102,7 +101,7 @@ def j_max() -> str:
     )
 
 
-def test_max_to_dict(c_max: SplitTime, d_max: Dict):
+def test_max_to_dict(c_max: SplitTime, d_max: dict):
     assert c_max.to_dict() == d_max
 
 
@@ -110,7 +109,7 @@ def test_max_to_json(c_max: SplitTime, j_max: str):
     assert c_max.to_json() == j_max
 
 
-def test_max_from_dict(d_max: Dict, c_max: SplitTime):
+def test_max_from_dict(d_max: dict, c_max: SplitTime):
     assert SplitTime.from_dict(d_max) == c_max
 
 

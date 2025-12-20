@@ -18,7 +18,6 @@
 
 
 import dataclasses
-from typing import List
 from typing import Optional
 
 
@@ -29,4 +28,4 @@ class CourseType:
     name: str
     length: Optional[float] = None
     climb: Optional[float] = None
-    controls: List[str] = dataclasses.field(default_factory=list)
+    controls: list[str] = dataclasses.field(default_factory=list)

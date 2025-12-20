@@ -19,7 +19,6 @@
 
 import datetime
 from datetime import timezone
-from typing import List
 
 import pytest
 from lxml import etree
@@ -49,7 +48,7 @@ def event() -> EventType:
 
 
 @pytest.fixture()
-def classes() -> List[ClassInfoType]:
+def classes() -> list[ClassInfoType]:
     return [
         ClassInfoType(
             id=109,
@@ -120,7 +119,7 @@ def test_class_list_is_empty(event: EventType):
 S1 = datetime.datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
 
 
-def test_class_list_is_not_empty(event: EventType, classes: List[ClassInfoType]):
+def test_class_list_is_not_empty(event: EventType, classes: list[ClassInfoType]):
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
     assert html.find(".//td[@id='clas.event_name']").text == "Test-Lauf 1"
@@ -200,7 +199,7 @@ def test_class_list_is_not_empty(event: EventType, classes: List[ClassInfoType])
     ]
 
 
-def test_short_name_is_defined(event: EventType, classes: List[ClassInfoType]):
+def test_short_name_is_defined(event: EventType, classes: list[ClassInfoType]):
     classes[0].short_name = "E Men"
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
@@ -208,7 +207,7 @@ def test_short_name_is_defined(event: EventType, classes: List[ClassInfoType]):
     assert elem.text == "E Men"
 
 
-def test_course_is_defined(event: EventType, classes: List[ClassInfoType]):
+def test_course_is_defined(event: EventType, classes: list[ClassInfoType]):
     classes[0].course_id = 2
     classes[0].course_name = "Bahn A"
     html = etree.HTML(render.classes_table(event=event, classes=classes))
@@ -217,7 +216,7 @@ def test_course_is_defined(event: EventType, classes: List[ClassInfoType]):
     assert elem.text == "Bahn A"
 
 
-def test_one_voided_leg(event: EventType, classes: List[ClassInfoType]):
+def test_one_voided_leg(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.voided_legs = [VoidedLeg("113", "115")]
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
@@ -225,7 +224,7 @@ def test_one_voided_leg(event: EventType, classes: List[ClassInfoType]):
     assert elem.text == "113-115"
 
 
-def test_two_voided_legs(event: EventType, classes: List[ClassInfoType]):
+def test_two_voided_legs(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.voided_legs = [VoidedLeg("113", "115"), VoidedLeg("114", "126")]
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
@@ -233,7 +232,7 @@ def test_two_voided_legs(event: EventType, classes: List[ClassInfoType]):
     assert elem.text == "113-115, 114-126"
 
 
-def test_otype_is_net(event: EventType, classes: List[ClassInfoType]):
+def test_otype_is_net(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.otype = "net"
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
@@ -241,7 +240,7 @@ def test_otype_is_net(event: EventType, classes: List[ClassInfoType]):
     assert elem.text == "Net"
 
 
-def test_otype_is_score(event: EventType, classes: List[ClassInfoType]):
+def test_otype_is_score(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.otype = "score"
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
@@ -249,7 +248,7 @@ def test_otype_is_score(event: EventType, classes: List[ClassInfoType]):
     assert elem.text == "Score"
 
 
-def test_start_control_is_yes(event: EventType, classes: List[ClassInfoType]):
+def test_start_control_is_yes(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.using_start_control = "yes"
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
@@ -257,7 +256,7 @@ def test_start_control_is_yes(event: EventType, classes: List[ClassInfoType]):
     assert elem.text == "Yes"
 
 
-def test_start_control_is_no(event: EventType, classes: List[ClassInfoType]):
+def test_start_control_is_no(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.using_start_control = "no"
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
@@ -265,7 +264,7 @@ def test_start_control_is_no(event: EventType, classes: List[ClassInfoType]):
     assert elem.text == "No"
 
 
-def test_apply_handicap_role_is_true(event: EventType, classes: List[ClassInfoType]):
+def test_apply_handicap_role_is_true(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.apply_handicap_rule = True
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
@@ -273,7 +272,7 @@ def test_apply_handicap_role_is_true(event: EventType, classes: List[ClassInfoTy
     assert elem.text == "Yes"
 
 
-def test_mass_start_is_defined(event: EventType, classes: List[ClassInfoType]):
+def test_mass_start_is_defined(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.mass_start = datetime.datetime(
         year=2023,
         month=7,
@@ -289,7 +288,7 @@ def test_mass_start_is_defined(event: EventType, classes: List[ClassInfoType]):
     assert elem.text == "14:30:00"
 
 
-def test_time_limit_is_defined(event: EventType, classes: List[ClassInfoType]):
+def test_time_limit_is_defined(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.time_limit = 2700
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
@@ -297,7 +296,7 @@ def test_time_limit_is_defined(event: EventType, classes: List[ClassInfoType]):
     assert elem.text == "45:00"
 
 
-def test_penalty_controls_is_defined(event: EventType, classes: List[ClassInfoType]):
+def test_penalty_controls_is_defined(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.penalty_controls = 240
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 
@@ -305,7 +304,7 @@ def test_penalty_controls_is_defined(event: EventType, classes: List[ClassInfoTy
     assert elem.text == "240"
 
 
-def test_penalty_overtime_is_defined(event: EventType, classes: List[ClassInfoType]):
+def test_penalty_overtime_is_defined(event: EventType, classes: list[ClassInfoType]):
     classes[0].params.penalty_overtime = 180
     html = etree.HTML(render.classes_table(event=event, classes=classes))
 

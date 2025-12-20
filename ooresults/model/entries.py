@@ -20,8 +20,6 @@
 import copy
 import datetime
 import enum
-from typing import Dict
-from typing import List
 from typing import Optional
 from typing import Union
 
@@ -38,14 +36,14 @@ from ooresults.otypes.result_type import SplitTime
 from ooresults.repo.repo import TransactionMode
 
 
-def import_entries(event_id: int, entries: List[Dict]) -> None:
+def import_entries(event_id: int, entries: list[dict]) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.import_entries(event_id=event_id, entries=entries)
 
     cached_result.clear_cache(event_id=event_id)
 
 
-def get_entries(event_id: int) -> List[EntryType]:
+def get_entries(event_id: int) -> list[EntryType]:
     with model.db.transaction():
         return model.db.get_entries(event_id=event_id)
 
@@ -67,7 +65,7 @@ def add_or_update_entry(
     club_id: Optional[int],
     not_competing: bool,
     chip: str,
-    fields: Dict[int, str],
+    fields: dict[int, str],
     status: ResultStatus,
     start_time: Optional[datetime.datetime],
     result_id: Optional[int],

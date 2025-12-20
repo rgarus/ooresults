@@ -17,9 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
 from typing import Optional
-from typing import Tuple
 from typing import Union
 
 from ooresults.otypes.class_type import ClassInfoType
@@ -32,7 +30,7 @@ from ooresults.utils import globals
 
 def create_pdf(
     event: EventType,
-    results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
+    results: list[tuple[ClassInfoType, list[RankedEntryType]]],
     include_dns: bool = False,
     landscape: bool = True,
 ) -> bytes:
@@ -76,7 +74,7 @@ def create_pdf(
     def print_points(width: int, points: Optional[float], status: ResultStatus) -> None:
         txt = ""
         if points is not None and status == ResultStatus.OK:
-            txt = "{:.2f}".format(points)
+            txt = f"{points:.2f}"
         cell(w=width, h=None, txt=txt, align="R")
 
     def print_points_or_status(
@@ -84,7 +82,7 @@ def create_pdf(
     ) -> None:
         txt = pdf.MAP_STATUS[status]
         if points is not None and status == ResultStatus.OK:
-            txt = "{:.2f}".format(points)
+            txt = f"{points:.2f}"
         cell(w=width, h=None, txt=txt, align="R")
 
     first_class = True

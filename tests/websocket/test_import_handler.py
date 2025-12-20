@@ -24,9 +24,9 @@ import json
 import pathlib
 import tempfile
 import threading
+from collections.abc import Iterator
 from datetime import timedelta
 from datetime import timezone
-from typing import Iterator
 
 import jsonschema
 import pytest
@@ -52,7 +52,7 @@ data_path = (
     / "schema"
     / "streaming_result.json"
 )
-with open(data_path, "r") as file:
+with open(data_path) as file:
     schema_streaming_result = json.loads(file.read())
 
 

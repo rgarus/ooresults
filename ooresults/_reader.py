@@ -27,7 +27,6 @@ import queue
 import ssl
 import threading
 import time
-from typing import Dict
 from typing import Literal
 from typing import Optional
 from typing import TypeAlias
@@ -119,7 +118,7 @@ class WebSocketClient(threading.Thread):
         entry_type: EntryType,
         entry_time: datetime.datetime,
         card: Optional[str] = None,
-    ) -> Dict:
+    ) -> dict:
         self.entry_type = entry_type
         self.entry_time = entry_time
         self.card = card
@@ -132,7 +131,7 @@ class WebSocketClient(threading.Thread):
             item["controlCard"] = self.card
         return self.send_and_receive(item=item)
 
-    def send_and_receive(self, item: Dict, timeout: Optional[int] = None) -> Dict:
+    def send_and_receive(self, item: dict, timeout: Optional[int] = None) -> dict:
         self.clear()
         data = bz2.compress(json.dumps(item).encode())
         self.send(data)
@@ -144,7 +143,7 @@ class WebSocketClient(threading.Thread):
         else:
             print("Not connected to server - could not send data")
 
-    def receive(self, timeout: Optional[int] = None) -> Dict:
+    def receive(self, timeout: Optional[int] = None) -> dict:
         if self.opened:
             return json.loads(self.queue.get(timeout=timeout))
         else:
@@ -183,14 +182,14 @@ class Cardreader:
     data_path = (
         pathlib.Path(__file__).resolve().parent / "schema" / "cardreader_log.json"
     )
-    with open(data_path, "r") as f:
+    with open(data_path) as f:
         schema_cardreader_log = json.loads(f.read())
 
     def __init__(self, webSocketClient: WebSocketClient, serial_number: str = ""):
         self.webSocketClient = webSocketClient
         self.serial_number = serial_number
 
-    def convert(self, card_type: str, card_data: Dict) -> Dict:
+    def convert(self, card_type: str, card_data: dict) -> dict:
         item = {
             "entryType": "cardRead",
             "entryTime": datetime.datetime.now().astimezone().isoformat(),
@@ -215,7 +214,7 @@ class Cardreader:
 
         return item
 
-    def protocol(self, item: Dict) -> None:
+    def protocol(self, item: dict) -> None:
         date_str = datetime.date.today().isoformat()
         with open(f"cardreader-{date_str}.log", "a") as f:
             f.write(json.dumps(item) + "\n")
@@ -339,7 +338,7 @@ class Cardreader:
 
     def process_log(self, cardreader_log: pathlib.Path) -> None:
         send_all_entries = False
-        with open(cardreader_log, "r") as f:
+        with open(cardreader_log) as f:
             r = self.webSocketClient.set_state(
                 entry_type="readerConnected",
                 entry_time=datetime.datetime.now(),

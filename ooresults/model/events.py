@@ -19,7 +19,6 @@
 
 import asyncio
 import datetime
-from typing import List
 from typing import Optional
 
 from ooresults import model
@@ -28,7 +27,7 @@ from ooresults.otypes.event_type import EventType
 from ooresults.repo.repo import TransactionMode
 
 
-def get_events() -> List[EventType]:
+def get_events() -> list[EventType]:
     with model.db.transaction():
         events = model.db.get_events()
     events.sort(key=lambda e: e.date, reverse=True)
@@ -46,7 +45,7 @@ def add_event(
     key: Optional[str],
     publish: bool,
     series: Optional[str],
-    fields: List[str],
+    fields: list[str],
     streaming_address: Optional[str] = None,
     streaming_key: Optional[str] = None,
     streaming_enabled: Optional[bool] = None,
@@ -90,7 +89,7 @@ def update_event(
     key: Optional[str],
     publish: bool,
     series: Optional[str],
-    fields: List[str],
+    fields: list[str],
     streaming_address: Optional[str] = None,
     streaming_key: Optional[str] = None,
     streaming_enabled: Optional[bool] = None,

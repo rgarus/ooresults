@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 import pytest
 from lxml import etree
 
@@ -27,7 +25,7 @@ from ooresults.utils import render
 
 
 @pytest.fixture()
-def clubs() -> List[ClubType]:
+def clubs() -> list[ClubType]:
     return [
         ClubType(
             id=145,
@@ -57,7 +55,7 @@ def test_club_list_is_empty():
     assert len(rows) == 0
 
 
-def test_club_list_is_not_empty(clubs: List[ClubType]):
+def test_club_list_is_not_empty(clubs: list[ClubType]):
     html = etree.HTML(render.clubs_table(clubs=clubs))
 
     # headers

@@ -118,11 +118,10 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
 
             result_time = ""
             if e.result.time is not None:
-                result_time = "{:02d}:{:02d}:{:02d}".format(
-                    e.result.time // 3600,
-                    e.result.time % 3600 // 60,
-                    e.result.time % 60,
-                )
+                h = e.result.time // 3600
+                m = e.result.time % 3600 // 60
+                s = e.result.time % 60
+                result_time = f"{h}:{m:02d}:{s:02d}"
 
             status = STATUS_MAP.get(e.result.status, "")
 

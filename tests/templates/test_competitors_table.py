@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 import pytest
 from lxml import etree
 
@@ -27,7 +25,7 @@ from ooresults.utils import render
 
 
 @pytest.fixture()
-def competitors() -> List[CompetitorType]:
+def competitors() -> list[CompetitorType]:
     return [
         CompetitorType(
             id=112,
@@ -84,7 +82,7 @@ def test_competitor_list_is_empty():
     assert len(rows) == 0
 
 
-def test_competitor_list_is_not_empty(competitors: List[CompetitorType]):
+def test_competitor_list_is_not_empty(competitors: list[CompetitorType]):
     html = etree.HTML(render.competitors_table(competitors=competitors))
 
     # headers
@@ -141,7 +139,7 @@ def test_competitor_list_is_not_empty(competitors: List[CompetitorType]):
     ]
 
 
-def test_gender_is_unknown(competitors: List[CompetitorType]):
+def test_gender_is_unknown(competitors: list[CompetitorType]):
     competitors[0].gender = ""
     html = etree.HTML(render.competitors_table(competitors=competitors))
 
@@ -149,7 +147,7 @@ def test_gender_is_unknown(competitors: List[CompetitorType]):
     assert elem.text is None
 
 
-def test_gender_is_female(competitors: List[CompetitorType]):
+def test_gender_is_female(competitors: list[CompetitorType]):
     competitors[0].gender = "F"
     html = etree.HTML(render.competitors_table(competitors=competitors))
 
@@ -157,7 +155,7 @@ def test_gender_is_female(competitors: List[CompetitorType]):
     assert elem.text == "F"
 
 
-def test_gender_is_male(competitors: List[CompetitorType]):
+def test_gender_is_male(competitors: list[CompetitorType]):
     competitors[0].gender = "M"
     html = etree.HTML(render.competitors_table(competitors=competitors))
 
@@ -165,7 +163,7 @@ def test_gender_is_male(competitors: List[CompetitorType]):
     assert elem.text == "M"
 
 
-def test_year_is_defined(competitors: List[CompetitorType]):
+def test_year_is_defined(competitors: list[CompetitorType]):
     competitors[0].year = 1957
     html = etree.HTML(render.competitors_table(competitors=competitors))
 
@@ -173,7 +171,7 @@ def test_year_is_defined(competitors: List[CompetitorType]):
     assert elem.text == "1957"
 
 
-def test_chip_is_defined(competitors: List[CompetitorType]):
+def test_chip_is_defined(competitors: list[CompetitorType]):
     competitors[0].chip = "1234567"
     html = etree.HTML(render.competitors_table(competitors=competitors))
 
@@ -181,7 +179,7 @@ def test_chip_is_defined(competitors: List[CompetitorType]):
     assert elem.text == "1234567"
 
 
-def test_club_is_defined(competitors: List[CompetitorType]):
+def test_club_is_defined(competitors: list[CompetitorType]):
     competitors[0].club_id = 2
     competitors[0].club_name = "OL Bundestag"
     html = etree.HTML(render.competitors_table(competitors=competitors))

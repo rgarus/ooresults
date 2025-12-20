@@ -19,8 +19,6 @@
 
 import datetime
 from decimal import Decimal
-from typing import List
-from typing import Tuple
 
 import pytest
 from lxml import etree
@@ -32,7 +30,7 @@ from ooresults.utils import render
 
 
 @pytest.fixture()
-def events() -> List[EventType]:
+def events() -> list[EventType]:
     return [
         EventType(
             id=5,
@@ -65,7 +63,7 @@ def events() -> List[EventType]:
 
 
 @pytest.fixture()
-def results() -> List[Tuple[str, List[PersonSeriesResult]]]:
+def results() -> list[tuple[str, list[PersonSeriesResult]]]:
     return [
         (
             "Bahn A - Frauen",
@@ -158,8 +156,8 @@ def results() -> List[Tuple[str, List[PersonSeriesResult]]]:
 
 
 def test_series_results(
-    events: List[EventType],
-    results: List[Tuple[str, List[PersonSeriesResult]]],
+    events: list[EventType],
+    results: list[tuple[str, list[PersonSeriesResult]]],
 ):
     html = etree.HTML(render.series_table(events=events, results=results))
 

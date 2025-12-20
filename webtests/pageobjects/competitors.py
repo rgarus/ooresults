@@ -18,7 +18,6 @@
 
 
 from pathlib import Path
-from typing import List
 from typing import Optional
 from typing import TypeVar
 
@@ -67,10 +66,10 @@ class AddCompetitorDialog:
         assert chip == TextControl(page=self.page, id="com_chip").get_text()
         assert club == ComboboxControl(page=self.page, id="com_clubId").selected_text()
 
-    def get_gender_list(self) -> List[str]:
+    def get_gender_list(self) -> list[str]:
         return ComboboxControl(page=self.page, id="com_gender").values()
 
-    def get_club_list(self) -> List[str]:
+    def get_club_list(self) -> list[str]:
         return ComboboxControl(page=self.page, id="com_clubId").values()
 
     def enter_values(

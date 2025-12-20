@@ -20,10 +20,7 @@
 import pathlib
 from datetime import timedelta
 from enum import Enum
-from typing import Dict
-from typing import List
 from typing import Optional
-from typing import Tuple
 
 import iso8601
 from lxml import etree
@@ -68,7 +65,7 @@ class ResultListStatus(Enum):
 
 def create_result_list(
     event: EventType,
-    class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
+    class_results: list[tuple[ClassInfoType, list[RankedEntryType]]],
     status: Optional[ResultListStatus] = None,
 ) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
@@ -244,7 +241,7 @@ SPSTATUS_MAP = {
 
 def parse_result_list(
     content: bytes,
-) -> Tuple[Dict, List[Dict], Optional[ResultListStatus]]:
+) -> tuple[dict, list[dict], Optional[ResultListStatus]]:
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)

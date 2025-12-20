@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
@@ -34,11 +32,11 @@ class Actions:
         self.page = page
         self.id = id
 
-    def actions(self) -> List[Action]:
+    def actions(self) -> list[Action]:
         elem = self.page.find_element(By.ID, self.id)
         return [Action(b) for b in elem.find_elements(By.XPATH, "button")]
 
-    def texts(self) -> List[str]:
+    def texts(self) -> list[str]:
         texts = []
         for action in self.actions():
             texts.append(action.text())

@@ -19,7 +19,6 @@
 
 import dataclasses
 from decimal import Decimal
-from typing import Dict
 from typing import Optional
 
 
@@ -44,6 +43,6 @@ class PersonSeriesResult:
     first_name: str
     year: Optional[int]
     club_name: Optional[str]
-    races: Dict[int, Points]
+    races: dict[int, Points]
     total_points: Decimal
     rank: Optional[int]

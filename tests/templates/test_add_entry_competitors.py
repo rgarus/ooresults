@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 import pytest
 from lxml import etree
 
@@ -27,7 +25,7 @@ from ooresults.utils import render
 
 
 @pytest.fixture()
-def competitors() -> List[CompetitorType]:
+def competitors() -> list[CompetitorType]:
     return [
         CompetitorType(
             id=7,
@@ -52,7 +50,7 @@ def competitors() -> List[CompetitorType]:
     ]
 
 
-def test_competitor_list_is_not_empty(competitors: List[CompetitorType]):
+def test_competitor_list_is_not_empty(competitors: list[CompetitorType]):
     html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
     trs = html.findall(".//tbody/tr")
@@ -78,7 +76,7 @@ def test_competitor_list_is_not_empty(competitors: List[CompetitorType]):
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_unknown(competitors: List[CompetitorType], row: int):
+def test_gender_is_unknown(competitors: list[CompetitorType], row: int):
     competitors[row - 1].gender = ""
     html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
@@ -87,7 +85,7 @@ def test_gender_is_unknown(competitors: List[CompetitorType], row: int):
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_female(competitors: List[CompetitorType], row: int):
+def test_gender_is_female(competitors: list[CompetitorType], row: int):
     competitors[row - 1].gender = "F"
     html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
@@ -99,7 +97,7 @@ def test_gender_is_female(competitors: List[CompetitorType], row: int):
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_male(competitors: List[CompetitorType], row: int):
+def test_gender_is_male(competitors: list[CompetitorType], row: int):
     competitors[row - 1].gender = "M"
     html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
@@ -111,7 +109,7 @@ def test_gender_is_male(competitors: List[CompetitorType], row: int):
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_year_is_defined(competitors: List[CompetitorType], row: int):
+def test_year_is_defined(competitors: list[CompetitorType], row: int):
     competitors[row - 1].year = 1957
     html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
@@ -123,7 +121,7 @@ def test_year_is_defined(competitors: List[CompetitorType], row: int):
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_chip_is_defined(competitors: List[CompetitorType], row: int):
+def test_chip_is_defined(competitors: list[CompetitorType], row: int):
     competitors[row - 1].chip = "1234567"
     html = etree.HTML(render.add_entry_competitors(competitors=competitors))
 
@@ -135,7 +133,7 @@ def test_chip_is_defined(competitors: List[CompetitorType], row: int):
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_club_is_defined(competitors: List[CompetitorType], row: int):
+def test_club_is_defined(competitors: list[CompetitorType], row: int):
     competitors[row - 1].club_id = 2
     competitors[row - 1].club_name = "OL Bundestag"
     html = etree.HTML(render.add_entry_competitors(competitors=competitors))

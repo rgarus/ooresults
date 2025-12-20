@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
@@ -34,11 +32,11 @@ class Tabs:
     def __init__(self, page: webdriver.Remote):
         self.page = page
 
-    def tabs(self) -> List[Tab]:
+    def tabs(self) -> list[Tab]:
         elem = self.page.find_element(By.ID, "tabs")
         return [Tab(b) for b in elem.find_elements(By.XPATH, "button")]
 
-    def texts(self) -> List[str]:
+    def texts(self) -> list[str]:
         texts = []
         for tab in self.tabs():
             texts.append(tab.text())

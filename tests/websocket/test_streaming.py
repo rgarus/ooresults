@@ -20,7 +20,6 @@
 import asyncio
 import datetime
 from typing import Any
-from typing import List
 from unittest import mock
 
 import pytest
@@ -159,7 +158,7 @@ class C:
         self.value = value
 
 
-def check_calls(parent: mock.MagicMock, calls: List[C]):
+def check_calls(parent: mock.MagicMock, calls: list[C]):
     for i, c in enumerate(parent.mock_calls):
         name, args, kwargs = c
         print(c, name, args, kwargs)
@@ -183,7 +182,7 @@ def check_calls(parent: mock.MagicMock, calls: List[C]):
     assert parent.mock_sleep.await_count == len(c)
 
 
-def value_calls(parent: mock.MagicMock, calls: List[C]):
+def value_calls(parent: mock.MagicMock, calls: list[C]):
     for i, c in enumerate(calls):
         if c.name == "mock_connect":
             if c.value == ClientConnection:

@@ -18,8 +18,6 @@
 
 
 import pathlib
-from typing import Dict
-from typing import List
 
 from lxml import etree
 from lxml.builder import ElementMaker
@@ -35,7 +33,7 @@ iof_namespace = "http://www.orienteering.org/datastandard/3.0"
 namespaces = {None: iof_namespace}
 
 
-def create_class_list(classes: List[ClassInfoType]) -> bytes:
+def create_class_list(classes: list[ClassInfoType]) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
     CLASSLIST = E.ClassList
@@ -64,7 +62,7 @@ def create_class_list(classes: List[ClassInfoType]) -> bytes:
     )
 
 
-def parse_class_list(content: bytes) -> List[Dict]:
+def parse_class_list(content: bytes) -> list[dict]:
     # Class: Dict of {'name': str, 'short_name': Optional[str]}
 
     root = etree.XML(content)

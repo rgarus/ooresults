@@ -19,7 +19,6 @@
 
 import datetime
 from datetime import timezone
-from typing import List
 from typing import Optional
 
 import pytest
@@ -401,7 +400,7 @@ def test_class_results_list_with_two_classes_and_with_results(
     ]
 
 
-def check_header(html: etree.Element, values: List[str]) -> None:
+def check_header(html: etree.Element, values: list[str]) -> None:
     table = html.find(".//div[@id='res.result']/table")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
@@ -417,7 +416,7 @@ def check_header(html: etree.Element, values: List[str]) -> None:
     assert [td.text for td in headers[1].findall(".//th")] == values
 
 
-def check_row(html: etree.Element, values: List[Optional[str]]) -> None:
+def check_row(html: etree.Element, values: list[Optional[str]]) -> None:
     table = html.find(".//div[@id='res.result']/table")
     assert [child.tag for child in table] == ["thead", "tbody"]
 

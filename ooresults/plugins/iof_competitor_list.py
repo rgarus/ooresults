@@ -18,8 +18,6 @@
 
 
 import pathlib
-from typing import Dict
-from typing import List
 
 from lxml import etree
 from lxml.builder import ElementMaker
@@ -35,7 +33,7 @@ iof_namespace = "http://www.orienteering.org/datastandard/3.0"
 namespaces = {None: iof_namespace}
 
 
-def create_competitor_list(competitors: List[CompetitorType]) -> bytes:
+def create_competitor_list(competitors: list[CompetitorType]) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
     COMPETITORLIST = E.CompetitorList
@@ -79,7 +77,7 @@ def create_competitor_list(competitors: List[CompetitorType]) -> bytes:
     )
 
 
-def parse_competitor_list(content: bytes) -> List[Dict]:
+def parse_competitor_list(content: bytes) -> list[dict]:
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)

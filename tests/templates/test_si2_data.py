@@ -18,7 +18,6 @@
 
 
 import datetime
-from typing import List
 from typing import Optional
 
 import pytest
@@ -445,7 +444,7 @@ def test_stream_status(event: EventType, status: Status, text: str, color: str):
     ],
 )
 def test_missing_controls_if_status_is_not_ok(
-    event: EventType, missing_controls: List[str], text: str
+    event: EventType, missing_controls: list[str], text: str
 ):
     messages = [
         {
@@ -517,7 +516,7 @@ def test_missing_controls_if_status_is_not_ok(
     ],
 )
 def test_missing_controls_if_status_is_ok(
-    event: EventType, missing_controls: List[str], text: str
+    event: EventType, missing_controls: list[str], text: str
 ):
     messages = [
         {

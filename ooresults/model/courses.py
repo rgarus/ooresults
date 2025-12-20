@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Dict
-from typing import List
 from typing import Optional
 
 from ooresults import model
@@ -28,7 +26,7 @@ from ooresults.otypes.course_type import CourseType
 from ooresults.repo.repo import TransactionMode
 
 
-def get_courses(event_id: int) -> List[CourseType]:
+def get_courses(event_id: int) -> list[CourseType]:
     with model.db.transaction():
         return model.db.get_courses(event_id=event_id)
 
@@ -39,7 +37,7 @@ def get_course(id: int) -> CourseType:
 
 
 def import_courses(
-    event_id: int, courses: List[Dict], class_course: List[Dict]
+    event_id: int, courses: list[dict], class_course: list[dict]
 ) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         existing_courses = model.db.get_courses(event_id=event_id)
@@ -115,7 +113,7 @@ def add_course(
     name: str,
     length: Optional[float],
     climb: Optional[float],
-    controls: List[str],
+    controls: list[str],
 ) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.add_course(
@@ -133,7 +131,7 @@ def update_course(
     name: str,
     length: Optional[float],
     climb: Optional[float],
-    controls: List[str],
+    controls: list[str],
 ) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         # update course data

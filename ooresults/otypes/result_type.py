@@ -23,8 +23,6 @@ import dataclasses
 import enum
 from datetime import datetime
 from datetime import timezone
-from typing import Dict
-from typing import List
 from typing import Optional
 
 import caseconverter
@@ -138,9 +136,9 @@ class PersonRaceResult:
     si_punched_start_time: Optional[datetime] = None
     si_punched_finish_time: Optional[datetime] = None
     time: Optional[int] = None
-    split_times: List[SplitTime] = dataclasses.field(default_factory=list)
+    split_times: list[SplitTime] = dataclasses.field(default_factory=list)
     last_leg_voided: bool = False
-    extensions: Dict = dataclasses.field(default_factory=dict)
+    extensions: dict = dataclasses.field(default_factory=dict)
 
     #
     # keys of extensions are:
@@ -192,7 +190,7 @@ class PersonRaceResult:
             ]
         )
 
-    def voided_legs(self) -> List[str]:
+    def voided_legs(self) -> list[str]:
         voided_legs = []
         c1 = "S"
         for split_time in [
@@ -218,7 +216,7 @@ class PersonRaceResult:
 
     def compute_result(
         self,
-        controls: List[str],
+        controls: list[str],
         class_params: ClassParams,
         start_time: Optional[datetime] = None,
         year: Optional[int] = None,

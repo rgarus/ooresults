@@ -19,7 +19,6 @@
 
 import dataclasses
 from dataclasses import field
-from typing import Dict
 from typing import Optional
 
 from ooresults.otypes.result_type import PersonRaceResult
@@ -39,7 +38,7 @@ class EntryType:
     class_name: Optional[str] = None
     not_competing: bool = False
     chip: Optional[str] = None
-    fields: Dict[int, str] = field(default_factory=lambda: {})
+    fields: dict[int, str] = field(default_factory=lambda: {})
     result: PersonRaceResult = field(default_factory=lambda: PersonRaceResult())
     start: PersonRaceStart = field(default_factory=lambda: PersonRaceStart())
     club_id: Optional[int] = None

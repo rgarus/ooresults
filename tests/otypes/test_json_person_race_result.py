@@ -20,7 +20,6 @@
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from typing import Dict
 
 from pytest import fixture
 
@@ -40,7 +39,7 @@ def c_min() -> PersonRaceResult:
 
 
 @fixture
-def d_min() -> Dict:
+def d_min() -> dict:
     return {
         "status": 0,
         "splitTimes": [],
@@ -61,7 +60,7 @@ def j_min() -> str:
     )
 
 
-def test_min_to_dict(c_min: PersonRaceResult, d_min: Dict):
+def test_min_to_dict(c_min: PersonRaceResult, d_min: dict):
     assert c_min.to_dict() == d_min
 
 
@@ -69,7 +68,7 @@ def test_min_to_json(c_min: PersonRaceResult, j_min: str):
     assert c_min.to_json() == j_min
 
 
-def test_min_from_dict(d_min: Dict, c_min: PersonRaceResult):
+def test_min_from_dict(d_min: dict, c_min: PersonRaceResult):
     assert PersonRaceResult.from_dict(d_min) == c_min
 
 
@@ -122,7 +121,7 @@ def c_max() -> PersonRaceResult:
 
 
 @fixture
-def d_max() -> Dict:
+def d_max() -> dict:
     return {
         "status": 6,
         "startTime": "2020-02-09T10:00:00+01:00",
@@ -211,7 +210,7 @@ def j_max() -> str:
     )
 
 
-def test_max_to_dict(c_max: PersonRaceResult, d_max: Dict):
+def test_max_to_dict(c_max: PersonRaceResult, d_max: dict):
     assert c_max.to_dict() == d_max
 
 
@@ -219,7 +218,7 @@ def test_max_to_json(c_max: PersonRaceResult, j_max: str):
     assert c_max.to_json() == j_max
 
 
-def test_max_from_dict(d_max: Dict, c_max: PersonRaceResult):
+def test_max_from_dict(d_max: dict, c_max: PersonRaceResult):
     assert PersonRaceResult.from_dict(d_max) == c_max
 
 

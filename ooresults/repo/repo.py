@@ -19,8 +19,6 @@
 
 import datetime
 from enum import Enum
-from typing import Dict
-from typing import List
 from typing import Optional
 
 from ooresults.otypes import result_type
@@ -146,7 +144,7 @@ class Repo:
         name: str,
         length: Optional[float],
         climb: Optional[float],
-        controls: List[str],
+        controls: list[str],
     ):
         raise NotImplementedError
 
@@ -156,7 +154,7 @@ class Repo:
         name: str,
         length: Optional[float],
         climb: Optional[float],
-        controls: List[str],
+        controls: list[str],
     ):
         raise NotImplementedError
 
@@ -209,7 +207,7 @@ class Repo:
     def delete_entry(self, id):
         raise NotImplementedError
 
-    def import_entries(self, event_id: int, entries: List[Dict]) -> None:
+    def import_entries(self, event_id: int, entries: list[dict]) -> None:
         raise NotImplementedError
 
     def get_entries(self, event_id):
@@ -230,7 +228,7 @@ class Repo:
         club_id: Optional[int],
         not_competing: bool,
         chip: str,
-        fields: Dict[int, str],
+        fields: dict[int, str],
         status: result_type.ResultStatus,
         start_time: Optional[datetime.datetime],
     ) -> int:
@@ -247,7 +245,7 @@ class Repo:
         club_id: Optional[int],
         not_competing: bool,
         chip: str,
-        fields: Dict[int, str],
+        fields: dict[int, str],
         status: result_type.ResultStatus,
         start_time: Optional[datetime.datetime],
     ) -> None:
@@ -255,7 +253,7 @@ class Repo:
 
     def get_entry_ids_by_competitor(
         self, event_id: int, competitor_id: int
-    ) -> List[int]:
+    ) -> list[int]:
         raise NotImplementedError
 
     def add_entry_result(
@@ -276,7 +274,7 @@ class Repo:
     ) -> None:
         raise NotImplementedError
 
-    def get_events(self) -> List[EventType]:
+    def get_events(self) -> list[EventType]:
         raise NotImplementedError
 
     def get_event(self, id: int) -> EventType:
@@ -289,7 +287,7 @@ class Repo:
         key: Optional[str],
         publish: bool,
         series: Optional[str],
-        fields: List[str],
+        fields: list[str],
         streaming_address: Optional[str] = None,
         streaming_key: Optional[str] = None,
         streaming_enabled: Optional[bool] = None,
@@ -304,7 +302,7 @@ class Repo:
         key: Optional[str],
         publish: bool,
         series: Optional[str],
-        fields: List[str],
+        fields: list[str],
         streaming_address: Optional[str] = None,
         streaming_key: Optional[str] = None,
         streaming_enabled: Optional[bool] = None,

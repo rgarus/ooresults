@@ -18,7 +18,6 @@
 
 
 from pathlib import Path
-from typing import List
 from typing import Optional
 from typing import TypeVar
 
@@ -92,13 +91,13 @@ class AddClassDialog:
             == NumberControl(page=self.page, id="cla_penaltyOvertime").get_text()
         )
 
-    def get_course_list(self) -> List[str]:
+    def get_course_list(self) -> list[str]:
         return ComboboxControl(page=self.page, id="cla_courseId").values()
 
-    def get_type_list(self) -> List[str]:
+    def get_type_list(self) -> list[str]:
         return ComboboxControl(page=self.page, id="cla_type").values()
 
-    def get_use_start_control_list(self) -> List[str]:
+    def get_use_start_control_list(self) -> list[str]:
         return ComboboxControl(page=self.page, id="cla_startControl").values()
 
     def enter_values(

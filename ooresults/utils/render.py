@@ -18,11 +18,7 @@
 
 
 import pathlib
-from typing import Dict
-from typing import List
 from typing import Optional
-from typing import Set
-from typing import Tuple
 
 from mako.template import Template
 
@@ -100,17 +96,17 @@ def si1_page(event_id: Optional[int], key: Optional[str], view: int) -> str:
     return _si__si1_page.render(event_id=event_id, key=key, view=view)
 
 
-def si1_data(message: Dict) -> str:
+def si1_data(message: dict) -> str:
     return _si__si1_data.render(message=message)
 
 
-def si1_error(message: Dict) -> str:
+def si1_error(message: dict) -> str:
     return _si__si1_error.render(message=message)
 
 
 def si1_results(
     event: EventType,
-    class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
+    class_results: list[tuple[ClassInfoType, list[RankedEntryType]]],
 ) -> str:
     return _si__si1_results.render(event=event, class_results=class_results)
 
@@ -123,22 +119,22 @@ def si2_data(
     status: str,
     stream_status: Optional[Status],
     event: EventType,
-    messages: List[Dict],
+    messages: list[dict],
 ) -> str:
     return _si__si2_data.render(
         status=status, stream_status=stream_status, event=event, messages=messages
     )
 
 
-def classes_table(event: Optional[EventType], classes: List[ClassInfoType]) -> str:
+def classes_table(event: Optional[EventType], classes: list[ClassInfoType]) -> str:
     return _classes_table.render(event=event, classes=classes)
 
 
-def add_class(class_: Optional[ClassType], courses: List[CourseType]) -> str:
+def add_class(class_: Optional[ClassType], courses: list[CourseType]) -> str:
     return _add_class.render(class_=class_, courses=courses)
 
 
-def clubs_table(clubs: List[ClubType]) -> str:
+def clubs_table(clubs: list[ClubType]) -> str:
     return _clubs_table.render(clubs=clubs)
 
 
@@ -146,15 +142,15 @@ def add_club(club: Optional[ClubType]) -> str:
     return _add_club.render(club=club)
 
 
-def competitors_table(competitors: List[CompetitorType]) -> str:
+def competitors_table(competitors: list[CompetitorType]) -> str:
     return _competitors_table.render(competitors=competitors)
 
 
-def add_competitor(competitor: Optional[CompetitorType], clubs: List[ClubType]) -> str:
+def add_competitor(competitor: Optional[CompetitorType], clubs: list[ClubType]) -> str:
     return _add_competitor.render(competitor=competitor, clubs=clubs)
 
 
-def courses_table(event: Optional[EventType], courses: List[CourseType]) -> str:
+def courses_table(event: Optional[EventType], courses: list[CourseType]) -> str:
     return _courses_table.render(event=event, courses=courses)
 
 
@@ -165,7 +161,7 @@ def add_course(course: Optional[CourseType]) -> str:
 def entries_table(
     event: Optional[EventType],
     view: str,
-    view_entries_list: List[Tuple[Optional[str], List[EntryType]]],
+    view_entries_list: list[tuple[Optional[str], list[EntryType]]],
 ) -> str:
     return _entries_table.render(
         event=event, view=view, view_entries_list=view_entries_list
@@ -174,10 +170,10 @@ def entries_table(
 
 def add_entry(
     entry: Optional[EntryType],
-    classes: List[ClassType],
-    clubs: List[ClubType],
-    unassigned_results: Dict[int, str],
-    event_fields: List[str],
+    classes: list[ClassType],
+    clubs: list[ClubType],
+    unassigned_results: dict[int, str],
+    event_fields: list[str],
 ) -> str:
     return _add_entry.render(
         entry=entry,
@@ -188,7 +184,7 @@ def add_entry(
     )
 
 
-def add_entry_competitors(competitors: List[CompetitorType]) -> str:
+def add_entry_competitors(competitors: list[CompetitorType]) -> str:
     return _add_entry_competitors.render(competitors=competitors)
 
 
@@ -197,7 +193,7 @@ def add_entry_result(entry: EntryType) -> str:
 
 
 def entries_import_status(
-    number_of_imported_entries: int, number_of_entries: int, names: Set[Tuple[str, str]]
+    number_of_imported_entries: int, number_of_entries: int, names: set[tuple[str, str]]
 ) -> str:
     return _entries_import_status.render(
         number_of_imported_entries=number_of_imported_entries,
@@ -206,7 +202,7 @@ def entries_import_status(
     )
 
 
-def events_table(events: List[EventType]) -> str:
+def events_table(events: list[EventType]) -> str:
     return _events_table.render(events=events)
 
 
@@ -216,13 +212,13 @@ def add_event(event: Optional[EventType]) -> str:
 
 def results_table(
     event: EventType,
-    class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
+    class_results: list[tuple[ClassInfoType, list[RankedEntryType]]],
 ) -> str:
     return _results_table.render(event=event, class_results=class_results)
 
 
 def series_table(
-    events: List[EventType], results: List[Tuple[str, List[PersonSeriesResult]]]
+    events: list[EventType], results: list[tuple[str, list[PersonSeriesResult]]]
 ) -> str:
     return _series_table.render(events=events, results=results)
 
@@ -243,7 +239,7 @@ def root(results_table: Optional[str]) -> str:
     return _root.render(results_table=results_table)
 
 
-def main(events: List[EventType]) -> str:
+def main(events: list[EventType]) -> str:
     events_table = _events_table.render(events=events)
     events_tab = _events_tab_content.render(events_table=events_table)
     entries_table = _entries_table.render(

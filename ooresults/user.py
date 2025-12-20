@@ -20,7 +20,6 @@
 import json
 import pathlib
 import threading
-from typing import Dict
 from typing import Optional
 
 import jsonschema
@@ -43,7 +42,7 @@ SCHEMA = {
 class Users:
     sema = threading.Semaphore()
     path: Optional[pathlib.Path] = None
-    users: Dict[str, str] = {}
+    users: dict[str, str] = {}
 
     @classmethod
     def check(cls, username: str, password: str) -> bool:

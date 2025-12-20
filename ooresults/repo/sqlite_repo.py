@@ -23,8 +23,6 @@ import json
 import logging
 import sqlite3
 import threading
-from typing import Dict
-from typing import List
 from typing import Optional
 
 from ooresults.otypes import result_type
@@ -208,7 +206,7 @@ class SqliteRepo(Repo):
             self.db.close()
             del self._ctx.db
 
-    def get_classes(self, event_id: int) -> List[ClassInfoType]:
+    def get_classes(self, event_id: int) -> list[ClassInfoType]:
         cur = self.db.execute(
             """
             SELECT
@@ -367,7 +365,7 @@ class SqliteRepo(Repo):
                 (id,),
             )
 
-    def get_courses(self, event_id: int) -> List[CourseType]:
+    def get_courses(self, event_id: int) -> list[CourseType]:
         cur = self.db.execute(
             """
             SELECT
@@ -429,7 +427,7 @@ class SqliteRepo(Repo):
         name: str,
         length: Optional[float],
         climb: Optional[float],
-        controls: List[str],
+        controls: list[str],
     ) -> int:
         # check if the event still exists
         self.get_event(id=event_id)
@@ -464,7 +462,7 @@ class SqliteRepo(Repo):
         name: str,
         length: Optional[float],
         climb: Optional[float],
-        controls: List[str],
+        controls: list[str],
     ):
         try:
             cur = self.db.execute(
@@ -515,7 +513,7 @@ class SqliteRepo(Repo):
                 (id,),
             )
 
-    def get_clubs(self) -> List[ClubType]:
+    def get_clubs(self) -> list[ClubType]:
         cur = self.db.execute(
             "SELECT id, name FROM clubs ORDER BY name ASC",
             (),
@@ -583,7 +581,7 @@ class SqliteRepo(Repo):
                 (id,),
             )
 
-    def get_competitors(self) -> List[CompetitorType]:
+    def get_competitors(self) -> list[CompetitorType]:
         cur = self.db.execute(
             """
             SELECT
@@ -769,7 +767,7 @@ class SqliteRepo(Repo):
                 (id,),
             )
 
-    def import_competitors(self, competitors: List[Dict]) -> None:
+    def import_competitors(self, competitors: list[dict]) -> None:
         list_of_competitors = []
         for c in competitors:
             club_id = None
@@ -832,7 +830,7 @@ class SqliteRepo(Repo):
                 list_of_competitors,
             )
 
-    def get_entries(self, event_id: int) -> List[EntryType]:
+    def get_entries(self, event_id: int) -> list[EntryType]:
         cur = self.db.execute(
             """
             SELECT
@@ -946,7 +944,7 @@ class SqliteRepo(Repo):
 
     def get_entry_ids_by_competitor(
         self, event_id: int, competitor_id: int
-    ) -> List[int]:
+    ) -> list[int]:
         cur = self.db.execute(
             """
             SELECT id
@@ -1032,7 +1030,7 @@ class SqliteRepo(Repo):
         club_id: Optional[int],
         not_competing: bool,
         chip: str,
-        fields: Dict[int, str],
+        fields: dict[int, str],
         status: result_type.ResultStatus,
         start_time: Optional[datetime.datetime],
     ) -> int:
@@ -1158,7 +1156,7 @@ class SqliteRepo(Repo):
         club_id: Optional[int],
         not_competing: bool,
         chip: str,
-        fields: Dict[int, str],
+        fields: dict[int, str],
         status: result_type.ResultStatus,
         start_time: Optional[datetime.datetime],
     ) -> None:
@@ -1242,7 +1240,7 @@ class SqliteRepo(Repo):
             (id,),
         )
 
-    def import_entries(self, event_id: int, entries: List[Dict]) -> None:
+    def import_entries(self, event_id: int, entries: list[dict]) -> None:
         # check if the event still exists
         self.get_event(id=event_id)
 
@@ -1413,7 +1411,7 @@ class SqliteRepo(Repo):
                 list_of_entries,
             )
 
-    def get_events(self) -> List[EventType]:
+    def get_events(self) -> list[EventType]:
         values = self.db.execute(
             """
             SELECT
@@ -1497,7 +1495,7 @@ class SqliteRepo(Repo):
         key: Optional[str],
         publish: bool,
         series: Optional[str],
-        fields: List[str],
+        fields: list[str],
         streaming_address: Optional[str] = None,
         streaming_key: Optional[str] = None,
         streaming_enabled: Optional[bool] = None,
@@ -1542,7 +1540,7 @@ class SqliteRepo(Repo):
         key: Optional[str],
         publish: bool,
         series: Optional[str],
-        fields: List[str],
+        fields: list[str],
         streaming_address: Optional[str] = None,
         streaming_key: Optional[str] = None,
         streaming_enabled: Optional[bool] = None,

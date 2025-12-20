@@ -18,9 +18,6 @@
 
 
 import pathlib
-from typing import Dict
-from typing import List
-from typing import Tuple
 
 import iso8601
 from lxml import etree
@@ -40,7 +37,7 @@ namespaces = {None: iof_namespace}
 
 
 def create_course_data(
-    event: EventType, courses: List[CourseType], classes: List[ClassInfoType]
+    event: EventType, courses: list[CourseType], classes: list[ClassInfoType]
 ) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
@@ -112,7 +109,7 @@ def create_course_data(
     )
 
 
-def parse_course_data(content: bytes) -> Tuple[Dict, List[Dict], List[Dict]]:
+def parse_course_data(content: bytes) -> tuple[dict, list[dict], list[dict]]:
     # Event: Dict of {'name': str, 'date': Optional[str]}
     # Course: Dict of {'name': str, 'length': Optional[float], 'climb': Optional[float], 'controls': List[str]}
     # ClassCourseAssignment: Dict of {'class_name': str, 'course_name': Optional[str]}

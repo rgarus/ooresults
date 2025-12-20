@@ -18,10 +18,7 @@
 
 
 from decimal import Decimal
-from typing import Dict
-from typing import List
 from typing import Optional
-from typing import Tuple
 
 from ooresults.otypes import series_type
 from ooresults.otypes.class_type import ClassInfoType
@@ -34,15 +31,15 @@ from ooresults.otypes.series_type import Points
 
 
 def build_results(
-    class_infos: List[ClassInfoType],
-    entries: List[EntryType],
-) -> List[Tuple[ClassInfoType, List[RankedEntryType]]]:
+    class_infos: list[ClassInfoType],
+    entries: list[EntryType],
+) -> list[tuple[ClassInfoType, list[RankedEntryType]]]:
     all_results = []
     for class_info in class_infos:
         if class_info.name in ["Organizer", "Organizers"]:
             continue
 
-        class_results: List[RankedEntryType] = []
+        class_results: list[RankedEntryType] = []
 
         # filter results belonging to this class
         class_entries = [e for e in entries if e.class_name == class_info.name]
@@ -128,14 +125,14 @@ def build_results(
 
 def build_total_results(
     settings: series_type.Settings,
-    list_of_results: List[List[Tuple[ClassInfoType, List[RankedEntryType]]]],
-    organizers: Optional[List[List[EntryType]]] = None,
-) -> List[Tuple[str, List[PersonSeriesResult]]]:
+    list_of_results: list[list[tuple[ClassInfoType, list[RankedEntryType]]]],
+    organizers: Optional[list[list[EntryType]]] = None,
+) -> list[tuple[str, list[PersonSeriesResult]]]:
     if organizers is None:
         organizers = []
     q = Decimal(10) ** -settings.decimal_places
 
-    r: Dict[str, Dict[Tuple[str, str], PersonSeriesResult]] = {}
+    r: dict[str, dict[tuple[str, str], PersonSeriesResult]] = {}
     for i, class_results in enumerate(list_of_results):
         for class_, ranked_entries in class_results:
             if class_.name in ["Organizer", "Organizers"]:

@@ -18,7 +18,6 @@
 
 
 from datetime import date
-from typing import List
 from typing import Optional
 
 import pytest
@@ -29,7 +28,7 @@ from ooresults.utils import render
 
 
 @pytest.fixture()
-def events() -> List[EventType]:
+def events() -> list[EventType]:
     return [
         EventType(
             id=3,
@@ -96,7 +95,7 @@ def test_events_list_is_empty():
     assert len(rows) == 0
 
 
-def test_events_list_is_not_empty(events: List[EventType]):
+def test_events_list_is_not_empty(events: list[EventType]):
     html = etree.HTML(render.events_table(events=events))
 
     # headers
@@ -157,7 +156,7 @@ def test_events_list_is_not_empty(events: List[EventType]):
     ]
 
 
-def test_key_is_defined(events: List[EventType]):
+def test_key_is_defined(events: list[EventType]):
     events[0].key = "sevenOr"
     html = etree.HTML(render.events_table(events=events))
 
@@ -165,7 +164,7 @@ def test_key_is_defined(events: List[EventType]):
     assert elem.text == "***"
 
 
-def test_publish_is_true(events: List[EventType]):
+def test_publish_is_true(events: list[EventType]):
     events[0].publish = True
     html = etree.HTML(render.events_table(events=events))
 
@@ -206,7 +205,7 @@ def test_publish_is_true(events: List[EventType]):
     ],
 )
 def test_streaming_is_defined(
-    events: List[EventType],
+    events: list[EventType],
     streaming_address: Optional[str],
     streaming_key: Optional[str],
     streaming_enabled: bool,
@@ -221,7 +220,7 @@ def test_streaming_is_defined(
     assert elem.text == value
 
 
-def test_series_is_defined(events: List[EventType]):
+def test_series_is_defined(events: list[EventType]):
     events[0].series = "Run 1"
     html = etree.HTML(render.events_table(events=events))
 
@@ -229,7 +228,7 @@ def test_series_is_defined(events: List[EventType]):
     assert elem.text == "Run 1"
 
 
-def test_one_field(events: List[EventType]):
+def test_one_field(events: list[EventType]):
     events[0].fields = ["Start number"]
     html = etree.HTML(render.events_table(events=events))
 
@@ -237,7 +236,7 @@ def test_one_field(events: List[EventType]):
     assert elem.text == "Start number"
 
 
-def test_two_fields(events: List[EventType]):
+def test_two_fields(events: list[EventType]):
     events[0].fields = ["Start number", "Region"]
     html = etree.HTML(render.events_table(events=events))
 

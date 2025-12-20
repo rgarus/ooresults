@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
@@ -35,7 +33,7 @@ class ComboboxControl:
     def is_enabled(self) -> bool:
         return not self.is_disabled()
 
-    def values(self) -> List[str]:
+    def values(self) -> list[str]:
         return [e.text for e in Select(self.elem).options]
 
     def select_by_text(self, text: str) -> None:

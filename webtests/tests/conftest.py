@@ -20,7 +20,6 @@
 import subprocess
 import sys
 import tempfile
-from typing import Dict
 
 import pytest
 import requests
@@ -49,7 +48,7 @@ def page(ooresults_server) -> webdriver.Firefox:
     driver.quit()
 
 
-def post(url: str, data: Dict[str, str]):
+def post(url: str, data: dict[str, str]):
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     r = requests.post(

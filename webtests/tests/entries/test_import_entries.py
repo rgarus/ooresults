@@ -19,7 +19,7 @@
 
 import pathlib
 import tempfile
-from typing import Iterator
+from collections.abc import Iterator
 
 import pytest
 from selenium import webdriver

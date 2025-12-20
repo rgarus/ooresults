@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Dict
-
 from pytest import fixture
 
 from ooresults.otypes.class_params import VoidedLeg
@@ -33,7 +31,7 @@ def c_max() -> VoidedLeg:
 
 
 @fixture
-def d_max() -> Dict:
+def d_max() -> dict:
     return {
         "control1": "257",
         "control2": "147",
@@ -45,7 +43,7 @@ def j_max() -> str:
     return '{"control1":"257","control2":"147"}'
 
 
-def test_max_to_dict(c_max: VoidedLeg, d_max: Dict):
+def test_max_to_dict(c_max: VoidedLeg, d_max: dict):
     assert c_max.to_dict() == d_max
 
 
@@ -53,7 +51,7 @@ def test_max_to_json(c_max: VoidedLeg, j_max: str):
     assert c_max.to_json() == j_max
 
 
-def test_max_from_dict(d_max: Dict, c_max: VoidedLeg):
+def test_max_from_dict(d_max: dict, c_max: VoidedLeg):
     assert VoidedLeg.from_dict(d_max) == c_max
 
 

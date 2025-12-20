@@ -28,8 +28,6 @@ import logging
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict
-from typing import List
 
 import tzlocal
 import websockets.exceptions
@@ -57,9 +55,9 @@ class WebSocketHandler:
     def __init__(self, demo_reader: bool = False, import_stream: bool = False):
         self.demo_reader = demo_reader
         self.import_stream = import_stream
-        self.connections: Dict[ServerConnection, ConnectionParameter] = {}
+        self.connections: dict[ServerConnection, ConnectionParameter] = {}
         self.messages = []
-        self.cardreader_status: Dict[int, str] = {}
+        self.cardreader_status: dict[int, str] = {}
         self.executor = ThreadPoolExecutor(max_workers=2)
         self.update_result = asyncio.Event()
         streaming_status.status.register(awaitable=self.update_event)
@@ -85,7 +83,7 @@ class WebSocketHandler:
                 pass
 
             try:
-                d: defaultdict[int, List[ServerConnection]] = defaultdict(list)
+                d: defaultdict[int, list[ServerConnection]] = defaultdict(list)
                 for conn, v in self.connections.items():
                     if conn.request.path == "/si1" and v.key_valid and v.show_result:
                         d[v.event_id].append(conn)
@@ -144,13 +142,13 @@ class WebSocketHandler:
                 if conn.request.path == "/si2":
                     await self.send(conn=conn, event=copy.deepcopy(event), message={})
 
-    async def send_to_all(self, event: EventType, message: Dict) -> None:
+    async def send_to_all(self, event: EventType, message: dict) -> None:
         connections = [c for c, v in self.connections.items() if event.id == v.event_id]
         for conn in connections:
             await self.send(conn=conn, event=copy.deepcopy(event), message=message)
 
     async def send(
-        self, conn: ServerConnection, event: EventType, message: Dict
+        self, conn: ServerConnection, event: EventType, message: dict
     ) -> None:
         status = (
             self.cardreader_status[event.id]

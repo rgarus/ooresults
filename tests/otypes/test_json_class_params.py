@@ -20,7 +20,6 @@
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from typing import Dict
 
 from pytest import fixture
 
@@ -34,7 +33,7 @@ def c_min() -> ClassParams:
 
 
 @fixture
-def d_min() -> Dict:
+def d_min() -> dict:
     return {
         "otype": "standard",
         "usingStartControl": "if_punched",
@@ -55,7 +54,7 @@ def j_min() -> str:
     )
 
 
-def test_min_to_dict(c_min: ClassParams, d_min: Dict):
+def test_min_to_dict(c_min: ClassParams, d_min: dict):
     assert c_min.to_dict() == d_min
 
 
@@ -63,7 +62,7 @@ def test_min_to_json(c_min: ClassParams, j_min: str):
     assert c_min.to_json() == j_min
 
 
-def test_min_from_dict(d_min: Dict, c_min: ClassParams):
+def test_min_from_dict(d_min: dict, c_min: ClassParams):
     assert ClassParams.from_dict(d_min) == c_min
 
 
@@ -90,7 +89,7 @@ def c_max() -> ClassParams:
 
 
 @fixture
-def d_max() -> Dict:
+def d_max() -> dict:
     return {
         "otype": "score",
         "usingStartControl": "yes",
@@ -126,7 +125,7 @@ def j_max() -> str:
     )
 
 
-def test_max_to_dict(c_max: ClassParams, d_max: Dict):
+def test_max_to_dict(c_max: ClassParams, d_max: dict):
     assert c_max.to_dict() == d_max
 
 
@@ -134,7 +133,7 @@ def test_max_to_json(c_max: ClassParams, j_max: str):
     assert c_max.to_json() == j_max
 
 
-def test_max_from_dict(d_max: Dict, c_max: ClassParams):
+def test_max_from_dict(d_max: dict, c_max: ClassParams):
     assert ClassParams.from_dict(d_max) == c_max
 
 

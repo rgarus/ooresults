@@ -19,9 +19,8 @@
 
 import logging
 import threading
+from collections.abc import Awaitable
 from enum import Enum
-from typing import Awaitable
-from typing import Dict
 from typing import Optional
 
 from ooresults.otypes.event_type import EventType
@@ -38,7 +37,7 @@ class Status(Enum):
 
 class StreamingStatus:
     def __init__(self):
-        self.status: Dict[int, Status] = {}
+        self.status: dict[int, Status] = {}
         self.lock = threading.Lock()
         self.awaitable = None
 

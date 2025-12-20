@@ -20,10 +20,7 @@
 import copy
 import json
 import pathlib
-from typing import Dict
-from typing import List
 from typing import Optional
-from typing import Tuple
 
 import iso8601
 import jsonschema
@@ -53,11 +50,11 @@ websocket_server: Optional[WebSocketServer] = None
 data_path = (
     pathlib.Path(__file__).resolve().parent.parent / "schema" / "cardreader_log.json"
 )
-with open(data_path, "r") as f:
+with open(data_path) as f:
     schema_cardreader_log = json.loads(f.read())
 
 
-def parse_cardreader_log(item: Dict) -> result_type.CardReaderMessage:
+def parse_cardreader_log(item: dict) -> result_type.CardReaderMessage:
     jsonschema.validate(item, schema_cardreader_log)
     d = result_type.CardReaderMessage(
         entry_type=item["entryType"],
@@ -96,8 +93,8 @@ def parse_cardreader_log(item: Dict) -> result_type.CardReaderMessage:
 
 def store_cardreader_result(
     event_key: str, item: result_type.CardReaderMessage
-) -> Tuple[str, EventType, Dict]:
-    def missing_controls(result: result_type.PersonRaceResult) -> List[str]:
+) -> tuple[str, EventType, dict]:
+    def missing_controls(result: result_type.PersonRaceResult) -> list[str]:
         if result.finish_time is None:
             return ["FINISH"]
         if result.start_time is None:
@@ -256,7 +253,7 @@ def update_series_settings(settings: Settings) -> None:
 
 def event_class_results(
     event_id: int,
-) -> Tuple[EventType, List[Tuple[ClassInfoType, List[RankedEntryType]]]]:
+) -> tuple[EventType, list[tuple[ClassInfoType, list[RankedEntryType]]]]:
     with model.db.transaction():
         event = model.db.get_event(id=event_id)
         classes = model.db.get_classes(event_id=event_id)
@@ -271,7 +268,7 @@ def event_class_results(
 
 def results_for_splitsbrowser(
     event_id: int,
-) -> Tuple[EventType, List[Tuple[ClassInfoType, List[RankedEntryType]]]]:
+) -> tuple[EventType, list[tuple[ClassInfoType, list[RankedEntryType]]]]:
     with model.db.transaction():
         event = model.db.get_event(id=event_id)
         classes = model.db.get_classes(event_id=event_id)
@@ -303,7 +300,7 @@ def results_for_splitsbrowser(
     return event, class_results
 
 
-def create_event_list(events: List[EventType]) -> List[EventType]:
+def create_event_list(events: list[EventType]) -> list[EventType]:
     # filter list
     e_list = [e for e in events if e.series is not None]
     # sort list
@@ -313,7 +310,7 @@ def create_event_list(events: List[EventType]) -> List[EventType]:
 
 
 def build_series_result() -> (
-    Tuple[Settings, List[EventType], List[Tuple[str, List[PersonSeriesResult]]]]
+    tuple[Settings, list[EventType], list[tuple[str, list[PersonSeriesResult]]]]
 ):
     with model.db.transaction():
         settings = model.db.get_series_settings()

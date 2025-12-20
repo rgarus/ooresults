@@ -95,7 +95,7 @@ force_single_line = "true"
 lines_after_imports = 2
 
 [tool.ruff.lint]
-select = ["C4", "D", "E", "F", "I", "PLC", "PLE", "PLW", "W"]
+select = ["C4", "D", "E", "F", "I", "PLC", "PLE", "PLW", "UP", "W"]
 ignore = [
     # pycodestyle error ignore
     "E501",  # Line too long
@@ -115,6 +115,9 @@ ignore = [
     "D107",  # Missing docstring in `__init__`
     "D203",  # incorrect-blank-line-before-class - incompatible with D211
     "D213",  # multi-line-summary-second-line - incompatible with D212
+
+    # pyupgrade ignore
+    "UP045",  # Use X | None for type annotations
 ]
 
 [tool.ruff.lint.isort]

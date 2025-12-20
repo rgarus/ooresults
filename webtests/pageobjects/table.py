@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -39,13 +37,13 @@ class Table:
     def nr_of_columns(self) -> int:
         return len(self._table().find_elements(By.XPATH, ".//thead//tr//th"))
 
-    def headers(self) -> List[str]:
+    def headers(self) -> list[str]:
         headers = []
         for h in self._table().find_elements(By.XPATH, ".//thead//tr//th"):
             headers.append(h.text)
         return headers
 
-    def row(self, i: int) -> List[str]:
+    def row(self, i: int) -> list[str]:
         rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
         rows = [row for row in rows if row.is_displayed()]
 
@@ -68,7 +66,7 @@ class Table:
         row = rows[i - 1].find_elements(By.XPATH, ".//td")[0]
         ActionChains(driver=self.page).double_click(on_element=row).perform()
 
-    def selected_rows(self) -> List[int]:
+    def selected_rows(self) -> list[int]:
         rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
         rows = [row for row in rows if row.is_displayed()]
         selected_rows = []

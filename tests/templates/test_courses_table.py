@@ -18,7 +18,6 @@
 
 
 import datetime
-from typing import List
 
 import pytest
 from lxml import etree
@@ -46,7 +45,7 @@ def event() -> EventType:
 
 
 @pytest.fixture()
-def courses() -> List[CourseType]:
+def courses() -> list[CourseType]:
     return [
         CourseType(
             id=110,
@@ -87,7 +86,7 @@ def test_courses_list_is_empty(event: EventType):
     assert len(rows) == 0
 
 
-def test_courses_list_is_not_empty(event: EventType, courses: List[CourseType]):
+def test_courses_list_is_not_empty(event: EventType, courses: list[CourseType]):
     html = etree.HTML(render.courses_table(event=event, courses=courses))
 
     assert html.find(".//td[@id='cour.event_name']").text == "Test-Lauf 1"
@@ -130,7 +129,7 @@ def test_courses_list_is_not_empty(event: EventType, courses: List[CourseType]):
     ]
 
 
-def test_length_is_defined(event: EventType, courses: List[CourseType]):
+def test_length_is_defined(event: EventType, courses: list[CourseType]):
     courses[0].length = 5400.4
     html = etree.HTML(render.courses_table(event=event, courses=courses))
 
@@ -138,7 +137,7 @@ def test_length_is_defined(event: EventType, courses: List[CourseType]):
     assert elem.text == "5400"
 
 
-def test_climb_is_defined(event: EventType, courses: List[CourseType]):
+def test_climb_is_defined(event: EventType, courses: list[CourseType]):
     courses[0].climb = 159.8
     html = etree.HTML(render.courses_table(event=event, courses=courses))
 
@@ -146,7 +145,7 @@ def test_climb_is_defined(event: EventType, courses: List[CourseType]):
     assert elem.text == "160"
 
 
-def test_controls_are_defined(event: EventType, courses: List[CourseType]):
+def test_controls_are_defined(event: EventType, courses: list[CourseType]):
     courses[0].controls = ["124", "137", "123", "129"]
     html = etree.HTML(render.courses_table(event=event, courses=courses))
 

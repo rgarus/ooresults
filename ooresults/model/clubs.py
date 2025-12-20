@@ -17,15 +17,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
-
 from ooresults import model
 from ooresults.model import cached_result
 from ooresults.otypes.club_type import ClubType
 from ooresults.repo.repo import TransactionMode
 
 
-def get_clubs() -> List[ClubType]:
+def get_clubs() -> list[ClubType]:
     with model.db.transaction():
         return model.db.get_clubs()
 

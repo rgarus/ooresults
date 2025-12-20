@@ -19,10 +19,7 @@
 
 from datetime import datetime
 from typing import Any
-from typing import List
 from typing import Optional
-from typing import Set
-from typing import Tuple
 
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.entry_type import RankedEntryType
@@ -53,8 +50,8 @@ STREAMING_STATUS = {
 
 
 def build_columns(
-    class_results: List[Tuple[ClassInfoType, List[RankedEntryType]]],
-) -> Set[str]:
+    class_results: list[tuple[ClassInfoType, list[RankedEntryType]]],
+) -> set[str]:
     columns = set()
     for class_, _ in class_results:
         if class_.params.apply_handicap_rule:
@@ -71,10 +68,10 @@ def build_columns(
 def minutes_seconds(time: Optional[int]) -> str:
     if time is None:
         return ""
-    elif time >= 0:
-        return "{:d}:{:02d}".format(abs(time) // 60, abs(time) % 60)
     else:
-        return "-{:d}:{:02d}".format(abs(time) // 60, abs(time) % 60)
+        m = abs(time) // 60
+        s = abs(time) % 60
+        return f"{m}:{s:02d}" if time >= 0 else f"-{m}:{s:02d}"
 
 
 def streaming_status_ok(status: streaming_status.Status) -> bool:

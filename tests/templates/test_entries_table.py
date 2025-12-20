@@ -19,7 +19,6 @@
 
 import datetime
 from datetime import timezone
-from typing import List
 from typing import Optional
 
 import pytest
@@ -119,11 +118,11 @@ def entry_3(event: EventType) -> EntryType:
 @pytest.fixture()
 def entries(
     entry_1: EntryType, entry_2: EntryType, entry_3: EntryType
-) -> List[EntryType]:
+) -> list[EntryType]:
     return [entry_1, entry_2, entry_3]
 
 
-def test_entry_list_with_one_group(event: EventType, entries: List[EntryType]):
+def test_entry_list_with_one_group(event: EventType, entries: list[EntryType]):
     html = etree.HTML(
         render.entries_table(
             event=event, view="entries", view_entries_list=[("Entries", entries)]
@@ -414,7 +413,7 @@ def test_entry_list_with_three_groups(
     ]
 
 
-def test_not_competing_is_true(event: EventType, entries: List[EntryType]):
+def test_not_competing_is_true(event: EventType, entries: list[EntryType]):
     entries[0].not_competing = True
     html = etree.HTML(
         render.entries_table(
@@ -426,7 +425,7 @@ def test_not_competing_is_true(event: EventType, entries: List[EntryType]):
     assert elem.text == "X"
 
 
-def test_first_name_is_defined(event: EventType, entries: List[EntryType]):
+def test_first_name_is_defined(event: EventType, entries: list[EntryType]):
     entries[0].first_name = "Sabine"
     html = etree.HTML(
         render.entries_table(
@@ -438,7 +437,7 @@ def test_first_name_is_defined(event: EventType, entries: List[EntryType]):
     assert elem.text == "Sabine"
 
 
-def test_last_name_is_defined(event: EventType, entries: List[EntryType]):
+def test_last_name_is_defined(event: EventType, entries: list[EntryType]):
     entries[0].last_name = "Derkel"
     html = etree.HTML(
         render.entries_table(
@@ -450,7 +449,7 @@ def test_last_name_is_defined(event: EventType, entries: List[EntryType]):
     assert elem.text == "Derkel"
 
 
-def test_gender_is_unknown(event: EventType, entries: List[EntryType]):
+def test_gender_is_unknown(event: EventType, entries: list[EntryType]):
     entries[0].gender = ""
     html = etree.HTML(
         render.entries_table(
@@ -462,7 +461,7 @@ def test_gender_is_unknown(event: EventType, entries: List[EntryType]):
     assert elem.text is None
 
 
-def test_gender_is_female(event: EventType, entries: List[EntryType]):
+def test_gender_is_female(event: EventType, entries: list[EntryType]):
     entries[0].gender = "F"
     html = etree.HTML(
         render.entries_table(
@@ -474,7 +473,7 @@ def test_gender_is_female(event: EventType, entries: List[EntryType]):
     assert elem.text == "F"
 
 
-def test_gender_is_male(event: EventType, entries: List[EntryType]):
+def test_gender_is_male(event: EventType, entries: list[EntryType]):
     entries[0].gender = "M"
     html = etree.HTML(
         render.entries_table(
@@ -486,7 +485,7 @@ def test_gender_is_male(event: EventType, entries: List[EntryType]):
     assert elem.text == "M"
 
 
-def test_year_is_defined(event: EventType, entries: List[EntryType]):
+def test_year_is_defined(event: EventType, entries: list[EntryType]):
     entries[0].year = 1957
     html = etree.HTML(
         render.entries_table(
@@ -498,7 +497,7 @@ def test_year_is_defined(event: EventType, entries: List[EntryType]):
     assert elem.text == "1957"
 
 
-def test_chip_is_defined(event: EventType, entries: List[EntryType]):
+def test_chip_is_defined(event: EventType, entries: list[EntryType]):
     entries[0].chip = "1234567"
     html = etree.HTML(
         render.entries_table(
@@ -510,7 +509,7 @@ def test_chip_is_defined(event: EventType, entries: List[EntryType]):
     assert elem.text == "1234567"
 
 
-def test_club_is_defined(event: EventType, entries: List[EntryType]):
+def test_club_is_defined(event: EventType, entries: list[EntryType]):
     entries[0].club_id = 3
     entries[0].club_name = "OC Bundestag"
     html = etree.HTML(
@@ -523,7 +522,7 @@ def test_club_is_defined(event: EventType, entries: List[EntryType]):
     assert elem.text == "OC Bundestag"
 
 
-def test_class_is_defined(event: EventType, entries: List[EntryType]):
+def test_class_is_defined(event: EventType, entries: list[EntryType]):
     entries[0].class_id = 7
     entries[0].class_name = "Elite Men"
     html = etree.HTML(
@@ -536,7 +535,7 @@ def test_class_is_defined(event: EventType, entries: List[EntryType]):
     assert elem.text == "Elite Men"
 
 
-def test_start_is_defined(event: EventType, entries: List[EntryType]):
+def test_start_is_defined(event: EventType, entries: list[EntryType]):
     entries[0].start.start_time = S1
     html = etree.HTML(
         render.entries_table(
@@ -548,7 +547,7 @@ def test_start_is_defined(event: EventType, entries: List[EntryType]):
     assert elem.text == "12:38:59"
 
 
-def test_time_is_defined(event: EventType, entries: List[EntryType]):
+def test_time_is_defined(event: EventType, entries: list[EntryType]):
     entries[0].result.time = 8
     html = etree.HTML(
         render.entries_table(
@@ -576,7 +575,7 @@ def test_time_is_defined(event: EventType, entries: List[EntryType]):
 )
 def test_status(
     event: EventType,
-    entries: List[EntryType],
+    entries: list[EntryType],
     status: ResultStatus,
     text: Optional[str],
 ):
@@ -591,7 +590,7 @@ def test_status(
     assert elem.text == text
 
 
-def test_entry_list_with_fields(event: EventType, entries: List[EntryType]):
+def test_entry_list_with_fields(event: EventType, entries: list[EntryType]):
     event.fields = ["Start number", "Region"]
     entries[0].fields = {0: "121", 1: "Bayern"}
     html = etree.HTML(

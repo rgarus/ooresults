@@ -19,7 +19,6 @@
 
 import dataclasses
 import datetime
-from typing import List
 from typing import Optional
 
 
@@ -31,7 +30,7 @@ class EventType:
     key: Optional[str]
     publish: bool
     series: Optional[str]
-    fields: List[str]
+    fields: list[str]
     streaming_address: Optional[str] = None
     streaming_key: Optional[str] = None
     streaming_enabled: Optional[bool] = None

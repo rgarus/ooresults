@@ -18,9 +18,7 @@
 
 
 from typing import Any
-from typing import List
 from typing import Optional
-from typing import Tuple
 
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.series_type import PersonSeriesResult
@@ -30,8 +28,8 @@ from ooresults.pdf.pdf import PDF
 
 def create_pdf(
     settings: Settings,
-    events: List[EventType],
-    results: List[Tuple[str, List[PersonSeriesResult]]],
+    events: list[EventType],
+    results: list[tuple[str, list[PersonSeriesResult]]],
     landscape: bool = False,
 ) -> bytes:
     W_SPACE = 3

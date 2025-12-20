@@ -18,7 +18,6 @@
 
 
 from pathlib import Path
-from typing import List
 from typing import Optional
 from typing import TypeVar
 
@@ -79,19 +78,19 @@ class AddEntryDialog:
         if result is not None:
             assert result == ComboboxControl(page=p, id="ent_result").selected_text()
 
-    def get_gender_list(self) -> List[str]:
+    def get_gender_list(self) -> list[str]:
         return ComboboxControl(page=self.page, id="ent_gender").values()
 
-    def get_club_list(self) -> List[str]:
+    def get_club_list(self) -> list[str]:
         return ComboboxControl(page=self.page, id="ent_clubId").values()
 
-    def get_class_list(self) -> List[str]:
+    def get_class_list(self) -> list[str]:
         return ComboboxControl(page=self.page, id="ent_classId").values()
 
-    def get_status_list(self) -> List[str]:
+    def get_status_list(self) -> list[str]:
         return ComboboxControl(page=self.page, id="ent_status").values()
 
-    def get_result_list(self) -> List[str]:
+    def get_result_list(self) -> list[str]:
         return ComboboxControl(page=self.page, id="ent_result").values()
 
     def enter_values(

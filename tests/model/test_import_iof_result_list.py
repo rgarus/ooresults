@@ -18,9 +18,9 @@
 
 
 import datetime
+from collections.abc import Iterator
 from datetime import timedelta
 from datetime import timezone
-from typing import Iterator
 
 import pytest
 

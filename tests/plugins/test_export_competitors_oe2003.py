@@ -531,12 +531,7 @@ def test_time():
         ],
         class_list=[],
     )
-    v1 = (
-        "1;;;b;a;;;;0;;;00:05:01;;;;;;;;"
-        "\r\n"
-        "2;;;d;c;;;;0;;;02:13:20;;;;;;;;"
-        "\r\n"
-    )
+    v1 = "1;;;b;a;;;;0;;;0:05:01;;;;;;;;\r\n2;;;d;c;;;;0;;;2:13:20;;;;;;;;\r\n"
 
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 

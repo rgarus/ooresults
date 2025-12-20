@@ -18,9 +18,6 @@
 
 
 import pathlib
-from typing import Dict
-from typing import List
-from typing import Tuple
 
 import iso8601
 from lxml import etree
@@ -39,7 +36,7 @@ iof_namespace = "http://www.orienteering.org/datastandard/3.0"
 namespaces = {None: iof_namespace}
 
 
-def create_entry_list(event: EventType, entries: List[EntryType]) -> bytes:
+def create_entry_list(event: EventType, entries: list[EntryType]) -> bytes:
     E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
 
     ENTRYLIST = E.EntryList
@@ -106,7 +103,7 @@ def create_entry_list(event: EventType, entries: List[EntryType]) -> bytes:
     )
 
 
-def parse_entry_list(content: bytes) -> Tuple[Dict, List[Dict]]:
+def parse_entry_list(content: bytes) -> tuple[dict, list[dict]]:
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)

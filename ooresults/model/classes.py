@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Dict
-from typing import List
 from typing import Optional
 
 from ooresults import model
@@ -29,7 +27,7 @@ from ooresults.otypes.class_type import ClassType
 from ooresults.repo.repo import TransactionMode
 
 
-def get_classes(event_id: int) -> List[ClassInfoType]:
+def get_classes(event_id: int) -> list[ClassInfoType]:
     with model.db.transaction():
         return model.db.get_classes(event_id=event_id)
 
@@ -39,7 +37,7 @@ def get_class(id: int) -> ClassType:
         return model.db.get_class(id=id)
 
 
-def import_classes(event_id: int, classes: List[Dict]) -> None:
+def import_classes(event_id: int, classes: list[dict]) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         existing_classes = model.db.get_classes(event_id=event_id)
         for c in classes:

@@ -21,11 +21,7 @@ import datetime
 import io
 import json
 from collections import defaultdict
-from typing import Dict
-from typing import List
 from typing import Optional
-from typing import Set
-from typing import Tuple
 
 import bottle
 import tzlocal
@@ -75,19 +71,19 @@ def update(event_id: int, view: str = "entries"):
             else:
                 view_entries_list = []
         elif view == "classes":
-            view_entries: defaultdict[str, List[EntryType]] = defaultdict(list)
+            view_entries: defaultdict[str, list[EntryType]] = defaultdict(list)
             for e in entry_list[unassigned_results:]:
                 view_entries[e.class_name].append(e)
             view_entries_list = list(view_entries.items())
             view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
         elif view == "clubs":
-            view_entries: defaultdict[str, List[EntryType]] = defaultdict(list)
+            view_entries: defaultdict[str, list[EntryType]] = defaultdict(list)
             for e in entry_list[unassigned_results:]:
                 view_entries[e.club_name].append(e)
             view_entries_list = list(view_entries.items())
             view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
         elif view == "states":
-            view_entries: defaultdict[ResultStatus, List[EntryType]] = defaultdict(list)
+            view_entries: defaultdict[ResultStatus, list[EntryType]] = defaultdict(list)
             for e in entry_list[unassigned_results:]:
                 view_entries[e.result.status].append(e)
             view_entries_list = list(view_entries.items())
@@ -195,9 +191,9 @@ def post_import():
             return bottle.HTTPResponse(status=409, body="Internal server error")
 
         # import only the first entry of the entries with same last and first name
-        entries_1: List[Dict] = []
-        names_1: Set[Tuple[str, str]] = set()
-        names_2: Set[Tuple[str, str]] = set()
+        entries_1: list[dict] = []
+        names_1: set[tuple[str, str]] = set()
+        names_2: set[tuple[str, str]] = set()
         for e in entries:
             name = (e["last_name"], e["first_name"])
             if name in names_1:
@@ -318,7 +314,7 @@ def post_add():
     return update(event_id=event_id, view=data.view)
 
 
-def collect_unassigned_si_results(entries: List[EntryType]) -> Dict[int, str]:
+def collect_unassigned_si_results(entries: list[EntryType]) -> dict[int, str]:
     unassigned_results = {}
     for e in entries:
         if e.last_name is None:

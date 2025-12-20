@@ -17,7 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
 from typing import Optional
 from typing import TypeVar
 
@@ -53,7 +52,7 @@ class AddEventDialog:
         key: str,
         publish: bool,
         series: str,
-        fields: List[str],
+        fields: list[str],
         streaming_address: str,
         streaming_key: str,
         streaming_enabled: bool,
@@ -88,7 +87,7 @@ class AddEventDialog:
         key: Optional[str] = None,
         publish: Optional[bool] = None,
         series: Optional[str] = None,
-        fields: Optional[List[str]] = None,
+        fields: Optional[list[str]] = None,
         streaming_address: Optional[str] = None,
         streaming_key: Optional[str] = None,
         streaming_enabled: Optional[bool] = None,

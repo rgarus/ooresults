@@ -23,8 +23,7 @@ import datetime
 import json
 import tempfile
 import threading
-from typing import Iterator
-from typing import List
+from collections.abc import Iterator
 
 import pytest
 import pytest_asyncio
@@ -272,7 +271,7 @@ async def si1_clients(
 async def test_cardreader_reader_connected(
     event_id: int,
     reader: ClientConnection,
-    si1_clients: List[ClientConnection],
+    si1_clients: list[ClientConnection],
     websocket_server: WebSocketServer,
 ):
     item = {
@@ -298,7 +297,7 @@ async def test_cardreader_reader_connected(
 async def test_cardreader_reader_disconnected(
     event_id: int,
     reader: ClientConnection,
-    si1_clients: List[ClientConnection],
+    si1_clients: list[ClientConnection],
     websocket_server: WebSocketServer,
 ):
     item = {
@@ -324,7 +323,7 @@ async def test_cardreader_reader_disconnected(
 async def test_cardreader_card_inserted(
     event_id: int,
     reader: ClientConnection,
-    si1_clients: List[ClientConnection],
+    si1_clients: list[ClientConnection],
     websocket_server: WebSocketServer,
 ):
     item = {
@@ -352,7 +351,7 @@ async def test_cardreader_card_inserted(
 async def test_cardreader_card_removed(
     event_id: int,
     reader: ClientConnection,
-    si1_clients: List[ClientConnection],
+    si1_clients: list[ClientConnection],
     websocket_server: WebSocketServer,
 ):
     item = {
@@ -379,7 +378,7 @@ async def test_cardreader_card_read(
     db: SqliteRepo,
     event_id: int,
     reader: ClientConnection,
-    si1_clients: List[ClientConnection],
+    si1_clients: list[ClientConnection],
     websocket_server: WebSocketServer,
 ):
     item = {

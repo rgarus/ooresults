@@ -25,7 +25,6 @@ import json
 import logging
 import ssl
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict
 
 import websockets.exceptions
 from websockets.asyncio.client import connect
@@ -41,8 +40,8 @@ from ooresults.websocket_server import streaming_status
 class Streaming:
     def __init__(self, loop: asyncio.AbstractEventLoop):
         self.loop = loop
-        self.tasks: Dict[int, asyncio.Task] = {}
-        self.events: Dict[int, EventType] = {}
+        self.tasks: dict[int, asyncio.Task] = {}
+        self.events: dict[int, EventType] = {}
         self.executor = ThreadPoolExecutor(max_workers=5)
 
         events = model.events.get_events()

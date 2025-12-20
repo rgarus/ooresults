@@ -23,7 +23,6 @@ import typing
 from collections import OrderedDict
 from typing import Callable
 from typing import Optional
-from typing import Set
 
 from ooresults import model
 
@@ -39,7 +38,7 @@ MAX_SIZE = 4
 
 lock = threading.Lock()
 cache: typing.OrderedDict[int, Data] = OrderedDict()
-callbacks: Set[Callable[[Optional[int]], None]] = set()
+callbacks: set[Callable[[Optional[int]], None]] = set()
 
 
 def get_cached_data(event_id: int):
