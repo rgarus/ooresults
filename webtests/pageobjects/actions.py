@@ -28,12 +28,12 @@ class Action(ButtonControl):
 
 
 class Actions:
-    def __init__(self, page: webdriver.Remote, id: str):
-        self.page = page
+    def __init__(self, driver: webdriver.Remote, id: str):
+        self.driver = driver
         self.id = id
 
     def actions(self) -> list[Action]:
-        elem = self.page.find_element(By.ID, self.id)
+        elem = self.driver.find_element(By.ID, self.id)
         return [Action(b) for b in elem.find_elements(By.XPATH, "button")]
 
     def texts(self) -> list[str]:

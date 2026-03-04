@@ -23,9 +23,9 @@ from selenium.webdriver.common.keys import Keys
 
 
 class TextControl:
-    def __init__(self, page: webdriver.Remote, id: str):
-        self.page = page
-        self.elem = page.find_element(By.ID, id)
+    def __init__(self, driver: webdriver.Remote, id: str):
+        self.driver = driver
+        self.elem = driver.find_element(By.ID, id)
 
     def is_disabled(self) -> bool:
         return self.elem.get_attribute("disabled") == "true"

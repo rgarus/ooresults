@@ -18,26 +18,19 @@
 
 
 import pytest
-from selenium import webdriver
 
-from webtests.pageobjects.competitors import CompetitorPage
-from webtests.pageobjects.tabs import Tabs
+from webtests.pageobjects.main_page import MainPage
 from webtests.tests.conftest import post
 
 
 @pytest.fixture
-def competitor_page(page: webdriver.Remote) -> CompetitorPage:
-    Tabs(page=page).select(text="Competitors")
-    return CompetitorPage(page=page)
+def delete_competitors(main_page: MainPage) -> None:
+    main_page.goto_competitors().delete_competitors()
 
 
 @pytest.fixture
-def delete_competitors(competitor_page: CompetitorPage) -> None:
-    competitor_page.delete_competitors()
-
-
-@pytest.fixture
-def competitor(competitor_page: CompetitorPage, delete_competitors: None) -> None:
+def competitor(main_page: MainPage, delete_competitors: None) -> None:
+    competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     dialog.enter_values(
         first_name="Annalena",
@@ -54,8 +47,9 @@ def competitor(competitor_page: CompetitorPage, delete_competitors: None) -> Non
 
 
 def test_if_competitor_page_is_displayed_then_all_actions_are_displayed(
-    competitor_page: CompetitorPage,
+    main_page: MainPage,
 ):
+    competitor_page = main_page.goto_competitors()
     assert competitor_page.actions.texts() == [
         "Reload",
         "Import ...",
@@ -67,8 +61,9 @@ def test_if_competitor_page_is_displayed_then_all_actions_are_displayed(
 
 
 def test_if_no_row_is_selected_then_some_actions_are_disabled(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
+    competitor_page = main_page.goto_competitors()
     assert competitor_page.actions.action("Reload").is_enabled()
     assert competitor_page.actions.action("Import ...").is_enabled()
     assert competitor_page.actions.action("Export ...").is_enabled()
@@ -78,8 +73,9 @@ def test_if_no_row_is_selected_then_some_actions_are_disabled(
 
 
 def test_if_a_row_is_selected_then_all_actions_are_enabled(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
+    competitor_page = main_page.goto_competitors()
     competitor_page.table.select_row(i=2)
 
     assert competitor_page.actions.action("Reload").is_enabled()
@@ -91,8 +87,9 @@ def test_if_a_row_is_selected_then_all_actions_are_enabled(
 
 
 def test_if_competitor_page_is_selected_then_the_table_header_is_displayed(
-    competitor_page: CompetitorPage,
+    main_page: MainPage,
 ):
+    competitor_page = main_page.goto_competitors()
     assert competitor_page.table.nr_of_columns() == 6
     assert competitor_page.table.headers() == [
         "First name",
@@ -105,8 +102,9 @@ def test_if_competitor_page_is_selected_then_the_table_header_is_displayed(
 
 
 def test_if_a_competitor_is_added_with_required_data_then_an_additional_competitor_is_displayed(
-    competitor_page: CompetitorPage, delete_competitors: None
+    main_page: MainPage, delete_competitors: None
 ):
+    competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     dialog.check_values(
         first_name="",
@@ -144,8 +142,9 @@ def test_if_a_competitor_is_added_with_required_data_then_an_additional_competit
 
 
 def test_if_adding_a_competitor_is_cancelled_then_no_additional_competitor_is_displayed(
-    competitor_page: CompetitorPage, delete_competitors: None
+    main_page: MainPage, delete_competitors: None
 ):
+    competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     dialog.enter_values(
         first_name="Robert",
@@ -163,8 +162,9 @@ def test_if_adding_a_competitor_is_cancelled_then_no_additional_competitor_is_di
 
 
 def test_if_a_competitor_is_added_with_all_data_then_an_additional_competitor_is_displayed(
-    competitor_page: CompetitorPage, delete_competitors: None
+    main_page: MainPage, delete_competitors: None
 ):
+    competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     dialog.check_values(
         first_name="",
@@ -203,8 +203,9 @@ def test_if_a_competitor_is_added_with_all_data_then_an_additional_competitor_is
 
 @pytest.mark.parametrize("gender", ["", "F", "M"])
 def test_if_a_competitor_is_added_you_can_choose_between_gender_unknown_and_female_and_male(
-    gender: str, competitor_page: CompetitorPage, delete_competitors: None
+    gender: str, main_page: MainPage, delete_competitors: None
 ):
+    competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     assert dialog.get_gender_list() == ["", "F", "M"]
 
@@ -236,8 +237,9 @@ def test_if_a_competitor_is_added_you_can_choose_between_gender_unknown_and_fema
 
 
 def test_if_a_competitor_is_selected_and_a_new_competitor_is_added_then_no_competitor_is_selected(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
+    competitor_page = main_page.goto_competitors()
     competitor_page.table.select_row(i=2)
     assert competitor_page.table.selected_row() == 2
 
@@ -255,8 +257,9 @@ def test_if_a_competitor_is_selected_and_a_new_competitor_is_added_then_no_compe
 
 
 def test_if_a_competitor_is_edited_then_the_changed_data_are_displayed(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
+    competitor_page = main_page.goto_competitors()
     competitor_page.table.select_row(2)
 
     dialog = competitor_page.actions.edit()
@@ -296,8 +299,9 @@ def test_if_a_competitor_is_edited_then_the_changed_data_are_displayed(
 
 
 def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
+    competitor_page = main_page.goto_competitors()
     dialog = competitor_page.table.double_click_row(2)
     dialog.check_values(
         first_name="Annalena",
@@ -335,8 +339,10 @@ def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
 
 
 def test_if_a_competitor_is_deleted_then_the_competitor_is_no_longer_displayed(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
+    competitor_page = main_page.goto_competitors()
+
     # add a second competitor
     dialog = competitor_page.actions.add()
     dialog.enter_values(
@@ -373,8 +379,10 @@ def test_if_a_competitor_is_deleted_then_the_competitor_is_no_longer_displayed(
 
 
 def test_if_a_competitor_is_deleted_then_no_competitor_is_selected(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
+    competitor_page = main_page.goto_competitors()
+
     # add a second competitor
     dialog = competitor_page.actions.add()
     dialog.enter_values(
@@ -396,8 +404,10 @@ def test_if_a_competitor_is_deleted_then_no_competitor_is_selected(
 
 
 def test_if_deleting_a_competitor_is_cancelled_then_the_competitor_is_displayed_further(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
+    competitor_page = main_page.goto_competitors()
+
     # select competitor
     competitor_page.table.select_row(2)
     assert competitor_page.table.selected_row() == 2
@@ -419,8 +429,9 @@ def test_if_deleting_a_competitor_is_cancelled_then_the_competitor_is_displayed_
 
 
 def test_if_several_competitors_are_added_then_the_added_competitors_are_displayed(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
+    competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     dialog.enter_values(
         first_name="Christian",
@@ -477,8 +488,9 @@ def test_if_several_competitors_are_added_then_the_added_competitors_are_display
 
 
 def test_if_filter_is_set_then_only_matching_rows_are_displayed(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
+    competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     dialog.enter_values(
         first_name="Christian",
@@ -528,7 +540,7 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(
 
 
 def test_if_a_competitor_is_added_by_another_user_then_it_is_displayed_after_reload(
-    competitor_page: CompetitorPage, competitor: None
+    main_page: MainPage, competitor: None
 ):
     post(
         url="https://127.0.0.1:8080/competitor/add",
@@ -542,6 +554,7 @@ def test_if_a_competitor_is_added_by_another_user_then_it_is_displayed_after_rel
             "club_id": "",
         },
     )
+    competitor_page = main_page.goto_competitors()
 
     # check number of rows
     assert competitor_page.table.nr_of_rows() == 2

@@ -17,13 +17,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pytest
-from selenium import webdriver
+from collections.abc import Iterator
 
-from webtests.pageobjects.classes import ClassPage
-from webtests.pageobjects.courses import CoursePage
-from webtests.pageobjects.events import EventPage
-from webtests.pageobjects.tabs import Tabs
+import pytest
+
+from webtests.pageobjects.main_page import MainPage
 
 
 EVENT_NAME = "Test for Classes"
@@ -31,9 +29,8 @@ EVENT_DATE = "2023-12-28"
 
 
 @pytest.fixture(scope="module")
-def select_event(page: webdriver.Remote) -> None:
-    Tabs(page=page).select(text="Events")
-    event_page = EventPage(page=page)
+def event(main_page: MainPage) -> Iterator[str]:
+    event_page = main_page.goto_events()
     event_page.delete_events()
     dialog = event_page.actions.add()
     dialog.enter_values(
@@ -41,17 +38,14 @@ def select_event(page: webdriver.Remote) -> None:
         date=EVENT_DATE,
     )
     dialog.submit()
-    event_page.table.select_row(2)
-    yield
-    Tabs(page=page).select(text="Events")
-    event_page = EventPage(page=page)
-    event_page.delete_events()
+    event_page.select_event(name=EVENT_NAME)
+    yield EVENT_NAME
+    main_page.goto_events().delete_events()
 
 
 @pytest.fixture(scope="module")
-def add_courses(page: webdriver.Remote, select_event: None) -> None:
-    Tabs(page=page).select(text="Courses")
-    course_page = CoursePage(page=page)
+def add_courses(main_page: MainPage, event: str) -> None:
+    course_page = main_page.goto_courses(event=event)
     course_page.delete_courses()
     dialog = course_page.actions.add()
     dialog.enter_values(name="Bahn A")
@@ -62,18 +56,13 @@ def add_courses(page: webdriver.Remote, select_event: None) -> None:
 
 
 @pytest.fixture
-def class_page(page: webdriver.Remote, add_courses: None) -> ClassPage:
-    Tabs(page=page).select(text="Classes")
-    return ClassPage(page=page)
+def delete_classes(main_page: MainPage, event: str) -> None:
+    main_page.goto_classes(event=event).delete_classes()
 
 
 @pytest.fixture
-def delete_classes(class_page: ClassPage) -> None:
-    class_page.delete_classes()
-
-
-@pytest.fixture
-def class_(class_page: ClassPage, delete_classes: None) -> None:
+def add_class(main_page: MainPage, event: str, delete_classes: None) -> None:
+    class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.enter_values(
         name="Women Short",
@@ -95,9 +84,9 @@ def class_(class_page: ClassPage, delete_classes: None) -> None:
 
 
 def test_if_class_page_is_displayed_then_all_actions_are_displayed(
-    class_page: ClassPage,
+    main_page: MainPage, event: str
 ):
-    assert class_page.actions.texts() == [
+    assert main_page.goto_classes(event=event).actions.texts() == [
         "Reload",
         "Import ...",
         "Export ...",
@@ -108,8 +97,10 @@ def test_if_class_page_is_displayed_then_all_actions_are_displayed(
 
 
 def test_if_no_row_is_selected_then_some_actions_are_disabled(
-    class_page: ClassPage, class_: None
+    main_page: MainPage, event: str, add_class: str
 ):
+    class_page = main_page.goto_classes(event=event)
+
     assert class_page.actions.action("Reload").is_enabled()
     assert class_page.actions.action("Import ...").is_enabled()
     assert class_page.actions.action("Export ...").is_enabled()
@@ -119,8 +110,9 @@ def test_if_no_row_is_selected_then_some_actions_are_disabled(
 
 
 def test_if_a_row_is_selected_then_all_actions_are_enabled(
-    class_page: ClassPage, class_: None
+    main_page: MainPage, event: str, add_class: str
 ):
+    class_page = main_page.goto_classes(event=event)
     class_page.table.select_row(i=2)
 
     assert class_page.actions.action("Reload").is_enabled()
@@ -132,8 +124,9 @@ def test_if_a_row_is_selected_then_all_actions_are_enabled(
 
 
 def test_if_class_page_is_selected_then_the_table_header_is_displayed(
-    class_page: ClassPage,
+    main_page: MainPage, event: str
 ):
+    class_page = main_page.goto_classes(event=event)
     assert class_page.table.nr_of_columns() == 11
     assert class_page.table.headers() == [
         "Name",
@@ -151,8 +144,9 @@ def test_if_class_page_is_selected_then_the_table_header_is_displayed(
 
 
 def test_if_a_class_is_added_with_required_data_then_an_additional_class_is_displayed(
-    class_page: ClassPage, delete_classes: None
+    main_page: MainPage, event: str, delete_classes: None
 ):
+    class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.check_values(
         name="",
@@ -195,8 +189,9 @@ def test_if_a_class_is_added_with_required_data_then_an_additional_class_is_disp
 
 
 def test_if_adding_a_class_is_cancelled_then_no_additional_class_is_displayed(
-    class_page: ClassPage, delete_classes: None
+    main_page: MainPage, event: str, delete_classes: None
 ):
+    class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.enter_values(
         name="Women Long",
@@ -219,8 +214,9 @@ def test_if_adding_a_class_is_cancelled_then_no_additional_class_is_displayed(
 
 
 def test_if_a_class_is_added_with_all_data_then_an_additional_class_is_displayed(
-    class_page: ClassPage, delete_classes: None
+    main_page: MainPage, event: str, delete_classes: None
 ):
+    class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.check_values(
         name="",
@@ -274,8 +270,13 @@ def test_if_a_class_is_added_with_all_data_then_an_additional_class_is_displayed
 
 @pytest.mark.parametrize("course", ["Bahn A", "Bahn B"])
 def test_if_a_class_is_added_you_can_choose_between_all_defined_courses(
-    course: str, class_page: ClassPage, delete_classes: None
+    main_page: MainPage,
+    event: str,
+    delete_classes: None,
+    add_courses: None,
+    course: str,
 ):
+    class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     assert dialog.get_course_list() == ["", "Bahn A", "Bahn B"]
 
@@ -309,8 +310,12 @@ def test_if_a_class_is_added_you_can_choose_between_all_defined_courses(
 
 @pytest.mark.parametrize("type", ["Standard", "Net", "Score"])
 def test_if_a_class_is_added_you_can_choose_between_type_standard_and_net_and_score(
-    type: str, class_page: ClassPage, delete_classes: None
+    main_page: MainPage,
+    event: str,
+    delete_classes: None,
+    type: str,
 ):
+    class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     assert dialog.get_type_list() == ["Standard", "Net", "Score"]
 
@@ -344,8 +349,9 @@ def test_if_a_class_is_added_you_can_choose_between_type_standard_and_net_and_sc
 
 @pytest.mark.parametrize("use_start_control", ["If punched", "No", "Yes"])
 def test_if_a_class_is_added_you_can_choose_between_use_start_control_if_punched_and_no_and_yes(
-    use_start_control: str, class_page: ClassPage, delete_classes: None
+    main_page: MainPage, event: str, delete_classes: None, use_start_control: str
 ):
+    class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     assert dialog.get_use_start_control_list() == ["If punched", "No", "Yes"]
 
@@ -378,8 +384,9 @@ def test_if_a_class_is_added_you_can_choose_between_use_start_control_if_punched
 
 
 def test_if_a_class_is_selected_and_a_new_class_is_added_then_no_class_is_selected(
-    class_page: ClassPage, class_: None
+    main_page: MainPage, event: str, add_class: None
 ):
+    class_page = main_page.goto_classes(event=event)
     class_page.table.select_row(i=2)
     assert class_page.table.selected_row() == 2
 
@@ -393,8 +400,9 @@ def test_if_a_class_is_selected_and_a_new_class_is_added_then_no_class_is_select
 
 
 def test_if_a_class_is_edited_then_the_changed_data_are_displayed(
-    class_page: ClassPage, class_: None
+    main_page: MainPage, event: str, add_class: None
 ):
+    class_page = main_page.goto_classes(event=event)
     class_page.table.select_row(2)
 
     dialog = class_page.actions.edit()
@@ -449,8 +457,9 @@ def test_if_a_class_is_edited_then_the_changed_data_are_displayed(
 
 
 def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
-    class_page: ClassPage, class_: None
+    main_page: MainPage, event: str, add_class: str
 ):
+    class_page = main_page.goto_classes(event=event)
     dialog = class_page.table.double_click_row(2)
     dialog.check_values(
         name="Women Short",
@@ -503,8 +512,9 @@ def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
 
 
 def test_if_a_class_is_deleted_then_the_class_is_no_longer_displayed(
-    class_page: ClassPage, class_: None
+    main_page: MainPage, event: str, add_class: str
 ):
+    class_page = main_page.goto_classes(event=event)
     # add a second course
     dialog = class_page.actions.add()
     dialog.enter_values(
@@ -551,8 +561,9 @@ def test_if_a_class_is_deleted_then_the_class_is_no_longer_displayed(
 
 
 def test_if_a_class_is_deleted_then_no_class_is_selected(
-    class_page: ClassPage, class_: None
+    main_page: MainPage, event: str, add_class: str
 ):
+    class_page = main_page.goto_classes(event=event)
     # add a second course
     dialog = class_page.actions.add()
     dialog.enter_values(
@@ -570,8 +581,9 @@ def test_if_a_class_is_deleted_then_no_class_is_selected(
 
 
 def test_if_deleting_a_class_is_cancelled_then_the_class_is_displayed_further(
-    class_page: ClassPage, class_: None
+    main_page: MainPage, event: str, add_class: str
 ):
+    class_page = main_page.goto_classes(event=event)
     # select course
     class_page.table.select_row(2)
     assert class_page.table.selected_row() == 2
@@ -598,8 +610,9 @@ def test_if_deleting_a_class_is_cancelled_then_the_class_is_displayed_further(
 
 
 def test_if_several_classes_are_added_then_the_added_classes_are_displayed(
-    class_page: ClassPage, class_: None
+    main_page: MainPage, event: str, add_class: str
 ):
+    class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.enter_values(
         name="Women Long",
@@ -683,8 +696,9 @@ def test_if_several_classes_are_added_then_the_added_classes_are_displayed(
 
 
 def test_if_filter_is_set_then_only_matching_rows_are_displayed(
-    class_page: ClassPage, class_: None
+    main_page: MainPage, event: str, add_class: str
 ):
+    class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.enter_values(
         name="Women Long",

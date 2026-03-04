@@ -35,11 +35,11 @@ T = TypeVar("T", bound="AddCourseDialog")
 
 
 class AddCourseDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def wait(self: T) -> T:
-        WebDriverWait(self.page, 10).until(
+        WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(locator=(By.ID, "cou.formAdd"))
         )
         return self
@@ -53,10 +53,10 @@ class AddCourseDialog:
     ):
         self.wait()
 
-        assert name == TextControl(page=self.page, id="cou_name").get_text()
-        assert length == TextControl(page=self.page, id="cou_length").get_text()
-        assert climb == TextControl(page=self.page, id="cou_climb").get_text()
-        assert controls == TextControl(page=self.page, id="cou_controls").get_text()
+        assert name == TextControl(driver=self.driver, id="cou_name").get_text()
+        assert length == TextControl(driver=self.driver, id="cou_length").get_text()
+        assert climb == TextControl(driver=self.driver, id="cou_climb").get_text()
+        assert controls == TextControl(driver=self.driver, id="cou_controls").get_text()
 
     def enter_values(
         self,
@@ -68,82 +68,94 @@ class AddCourseDialog:
         self.wait()
 
         if name is not None:
-            TextControl(page=self.page, id="cou_name").set_text(text=name)
+            TextControl(driver=self.driver, id="cou_name").set_text(text=name)
         if length is not None:
-            TextControl(page=self.page, id="cou_length").set_text(text=length)
+            TextControl(driver=self.driver, id="cou_length").set_text(text=length)
         if climb is not None:
-            TextControl(page=self.page, id="cou_climb").set_text(text=climb)
+            TextControl(driver=self.driver, id="cou_climb").set_text(text=climb)
         if controls is not None:
-            TextControl(page=self.page, id="cou_controls").set_text(text=controls)
+            TextControl(driver=self.driver, id="cou_controls").set_text(text=controls)
 
     def submit(self) -> None:
-        elem = self.page.find_element(By.ID, "cou.formAdd")
+        elem = self.driver.find_element(By.ID, "cou.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Save']")
         elem.click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "cou.formAdd")
+        elem = self.driver.find_element(By.ID, "cou.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Cancel']")
         elem.click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class ImportCourseDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "cou.import.form")
+        elem = self.driver.find_element(By.ID, "cou.import.form")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
     def import_(self, path: Path) -> None:
-        elem = self.page.find_element(By.ID, "cou.import.form")
+        elem = self.driver.find_element(By.ID, "cou.import.form")
         elem.find_element(By.ID, "file1").send_keys(str(path))
         elem.find_element(By.XPATH, "button[text()='Import']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class ExportCourseDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "cou.export.form")
+        elem = self.driver.find_element(By.ID, "cou.export.form")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(elem))
 
 
 class DeleteCourseDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def ok(self) -> None:
-        elem = self.page.find_element(By.ID, "cou.formDelete")
+        elem = self.driver.find_element(By.ID, "cou.formDelete")
         elem.find_element(By.XPATH, "button[text()='Delete']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(elem))
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "cou.formDelete")
+        elem = self.driver.find_element(By.ID, "cou.formDelete")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(elem))
 
 
 class CoursePage:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
-        self.actions = CourseActions(page=page)
-        self.table = CourseTable(page=page)
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
+        self.actions = CourseActions(driver=driver)
+        self.table = CourseTable(driver=driver)
 
     def filter(self) -> TextControl:
-        return TextControl(page=self.page, id="cour.filter")
+        return TextControl(driver=self.driver, id="cour.filter")
 
     def get_event_name(self) -> str:
-        return self.page.find_element(By.ID, "cou.event_name").text
+        return self.driver.find_element(By.ID, "cour.event_name").text
 
     def get_event_date(self) -> str:
-        return self.page.find_element(By.ID, "cou.event_date").text
+        return self.driver.find_element(By.ID, "cour.event_date").text
+
+    def select_course(self, name: str) -> None:
+        for i in range(2, self.table.nr_of_rows() + 2):
+            if self.table.row(i=i)[0] == name:
+                self.table.select_row(i=i)
+                break
+        else:
+            raise RuntimeError(f"Course {name} not found")
+
+    def delete_course(self, name: str) -> None:
+        self.select_course(name=name)
+        self.actions.delete().ok()
 
     def delete_courses(self):
         for i in range(self.table.nr_of_rows() - 1):
@@ -152,36 +164,36 @@ class CoursePage:
 
 
 class CourseActions(Actions):
-    def __init__(self, page: webdriver.Remote) -> None:
-        super().__init__(page=page, id="cour.actions")
+    def __init__(self, driver: webdriver.Remote) -> None:
+        super().__init__(driver=driver, id="cour.actions")
 
     def reload(self) -> None:
         self.action(text="Reload").click()
 
     def import_(self) -> ImportCourseDialog:
         self.action(text="Import ...").click()
-        return ImportCourseDialog(page=self.page)
+        return ImportCourseDialog(driver=self.driver)
 
     def export(self) -> ExportCourseDialog:
         self.action(text="Export ...").click()
-        return ExportCourseDialog(page=self.page)
+        return ExportCourseDialog(driver=self.driver)
 
     def add(self) -> AddCourseDialog:
         self.action(text="Add course ...").click()
-        return AddCourseDialog(page=self.page)
+        return AddCourseDialog(driver=self.driver)
 
     def edit(self) -> AddCourseDialog:
         self.action(text="Edit course ...").click()
-        return AddCourseDialog(page=self.page)
+        return AddCourseDialog(driver=self.driver)
 
     def delete(self) -> DeleteCourseDialog:
         self.action(text="Delete course").click()
-        return DeleteCourseDialog(page=self.page)
+        return DeleteCourseDialog(driver=self.driver)
 
 
 class CourseTable(Table):
-    def __init__(self, page: webdriver.Remote) -> None:
-        super().__init__(page=page, xpath="//table[@id='cou.table']")
+    def __init__(self, driver: webdriver.Remote) -> None:
+        super().__init__(driver=driver, xpath="//table[@id='cou.table']")
 
     def selected_row(self) -> Optional[int]:
         rows = self.selected_rows()
@@ -193,4 +205,4 @@ class CourseTable(Table):
 
     def double_click_row(self, i: int) -> AddCourseDialog:
         super().double_click_row(i=i)
-        return AddCourseDialog(page=self.page)
+        return AddCourseDialog(driver=self.driver)

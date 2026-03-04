@@ -23,12 +23,12 @@ from selenium.webdriver.common.by import By
 
 
 class Table:
-    def __init__(self, page: webdriver.Remote, xpath: str):
-        self.page = page
+    def __init__(self, driver: webdriver.Remote, xpath: str):
+        self.driver = driver
         self.xpath = xpath
 
     def _table(self):
-        return self.page.find_element(By.XPATH, self.xpath)
+        return self.driver.find_element(By.XPATH, self.xpath)
 
     def nr_of_rows(self) -> int:
         rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
@@ -64,7 +64,7 @@ class Table:
         rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
         rows = [row for row in rows if row.is_displayed()]
         row = rows[i - 1].find_elements(By.XPATH, ".//td")[0]
-        ActionChains(driver=self.page).double_click(on_element=row).perform()
+        ActionChains(driver=self.driver).double_click(on_element=row).perform()
 
     def selected_rows(self) -> list[int]:
         rows = self._table().find_elements(By.XPATH, ".//tbody//tr")

@@ -37,11 +37,11 @@ T = TypeVar("T", bound="AddCompetitorDialog")
 
 
 class AddCompetitorDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def wait(self: T) -> T:
-        WebDriverWait(self.page, 10).until(
+        WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(locator=(By.ID, "comp.formAdd"))
         )
         return self
@@ -57,20 +57,27 @@ class AddCompetitorDialog:
     ) -> None:
         self.wait()
 
-        assert first_name == TextControl(page=self.page, id="com_firstName").get_text()
-        assert last_name == TextControl(page=self.page, id="com_lastName").get_text()
         assert (
-            gender == ComboboxControl(page=self.page, id="com_gender").selected_text()
+            first_name == TextControl(driver=self.driver, id="com_firstName").get_text()
         )
-        assert year == NumberControl(page=self.page, id="com_year").get_text()
-        assert chip == TextControl(page=self.page, id="com_chip").get_text()
-        assert club == ComboboxControl(page=self.page, id="com_clubId").selected_text()
+        assert (
+            last_name == TextControl(driver=self.driver, id="com_lastName").get_text()
+        )
+        assert (
+            gender
+            == ComboboxControl(driver=self.driver, id="com_gender").selected_text()
+        )
+        assert year == NumberControl(driver=self.driver, id="com_year").get_text()
+        assert chip == TextControl(driver=self.driver, id="com_chip").get_text()
+        assert (
+            club == ComboboxControl(driver=self.driver, id="com_clubId").selected_text()
+        )
 
     def get_gender_list(self) -> list[str]:
-        return ComboboxControl(page=self.page, id="com_gender").values()
+        return ComboboxControl(driver=self.driver, id="com_gender").values()
 
     def get_club_list(self) -> list[str]:
-        return ComboboxControl(page=self.page, id="com_clubId").values()
+        return ComboboxControl(driver=self.driver, id="com_clubId").values()
 
     def enter_values(
         self,
@@ -84,80 +91,98 @@ class AddCompetitorDialog:
         self.wait()
 
         if first_name is not None:
-            TextControl(page=self.page, id="com_firstName").set_text(text=first_name)
+            TextControl(driver=self.driver, id="com_firstName").set_text(
+                text=first_name
+            )
         if last_name is not None:
-            TextControl(page=self.page, id="com_lastName").set_text(text=last_name)
+            TextControl(driver=self.driver, id="com_lastName").set_text(text=last_name)
         if gender is not None:
-            ComboboxControl(page=self.page, id="com_gender").select_by_text(text=gender)
+            ComboboxControl(driver=self.driver, id="com_gender").select_by_text(
+                text=gender
+            )
         if year is not None:
-            NumberControl(page=self.page, id="com_year").set_text(text=year)
+            NumberControl(driver=self.driver, id="com_year").set_text(text=year)
         if chip is not None:
-            TextControl(page=self.page, id="com_chip").set_text(text=chip)
+            TextControl(driver=self.driver, id="com_chip").set_text(text=chip)
         if club is not None:
-            ComboboxControl(page=self.page, id="com_clubId").select_by_text(text=club)
+            ComboboxControl(driver=self.driver, id="com_clubId").select_by_text(
+                text=club
+            )
 
     def submit(self) -> None:
-        elem = self.page.find_element(By.ID, "comp.formAdd")
+        elem = self.driver.find_element(By.ID, "comp.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Save']")
         elem.click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "comp.formAdd")
+        elem = self.driver.find_element(By.ID, "comp.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Cancel']")
         elem.click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class ImportCompetitorDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "comp.import.form")
+        elem = self.driver.find_element(By.ID, "comp.import.form")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
     def import_(self, path: Path) -> None:
-        elem = self.page.find_element(By.ID, "comp.import.form")
+        elem = self.driver.find_element(By.ID, "comp.import.form")
         elem.find_element(By.ID, "file1").send_keys(str(path))
         elem.find_element(By.XPATH, "button[text()='Import']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class ExportCompetitorDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "comp.formExport")
+        elem = self.driver.find_element(By.ID, "comp.formExport")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class DeleteCompetitorDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def ok(self) -> None:
-        elem = self.page.find_element(By.ID, "comp.formDelete")
+        elem = self.driver.find_element(By.ID, "comp.formDelete")
         elem.find_element(By.XPATH, "button[text()='Delete']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "comp.formDelete")
+        elem = self.driver.find_element(By.ID, "comp.formDelete")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class CompetitorPage:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
-        self.actions = CompetitorActions(page=page)
-        self.table = CompetitorTable(page=page)
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
+        self.actions = CompetitorActions(driver=driver)
+        self.table = CompetitorTable(driver=driver)
 
     def filter(self) -> TextControl:
-        return TextControl(page=self.page, id="comp.filter")
+        return TextControl(driver=self.driver, id="comp.filter")
+
+    def select_competitor(self, first_name: str, last_name: str) -> None:
+        for i in range(2, self.table.nr_of_rows() + 2):
+            if self.table.row(i=i)[0:2] == (first_name, last_name):
+                self.table.select_row(i=i)
+                break
+        else:
+            raise RuntimeError(f"Competitor {last_name}, {first_name} not found")
+
+    def delete_competitor(self, first_name: str, last_name: str) -> None:
+        self.select_competitor(first_name=first_name, last_name=last_name)
+        self.actions.delete().ok()
 
     def delete_competitors(self) -> None:
         for i in range(self.table.nr_of_rows() - 1):
@@ -166,36 +191,36 @@ class CompetitorPage:
 
 
 class CompetitorActions(Actions):
-    def __init__(self, page: webdriver.Remote) -> None:
-        super().__init__(page=page, id="comp.actions")
+    def __init__(self, driver: webdriver.Remote) -> None:
+        super().__init__(driver=driver, id="comp.actions")
 
     def reload(self) -> None:
         self.action(text="Reload").click()
 
     def import_(self) -> ImportCompetitorDialog:
         self.action(text="Import ...").click()
-        return ImportCompetitorDialog(page=self.page)
+        return ImportCompetitorDialog(driver=self.driver)
 
     def export(self) -> ExportCompetitorDialog:
         self.action(text="Export ...").click()
-        return ExportCompetitorDialog(page=self.page)
+        return ExportCompetitorDialog(driver=self.driver)
 
     def add(self) -> AddCompetitorDialog:
         self.action(text="Add competitor ...").click()
-        return AddCompetitorDialog(page=self.page)
+        return AddCompetitorDialog(driver=self.driver)
 
     def edit(self) -> AddCompetitorDialog:
         self.action(text="Edit competitor ...").click()
-        return AddCompetitorDialog(page=self.page)
+        return AddCompetitorDialog(driver=self.driver)
 
     def delete(self) -> DeleteCompetitorDialog:
         self.action(text="Delete competitor").click()
-        return DeleteCompetitorDialog(page=self.page)
+        return DeleteCompetitorDialog(driver=self.driver)
 
 
 class CompetitorTable(Table):
-    def __init__(self, page: webdriver.Remote) -> None:
-        super().__init__(page=page, xpath="//table[@id='comp.table']")
+    def __init__(self, driver: webdriver.Remote) -> None:
+        super().__init__(driver=driver, xpath="//table[@id='comp.table']")
 
     def selected_row(self) -> Optional[int]:
         rows = self.selected_rows()
@@ -207,4 +232,4 @@ class CompetitorTable(Table):
 
     def double_click_row(self, i: int) -> AddCompetitorDialog:
         super().double_click_row(i=i)
-        return AddCompetitorDialog(page=self.page)
+        return AddCompetitorDialog(driver=self.driver)

@@ -21,29 +21,17 @@ import pathlib
 import tempfile
 
 import pytest
-from selenium import webdriver
 
-from webtests.pageobjects.clubs import ClubPage
-from webtests.pageobjects.competitors import CompetitorPage
-from webtests.pageobjects.tabs import Tabs
+from webtests.pageobjects.main_page import MainPage
 
 
 @pytest.fixture
-def competitor_page(page: webdriver.Remote) -> CompetitorPage:
-    Tabs(page=page).select(text="Competitors")
-    return CompetitorPage(page=page)
+def delete_competitors(main_page: MainPage) -> None:
+    main_page.goto_competitors().delete_competitors()
+    main_page.goto_clubs().delete_clubs()
 
 
-@pytest.fixture
-def delete_competitors(page: webdriver.Remote) -> None:
-    Tabs(page=page).select(text="Competitors")
-    CompetitorPage(page=page).delete_competitors()
-    Tabs(page=page).select(text="Clubs")
-    ClubPage(page=page).delete_clubs()
-    Tabs(page=page).select(text="Competitors")
-
-
-def test_import_competitor(competitor_page: CompetitorPage, delete_competitors: None):
+def test_import_competitor(main_page: MainPage, delete_competitors: None):
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -69,6 +57,7 @@ def test_import_competitor(competitor_page: CompetitorPage, delete_competitors: 
   </Competitor>
 </CompetitorList>
 """
+    competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "competitors.xml"

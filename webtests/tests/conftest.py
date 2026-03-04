@@ -20,6 +20,7 @@
 import subprocess
 import sys
 import tempfile
+from collections.abc import Iterator
 
 import pytest
 import requests
@@ -27,25 +28,37 @@ import urllib3
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
+from webtests.pageobjects.main_page import MainPage
+
+
+pytest_plugins = [
+    "webtests.pytest_plugins.close_popups",
+]
+
 
 @pytest.fixture(scope="session")
-def ooresults_server() -> None:
+def ooresults_server() -> Iterator[subprocess.Popen]:
     with tempfile.TemporaryDirectory() as d_name:
         p = subprocess.Popen([sys.executable, "-m", "ooresults.server", "-p", d_name])
-        yield
+        yield p
         p.kill()
         p.wait(timeout=10)
 
 
-@pytest.fixture(scope="module")
-def page(ooresults_server) -> webdriver.Firefox:
-    driver = webdriver.Firefox()
+@pytest.fixture(scope="session")
+def driver() -> Iterator[webdriver.Remote]:
+    driver: webdriver.Remote = webdriver.Firefox()
+    yield driver
+    driver.quit()
+
+
+@pytest.fixture(scope="session")
+def main_page(ooresults_server: subprocess.Popen, driver: webdriver.Remote) -> MainPage:
     driver.get("https://admin:admin@localhost:8080")
     assert "ooresults" in driver.title
     elem = driver.find_element(By.LINK_TEXT, "Administration")
     elem.click()
-    yield driver
-    driver.quit()
+    return MainPage(driver=driver)
 
 
 def post(url: str, data: dict[str, str]):

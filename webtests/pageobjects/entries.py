@@ -38,11 +38,11 @@ T1 = TypeVar("T1", bound="AddEntryDialog")
 
 
 class AddEntryDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def wait(self: T1) -> T1:
-        WebDriverWait(self.page, 10).until(
+        WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(locator=(By.ID, "entr.formAdd"))
         )
         return self
@@ -62,36 +62,37 @@ class AddEntryDialog:
         result: Optional[str] = None,
     ):
         self.wait()
-        p = self.page
-        assert first_name == TextControl(page=p, id="ent_firstName").get_text()
-        assert last_name == TextControl(page=p, id="ent_lastName").get_text()
-        assert gender == ComboboxControl(page=p, id="ent_gender").selected_text()
-        assert year == NumberControl(page=p, id="ent_year").get_text()
-        assert chip == TextControl(page=p, id="ent_chip").get_text()
-        assert club_name == ComboboxControl(page=p, id="ent_clubId").selected_text()
-        assert class_name == ComboboxControl(page=p, id="ent_classId").selected_text()
+        p = self.driver
+        assert first_name == TextControl(driver=p, id="ent_firstName").get_text()
+        assert last_name == TextControl(driver=p, id="ent_lastName").get_text()
+        assert gender == ComboboxControl(driver=p, id="ent_gender").selected_text()
+        assert year == NumberControl(driver=p, id="ent_year").get_text()
+        assert chip == TextControl(driver=p, id="ent_chip").get_text()
+        assert club_name == ComboboxControl(driver=p, id="ent_clubId").selected_text()
+        assert class_name == ComboboxControl(driver=p, id="ent_classId").selected_text()
         assert (
-            not_competing == CheckboxControl(page=p, id="ent_notCompeting").is_checked()
+            not_competing
+            == CheckboxControl(driver=p, id="ent_notCompeting").is_checked()
         )
-        assert start_time == TextControl(page=p, id="ent_startTime").get_text()
-        assert status == ComboboxControl(page=p, id="ent_status").selected_text()
+        assert start_time == TextControl(driver=p, id="ent_startTime").get_text()
+        assert status == ComboboxControl(driver=p, id="ent_status").selected_text()
         if result is not None:
-            assert result == ComboboxControl(page=p, id="ent_result").selected_text()
+            assert result == ComboboxControl(driver=p, id="ent_result").selected_text()
 
     def get_gender_list(self) -> list[str]:
-        return ComboboxControl(page=self.page, id="ent_gender").values()
+        return ComboboxControl(driver=self.driver, id="ent_gender").values()
 
     def get_club_list(self) -> list[str]:
-        return ComboboxControl(page=self.page, id="ent_clubId").values()
+        return ComboboxControl(driver=self.driver, id="ent_clubId").values()
 
     def get_class_list(self) -> list[str]:
-        return ComboboxControl(page=self.page, id="ent_classId").values()
+        return ComboboxControl(driver=self.driver, id="ent_classId").values()
 
     def get_status_list(self) -> list[str]:
-        return ComboboxControl(page=self.page, id="ent_status").values()
+        return ComboboxControl(driver=self.driver, id="ent_status").values()
 
     def get_result_list(self) -> list[str]:
-        return ComboboxControl(page=self.page, id="ent_result").values()
+        return ComboboxControl(driver=self.driver, id="ent_result").values()
 
     def enter_values(
         self,
@@ -108,44 +109,46 @@ class AddEntryDialog:
         result: Optional[str] = None,
     ):
         self.wait()
-        p = self.page
+        p = self.driver
         if first_name is not None:
-            TextControl(page=p, id="ent_firstName").set_text(text=first_name)
+            TextControl(driver=p, id="ent_firstName").set_text(text=first_name)
         if last_name is not None:
-            TextControl(page=p, id="ent_lastName").set_text(text=last_name)
+            TextControl(driver=p, id="ent_lastName").set_text(text=last_name)
         if gender is not None:
-            ComboboxControl(page=p, id="ent_gender").select_by_text(text=gender)
+            ComboboxControl(driver=p, id="ent_gender").select_by_text(text=gender)
         if year is not None:
-            NumberControl(page=p, id="ent_year").set_text(text=year)
+            NumberControl(driver=p, id="ent_year").set_text(text=year)
         if chip is not None:
-            TextControl(page=p, id="ent_chip").set_text(text=chip)
+            TextControl(driver=p, id="ent_chip").set_text(text=chip)
         if club_name is not None:
-            ComboboxControl(page=p, id="ent_clubId").select_by_text(text=club_name)
+            ComboboxControl(driver=p, id="ent_clubId").select_by_text(text=club_name)
         if class_name is not None:
-            ComboboxControl(page=p, id="ent_classId").select_by_text(text=class_name)
+            ComboboxControl(driver=p, id="ent_classId").select_by_text(text=class_name)
         if not_competing is not None:
-            CheckboxControl(page=p, id="ent_notCompeting").set_state(
+            CheckboxControl(driver=p, id="ent_notCompeting").set_state(
                 checked=not_competing
             )
         if start_time is not None:
-            TextControl(page=p, id="ent_startTime").set_text(text=start_time)
+            TextControl(driver=p, id="ent_startTime").set_text(text=start_time)
         if status is not None:
-            ComboboxControl(page=p, id="ent_status").select_by_text(text=status)
+            ComboboxControl(driver=p, id="ent_status").select_by_text(text=status)
         if result is not None:
-            ComboboxControl(page=p, id="ent_result").select_by_text(text=result)
+            ComboboxControl(driver=p, id="ent_result").select_by_text(text=result)
 
     def submit(self, wait_until_closed: bool = True) -> None:
-        elem = self.page.find_element(By.ID, "entr.formAdd")
+        elem = self.driver.find_element(By.ID, "entr.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Save']")
         elem.click()
         if wait_until_closed:
-            WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+            WebDriverWait(self.driver, 10).until(
+                EC.invisibility_of_element(element=elem)
+            )
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "entr.formAdd")
+        elem = self.driver.find_element(By.ID, "entr.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Cancel']")
         elem.click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 T2 = TypeVar("T2", bound="StatusDialog")
@@ -154,94 +157,106 @@ T2 = TypeVar("T2", bound="StatusDialog")
 class StatusDialog:
     modal_dialog_id = "statusDialog"
 
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def wait(self: T2) -> T2:
-        WebDriverWait(self.page, 10).until(
+        WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(locator=(By.ID, self.modal_dialog_id))
         )
         return self
 
     def get_text(self) -> list[str]:
-        elem = self.page.find_element(By.ID, "statusDialogContent")
+        elem = self.driver.find_element(By.ID, "statusDialogContent")
 
         items = elem.find_elements(By.XPATH, "p")
         return [p.text for p in items if p.text]
 
     def close(self) -> None:
-        elem = self.page.find_element(By.ID, self.modal_dialog_id)
+        elem = self.driver.find_element(By.ID, self.modal_dialog_id)
         elem.find_element(By.XPATH, ".//button[text()='Close']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class ImportEntryDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "entr.import.form")
+        elem = self.driver.find_element(By.ID, "entr.import.form")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
     def import_(self, path: Path, info_dialog: bool = False) -> Optional[StatusDialog]:
-        elem = self.page.find_element(By.ID, "entr.import.form")
+        elem = self.driver.find_element(By.ID, "entr.import.form")
         elem.find_element(By.ID, "file1").send_keys(str(path))
         elem.find_element(By.XPATH, "button[text()='Import']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
         if info_dialog:
-            return StatusDialog(page=self.page).wait()
+            return StatusDialog(driver=self.driver).wait()
 
 
 class ExportEntryDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "entr.export.form")
+        elem = self.driver.find_element(By.ID, "entr.export.form")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class DeleteEntryDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def ok(self) -> None:
-        elem = self.page.find_element(By.ID, "entr.formDelete")
+        elem = self.driver.find_element(By.ID, "entr.formDelete")
         elem.find_element(By.XPATH, "button[text()='Delete']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "entr.formDelete")
+        elem = self.driver.find_element(By.ID, "entr.formDelete")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class EditSplitTimesDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def close(self) -> None:
-        elem = self.page.find_element(By.ID, "entr.formSplitTimes")
+        elem = self.driver.find_element(By.ID, "entr.formSplitTimes")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class EntryPage:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
-        self.actions = EntryActions(page=page)
-        self.table = EntryTable(page=page)
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
+        self.actions = EntryActions(driver=driver)
+        self.table = EntryTable(driver=driver)
 
     def filter(self) -> TextControl:
-        return TextControl(page=self.page, id="entr.filter")
+        return TextControl(driver=self.driver, id="entr.filter")
 
     def get_event_name(self) -> str:
-        return self.page.find_element(By.ID, "entr.event_name").text
+        return self.driver.find_element(By.ID, "entr.event_name").text
 
     def get_event_date(self) -> str:
-        return self.page.find_element(By.ID, "entr.event_date").text
+        return self.driver.find_element(By.ID, "entr.event_date").text
+
+    def select_entry(self, first_name: str, last_name: str) -> None:
+        for i in range(2, self.table.nr_of_rows() + 2):
+            if self.table.row(i=i)[0:2] == (first_name, last_name):
+                self.table.select_row(i=i)
+                break
+        else:
+            raise RuntimeError(f"Entry {last_name}, {first_name} not found")
+
+    def delete_entry(self, first_name: str, last_name: str) -> None:
+        self.select_entry(first_name=first_name, last_name=last_name)
+        self.actions.delete().ok()
 
     def delete_entries(self):
         for i in range(self.table.nr_of_rows() - 1):
@@ -250,40 +265,40 @@ class EntryPage:
 
 
 class EntryActions(Actions):
-    def __init__(self, page: webdriver.Remote) -> None:
-        super().__init__(page=page, id="entr.actions")
+    def __init__(self, driver: webdriver.Remote) -> None:
+        super().__init__(driver=driver, id="entr.actions")
 
     def reload(self) -> None:
         self.action(text="Reload").click()
 
     def import_(self) -> ImportEntryDialog:
         self.action(text="Import ...").click()
-        return ImportEntryDialog(page=self.page)
+        return ImportEntryDialog(driver=self.driver)
 
     def export(self) -> ExportEntryDialog:
         self.action(text="Export ...").click()
-        return ExportEntryDialog(page=self.page)
+        return ExportEntryDialog(driver=self.driver)
 
     def add(self) -> AddEntryDialog:
         self.action(text="Add entry ...").click()
-        return AddEntryDialog(page=self.page)
+        return AddEntryDialog(driver=self.driver)
 
     def edit(self) -> AddEntryDialog:
         self.action(text="Edit entry ...").click()
-        return AddEntryDialog(page=self.page)
+        return AddEntryDialog(driver=self.driver)
 
     def delete(self) -> DeleteEntryDialog:
         self.action(text="Delete entry").click()
-        return DeleteEntryDialog(page=self.page)
+        return DeleteEntryDialog(driver=self.driver)
 
     def edit_split_times(self) -> EditSplitTimesDialog:
         self.action(text="Edit split times ...").click()
-        return EditSplitTimesDialog(page=self.page)
+        return EditSplitTimesDialog(driver=self.driver)
 
 
 class EntryTable(Table):
-    def __init__(self, page: webdriver.Remote) -> None:
-        super().__init__(page=page, xpath="//table[@id='entr.table']")
+    def __init__(self, driver: webdriver.Remote) -> None:
+        super().__init__(driver=driver, xpath="//table[@id='entr.table']")
 
     def selected_row(self) -> Optional[int]:
         rows = self.selected_rows()
@@ -295,4 +310,4 @@ class EntryTable(Table):
 
     def double_click_row(self, i: int) -> AddEntryDialog:
         super().double_click_row(i=i)
-        return AddEntryDialog(page=self.page)
+        return AddEntryDialog(driver=self.driver)

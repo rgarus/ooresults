@@ -19,13 +19,11 @@
 
 import pathlib
 import tempfile
+from collections.abc import Iterator
 
 import pytest
-from selenium import webdriver
 
-from webtests.pageobjects.classes import ClassPage
-from webtests.pageobjects.events import EventPage
-from webtests.pageobjects.tabs import Tabs
+from webtests.pageobjects.main_page import MainPage
 
 
 EVENT_NAME = "Test for Classes"
@@ -33,9 +31,8 @@ EVENT_DATE = "2023-12-28"
 
 
 @pytest.fixture(scope="module")
-def select_event(page: webdriver.Remote) -> None:
-    Tabs(page=page).select(text="Events")
-    event_page = EventPage(page=page)
+def event(main_page: MainPage) -> Iterator[str]:
+    event_page = main_page.goto_events()
     event_page.delete_events()
     dialog = event_page.actions.add()
     dialog.enter_values(
@@ -43,25 +40,17 @@ def select_event(page: webdriver.Remote) -> None:
         date=EVENT_DATE,
     )
     dialog.submit()
-    event_page.table.select_row(2)
-    yield
-    Tabs(page=page).select(text="Events")
-    event_page = EventPage(page=page)
-    event_page.delete_events()
+    event_page.select_event(name=EVENT_NAME)
+    yield EVENT_NAME
+    main_page.goto_events().delete_events()
 
 
 @pytest.fixture
-def class_page(page: webdriver.Remote, select_event: None) -> ClassPage:
-    Tabs(page=page).select(text="Classes")
-    return ClassPage(page=page)
+def delete_classes(main_page: MainPage, event: str) -> None:
+    main_page.goto_classes(event=event).delete_classes()
 
 
-@pytest.fixture
-def delete_classes(class_page: ClassPage) -> None:
-    class_page.delete_classes()
-
-
-def test_import_classes(class_page: ClassPage, delete_classes: None):
+def test_import_classes(main_page: MainPage, delete_classes: None):
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ClassList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -75,6 +64,8 @@ def test_import_classes(class_page: ClassPage, delete_classes: None):
   </Class>
 </ClassList>
 """
+    class_page = main_page.goto_classes()
+
     dialog = class_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "ClassData.xml"

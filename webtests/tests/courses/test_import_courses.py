@@ -19,13 +19,11 @@
 
 import pathlib
 import tempfile
+from collections.abc import Iterator
 
 import pytest
-from selenium import webdriver
 
-from webtests.pageobjects.courses import CoursePage
-from webtests.pageobjects.events import EventPage
-from webtests.pageobjects.tabs import Tabs
+from webtests.pageobjects.main_page import MainPage
 
 
 EVENT_NAME = "Test for Courses"
@@ -33,9 +31,8 @@ EVENT_DATE = "2023-12-28"
 
 
 @pytest.fixture(scope="module")
-def select_event(page: webdriver.Remote) -> None:
-    Tabs(page=page).select(text="Events")
-    event_page = EventPage(page=page)
+def event(main_page: MainPage) -> Iterator[str]:
+    event_page = main_page.goto_events()
     event_page.delete_events()
     dialog = event_page.actions.add()
     dialog.enter_values(
@@ -43,25 +40,17 @@ def select_event(page: webdriver.Remote) -> None:
         date=EVENT_DATE,
     )
     dialog.submit()
-    event_page.table.select_row(2)
-    yield
-    Tabs(page=page).select(text="Events")
-    event_page = EventPage(page=page)
-    event_page.delete_events()
+    event_page.select_event(name=EVENT_NAME)
+    yield EVENT_NAME
+    main_page.goto_events().delete_events()
 
 
 @pytest.fixture
-def course_page(page: webdriver.Remote, select_event: None) -> CoursePage:
-    Tabs(page=page).select(text="Courses")
-    return CoursePage(page=page)
+def delete_courses(main_page: MainPage, event: str) -> None:
+    main_page.goto_courses(event=event).delete_courses()
 
 
-@pytest.fixture
-def delete_courses(course_page: CoursePage) -> None:
-    course_page.delete_courses()
-
-
-def test_import_courses(course_page: CoursePage, delete_courses: None):
+def test_import_courses(main_page: MainPage, event: str, delete_courses: None):
     content = f"""\
 <?xml version='1.0' encoding='UTF-8'?>
 <CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -113,6 +102,7 @@ def test_import_courses(course_page: CoursePage, delete_courses: None):
   </RaceCourseData>
 </CourseData>
 """
+    course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "CourseData.xml"

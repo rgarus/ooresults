@@ -34,11 +34,11 @@ T = TypeVar("T", bound="AddClubDialog")
 
 
 class AddClubDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def wait(self: T) -> T:
-        WebDriverWait(self.page, 10).until(
+        WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(locator=(By.ID, "clb.formAdd"))
         )
         return self
@@ -46,50 +46,65 @@ class AddClubDialog:
     def check_values(self, name: str) -> None:
         self.wait()
 
-        assert name == TextControl(page=self.page, id="clb_name").get_text()
+        assert name == TextControl(driver=self.driver, id="clb_name").get_text()
 
     def enter_values(self, name: Optional[str] = None) -> None:
         self.wait()
 
         if name is not None:
-            TextControl(page=self.page, id="clb_name").set_text(text=name)
+            TextControl(driver=self.driver, id="clb_name").set_text(text=name)
 
-    def submit(self) -> None:
-        elem = self.page.find_element(By.ID, "clb.formAdd")
+    def submit(self, wait_until_closed: bool = True) -> None:
+        elem = self.driver.find_element(By.ID, "clb.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Save']")
         elem.click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        if wait_until_closed:
+            WebDriverWait(self.driver, 10).until(
+                EC.invisibility_of_element(element=elem)
+            )
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "clb.formAdd")
+        elem = self.driver.find_element(By.ID, "clb.formAdd")
         elem = elem.find_element(By.XPATH, "button[text()='Cancel']")
         elem.click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class DeleteClubDialog:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
 
     def ok(self) -> None:
-        elem = self.page.find_element(By.ID, "clb.formDelete")
+        elem = self.driver.find_element(By.ID, "clb.formDelete")
         elem.find_element(By.XPATH, "button[text()='Delete']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
     def cancel(self) -> None:
-        elem = self.page.find_element(By.ID, "clb.formDelete")
+        elem = self.driver.find_element(By.ID, "clb.formDelete")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
-        WebDriverWait(self.page, 10).until(EC.invisibility_of_element(element=elem))
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
 class ClubPage:
-    def __init__(self, page: webdriver.Remote) -> None:
-        self.page = page
-        self.actions = ClubActions(page=page)
-        self.table = ClubTable(page=page)
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
+        self.actions = ClubActions(driver=driver)
+        self.table = ClubTable(driver=driver)
 
     def filter(self) -> TextControl:
-        return TextControl(page=self.page, id="club.filter")
+        return TextControl(driver=self.driver, id="club.filter")
+
+    def select_club(self, name: str) -> None:
+        for i in range(2, self.table.nr_of_rows() + 2):
+            if self.table.row(i=i)[0] == name:
+                self.table.select_row(i=i)
+                break
+        else:
+            raise RuntimeError(f"Club {name} not found")
+
+    def delete_club(self, name: str) -> None:
+        self.select_club(name=name)
+        self.actions.delete().ok()
 
     def delete_clubs(self) -> None:
         for i in range(self.table.nr_of_rows() - 1):
@@ -98,28 +113,28 @@ class ClubPage:
 
 
 class ClubActions(Actions):
-    def __init__(self, page: webdriver.Remote) -> None:
-        super().__init__(page=page, id="club.actions")
+    def __init__(self, driver: webdriver.Remote) -> None:
+        super().__init__(driver=driver, id="club.actions")
 
     def reload(self) -> None:
         self.action(text="Reload").click()
 
     def add(self) -> AddClubDialog:
         self.action(text="Add club ...").click()
-        return AddClubDialog(page=self.page)
+        return AddClubDialog(driver=self.driver)
 
     def edit(self) -> AddClubDialog:
         self.action(text="Edit club ...").click()
-        return AddClubDialog(page=self.page)
+        return AddClubDialog(driver=self.driver)
 
     def delete(self) -> DeleteClubDialog:
         self.action(text="Delete club").click()
-        return DeleteClubDialog(page=self.page)
+        return DeleteClubDialog(driver=self.driver)
 
 
 class ClubTable(Table):
-    def __init__(self, page: webdriver.Remote) -> None:
-        super().__init__(page=page, xpath="//table[@id='clb.table']")
+    def __init__(self, driver: webdriver.Remote) -> None:
+        super().__init__(driver=driver, xpath="//table[@id='clb.table']")
 
     def selected_row(self) -> Optional[int]:
         rows = self.selected_rows()
@@ -131,4 +146,4 @@ class ClubTable(Table):
 
     def double_click_row(self, i: int) -> AddClubDialog:
         super().double_click_row(i=i)
-        return AddClubDialog(page=self.page)
+        return AddClubDialog(driver=self.driver)

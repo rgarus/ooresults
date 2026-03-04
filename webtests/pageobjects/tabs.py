@@ -29,11 +29,11 @@ class Tab(ButtonControl):
 
 
 class Tabs:
-    def __init__(self, page: webdriver.Remote):
-        self.page = page
+    def __init__(self, driver: webdriver.Remote):
+        self.driver = driver
 
     def tabs(self) -> list[Tab]:
-        elem = self.page.find_element(By.ID, "tabs")
+        elem = self.driver.find_element(By.ID, "tabs")
         return [Tab(b) for b in elem.find_elements(By.XPATH, "button")]
 
     def texts(self) -> list[str]:

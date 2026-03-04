@@ -22,13 +22,8 @@ import tempfile
 from collections.abc import Iterator
 
 import pytest
-from selenium import webdriver
 
-from webtests.pageobjects.clubs import ClubPage
-from webtests.pageobjects.competitors import CompetitorPage
-from webtests.pageobjects.entries import EntryPage
-from webtests.pageobjects.events import EventPage
-from webtests.pageobjects.tabs import Tabs
+from webtests.pageobjects.main_page import MainPage
 
 
 EVENT_NAME = "Test for Entries"
@@ -36,36 +31,24 @@ EVENT_DATE = "2023-12-28"
 
 
 @pytest.fixture
-def delete_all(page: webdriver.Remote) -> None:
-    Tabs(page=page).select(text="Events")
-    EventPage(page=page).delete_events()
-    Tabs(page=page).select(text="Competitors")
-    CompetitorPage(page=page).delete_competitors()
-    Tabs(page=page).select(text="Clubs")
-    ClubPage(page=page).delete_clubs()
+def delete_all(main_page: MainPage) -> None:
+    main_page.goto_events().delete_events()
+    main_page.goto_competitors().delete_competitors()
+    main_page.goto_clubs().delete_clubs()
 
 
 @pytest.fixture
-def select_event(page: webdriver.Remote, delete_all: None) -> Iterator[None]:
-    Tabs(page=page).select(text="Events")
-    event_page = EventPage(page=page)
+def event(main_page: MainPage, delete_all: None) -> Iterator[str]:
+    event_page = main_page.goto_events()
     dialog = event_page.actions.add()
     dialog.enter_values(name=EVENT_NAME, date=EVENT_DATE)
     dialog.submit()
-    event_page.table.select_row(2)
-    yield
-    Tabs(page=page).select(text="Events")
-    event_page = EventPage(page=page)
-    event_page.delete_events()
+    event_page.select_event(name=EVENT_NAME)
+    yield EVENT_NAME
+    main_page.goto_events().delete_events()
 
 
-@pytest.fixture
-def entry_page(page: webdriver.Remote, select_event: None) -> EntryPage:
-    Tabs(page=page).select(text="Entries")
-    return EntryPage(page=page)
-
-
-def test_import_entries(entry_page: EntryPage, delete_all: None):
+def test_import_entries(main_page: MainPage, event: str):
     content = f"""\
 <?xml version='1.0' encoding='UTF-8'?>
 <EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -125,6 +108,7 @@ def test_import_entries(entry_page: EntryPage, delete_all: None):
   </PersonEntry>
 </EntryList>
 """
+    entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "EntryList.xml"
@@ -181,7 +165,7 @@ def test_import_entries(entry_page: EntryPage, delete_all: None):
 
 
 def test_if_a_competitor_is_contained_several_times_then_only_the_first_entry_is_imported(
-    entry_page: EntryPage, delete_all: None
+    main_page: MainPage, event: str
 ):
     content = f"""\
 <?xml version='1.0' encoding='UTF-8'?>
@@ -216,6 +200,7 @@ def test_if_a_competitor_is_contained_several_times_then_only_the_first_entry_is
   </PersonEntry>
 </EntryList>
 """
+    entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "EntryList.xml"

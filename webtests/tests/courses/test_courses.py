@@ -17,12 +17,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from collections.abc import Iterator
+
 import pytest
-from selenium import webdriver
 
 from webtests.pageobjects.courses import CoursePage
-from webtests.pageobjects.events import EventPage
-from webtests.pageobjects.tabs import Tabs
+from webtests.pageobjects.main_page import MainPage
 
 
 EVENT_NAME = "Test for Courses"
@@ -30,9 +30,8 @@ EVENT_DATE = "2023-12-28"
 
 
 @pytest.fixture(scope="module")
-def select_event(page: webdriver.Remote) -> None:
-    Tabs(page=page).select(text="Events")
-    event_page = EventPage(page=page)
+def event(main_page: MainPage) -> Iterator[str]:
+    event_page = main_page.goto_events()
     event_page.delete_events()
     dialog = event_page.actions.add()
     dialog.enter_values(
@@ -40,26 +39,24 @@ def select_event(page: webdriver.Remote) -> None:
         date=EVENT_DATE,
     )
     dialog.submit()
-    event_page.table.select_row(2)
-    yield
-    Tabs(page=page).select(text="Events")
-    event_page = EventPage(page=page)
-    event_page.delete_events()
+    event_page.select_event(name=EVENT_NAME)
+    yield EVENT_NAME
+    main_page.goto_events().delete_events()
 
 
 @pytest.fixture
-def course_page(page: webdriver.Remote, select_event: None) -> CoursePage:
-    Tabs(page=page).select(text="Courses")
-    return CoursePage(page=page)
+def course_page(main_page: MainPage, event: str) -> CoursePage:
+    return main_page.goto_courses(event=event)
 
 
 @pytest.fixture
-def delete_courses(course_page: CoursePage) -> None:
-    course_page.delete_courses()
+def delete_courses(main_page: MainPage, event: str) -> None:
+    main_page.goto_courses(event=event).delete_courses()
 
 
 @pytest.fixture
-def course(course_page: CoursePage, delete_courses: None) -> None:
+def course(main_page: MainPage, event: str, delete_courses: None) -> None:
+    course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.add()
     dialog.enter_values(
         name="Bahn B",
@@ -74,8 +71,9 @@ def course(course_page: CoursePage, delete_courses: None) -> None:
 
 
 def test_if_course_page_is_displayed_then_all_actions_are_displayed(
-    course_page: CoursePage,
+    main_page: MainPage, event: str
 ):
+    course_page = main_page.goto_courses(event=event)
     assert course_page.actions.texts() == [
         "Reload",
         "Import ...",
@@ -87,8 +85,9 @@ def test_if_course_page_is_displayed_then_all_actions_are_displayed(
 
 
 def test_if_no_row_is_selected_then_some_actions_are_disabled(
-    course_page: CoursePage, course: None
+    main_page: MainPage, event: str, course: None
 ):
+    course_page = main_page.goto_courses(event=event)
     assert course_page.actions.action("Reload").is_enabled()
     assert course_page.actions.action("Import ...").is_enabled()
     assert course_page.actions.action("Export ...").is_enabled()
@@ -98,8 +97,9 @@ def test_if_no_row_is_selected_then_some_actions_are_disabled(
 
 
 def test_if_a_row_is_selected_then_all_actions_are_enabled(
-    course_page: CoursePage, course: None
+    main_page: MainPage, event: str, course: None
 ):
+    course_page = main_page.goto_courses(event=event)
     course_page.table.select_row(i=2)
 
     assert course_page.actions.action("Reload").is_enabled()
@@ -111,8 +111,9 @@ def test_if_a_row_is_selected_then_all_actions_are_enabled(
 
 
 def test_if_course_page_is_selected_then_the_table_header_is_displayed(
-    course_page: CoursePage,
+    main_page: MainPage, event: str
 ):
+    course_page = main_page.goto_courses(event=event)
     assert course_page.table.nr_of_columns() == 4
     assert course_page.table.headers() == [
         "Name",
@@ -123,8 +124,9 @@ def test_if_course_page_is_selected_then_the_table_header_is_displayed(
 
 
 def test_if_a_course_is_added_with_required_data_then_an_additional_course_is_displayed(
-    course_page: CoursePage, delete_courses: None
+    main_page: MainPage, event: str, delete_courses: None
 ):
+    course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.add()
     dialog.check_values(
         name="",
@@ -156,8 +158,9 @@ def test_if_a_course_is_added_with_required_data_then_an_additional_course_is_di
 
 
 def test_if_adding_a_course_is_cancelled_then_no_additional_course_is_displayed(
-    course_page: CoursePage, delete_courses: None
+    main_page: MainPage, event: str, delete_courses: None
 ):
+    course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.add()
     dialog.enter_values(
         name="Bahn A",
@@ -173,8 +176,9 @@ def test_if_adding_a_course_is_cancelled_then_no_additional_course_is_displayed(
 
 
 def test_if_a_course_is_added_with_all_data_then_an_additional_course_is_displayed(
-    course_page: CoursePage, delete_courses: None
+    main_page: MainPage, event: str, delete_courses: None
 ):
+    course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.add()
     dialog.check_values(
         name="",
@@ -206,8 +210,9 @@ def test_if_a_course_is_added_with_all_data_then_an_additional_course_is_display
 
 
 def test_if_a_course_is_selected_and_a_new_course_is_added_then_no_course_is_selected(
-    course_page: CoursePage, course: None
+    main_page: MainPage, event: str, course: None
 ):
+    course_page = main_page.goto_courses(event=event)
     course_page.table.select_row(i=2)
     assert course_page.table.selected_row() == 2
 
@@ -223,8 +228,9 @@ def test_if_a_course_is_selected_and_a_new_course_is_added_then_no_course_is_sel
 
 
 def test_if_a_course_is_edited_then_the_changed_data_are_displayed(
-    course_page: CoursePage, course: None
+    main_page: MainPage, event: str, course: None
 ):
+    course_page = main_page.goto_courses(event=event)
     course_page.table.select_row(2)
 
     dialog = course_page.actions.edit()
@@ -258,8 +264,9 @@ def test_if_a_course_is_edited_then_the_changed_data_are_displayed(
 
 
 def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
-    course_page: CoursePage, course: None
+    main_page: MainPage, event: str, course: None
 ):
+    course_page = main_page.goto_courses(event=event)
     dialog = course_page.table.double_click_row(2)
     dialog.check_values(
         name="Bahn B",
@@ -291,8 +298,10 @@ def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
 
 
 def test_if_a_course_is_deleted_then_the_course_is_no_longer_displayed(
-    course_page: CoursePage, course: None
+    main_page: MainPage, event: str, course: None
 ):
+    course_page = main_page.goto_courses(event=event)
+
     # add a second course
     dialog = course_page.actions.add()
     dialog.enter_values(
@@ -325,8 +334,10 @@ def test_if_a_course_is_deleted_then_the_course_is_no_longer_displayed(
 
 
 def test_if_a_course_is_deleted_then_no_course_is_selected(
-    course_page: CoursePage, course: None
+    main_page: MainPage, event: str, course: None
 ):
+    course_page = main_page.goto_courses(event=event)
+
     # add a second course
     dialog = course_page.actions.add()
     dialog.enter_values(
@@ -346,8 +357,10 @@ def test_if_a_course_is_deleted_then_no_course_is_selected(
 
 
 def test_if_deleting_a_course_is_cancelled_then_the_course_is_displayed_further(
-    course_page: CoursePage, course: None
+    main_page: MainPage, event: str, course: None
 ):
+    course_page = main_page.goto_courses(event=event)
+
     # select course
     course_page.table.select_row(2)
     assert course_page.table.selected_row() == 2
@@ -367,8 +380,9 @@ def test_if_deleting_a_course_is_cancelled_then_the_course_is_displayed_further(
 
 
 def test_if_several_courses_are_added_then_the_added_courses_are_displayed(
-    course_page: CoursePage, course: None
+    main_page: MainPage, event: str, course: None
 ):
+    course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.add()
     dialog.enter_values(
         name="Bahn C",
@@ -415,8 +429,9 @@ def test_if_several_courses_are_added_then_the_added_courses_are_displayed(
 
 
 def test_if_filter_is_set_then_only_matching_rows_are_displayed(
-    course_page: CoursePage, course: None
+    main_page: MainPage, event: str, course: None
 ):
+    course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.add()
     dialog.enter_values(
         name="Bahn C",

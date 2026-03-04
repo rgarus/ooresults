@@ -18,28 +18,24 @@
 
 
 import pytest
-from selenium import webdriver
 
-from webtests.pageobjects.clubs import ClubPage
-from webtests.pageobjects.tabs import Tabs
+from webtests.controls.alert_window import AlertWindow
+from webtests.pageobjects.main_page import MainPage
 from webtests.tests.conftest import post
 
 
 @pytest.fixture
-def club_page(page: webdriver.Remote) -> ClubPage:
-    Tabs(page=page).select(text="Clubs")
-    return ClubPage(page=page)
+def delete_clubs(main_page: MainPage) -> None:
+    main_page.goto_clubs().delete_clubs()
 
 
 @pytest.fixture
-def delete_clubs(club_page: ClubPage) -> None:
-    club_page.delete_clubs()
+def add_club(main_page: MainPage, delete_clubs: None) -> None:
+    name = "OL Bundestag"
 
-
-@pytest.fixture
-def club(club_page: ClubPage, delete_clubs: None) -> None:
+    club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
-    dialog.enter_values(name="OL Bundestag")
+    dialog.enter_values(name=name)
     dialog.submit()
 
     # check number of rows
@@ -47,7 +43,8 @@ def club(club_page: ClubPage, delete_clubs: None) -> None:
     assert club_page.table.nr_of_columns() == 1
 
 
-def test_if_club_page_is_selected_then_all_actions_are_displayed(club_page: ClubPage):
+def test_if_club_page_is_selected_then_all_actions_are_displayed(main_page: MainPage):
+    club_page = main_page.goto_clubs()
     assert club_page.actions.texts() == [
         "Reload",
         "Add club ...",
@@ -57,8 +54,9 @@ def test_if_club_page_is_selected_then_all_actions_are_displayed(club_page: Club
 
 
 def test_if_no_row_is_selected_then_some_actions_are_disabled(
-    club_page: ClubPage, club: None
+    main_page: MainPage, add_club: None
 ):
+    club_page = main_page.goto_clubs()
     assert club_page.table.selected_row() is None
 
     assert club_page.actions.action("Reload").is_enabled()
@@ -68,8 +66,9 @@ def test_if_no_row_is_selected_then_some_actions_are_disabled(
 
 
 def test_if_a_row_is_selected_then_all_actions_are_enabled(
-    club_page: ClubPage, club: None
+    main_page: MainPage, add_club: None
 ):
+    club_page = main_page.goto_clubs()
     club_page.table.select_row(i=2)
     assert club_page.table.selected_row() == 2
 
@@ -79,14 +78,16 @@ def test_if_a_row_is_selected_then_all_actions_are_enabled(
     assert club_page.actions.action("Delete club").is_enabled()
 
 
-def test_if_club_page_is_selected_then_table_header_is_displayed(club_page: ClubPage):
+def test_if_club_page_is_selected_then_table_header_is_displayed(main_page: MainPage):
+    club_page = main_page.goto_clubs()
     assert club_page.table.nr_of_columns() == 1
     assert club_page.table.headers() == ["Name"]
 
 
 def test_if_a_club_is_added_with_required_data_then_an_additional_club_is_displayed(
-    club_page: ClubPage, delete_clubs: None
+    main_page: MainPage, delete_clubs: None
 ):
+    club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.check_values(name="")
     dialog.enter_values(name="OL Bundestag")
@@ -101,8 +102,9 @@ def test_if_a_club_is_added_with_required_data_then_an_additional_club_is_displa
 
 
 def test_if_adding_a_club_is_cancelled_then_no_additional_club_is_displayed(
-    club_page: ClubPage, delete_clubs: None
+    main_page: MainPage, delete_clubs: None
 ):
+    club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.check_values(name="")
     dialog.enter_values(name="OL Bundestag")
@@ -113,7 +115,10 @@ def test_if_adding_a_club_is_cancelled_then_no_additional_club_is_displayed(
     assert club_page.table.nr_of_columns() == 1
 
 
-def test_if_a_club_is_added_then_no_club_is_selected(club_page: ClubPage, club: None):
+def test_if_a_club_is_added_then_no_club_is_selected(
+    main_page: MainPage, add_club: None
+):
+    club_page = main_page.goto_clubs()
     club_page.table.select_row(i=2)
     assert club_page.table.selected_row() == 2
 
@@ -126,8 +131,9 @@ def test_if_a_club_is_added_then_no_club_is_selected(club_page: ClubPage, club: 
 
 
 def test_if_a_club_is_edited_then_the_changed_data_are_displayed(
-    club_page: ClubPage, club: None
+    main_page: MainPage, add_club: None
 ):
+    club_page = main_page.goto_clubs()
     club_page.table.select_row(2)
 
     dialog = club_page.actions.edit()
@@ -144,8 +150,9 @@ def test_if_a_club_is_edited_then_the_changed_data_are_displayed(
 
 
 def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
-    club_page: ClubPage, club: None
+    main_page: MainPage, add_club: None
 ):
+    club_page = main_page.goto_clubs()
     dialog = club_page.table.double_click_row(2)
     dialog.check_values(name="OL Bundestag")
     dialog.enter_values(name="OC Kanzleramt")
@@ -159,7 +166,10 @@ def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
     assert club_page.table.row(i=2) == ["OC Kanzleramt"]
 
 
-def test_if_a_club_is_edited_then_no_club_is_selected(club_page: ClubPage, club: None):
+def test_if_a_club_is_edited_then_no_club_is_selected(
+    main_page: MainPage, add_club: None
+):
+    club_page = main_page.goto_clubs()
     club_page.table.select_row(i=2)
     dialog = club_page.actions.edit()
     dialog.check_values(name="OL Bundestag")
@@ -171,8 +181,9 @@ def test_if_a_club_is_edited_then_no_club_is_selected(club_page: ClubPage, club:
 
 
 def test_if_a_club_is_deleted_then_the_club_is_no_longer_displayed(
-    club_page: ClubPage, club: None
+    main_page: MainPage, add_club: None
 ):
+    club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.enter_values(name="XXX Club")
     dialog.submit()
@@ -191,7 +202,10 @@ def test_if_a_club_is_deleted_then_the_club_is_no_longer_displayed(
     assert club_page.table.row(i=2) == ["XXX Club"]
 
 
-def test_if_a_club_is_deleted_then_no_club_is_selected(club_page: ClubPage, club: None):
+def test_if_a_club_is_deleted_then_no_club_is_selected(
+    main_page: MainPage, add_club: None
+):
+    club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.enter_values(name="XXX Club")
     dialog.submit()
@@ -209,9 +223,10 @@ def test_if_a_club_is_deleted_then_no_club_is_selected(club_page: ClubPage, club
 
 
 def test_if_deleting_a_club_is_cancelled_then_the_club_is_displayed_further(
-    club_page: ClubPage, club: None
+    main_page: MainPage, add_club: None
 ):
     # select club
+    club_page = main_page.goto_clubs()
     club_page.table.select_row(2)
     assert club_page.table.selected_row() == 2
 
@@ -225,8 +240,9 @@ def test_if_deleting_a_club_is_cancelled_then_the_club_is_displayed_further(
 
 
 def test_if_several_clubs_are_added_then_the_added_clubs_are_displayed(
-    club_page: ClubPage, club: None
+    main_page: MainPage, add_club: None
 ):
+    club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.enter_values(name="Verein 2")
     dialog.submit()
@@ -245,9 +261,32 @@ def test_if_several_clubs_are_added_then_the_added_clubs_are_displayed(
     assert club_page.table.row(i=4) == ["Verein 2"]
 
 
-def test_if_filter_is_set_then_only_matching_rows_are_displayed(
-    club_page: ClubPage, club: None
+def test_if_a_club_is_added_a_second_time_then_an_error_message_will_be_displayed(
+    main_page: MainPage, add_club: None
 ):
+    club_page = main_page.goto_clubs()
+
+    # add the club a second time
+    dialog = club_page.actions.add()
+    dialog.enter_values(name="OL Bundestag")
+    dialog.submit(wait_until_closed=False)
+
+    # check error message
+    alert = AlertWindow(driver=club_page.driver)
+    assert alert.get_text() == "Club already exist"
+    alert.accept()
+    dialog.cancel()
+
+    # check number of rows
+    assert club_page.table.nr_of_rows() == 2
+    assert club_page.table.row(i=1) == ["Clubs  (1)"]
+    assert club_page.table.row(i=2) == ["OL Bundestag"]
+
+
+def test_if_filter_is_set_then_only_matching_rows_are_displayed(
+    main_page: MainPage, add_club: None
+):
+    club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.enter_values(name="Verein 2")
     dialog.submit()
@@ -274,7 +313,7 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(
 
 
 def test_if_an_club_is_added_by_another_user_then_it_is_displayed_after_reload(
-    club_page: ClubPage, club: None
+    main_page: MainPage, add_club: None
 ):
     post(
         url="https://127.0.0.1:8080/club/add",
@@ -283,6 +322,7 @@ def test_if_an_club_is_added_by_another_user_then_it_is_displayed_after_reload(
             "name": "XXX Club",
         },
     )
+    club_page = main_page.goto_clubs()
 
     # check number of rows
     assert club_page.table.nr_of_rows() == 2

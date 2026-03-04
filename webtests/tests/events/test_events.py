@@ -18,17 +18,17 @@
 
 
 import pytest
-from selenium import webdriver
 
 from webtests.pageobjects.events import EventPage
+from webtests.pageobjects.main_page import MainPage
 from webtests.pageobjects.tabs import Tabs
 from webtests.tests.conftest import post
 
 
 @pytest.fixture
-def event_page(page: webdriver.Remote) -> EventPage:
-    Tabs(page=page).select(text="Events")
-    return EventPage(page=page)
+def event_page(main_page: MainPage) -> EventPage:
+    Tabs(driver=main_page.driver).select(text="Events")
+    return EventPage(driver=main_page.driver)
 
 
 @pytest.fixture
