@@ -20,15 +20,7 @@
 import pathlib
 import tempfile
 
-import pytest
-
 from webtests.pageobjects.main_page import MainPage
-
-
-@pytest.fixture
-def delete_competitors(main_page: MainPage) -> None:
-    main_page.goto_competitors().delete_competitors()
-    main_page.goto_clubs().delete_clubs()
 
 
 def test_import_competitor(main_page: MainPage, delete_competitors: None):

@@ -19,35 +19,12 @@
 
 import pathlib
 import tempfile
-from collections.abc import Iterator
-
-import pytest
 
 from webtests.pageobjects.main_page import MainPage
 
 
 EVENT_NAME = "Test for Classes"
 EVENT_DATE = "2023-12-28"
-
-
-@pytest.fixture(scope="module")
-def event(main_page: MainPage) -> Iterator[str]:
-    event_page = main_page.goto_events()
-    event_page.delete_events()
-    dialog = event_page.actions.add()
-    dialog.enter_values(
-        name=EVENT_NAME,
-        date=EVENT_DATE,
-    )
-    dialog.submit()
-    event_page.select_event(name=EVENT_NAME)
-    yield EVENT_NAME
-    main_page.goto_events().delete_events()
-
-
-@pytest.fixture
-def delete_classes(main_page: MainPage, event: str) -> None:
-    main_page.goto_classes(event=event).delete_classes()
 
 
 def test_import_classes(main_page: MainPage, delete_classes: None):
