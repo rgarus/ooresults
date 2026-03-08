@@ -37,7 +37,7 @@ dependencies = [
     "Mako == 1.3.10",
     "pyOpenSSL",
     "pyserial",
-    "requests",
+    "requests[use_chardet_on_py3]",
     "sireader",
     "tzlocal",
     "unidecode",
