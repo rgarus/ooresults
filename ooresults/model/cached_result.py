@@ -21,7 +21,7 @@ import dataclasses
 import threading
 import typing
 from collections import OrderedDict
-from typing import Callable
+from collections.abc import Callable
 from typing import Optional
 
 from ooresults import model

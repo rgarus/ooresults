@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+
+- Support for Python 3.9 has ended.
+
+
 [0.4.7] - 2026-03-11
 --------------------
 

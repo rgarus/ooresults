@@ -22,7 +22,6 @@ import datetime
 import enum
 import sqlite3
 from typing import Optional
-from typing import Union
 
 import tzlocal
 
@@ -280,7 +279,7 @@ def edit_entry_result(
     event_id: int,
     command: str,
     control: str,
-    selected_row: Union[int, str],
+    selected_row: int | str,
     punch_time: Optional[datetime.time],
 ) -> EntryType:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
