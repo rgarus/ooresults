@@ -17,6 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import pytest
+
 from ooresults.model import build_results
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
@@ -995,6 +997,52 @@ def test_ranking_with_started_and_finished_runners():
                     rank=None,
                     time_behind=None,
                 ),
+                RankedEntryType(
+                    entry=entry_1,
+                    rank=None,
+                    time_behind=None,
+                ),
+            ],
+        )
+    ]
+
+
+@pytest.mark.parametrize("status", list(ResultStatus))
+def test_if_entry_has_no_runtime_then_rank_is_none(status: ResultStatus):
+    class_info_a = ClassInfoType(
+        id=1,
+        name="Bahn A - Lang",
+        short_name=None,
+        course_id=None,
+        course_name=None,
+        course_length=None,
+        course_climb=None,
+        number_of_controls=None,
+        params=ClassParams(),
+    )
+
+    entry_1 = EntryType(
+        id=1,
+        event_id=1,
+        competitor_id=3,
+        first_name="Birgit",
+        last_name="Merkel",
+        class_id=1,
+        class_name="Bahn A - Lang",
+        result=PersonRaceResult(
+            status=status,
+            time=None,
+        ),
+    )
+
+    data = build_results.build_results(
+        class_infos=[class_info_a],
+        entries=[entry_1],
+    )
+    assert data == [
+        (
+            class_info_a,
+            [
                 RankedEntryType(
                     entry=entry_1,
                     rank=None,

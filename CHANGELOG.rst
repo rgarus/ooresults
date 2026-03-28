@@ -10,6 +10,11 @@ Changed
 
 - Support for Python 3.9 has ended.
 
+Fixed
+^^^^^
+
+- Fixed an internal error that occurred during result calculation when an entry had the status “OK” but did not contain a runtime value.
+
 
 [0.4.7] - 2026-03-11
 --------------------

@@ -49,14 +49,14 @@ def build_results(
                 key=lambda e: e.last_name + "," + e.first_name,
             )
             class_entries.sort(
-                key=lambda e: e.result.time if e.result.time is not None else 0,
+                key=lambda e: e.result.time if e.result.time is not None else 99999999
             )
             if class_info.params.otype == "score":
                 class_entries.sort(
                     key=lambda e: (
                         e.result.extensions["score"]
                         if e.result.extensions.get("score", None) is not None
-                        else -999999
+                        else -99999999
                     ),
                     reverse=True,
                 )
@@ -99,7 +99,11 @@ def build_results(
                         return r1.time == r2.time
 
                 winner_time = class_entries[0].result.time
-                if e.result.status == ResultStatus.OK and not e.not_competing:
+                if (
+                    e.result.status == ResultStatus.OK
+                    and e.result.time is not None
+                    and not e.not_competing
+                ):
                     if i > 0 and result_equal(
                         class_entries[i].result, class_entries[i - 1].result
                     ):

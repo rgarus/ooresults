@@ -36,7 +36,7 @@ def format_points(points: float, status: ResultStatus) -> str:
 
 
 def format_time_total(time: int, status: ResultStatus, start_time=None) -> str:
-    if status == ResultStatus.OK:
+    if status == ResultStatus.OK and time is not None:
         return minutes_seconds(time)
     elif status == ResultStatus.INACTIVE and start_time is not None:
         return "Start at " + start_time.strftime("%H:%M:%S")
