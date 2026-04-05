@@ -26,6 +26,19 @@ from ooresults.otypes.start_type import PersonRaceStart
 
 
 @dataclasses.dataclass
+class EntryBaseDataType:
+    event_id: int
+    competitor_id: Optional[int]
+    class_id: Optional[int] = None
+    club_id: Optional[int] = None
+    not_competing: bool = False
+    chip: Optional[str] = None
+    fields: dict[int, str] = field(default_factory=lambda: {})
+    result: PersonRaceResult = field(default_factory=lambda: PersonRaceResult())
+    start: PersonRaceStart = field(default_factory=lambda: PersonRaceStart())
+
+
+@dataclasses.dataclass
 class EntryType:
     id: int
     event_id: int

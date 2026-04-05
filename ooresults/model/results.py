@@ -38,8 +38,6 @@ from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SpStatus
 from ooresults.otypes.series_type import Settings
 from ooresults.otypes.start_type import PersonRaceStart
-from ooresults.plugins import iof_result_list
-from ooresults.plugins.iof_result_list import ResultListStatus
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import TransactionMode
 from ooresults.websocket_server.websocket_server import WebSocketServer
@@ -343,30 +341,3 @@ def build_series_result() -> (
         events,
         ranked_classes,
     )
-
-
-def import_iof_result_list(event_key: str, content: bytes) -> None:
-    #
-    # 1. Find event corresponding to event_key
-    # 2. Decode IOF xml data
-    # 3. Delete all entries of the event
-    # 4. Delete all classes of the event
-    # 5. Import entries
-    #
-    event: Optional[EventType] = None
-    with model.db.transaction(mode=TransactionMode.IMMEDIATE):
-        for e in model.db.get_events():
-            if event_key != "" and e.key == event_key:
-                event = e
-                break
-        else:
-            raise EventNotFoundError(f'Event for key "{event_key}" not found')
-
-        _, entries, status = iof_result_list.parse_result_list(content)
-        if status != ResultListStatus.DELTA:
-            model.db.delete_entries(event_id=event.id)
-            model.db.delete_classes(event_id=event.id)
-        model.db.import_entries(event_id=event.id, entries=entries)
-
-    if event:
-        cached_result.clear_cache(event_id=event.id)

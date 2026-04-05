@@ -201,7 +201,7 @@ class WebSocketHandler:
                         await asyncio.get_event_loop().run_in_executor(
                             executor=self.executor,
                             func=functools.partial(
-                                model.results.import_iof_result_list,
+                                model.entries.import_iof_result_list,
                                 event_key=event_key,
                                 content=data,
                             ),

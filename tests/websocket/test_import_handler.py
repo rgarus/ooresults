@@ -351,6 +351,17 @@ async def test_live_server_import_result_list_snapshot(
             number_of_controls=None,
             params=ClassParams(),
         ),
+        ClassInfoType(
+            id=classes[1].id,
+            name="Elite",
+            short_name="E",
+            course_id=None,
+            course_name=None,
+            course_length=None,
+            course_climb=None,
+            number_of_controls=None,
+            params=ClassParams(),
+        ),
     ]
 
     entries = model.entries.get_entries(event_id=event_id)

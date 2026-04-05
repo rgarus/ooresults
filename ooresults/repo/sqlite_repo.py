@@ -17,7 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import copy
 import datetime
 import json
 import logging
@@ -34,6 +33,7 @@ from ooresults.otypes.class_type import ClassType
 from ooresults.otypes.club_type import ClubType
 from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.otypes.course_type import CourseType
+from ooresults.otypes.entry_type import EntryBaseDataType
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.event_type import EventType
 from ooresults.repo.repo import ClassUsedError
@@ -1169,159 +1169,24 @@ class SqliteRepo(Repo):
             (id,),
         )
 
-    def import_entries(self, event_id: int, entries: list[dict]) -> None:
-        # check if the event still exists
-        self.get_event(id=event_id)
-
-        list_of_entries = []
-        for c in entries:
-            class_id = None
-            class_ = None
-            for cla in self.get_classes(event_id=event_id):
-                if cla.name == c["class_"]:
-                    class_id = cla.id
-                    class_ = cla
-                    break
-            else:
-                class_id = self.add_class(
-                    event_id=event_id,
-                    name=c["class_"],
-                    short_name=None,
-                    course_id=None,
-                    params=ClassParams(),
-                )
-
-            club_id = None
-            if c["club"]:
-                for clb in self.get_clubs():
-                    if clb.name == c["club"]:
-                        club_id = clb.id
-                        break
-                else:
-                    club_id = self.add_club(c["club"])
-
-            gender = c["gender"] if "gender" in c else ""
-            year = c["year"] if "year" in c else None
-            competitor = self.get_competitor_by_name(
-                first_name=c["first_name"],
-                last_name=c["last_name"],
-            )
-            if competitor:
-                competitor_id = competitor.id
-                # update gender and year in competitor
-                gender = gender if gender != "" else competitor.gender
-                year = year if year is not None else competitor.year
-                if gender != competitor.gender or year != competitor.year:
-                    self.update_competitor(
-                        id=competitor.id,
-                        first_name=competitor.first_name,
-                        last_name=competitor.last_name,
-                        club_id=competitor.club_id,
-                        gender=gender,
-                        year=year,
-                        chip=competitor.chip,
-                    )
-            else:
-                competitor_id = self.add_competitor(
-                    first_name=c["first_name"],
-                    last_name=c["last_name"],
-                    club_id=club_id,
-                    gender=gender,
-                    year=year,
-                    chip=c["chip"] if "chip" in c else "",
-                )
-
-            # update result
-            if c["result"].has_punches():
-                try:
-                    course_id = class_["course_id"]
-                    class_params = class_["params"]
-                    controls = self.get_course(id=course_id).controls
-                except Exception:
-                    class_params = ClassParams()
-                    controls = []
-                c["result"].compute_result(
-                    controls=controls,
-                    class_params=class_params,
-                    start_time=c["result"].start_time,
-                    year=year,
-                    gender=gender if gender != "" else None,
-                )
-
-            try:
-                entry = self.get_entry_by_name(
-                    event_id=event_id,
-                    first_name=c["first_name"],
-                    last_name=c["last_name"],
-                )
-                fields = entry.fields
-                if "fields" in c:
-                    fields = copy.deepcopy(c["fields"])
-                result = entry.result
-                if "result" in c:
-                    result = copy.deepcopy(c["result"])
-                start = entry.start
-                if "start" in c:
-                    start = copy.deepcopy(c["start"])
-
-                self.db.execute(
-                    """
-                    UPDATE entries SET
-                        class_id=?,
-                        club_id=?,
-                        not_competing=?,
-                        chip=?,
-                        fields=?,
-                        result=?,
-                        start=?
-                    WHERE id=?""",
-                    (
-                        class_id,
-                        club_id,
-                        (
-                            c["not_competing"]
-                            if "not_competing" in c
-                            else entry.not_competing
-                        ),
-                        c["chip"] if "chip" in c else entry.chip,
-                        json.dumps(fields),
-                        result.to_json(),
-                        start.to_json(),
-                        entry.id,
-                    ),
-                )
-            except KeyError:
-                if "result" in c:
-                    result = copy.deepcopy(c["result"])
-                else:
-                    result = result_type.PersonRaceResult()
-                if "start" in c:
-                    start = copy.deepcopy(c["start"])
-                else:
-                    start = start_type.PersonRaceStart()
-                list_of_entries.append(
-                    (
-                        event_id,
-                        competitor_id,
-                        class_id,
-                        club_id,
-                        c["not_competing"] if "not_competing" in c else False,
-                        result.to_json(),
-                        start.to_json(),
-                        c["chip"] if "chip" in c else "",
-                        json.dumps(c["fields"] if "fields" in c else {}),
-                    )
-                )
-
-        # check that each competitor has only one entry
-        competitor_ids: set[int] = set()
+    def add_many_entries(self, list_of_entries: list[EntryBaseDataType]) -> None:
+        entries = []
         for e in list_of_entries:
-            if e[1] in competitor_ids:
-                raise ConstraintError("Competitor already registered for this event")
-            else:
-                competitor_ids.add(e[1])
+            entries.append(
+                (
+                    e.event_id,
+                    e.competitor_id,
+                    e.class_id,
+                    e.club_id,
+                    e.not_competing,
+                    e.result.to_json(),
+                    e.start.to_json(),
+                    e.chip,
+                    json.dumps(e.fields),
+                )
+            )
 
-        if list_of_entries:
+        if entries:
             self.db.executemany(
                 """
                 INSERT into entries (
@@ -1336,7 +1201,7 @@ class SqliteRepo(Repo):
                     fields
                 )
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                list_of_entries,
+                entries,
             )
 
     def get_events(self) -> list[EventType]:

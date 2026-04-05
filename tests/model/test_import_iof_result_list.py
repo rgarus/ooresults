@@ -135,7 +135,7 @@ def test_import_iof_result_list_snapshot(
     s = datetime.datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime.datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    model.results.import_iof_result_list(
+    model.entries.import_iof_result_list(
         event_key="local",
         content=content.encode(),
     )
@@ -170,6 +170,17 @@ def test_import_iof_result_list_snapshot(
             id=classes[0].id,
             name="Bahn A - Lang",
             short_name=None,
+            course_id=None,
+            course_name=None,
+            course_length=None,
+            course_climb=None,
+            number_of_controls=None,
+            params=ClassParams(),
+        ),
+        ClassInfoType(
+            id=classes[1].id,
+            name="Elite",
+            short_name="E",
             course_id=None,
             course_name=None,
             course_length=None,
@@ -250,7 +261,7 @@ def test_import_iof_result_list_delta(
     s = datetime.datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime.datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    model.results.import_iof_result_list(
+    model.entries.import_iof_result_list(
         event_key="local",
         content=content.encode(),
     )

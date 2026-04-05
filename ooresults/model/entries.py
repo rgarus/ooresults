@@ -29,19 +29,199 @@ from ooresults import model
 from ooresults.model import cached_result
 from ooresults.otypes import result_type
 from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.entry_type import EntryBaseDataType
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SplitTime
 from ooresults.otypes.start_type import PersonRaceStart
+from ooresults.plugins import iof_result_list
+from ooresults.plugins.iof_result_list import ResultListStatus
 from ooresults.repo import repo
 from ooresults.repo.repo import TransactionMode
 
 
-def import_entries(event_id: int, entries: list[dict]) -> None:
+def import_entries(
+    event_id: int,
+    entries: list[dict],
+    event_key: str = None,
+    clear_entries: bool = False,
+) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
-        model.db.import_entries(event_id=event_id, entries=entries)
+        # check if the event still exists
+        event = model.db.get_event(id=event_id)
+        if event_key is not None and event_key != event.key:
+            raise repo.EventNotFoundError(f'Event for key "{event_key}" not found')
 
+        # optionally, delete all entries before importing
+        if clear_entries:
+            model.db.delete_entries(event_id=event_id)
+
+        list_of_entries = []
+        for c in entries:
+            class_id = None
+            class_ = None
+            for cla in model.db.get_classes(event_id=event_id):
+                if cla.name == c["class_"]:
+                    class_id = cla.id
+                    class_ = cla
+                    break
+            else:
+                class_id = model.db.add_class(
+                    event_id=event_id,
+                    name=c["class_"],
+                    short_name=None,
+                    course_id=None,
+                    params=ClassParams(),
+                )
+
+            club_id = None
+            if c["club"]:
+                for clb in model.db.get_clubs():
+                    if clb.name == c["club"]:
+                        club_id = clb.id
+                        break
+                else:
+                    club_id = model.db.add_club(c["club"])
+
+            gender = c["gender"] if "gender" in c else ""
+            year = c["year"] if "year" in c else None
+            competitor = model.db.get_competitor_by_name(
+                first_name=c["first_name"],
+                last_name=c["last_name"],
+            )
+            if competitor:
+                competitor_id = competitor.id
+                # update gender and year in competitor
+                gender = gender if gender != "" else competitor.gender
+                year = year if year is not None else competitor.year
+                if gender != competitor.gender or year != competitor.year:
+                    model.db.update_competitor(
+                        id=competitor.id,
+                        first_name=competitor.first_name,
+                        last_name=competitor.last_name,
+                        club_id=competitor.club_id,
+                        gender=gender,
+                        year=year,
+                        chip=competitor.chip,
+                    )
+            else:
+                competitor_id = model.db.add_competitor(
+                    first_name=c["first_name"],
+                    last_name=c["last_name"],
+                    club_id=club_id,
+                    gender=gender,
+                    year=year,
+                    chip=c["chip"] if "chip" in c else "",
+                )
+
+            # update result
+            if c["result"].has_punches():
+                try:
+                    course_id = class_["course_id"]
+                    class_params = class_["params"]
+                    controls = model.db.get_course(id=course_id).controls
+                except Exception:
+                    class_params = ClassParams()
+                    controls = []
+                c["result"].compute_result(
+                    controls=controls,
+                    class_params=class_params,
+                    start_time=c["result"].start_time,
+                    year=year,
+                    gender=gender if gender != "" else None,
+                )
+
+            try:
+                entry = model.db.get_entry_by_name(
+                    event_id=event_id,
+                    first_name=c["first_name"],
+                    last_name=c["last_name"],
+                )
+
+                not_competing = entry.not_competing
+                if "not_competing" in c:
+                    not_competing = c["not_competing"]
+                chip = entry.chip
+                if "chip" in c:
+                    chip = c["chip"]
+                fields = entry.fields
+                if "fields" in c:
+                    fields = copy.deepcopy(c["fields"])
+                result = entry.result
+                if "result" in c:
+                    result = copy.deepcopy(c["result"])
+                start = entry.start
+                if "start" in c:
+                    start = copy.deepcopy(c["start"])
+
+                model.db.update_entry(
+                    id=entry.id,
+                    class_id=class_id,
+                    club_id=club_id,
+                    not_competing=not_competing,
+                    chip=chip,
+                    fields=fields,
+                    result=result,
+                    start=start,
+                )
+            except KeyError:
+                entry_data = EntryBaseDataType(
+                    event_id=event_id,
+                    competitor_id=competitor_id,
+                    class_id=class_id,
+                    club_id=club_id,
+                )
+                if "result" in c:
+                    entry_data.result = copy.deepcopy(c["result"])
+                if "start" in c:
+                    entry_data.start = copy.deepcopy(c["start"])
+                if "chip" in c:
+                    entry_data.chip = c["chip"]
+                if "fields" in c:
+                    entry_data.fields = copy.deepcopy(c["fields"])
+                if "not_competing" in c:
+                    entry_data.not_competing = c["not_competing"]
+
+                list_of_entries.append(entry_data)
+
+        # check that each competitor has only one entry
+        competitor_ids: set[int] = set()
+        for entry_data in list_of_entries:
+            if entry_data.competitor_id in competitor_ids:
+                raise repo.ConstraintError(
+                    "Competitor already registered for this event"
+                )
+            else:
+                competitor_ids.add(entry_data.competitor_id)
+
+        if list_of_entries:
+            model.db.add_many_entries(list_of_entries=list_of_entries)
+
+    cached_result.clear_cache(event_id=event_id)
+
+
+def import_iof_result_list(event_key: str, content: bytes) -> None:
+    #
+    # 1. Find event corresponding to event_key
+    # 2. Decode IOF xml data
+    # 3. Import entries
+    #
+    with model.db.transaction(mode=TransactionMode.IMMEDIATE):
+        for e in model.db.get_events():
+            if event_key != "" and e.key == event_key:
+                event_id = e.id
+                break
+        else:
+            raise repo.EventNotFoundError(f'Event for key "{event_key}" not found')
+
+    _, entries, status = iof_result_list.parse_result_list(content)
+    import_entries(
+        event_id=event_id,
+        entries=entries,
+        event_key=event_key,
+        clear_entries=status != ResultListStatus.DELTA,
+    )
     cached_result.clear_cache(event_id=event_id)
 
 

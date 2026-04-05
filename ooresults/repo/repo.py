@@ -26,6 +26,7 @@ from ooresults.otypes import series_type
 from ooresults.otypes import start_type
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.entry_type import EntryBaseDataType
 from ooresults.otypes.event_type import EventType
 
 
@@ -214,7 +215,7 @@ class Repo:
     def delete_entry(self, id):
         raise NotImplementedError
 
-    def import_entries(self, event_id: int, entries: list[dict]) -> None:
+    def add_many_entries(self, list_of_entries: list[EntryBaseDataType]) -> None:
         raise NotImplementedError
 
     def get_entries(self, event_id):
