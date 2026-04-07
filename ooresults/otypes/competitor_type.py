@@ -22,6 +22,16 @@ from typing import Optional
 
 
 @dataclasses.dataclass
+class CompetitorBaseDataType:
+    first_name: str
+    last_name: str
+    gender: Optional[str]
+    year: Optional[int]
+    chip: Optional[str]
+    club_id: Optional[int]
+
+
+@dataclasses.dataclass
 class CompetitorType:
     id: int
     first_name: str

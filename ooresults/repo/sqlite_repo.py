@@ -31,6 +31,7 @@ from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.class_type import ClassType
 from ooresults.otypes.club_type import ClubType
+from ooresults.otypes.competitor_type import CompetitorBaseDataType
 from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.otypes.course_type import CourseType
 from ooresults.otypes.entry_type import EntryBaseDataType
@@ -716,8 +717,12 @@ class SqliteRepo(Repo):
             )
             return cur.lastrowid
 
-        except sqlite3.IntegrityError:
-            raise ConstraintError("Competitor already exist")
+        except sqlite3.IntegrityError as err:
+            if str(err).startswith("UNIQUE constraint failed"):
+                raise ConstraintError("Competitor already exist")
+            if str(err).startswith("FOREIGN KEY constraint failed"):
+                raise ConstraintError("Club id does not exist")
+            raise
 
     def update_competitor(
         self,
@@ -769,67 +774,40 @@ class SqliteRepo(Repo):
                 (id,),
             )
 
-    def import_competitors(self, competitors: list[dict]) -> None:
-        list_of_competitors = []
-        for c in competitors:
-            club_id = None
-            if c["club"]:
-                for clb in self.get_clubs():
-                    if clb.name == c["club"]:
-                        club_id = clb.id
-                        break
-                else:
-                    club_id = self.add_club(name=c["club"])
-
-            c_name = self.get_competitor_by_name(
-                first_name=c["first_name"],
-                last_name=c["last_name"],
-            )
-            if c_name:
-                gender = c_name.gender
-                if "gender" in c and c["gender"]:
-                    gender = c["gender"]
-                year = c_name.year
-                if "year" in c and c["year"] is not None:
-                    year = c["year"]
-                chip = c_name.chip
-                if "chip" in c and c["chip"]:
-                    chip = c["chip"]
-                self.update_competitor(
-                    id=c_name.id,
-                    first_name=c_name.first_name,
-                    last_name=c_name.last_name,
-                    club_id=c_name.club_id if club_id is None else club_id,
-                    gender=gender,
-                    year=year,
-                    chip=chip,
+    def add_many_competitors(self, list_of_competitors: CompetitorBaseDataType) -> None:
+        competitors = []
+        for c in list_of_competitors:
+            competitors.append(
+                (
+                    c.first_name,
+                    c.last_name,
+                    c.club_id,
+                    c.gender,
+                    c.year,
+                    c.chip,
                 )
-            else:
-                list_of_competitors.append(
-                    (
-                        c["first_name"],
-                        c["last_name"],
+            )
+        if competitors:
+            try:
+                self.db.executemany(
+                    """
+                    INSERT into competitors (
+                        first_name,
+                        last_name,
                         club_id,
-                        c["gender"] if "gender" in c else "",
-                        c["year"] if "year" in c else "",
-                        c["chip"] if "chip" in c else "",
+                        gender,
+                        year,
+                        chip
                     )
+                    VALUES(?, ?, ?, ?, ?, ?)""",
+                    competitors,
                 )
-
-        if list_of_competitors:
-            self.db.executemany(
-                """
-                INSERT into competitors (
-                    first_name,
-                    last_name,
-                    club_id,
-                    gender,
-                    year,
-                    chip
-                )
-                VALUES(?, ?, ?, ?, ?, ?)""",
-                list_of_competitors,
-            )
+            except sqlite3.IntegrityError as err:
+                if str(err).startswith("UNIQUE constraint failed"):
+                    raise ConstraintError("Competitor already exist")
+                if str(err).startswith("FOREIGN KEY constraint failed"):
+                    raise ConstraintError("Club id does not exist")
+                raise
 
     def get_entries(self, event_id: int) -> list[EntryType]:
         cur = self.db.execute(
