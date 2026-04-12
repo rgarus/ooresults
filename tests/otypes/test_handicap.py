@@ -17,44 +17,36 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from ooresults.otypes import handicap
+from ooresults.otypes.handicap import Handicap
 
 
 def test_female_without_year():
-    h = handicap.Handicap()
-    assert h.factor(female=True, year=None) == 0.8716
+    assert Handicap.factor(female=True, age=None) == 0.8716
 
 
 def test_female_less_min_year():
-    h = handicap.Handicap()
-    assert h.factor(female=True, year=1) == 0.7626
+    assert Handicap.factor(female=True, age=1) == 0.7626
 
 
 def test_female_greater_max_year():
-    h = handicap.Handicap()
-    assert h.factor(female=True, year=99) == 0.3191
+    assert Handicap.factor(female=True, age=99) == 0.3191
 
 
 def test_female_with_year():
-    h = handicap.Handicap()
-    assert h.factor(female=True, year=44) == 0.8154
+    assert Handicap.factor(female=True, age=44) == 0.8154
 
 
 def test_male_without_year():
-    h = handicap.Handicap()
-    assert h.factor(female=False, year=None) == 1.0000
+    assert Handicap.factor(female=False, age=None) == 1.0000
 
 
 def test_male_less_min_year():
-    h = handicap.Handicap()
-    assert h.factor(female=False, year=1) == 0.7886
+    assert Handicap.factor(female=False, age=1) == 0.7886
 
 
 def test_male_greater_max_year():
-    h = handicap.Handicap()
-    assert h.factor(female=False, year=99) == 0.4321
+    assert Handicap.factor(female=False, age=99) == 0.4321
 
 
 def test_male_with_year():
-    h = handicap.Handicap()
-    assert h.factor(female=False, year=44) == 0.9169
+    assert Handicap.factor(female=False, age=44) == 0.9169

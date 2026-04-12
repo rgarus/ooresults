@@ -23,8 +23,8 @@ from datetime import timezone
 
 import pytest
 
-from ooresults.otypes import handicap
 from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.handicap import Handicap
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SplitTime
@@ -581,7 +581,6 @@ def test_compute_handicap_ok(
         gender="F" if female else "M",
     )
 
-    h = handicap.Handicap()
     assert result == PersonRaceResult(
         start_time=s1,
         punched_start_time=s1,
@@ -589,7 +588,7 @@ def test_compute_handicap_ok(
         punched_finish_time=f1,
         extensions={
             "running_time": int((f1 - s1).total_seconds()),
-            "factor": h.factor(female=female, year=f1.year - year_of_birth),
+            "factor": Handicap.factor(female=female, age=f1.year - year_of_birth),
         },
         time=int(result.extensions["running_time"] * result.extensions["factor"]),
         status=ResultStatus.OK,
@@ -630,7 +629,6 @@ def test_compute_handicap_mp(
         gender="F" if female else "M",
     )
 
-    h = handicap.Handicap()
     assert result == PersonRaceResult(
         start_time=s1,
         punched_start_time=s1,
@@ -640,7 +638,7 @@ def test_compute_handicap_mp(
         status=ResultStatus.MISSING_PUNCH,
         extensions={
             "running_time": int((f1 - s1).total_seconds()),
-            "factor": h.factor(female=female, year=f1.year - year_of_birth),
+            "factor": Handicap.factor(female=female, age=f1.year - year_of_birth),
         },
         split_times=[
             SplitTime(

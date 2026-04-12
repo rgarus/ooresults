@@ -22,8 +22,8 @@ from datetime import timezone
 
 import pytest
 
-from ooresults.otypes import handicap
 from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.handicap import Handicap
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SplitTime
@@ -377,7 +377,6 @@ def test_compute_handicap_ok(time_limit, score_overtime, female, year_of_birth):
         year=year_of_birth,
         gender="F" if female else "M",
     )
-    h = handicap.Handicap()
 
     assert result == PersonRaceResult(
         start_time=s1,
@@ -387,7 +386,7 @@ def test_compute_handicap_ok(time_limit, score_overtime, female, year_of_birth):
         time=int((f1 - s1).total_seconds()),
         status=ResultStatus.OK,
         extensions={
-            "factor": h.factor(female=female, year=f1.year - year_of_birth),
+            "factor": Handicap.factor(female=female, age=f1.year - year_of_birth),
             "score_controls": 1,
             "score_overtime": score_overtime,
             "score": 1 / result.extensions["factor"] + score_overtime,
@@ -423,7 +422,6 @@ def test_compute_handicap_mp(female, year_of_birth):
         year=year_of_birth,
         gender="F" if female else "M",
     )
-    h = handicap.Handicap()
 
     assert result == PersonRaceResult(
         start_time=s1,
@@ -433,7 +431,7 @@ def test_compute_handicap_mp(female, year_of_birth):
         time=int((f1 - s1).total_seconds()),
         status=ResultStatus.OK,
         extensions={
-            "factor": h.factor(female=female, year=f1.year - year_of_birth),
+            "factor": Handicap.factor(female=female, age=f1.year - year_of_birth),
             "score_controls": 0,
             "score_overtime": 0,
             "score": 0,

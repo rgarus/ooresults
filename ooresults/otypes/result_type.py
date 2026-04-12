@@ -28,9 +28,9 @@ from typing import Optional
 import caseconverter
 import fastclasses_json
 
-from ooresults.otypes import handicap
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_params import VoidedLeg
+from ooresults.otypes.handicap import Handicap
 
 
 class SpStatus(enum.Enum):
@@ -258,17 +258,10 @@ class PersonRaceResult:
         for s in self.split_times:
             s.leg_voided = False
 
-        # compute handicap factor
-        handicap_factor = None
-        if class_params.apply_handicap_rule:
-            # use year of finish time to compute the age of the competitor
-            h = handicap.Handicap()
-            if self.punched_finish_time is not None and year is not None:
-                handicap_factor = h.factor(
-                    female=gender == "F", year=self.punched_finish_time.year - year
-                )
-            else:
-                handicap_factor = h.factor(female=gender == "F", year=None)
+        age: Optional[int] = None
+        # use year of finish time to compute the age of the competitor
+        if self.punched_finish_time is not None and year is not None:
+            age = self.punched_finish_time.year - year
 
         # compute start time
         if class_params.using_start_control == "yes":
@@ -486,6 +479,7 @@ class PersonRaceResult:
 
                 # compute total score
                 if class_params.apply_handicap_rule:
+                    handicap_factor = Handicap.factor(female=gender == "F", age=age)
                     self.extensions["factor"] = handicap_factor
                     score = score_controls / handicap_factor + score_overtime
                 else:
@@ -536,6 +530,7 @@ class PersonRaceResult:
 
                 # compute total time using handicap
                 if class_params.apply_handicap_rule and self.time is not None:
+                    handicap_factor = Handicap.factor(female=gender == "F", age=age)
                     self.extensions["factor"] = handicap_factor
                     self.time = int(handicap_factor * self.time)
 
