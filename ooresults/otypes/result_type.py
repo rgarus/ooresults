@@ -23,6 +23,7 @@ import dataclasses
 import enum
 from datetime import datetime
 from datetime import timezone
+from typing import Any
 from typing import Optional
 
 import caseconverter
@@ -138,7 +139,7 @@ class PersonRaceResult:
     time: Optional[int] = None
     split_times: list[SplitTime] = dataclasses.field(default_factory=list)
     last_leg_voided: bool = False
-    extensions: dict = dataclasses.field(default_factory=dict)
+    extensions: dict[str, Any] = dataclasses.field(default_factory=dict)
 
     #
     # keys of extensions are:
@@ -155,7 +156,7 @@ class PersonRaceResult:
         return (
             self.punched_start_time is not None
             or self.punched_finish_time is not None
-            or [p for p in self.split_times if p.status != SpStatus.MISSING]
+            or [p for p in self.split_times if p.status != SpStatus.MISSING] != []
         )
 
     def same_punches(self, other: PersonRaceResult) -> bool:
@@ -414,8 +415,10 @@ class PersonRaceResult:
             self.status = ResultStatus.OK
 
         # compute running time
+        run_time: Optional[int] = None
         if self.start_time is not None and self.finish_time is not None:
-            self.time = int((self.finish_time - self.start_time).total_seconds())
+            run_time = int((self.finish_time - self.start_time).total_seconds())
+            self.time = run_time
 
         # handle voided legs
         if class_params.otype == "standard" and class_params.voided_legs:
@@ -446,7 +449,7 @@ class PersonRaceResult:
             # voidedLeg = 101-102,102-103, times ok-3:00-4:00   -> subtract 60 sec
             #
             if self.time is not None:
-                t1 = 0
+                t1: Optional[int] = 0
                 for split_time in [
                     s
                     for s in self.split_times
@@ -460,16 +463,14 @@ class PersonRaceResult:
                             t1 = t2
                     else:
                         t1 = t2
-                if self.last_leg_voided and t1 is not None:
-                    self.time -= (
-                        int((self.finish_time - self.start_time).total_seconds()) - t1
-                    )
+                if self.last_leg_voided and run_time is not None and t1 is not None:
+                    self.time -= run_time - t1
 
         if class_params.otype == "score":
             self.extensions["score_controls"] = score_controls
 
             # compute score for overtime
-            if self.time is not None:
+            if self.time is not None and class_params.time_limit is not None:
                 score_overtime = 0
                 overtime = self.time
                 while overtime > class_params.time_limit:
