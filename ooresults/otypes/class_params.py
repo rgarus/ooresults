@@ -27,14 +27,14 @@ import fastclasses_json
 
 @fastclasses_json.dataclass_json(field_name_transform=caseconverter.camelcase)
 @dataclasses.dataclass
-class VoidedLeg:
+class VoidedLeg(fastclasses_json.JSONMixin):
     control_1: str
     control_2: str
 
 
 @fastclasses_json.dataclass_json(field_name_transform=caseconverter.camelcase)
 @dataclasses.dataclass
-class ClassParams:
+class ClassParams(fastclasses_json.JSONMixin):
     otype: str = "standard"
     using_start_control: str = "if_punched"
     mass_start: Optional[datetime] = None

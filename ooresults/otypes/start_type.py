@@ -27,5 +27,5 @@ import fastclasses_json
 
 @fastclasses_json.dataclass_json(field_name_transform=caseconverter.camelcase)
 @dataclasses.dataclass
-class PersonRaceStart:
+class PersonRaceStart(fastclasses_json.JSONMixin):
     start_time: Optional[datetime] = None

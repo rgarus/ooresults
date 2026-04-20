@@ -57,7 +57,7 @@ class SpStatus(enum.Enum):
 
 @fastclasses_json.dataclass_json(field_name_transform=caseconverter.camelcase)
 @dataclasses.dataclass
-class SplitTime:
+class SplitTime(fastclasses_json.JSONMixin):
     NO_TIME = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
     control_code: str
@@ -126,7 +126,7 @@ class ResultStatus(enum.Enum):
 
 @fastclasses_json.dataclass_json(field_name_transform=caseconverter.camelcase)
 @dataclasses.dataclass
-class PersonRaceResult:
+class PersonRaceResult(fastclasses_json.JSONMixin):
     status: ResultStatus = ResultStatus.INACTIVE
     start_time: Optional[datetime] = None
     finish_time: Optional[datetime] = None

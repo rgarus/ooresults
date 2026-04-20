@@ -118,7 +118,7 @@ def test_given_no_controls_and_status_is_not_inactive_active_finished_then_resul
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
     f1 = datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
 
-    controls = []
+    controls: list[str] = []
     result = PersonRaceResult(
         status=status,
         punched_start_time=None,
@@ -174,7 +174,7 @@ def test_given_no_controls_but_punches_and_status_inactive_active_finished_then_
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
     f1 = datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
 
-    controls = []
+    controls: list[str] = []
     result = PersonRaceResult(
         status=status_old,
         punched_start_time=None,
@@ -256,7 +256,7 @@ def test_given_no_controls_and_no_punches_and_status_inactive_active_finished_th
 ):
     time_limit = 60 if otype == "score" else None
 
-    controls = []
+    controls: list[str] = []
     result = PersonRaceResult(
         status=status_old,
         punched_start_time=None,
@@ -467,7 +467,7 @@ def test_given_no_punches_and_status_is_inactive_when_compute_result_then_new_st
 ):
     time_limit = 60 if otype == "score" else None
 
-    controls = []
+    controls: list[str] = []
     result = PersonRaceResult(
         status=ResultStatus.INACTIVE,
         punched_start_time=None,
@@ -511,7 +511,7 @@ def test_given_no_controls_but_punches_when_compute_result_then_status_is_finish
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
     f1 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
 
-    controls = []
+    controls: list[str] = []
     result = PersonRaceResult(
         status=ResultStatus.INACTIVE,
         punched_start_time=s1,

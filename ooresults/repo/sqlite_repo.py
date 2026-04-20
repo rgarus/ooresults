@@ -42,6 +42,7 @@ from ooresults.repo.repo import ClubUsedError
 from ooresults.repo.repo import CompetitorUsedError
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.repo import CourseUsedError
+from ooresults.repo.repo import DatabaseError
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import OperationalError
 from ooresults.repo.repo import Repo
@@ -189,19 +190,21 @@ class SqliteRepo(Repo):
 
         return self._ctx.db
 
-    def start_transaction(self, mode: TransactionMode = TransactionMode.DEFERRED):
+    def start_transaction(
+        self, mode: TransactionMode = TransactionMode.DEFERRED
+    ) -> None:
         try:
             self.db.execute(f"BEGIN {mode.value} TRANSACTION")
         except sqlite3.OperationalError as e:
             raise OperationalError(str(e))
 
-    def commit(self):
+    def commit(self) -> None:
         self.db.commit()
 
-    def rollback(self):
+    def rollback(self) -> None:
         self.db.rollback()
 
-    def close(self):
+    def close(self) -> None:
         if hasattr(self._ctx, "db"):
             self.db.rollback()
             self.db.close()
@@ -304,7 +307,10 @@ class SqliteRepo(Repo):
                     params.to_json(),
                 ),
             )
-            return cur.lastrowid
+            if cur.lastrowid is None:
+                raise DatabaseError("cursor.lastrowid is None")
+            else:
+                return cur.lastrowid
 
         except sqlite3.IntegrityError:
             raise ConstraintError("Class already exist")
@@ -316,7 +322,7 @@ class SqliteRepo(Repo):
         short_name: Optional[str],
         course_id: Optional[int],
         params: ClassParams,
-    ):
+    ) -> None:
         try:
             cur = self.db.execute(
                 """
@@ -340,7 +346,7 @@ class SqliteRepo(Repo):
         except sqlite3.IntegrityError:
             raise ConstraintError("Class already exist")
 
-    def delete_classes(self, event_id: int):
+    def delete_classes(self, event_id: int) -> None:
         cur = self.db.execute(
             "SELECT id FROM entries WHERE event_id=?",
             (event_id,),
@@ -353,7 +359,7 @@ class SqliteRepo(Repo):
                 (event_id,),
             )
 
-    def delete_class(self, id: int):
+    def delete_class(self, id: int) -> None:
         cur = self.db.execute(
             "SELECT id FROM entries WHERE class_id=?",
             (id,),
@@ -452,7 +458,10 @@ class SqliteRepo(Repo):
                     json.dumps(controls),
                 ),
             )
-            return cur.lastrowid
+            if cur.lastrowid is None:
+                raise DatabaseError("cursor.lastrowid is None")
+            else:
+                return cur.lastrowid
 
         except sqlite3.IntegrityError:
             raise ConstraintError("Course already exist")
@@ -464,7 +473,7 @@ class SqliteRepo(Repo):
         length: Optional[float],
         climb: Optional[float],
         controls: list[str],
-    ):
+    ) -> None:
         try:
             cur = self.db.execute(
                 """
@@ -488,7 +497,7 @@ class SqliteRepo(Repo):
         except sqlite3.IntegrityError:
             raise ConstraintError("Course already exist")
 
-    def delete_courses(self, event_id: int):
+    def delete_courses(self, event_id: int) -> None:
         cur = self.db.execute(
             "SELECT id FROM classes WHERE event_id=? and course_id is not null",
             (event_id,),
@@ -501,7 +510,7 @@ class SqliteRepo(Repo):
                 (event_id,),
             )
 
-    def delete_course(self, id: int):
+    def delete_course(self, id: int) -> None:
         cur = self.db.execute(
             "SELECT id FROM classes WHERE course_id=?",
             (id,),
@@ -549,7 +558,11 @@ class SqliteRepo(Repo):
                 "INSERT into clubs (name) VALUES(?)",
                 (name,),
             )
-            return cur.lastrowid
+            if cur.lastrowid is None:
+                raise DatabaseError("cursor.lastrowid is None")
+            else:
+                return cur.lastrowid
+
         except sqlite3.IntegrityError:
             raise ConstraintError("Club already exist")
 
@@ -615,7 +628,7 @@ class SqliteRepo(Repo):
             )
         return competitors
 
-    def get_competitor(self, id) -> CompetitorType:
+    def get_competitor(self, id: int) -> CompetitorType:
         cur = self.db.execute(
             """
             SELECT
@@ -715,7 +728,10 @@ class SqliteRepo(Repo):
                     chip,
                 ),
             )
-            return cur.lastrowid
+            if cur.lastrowid is None:
+                raise DatabaseError("cursor.lastrowid is None")
+            else:
+                return cur.lastrowid
 
         except sqlite3.IntegrityError as err:
             if str(err).startswith("UNIQUE constraint failed"):
@@ -774,7 +790,9 @@ class SqliteRepo(Repo):
                 (id,),
             )
 
-    def add_many_competitors(self, list_of_competitors: CompetitorBaseDataType) -> None:
+    def add_many_competitors(
+        self, list_of_competitors: list[CompetitorBaseDataType]
+    ) -> None:
         competitors = []
         for c in list_of_competitors:
             competitors.append(
@@ -1035,7 +1053,10 @@ class SqliteRepo(Repo):
                 json.dumps(fields),
             ),
         )
-        return cur.lastrowid
+        if cur.lastrowid is None:
+            raise DatabaseError("cursor.lastrowid is None")
+        else:
+            return cur.lastrowid
 
     def add_entry_result(
         self,
@@ -1073,7 +1094,10 @@ class SqliteRepo(Repo):
                 json.dumps({}),
             ),
         )
-        return cur.lastrowid
+        if cur.lastrowid is None:
+            raise DatabaseError("cursor.lastrowid is None")
+        else:
+            return cur.lastrowid
 
     def update_entry(
         self,
@@ -1298,7 +1322,10 @@ class SqliteRepo(Repo):
                     streaming_enabled,
                 ),
             )
-            return cur.lastrowid
+            if cur.lastrowid is None:
+                raise DatabaseError("cursor.lastrowid is None")
+            else:
+                return cur.lastrowid
 
         except sqlite3.IntegrityError:
             raise ConstraintError("Event or event key already exist")
@@ -1413,4 +1440,3 @@ class SqliteRepo(Repo):
                     settings.decimal_places,
                 ),
             )
-            return cur.lastrowid

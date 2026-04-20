@@ -25,9 +25,14 @@ from ooresults.otypes import result_type
 from ooresults.otypes import series_type
 from ooresults.otypes import start_type
 from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.class_type import ClassType
+from ooresults.otypes.club_type import ClubType
 from ooresults.otypes.competitor_type import CompetitorBaseDataType
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.course_type import CourseType
 from ooresults.otypes.entry_type import EntryBaseDataType
+from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.event_type import EventType
 
 
@@ -59,6 +64,10 @@ class OperationalError(RuntimeError):
     pass
 
 
+class DatabaseError(RuntimeError):
+    pass
+
+
 class TransactionMode(Enum):
     DEFERRED = "DEFERRED"
     IMMEDIATE = "IMMEDIATE"
@@ -68,7 +77,7 @@ class TransactionMode(Enum):
 class Transaction:
     """Database transaction."""
 
-    def __init__(self, db, mode: TransactionMode = TransactionMode.DEFERRED):
+    def __init__(self, db, mode: TransactionMode = TransactionMode.DEFERRED) -> None:
         self.db = db
         self.mode = mode
 
@@ -76,7 +85,7 @@ class Transaction:
         self.db.start_transaction(mode=self.mode)
         return self
 
-    def __exit__(self, exctype, excvalue, traceback):
+    def __exit__(self, exctype, excvalue, traceback) -> None:
         if exctype is not None:
             self.db.rollback()
         else:
@@ -84,7 +93,7 @@ class Transaction:
 
 
 class Repo:
-    def __init__(self):
+    def __init__(self) -> None:
         raise NotImplementedError
 
     def transaction(
@@ -92,22 +101,24 @@ class Repo:
     ) -> Transaction:
         return Transaction(db=self, mode=mode)
 
-    def start_transaction(self, mode: str):
+    def start_transaction(
+        self, mode: TransactionMode = TransactionMode.DEFERRED
+    ) -> None:
         raise NotImplementedError
 
-    def commit(self):
+    def commit(self) -> None:
         raise NotImplementedError
 
-    def rollback(self):
+    def rollback(self) -> None:
         raise NotImplementedError
 
-    def close(self):
+    def close(self) -> None:
         raise NotImplementedError
 
-    def get_classes(self, event_id: int):
+    def get_classes(self, event_id: int) -> list[ClassInfoType]:
         raise NotImplementedError
 
-    def get_class(self, id):
+    def get_class(self, id: int) -> ClassType:
         raise NotImplementedError
 
     def add_class(
@@ -117,29 +128,29 @@ class Repo:
         short_name: Optional[str],
         course_id: Optional[int],
         params: ClassParams,
-    ):
+    ) -> int:
         raise NotImplementedError
 
     def update_class(
         self,
-        id,
-        name,
+        id: int,
+        name: str,
         short_name: Optional[str],
         course_id: Optional[int],
         params: ClassParams,
-    ):
+    ) -> None:
         raise NotImplementedError
 
-    def delete_classes(self, event_id):
+    def delete_classes(self, event_id: int) -> None:
         raise NotImplementedError
 
-    def delete_class(self, id):
+    def delete_class(self, id: int) -> None:
         raise NotImplementedError
 
-    def get_courses(self, event_id: int):
+    def get_courses(self, event_id: int) -> list[CourseType]:
         raise NotImplementedError
 
-    def get_course(self, id):
+    def get_course(self, id: int) -> CourseType:
         raise NotImplementedError
 
     def add_course(
@@ -149,44 +160,44 @@ class Repo:
         length: Optional[float],
         climb: Optional[float],
         controls: list[str],
-    ):
+    ) -> int:
         raise NotImplementedError
 
     def update_course(
         self,
-        id,
+        id: int,
         name: str,
         length: Optional[float],
         climb: Optional[float],
         controls: list[str],
-    ):
+    ) -> None:
         raise NotImplementedError
 
-    def delete_courses(self, event_id):
+    def delete_courses(self, event_id: int) -> None:
         raise NotImplementedError
 
-    def delete_course(self, id):
+    def delete_course(self, id: int) -> None:
         raise NotImplementedError
 
-    def get_clubs(self):
+    def get_clubs(self) -> list[ClubType]:
         raise NotImplementedError
 
-    def get_club(self, id):
+    def get_club(self, id: int) -> ClubType:
         raise NotImplementedError
 
-    def add_club(self, name: str):
+    def add_club(self, name: str) -> int:
         raise NotImplementedError
 
-    def update_club(self, id, name: str):
+    def update_club(self, id: int, name: str) -> None:
         raise NotImplementedError
 
-    def delete_club(self, id):
+    def delete_club(self, id: int) -> None:
         raise NotImplementedError
 
-    def get_competitors(self):
+    def get_competitors(self) -> list[CompetitorType]:
         raise NotImplementedError
 
-    def get_competitor(self, id):
+    def get_competitor(self, id: int) -> CompetitorType:
         raise NotImplementedError
 
     def get_competitor_by_name(
@@ -195,45 +206,70 @@ class Repo:
         raise NotImplementedError
 
     def add_competitor(
-        self, first_name, last_name, club_id, gender, year: Optional[int], chip
-    ):
+        self,
+        first_name: str,
+        last_name: str,
+        club_id: Optional[int],
+        gender: str,
+        year: Optional[int],
+        chip: str,
+    ) -> int:
         raise NotImplementedError
 
     def update_competitor(
-        self, id, first_name, last_name, club_id, gender, year: Optional[int], chip
-    ):
+        self,
+        id: int,
+        first_name: str,
+        last_name: str,
+        club_id: Optional[int],
+        gender: str,
+        year: Optional[int],
+        chip: str,
+    ) -> None:
         raise NotImplementedError
 
-    def delete_competitor(self, id):
+    def delete_competitor(self, id: int) -> None:
         raise NotImplementedError
 
-    def add_many_competitors(self, list_of_competitors: CompetitorBaseDataType) -> None:
+    def add_many_competitors(
+        self, list_of_competitors: list[CompetitorBaseDataType]
+    ) -> None:
         raise NotImplementedError
 
-    def delete_entries(self, event_id):
+    def get_entries(self, event_id: int) -> list[EntryType]:
         raise NotImplementedError
 
-    def delete_entry(self, id):
+    def get_entry(self, id: int) -> EntryType:
         raise NotImplementedError
 
-    def add_many_entries(self, list_of_entries: list[EntryBaseDataType]) -> None:
+    def get_entry_ids_by_competitor(
+        self, event_id: int, competitor_id: int
+    ) -> list[int]:
         raise NotImplementedError
 
-    def get_entries(self, event_id):
-        raise NotImplementedError
-
-    def get_entry(self, id):
+    def get_entry_by_name(
+        self, event_id: int, first_name: str, last_name: str
+    ) -> EntryType:
         raise NotImplementedError
 
     def add_entry(
         self,
         event_id: int,
-        competitor_id: Optional[int],
+        competitor_id: int,
         class_id: int,
         club_id: Optional[int],
         not_competing: bool,
         chip: str,
         fields: dict[int, str],
+        result: result_type.PersonRaceResult,
+        start: start_type.PersonRaceStart,
+    ) -> int:
+        raise NotImplementedError
+
+    def add_entry_result(
+        self,
+        event_id: int,
+        chip: str,
         result: result_type.PersonRaceResult,
         start: start_type.PersonRaceStart,
     ) -> int:
@@ -252,27 +288,22 @@ class Repo:
     ) -> None:
         raise NotImplementedError
 
-    def get_entry_ids_by_competitor(
-        self, event_id: int, competitor_id: int
-    ) -> list[int]:
-        raise NotImplementedError
-
-    def add_entry_result(
-        self,
-        event_id: int,
-        chip,
-        result: result_type.PersonRaceResult,
-        start: start_type.PersonRaceStart,
-    ) -> int:
-        raise NotImplementedError
-
     def update_entry_result(
         self,
         id: int,
-        chip,
+        chip: str,
         result: result_type.PersonRaceResult,
         start: start_type.PersonRaceStart,
     ) -> None:
+        raise NotImplementedError
+
+    def delete_entries(self, event_id: int) -> None:
+        raise NotImplementedError
+
+    def delete_entry(self, id: int) -> None:
+        raise NotImplementedError
+
+    def add_many_entries(self, list_of_entries: list[EntryBaseDataType]) -> None:
         raise NotImplementedError
 
     def get_events(self) -> list[EventType]:
