@@ -29,7 +29,7 @@ t = {"entries": "Entries", "classes": "Unassigned results", "clubs": "Individual
 
 <p/>
 
-<input id="entr.filter" oninput="filter_table('entr.table', 'tr', this.value)" placeholder="Search ...">
+<input id="entr.filter" oninput="filter_table('entr.table', 'tr', this.value)" placeholder="Filter (Alt+F) ...">
 <label for="entr.view">&nbsp;&nbsp;&nbsp;&nbsp;View:&nbsp;&nbsp;</label>
 <select id="entr.view" onchange="entr_reload_view(this)">
     % for value, text in (("entries", "Entries"), ("classes", "Classes"), ("clubs", "Clubs"), ("states", "States"), ("competitors", "Competitors")):

@@ -214,7 +214,7 @@ kann man den Button "Competitors ..." (rechts neben dem Feld "First name") drüc
 
 Es öffnet sich ein Fenster mit der Competitors-Liste.
 Durch Anklicken und Betätigen von "Save" können die Daten direkt in das "Add entry ..." Formular übernommen werden.
-Dabei kann die Competitors-Liste durch Filtern (Search ... Feld) verkleinert werden.
+Dabei kann die Competitors-Liste durch Filtern (Eingabefeld "Filter ...") verkleinert werden.
 
 
 Editieren und Löschen von Teilnehmern
@@ -226,8 +226,12 @@ Die Editierfunktion wird vor allem benötigt zum Ergänzen oder Ändern von SI-C
 1. Anklicken des Registerblatts "Entries"
 2. Selektieren des gewünschten Teilnehmers in der Tabelle.
    Die Zeile wird dann mit roten Hintergrund angezeigt.
-   Durch Verwendung des Filters (Search ... Feld) kann die Liste verkleinert werden.
-   **Besonders geeignet als Filterkriterium ist das Geburtsjahr.**
+   Durch Verwendung des Filters (Eingabefeld "Filter (ALT+F) ...") kann die Liste verkleinert werden.
+   
+   .. note::
+   
+      Der Aufruf der Tastenkombination "ALT+F" setzt den Eingabefokus auf den Filter und löscht seinen Inhalt.
+      Besonders geeignet als Filterkriterium ist das Geburtsjahr.
 
 .. image:: images/competitor_2_edited.png
 

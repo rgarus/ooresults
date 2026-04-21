@@ -5,6 +5,11 @@ Changelog
 [Unreleased]
 ------------
 
+Added
+^^^^^
+
+- On the “Events", “Entries”, “Classes”, “Courses”, "Competitors”, and "Clubs" tabs, the keyboard shortcut “ALT+F” has been added to scroll to the top of the page, set the input focus to the table filter, and clear the table filter's contents.
+
 Changed
 ^^^^^^^
 

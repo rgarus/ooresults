@@ -10,14 +10,14 @@
 
 <!-- Tab links -->
 <div id="tabs" class="tab">
-  <button class="tablinks active" onclick="evnt_update(); openTab(event, 'Events')">Events</button>
+  <button id="tab.events" class="tablinks active" onclick="evnt_update(); openTab(event, 'Events')">Events</button>
   <button id="tab.entries" disabled class="tablinks" onclick="entr_update(); openTab(event, 'Entries')">Entries</button>
   <button id="tab.classes" disabled class="tablinks" onclick="cls_update(); openTab(event, 'Classes')">Classes</button>
   <button id="tab.courses" disabled class="tablinks" onclick="cou_update(); openTab(event, 'Courses')">Courses</button>
   <button id="tab.results" disabled class="tablinks" onclick="res_update(); openTab(event, 'Results')">Results</button>
-  <button class="tablinks" onclick="ser_update(); openTab(event, 'Series')">Series</button>
-  <button class="tablinks" onclick="comp_update(); openTab(event, 'Competitors')">Competitors</button>
-  <button class="tablinks" onclick="clb_update(); openTab(event, 'Clubs')">Clubs</button>
+  <button id="tab.series" class="tablinks" onclick="ser_update(); openTab(event, 'Series')">Series</button>
+  <button id="tab.competitors" class="tablinks" onclick="comp_update(); openTab(event, 'Competitors')">Competitors</button>
+  <button id="tab.clubs" class="tablinks" onclick="clb_update(); openTab(event, 'Clubs')">Clubs</button>
   <button id="tab.reader" disabled class="tablinks" onclick="evnt_mySIReader()">SI Reader ...</button>
 </div>
 
@@ -207,4 +207,44 @@ ${clubs_tab_content | n}
         }
         downloadLink.click();
     }
+</script>
+
+<script>
+    function clear_filter(event, filter, table) {
+        filt = document.getElementById(filter);
+        filt.value = "";
+        filt.focus();
+        window.scrollTo(0, 0);
+        filter_table(table, 'tr', filt.value);
+        event.preventDefault()
+    }
+
+    function hotkey_alt_f(e) {
+        if (e.altKey && e.key == "f") {
+            active_tab = document.getElementsByClassName("tablinks active");
+            if (active_tab.length > 0) {
+                switch (active_tab[0].id) {
+                    case "tab.events":
+                        clear_filter(e, 'eve_filter', 'evnt.table');
+                        break;
+                    case "tab.entries":
+                        clear_filter(e, 'entr.filter', 'entr.table');
+                        break;
+                    case "tab.classes":
+                        clear_filter(e, 'clas.filter', 'cls.table');
+                        break;
+                    case "tab.courses":
+                        clear_filter(e, 'cour.filter', 'cou.table');
+                        break;
+                    case "tab.competitors":
+                        clear_filter(e, 'comp.filter', 'comp.table');
+                        break;
+                    case "tab.clubs":
+                        clear_filter(e, 'club.filter', 'clb.table');
+                        break;
+                }
+            }
+        }
+    }
+    document.addEventListener('keydown', hotkey_alt_f, false);
 </script>
