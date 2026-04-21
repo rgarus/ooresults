@@ -36,6 +36,7 @@ from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SpStatus
 from ooresults.otypes.start_type import PersonRaceStart
+from ooresults.repo import repo
 from ooresults.repo.sqlite_repo import SqliteRepo
 
 
@@ -440,7 +441,7 @@ def test_import_entries(db: SqliteRepo, event_2_id: int, class_1_id: int, club_i
     )
 
 
-def test_import_entries_already_exist(
+def test_if_competitor_has_already_one_entry_and_import_list_has_one_entry_then_update_entry(
     db: SqliteRepo,
     event_2_id: int,
     class_1_id: int,
@@ -479,73 +480,399 @@ def test_import_entries_already_exist(
             },
         ],
     )
-    c = model.competitors.get_competitors()
-    assert len(c) == 2
-    assert c[0].id != c[1].id
 
-    assert c[0] == CompetitorType(
-        id=c[0].id,
-        first_name="Jogi",
-        last_name="Löw",
-        club_id=None,
-        club_name=None,
-        gender="M",
-        year=1960,
-        chip="",
-    )
-    assert c[1] == CompetitorType(
-        id=c[1].id,
-        first_name="Angela",
-        last_name="Merkel",
-        club_id=club_id,
-        club_name="OL Bundestag",
-        gender="F",
-        year=1957,
-        chip="1234567",
-    )
+    c = model.competitors.get_competitors()
+    assert c[0].id != c[1].id
+    assert c == [
+        CompetitorType(
+            id=c[0].id,
+            first_name="Jogi",
+            last_name="Löw",
+            club_id=None,
+            club_name=None,
+            gender="M",
+            year=1960,
+            chip="",
+        ),
+        CompetitorType(
+            id=c[1].id,
+            first_name="Angela",
+            last_name="Merkel",
+            club_id=club_id,
+            club_name="OL Bundestag",
+            gender="F",
+            year=1957,
+            chip="1234567",
+        ),
+    ]
 
     data = model.entries.get_entries(event_id=event_2_id)
-    assert len(data) == 2
     assert data[0].id != data[1].id
-
-    assert data[0] == EntryType(
-        id=data[0].id,
-        event_id=event_2_id,
-        competitor_id=c[0].id,
-        first_name="Jogi",
-        last_name="Löw",
-        gender="M",
-        year=1960,
-        class_id=class_1_id,
-        class_name="Class 1",
-        not_competing=False,
-        chip="1234",
-        fields={},
-        result=result_type.PersonRaceResult(
-            status=ResultStatus.MISSING_PUNCH, time=2233
+    assert data == [
+        EntryType(
+            id=data[0].id,
+            event_id=event_2_id,
+            competitor_id=c[0].id,
+            first_name="Jogi",
+            last_name="Löw",
+            gender="M",
+            year=1960,
+            class_id=class_1_id,
+            class_name="Class 1",
+            not_competing=False,
+            chip="1234",
+            fields={},
+            result=result_type.PersonRaceResult(
+                status=ResultStatus.MISSING_PUNCH, time=2233
+            ),
+            start=start_type.PersonRaceStart(),
+            club_id=None,
+            club_name=None,
         ),
-        start=start_type.PersonRaceStart(),
-        club_id=None,
-        club_name=None,
-    )
-    assert data[1] == EntryType(
-        id=data[1].id,
+        EntryType(
+            id=data[1].id,
+            event_id=event_2_id,
+            competitor_id=c[1].id,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1957,
+            class_id=class_1_id,
+            class_name="Class 1",
+            not_competing=True,
+            chip="4455",
+            fields={0: "x"},
+            result=result_type.PersonRaceResult(status=ResultStatus.OK, time=2361),
+            start=start_type.PersonRaceStart(start_time=S3),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+    ]
+
+
+def test_if_competitor_has_already_one_entry_and_import_list_has_two_entries_then_raise_exception(
+    db: SqliteRepo,
+    event_2_id: int,
+    class_2_id: int,
+    club_id: int,
+    entry_2_id: int,
+):
+    with pytest.raises(repo.ConstraintError, match="Ambiguous update"):
+        model.entries.import_entries(
+            event_id=event_2_id,
+            entries=[
+                {
+                    "first_name": "Angela",
+                    "last_name": "Merkel",
+                    "gender": "",
+                    "year": 1972,
+                    "class_": "Class 1",
+                    "club": "OL Bundestag",
+                    "chip": "4455",
+                    "result": result_type.PersonRaceResult(
+                        status=ResultStatus.OK, time=2361
+                    ),
+                    "start": start_type.PersonRaceStart(start_time=S3),
+                },
+                {
+                    "first_name": "Angela",
+                    "last_name": "Merkel",
+                    "gender": "",
+                    "year": 1972,
+                    "class_": "Class 1",
+                    "club": "OL Bundestag",
+                    "chip": "4455",
+                    "result": result_type.PersonRaceResult(
+                        status=ResultStatus.OK, time=2200
+                    ),
+                    "start": start_type.PersonRaceStart(start_time=S3),
+                },
+            ],
+        )
+
+    # database contents is not changed
+    c = model.competitors.get_competitors()
+    assert c == [
+        CompetitorType(
+            id=c[0].id,
+            first_name="Angela",
+            last_name="Merkel",
+            club_id=club_id,
+            club_name="OL Bundestag",
+            gender="F",
+            year=1957,
+            chip="1234567",
+        ),
+    ]
+
+    # database contents is not changed
+    data = model.entries.get_entries(event_id=event_2_id)
+    assert data == [
+        EntryType(
+            id=data[0].id,
+            event_id=event_2_id,
+            competitor_id=c[0].id,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1957,
+            class_id=class_2_id,
+            class_name="Class 2",
+            not_competing=True,
+            chip="9999999",
+            fields={0: "x"},
+            result=result_type.PersonRaceResult(status=ResultStatus.DID_NOT_START),
+            start=start_type.PersonRaceStart(start_time=S1),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+    ]
+
+
+def test_if_competitor_has_already_two_entries_and_import_list_has_one_entry_then_raise_exception(
+    db: SqliteRepo,
+    event_2_id: int,
+    class_1_id: int,
+    class_2_id: int,
+    club_id: int,
+    competitor_2_id: int,
+):
+    with db.transaction():
+        c1 = db.add_entry(
+            event_id=event_2_id,
+            competitor_id=competitor_2_id,
+            class_id=class_2_id,
+            club_id=club_id,
+            not_competing=True,
+            chip="9999999",
+            fields={0: "x"},
+            result=PersonRaceResult(),
+            start=PersonRaceStart(),
+        )
+        c2 = db.add_entry(
+            event_id=event_2_id,
+            competitor_id=competitor_2_id,
+            class_id=class_2_id,
+            club_id=club_id,
+            not_competing=True,
+            chip="9999999",
+            fields={0: "x"},
+            result=PersonRaceResult(),
+            start=PersonRaceStart(),
+        )
+
+    with pytest.raises(repo.ConstraintError, match="Ambiguous update"):
+        model.entries.import_entries(
+            event_id=event_2_id,
+            entries=[
+                {
+                    "first_name": "Angela",
+                    "last_name": "Merkel",
+                    "gender": "",
+                    "year": None,
+                    "class_": "Class 1",
+                    "club": "OL Bundestag",
+                    "chip": "4455",
+                    "result": result_type.PersonRaceResult(
+                        status=ResultStatus.OK, time=2361
+                    ),
+                    "start": start_type.PersonRaceStart(start_time=S3),
+                },
+            ],
+        )
+
+    # database contents is not changed
+    c = model.competitors.get_competitors()
+    assert c == [
+        CompetitorType(
+            id=c[0].id,
+            first_name="Angela",
+            last_name="Merkel",
+            club_id=club_id,
+            club_name="OL Bundestag",
+            gender="F",
+            year=1957,
+            chip="1234567",
+        ),
+    ]
+
+    # database contents is not changed
+    data = model.entries.get_entries(event_id=event_2_id)
+    assert data == [
+        EntryType(
+            id=c1,
+            event_id=event_2_id,
+            competitor_id=c[0].id,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1957,
+            class_id=class_2_id,
+            class_name="Class 2",
+            not_competing=True,
+            chip="9999999",
+            fields={0: "x"},
+            result=result_type.PersonRaceResult(),
+            start=start_type.PersonRaceStart(),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+        EntryType(
+            id=c2,
+            event_id=event_2_id,
+            competitor_id=c[0].id,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1957,
+            class_id=class_2_id,
+            class_name="Class 2",
+            not_competing=True,
+            chip="9999999",
+            fields={0: "x"},
+            result=result_type.PersonRaceResult(),
+            start=start_type.PersonRaceStart(),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+    ]
+
+
+def test_if_competitor_has_no_entry_then_add_all_entries_of_import_list(
+    db: SqliteRepo,
+    event_2_id: int,
+    class_1_id: int,
+    class_2_id: int,
+    club_id: int,
+    entry_3_id: int,
+):
+    model.entries.import_entries(
         event_id=event_2_id,
-        competitor_id=c[1].id,
-        first_name="Angela",
-        last_name="Merkel",
-        gender="F",
-        year=1957,
-        class_id=class_1_id,
-        class_name="Class 1",
-        not_competing=True,
-        chip="4455",
-        fields={0: "x"},
-        result=result_type.PersonRaceResult(status=ResultStatus.OK, time=2361),
-        start=start_type.PersonRaceStart(start_time=S3),
-        club_id=club_id,
-        club_name="OL Bundestag",
+        entries=[
+            {
+                "first_name": "Angela",
+                "last_name": "Merkel",
+                "gender": None,
+                "year": None,
+                "class_": "Class 1",
+                "club": "OL Bundestag",
+                "chip": "4455",
+                "result": result_type.PersonRaceResult(
+                    status=ResultStatus.OK, time=2361
+                ),
+                "start": start_type.PersonRaceStart(start_time=S1),
+            },
+            {
+                "first_name": "Angela",
+                "last_name": "Merkel",
+                "gender": None,
+                "year": None,
+                "class_": "Class 1",
+                "club": "OL Bundestag",
+                "chip": "4455",
+                "result": result_type.PersonRaceResult(
+                    status=ResultStatus.MISSING_PUNCH, time=2200
+                ),
+                "start": start_type.PersonRaceStart(start_time=S2),
+            },
+            {
+                "first_name": "Angela",
+                "last_name": "Merkel",
+                "gender": None,
+                "year": None,
+                "class_": "Class 1",
+                "club": None,
+                "chip": "445533",
+                "result": result_type.PersonRaceResult(
+                    status=ResultStatus.DID_NOT_START
+                ),
+                "start": start_type.PersonRaceStart(start_time=S3),
+            },
+        ],
     )
+
+    c = model.competitors.get_competitors()
+    assert c[0].id != c[1].id
+    assert c == [
+        CompetitorType(
+            id=c[0].id,
+            first_name="Jogi",
+            last_name="Löw",
+            club_id=None,
+            club_name=None,
+            gender="M",
+            year=None,
+            chip="",
+        ),
+        CompetitorType(
+            id=c[1].id,
+            first_name="Angela",
+            last_name="Merkel",
+            club_id=club_id,
+            club_name="OL Bundestag",
+            gender=None,
+            year=None,
+            chip="4455",
+        ),
+    ]
+
+    data = model.entries.get_entries(event_id=event_2_id)
+    assert data[0].id != data[1].id
+    assert data == [
+        EntryType(
+            id=data[0].id,
+            event_id=event_2_id,
+            competitor_id=c[0].id,
+            first_name="Jogi",
+            last_name="Löw",
+            gender="M",
+            class_id=class_2_id,
+            class_name="Class 2",
+            chip="",
+        ),
+        EntryType(
+            id=data[1].id,
+            event_id=event_2_id,
+            competitor_id=c[1].id,
+            first_name="Angela",
+            last_name="Merkel",
+            class_id=class_1_id,
+            class_name="Class 1",
+            chip="4455",
+            result=result_type.PersonRaceResult(status=ResultStatus.OK, time=2361),
+            start=start_type.PersonRaceStart(start_time=S1),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+        EntryType(
+            id=data[2].id,
+            event_id=event_2_id,
+            competitor_id=c[1].id,
+            first_name="Angela",
+            last_name="Merkel",
+            class_id=class_1_id,
+            class_name="Class 1",
+            chip="4455",
+            result=result_type.PersonRaceResult(
+                status=ResultStatus.MISSING_PUNCH, time=2200
+            ),
+            start=start_type.PersonRaceStart(start_time=S2),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+        EntryType(
+            id=data[3].id,
+            event_id=event_2_id,
+            competitor_id=c[1].id,
+            first_name="Angela",
+            last_name="Merkel",
+            class_id=class_1_id,
+            class_name="Class 1",
+            chip="445533",
+            result=result_type.PersonRaceResult(status=ResultStatus.DID_NOT_START),
+            start=start_type.PersonRaceStart(start_time=S3),
+        ),
+    ]
 
 
 def test_import_entries_with_results(db: SqliteRepo, event_2_id: int, class_1_id: int):
@@ -757,3 +1084,105 @@ def test_import_entries_already_exist_with_results(
         club_id=None,
         club_name=None,
     )
+
+
+def test_if_clear_entries_is_true_then_all_entries_are_deleted_before_the_import(
+    db: SqliteRepo,
+    event_2_id: int,
+    class_1_id: int,
+    club_id: int,
+    entry_2_id: int,
+    entry_3_id: int,
+):
+    model.entries.import_entries(
+        event_id=event_2_id,
+        entries=[
+            {
+                "first_name": "Angela",
+                "last_name": "Merkel",
+                "gender": "",
+                "year": 1972,
+                "class_": "Class 1",
+                "club": "OL Bundestag",
+                "chip": "4455",
+                "result": result_type.PersonRaceResult(
+                    status=ResultStatus.OK, time=2361
+                ),
+                "start": start_type.PersonRaceStart(start_time=S3),
+            },
+            {
+                "first_name": "Angela",
+                "last_name": "Merkel",
+                "gender": "",
+                "year": 1972,
+                "class_": "Class 1",
+                "club": "OL Bundestag",
+                "chip": "4455",
+                "result": result_type.PersonRaceResult(
+                    status=ResultStatus.OK, time=2200
+                ),
+                "start": start_type.PersonRaceStart(start_time=S3),
+            },
+        ],
+        clear_entries=True,
+    )
+
+    c = model.competitors.get_competitors()
+    assert c == [
+        CompetitorType(
+            id=c[0].id,
+            first_name="Jogi",
+            last_name="Löw",
+            club_id=None,
+            club_name=None,
+            gender="M",
+            year=None,
+            chip="",
+        ),
+        CompetitorType(
+            id=c[1].id,
+            first_name="Angela",
+            last_name="Merkel",
+            club_id=club_id,
+            club_name="OL Bundestag",
+            gender="F",
+            year=1972,
+            chip="1234567",
+        ),
+    ]
+
+    data = model.entries.get_entries(event_id=event_2_id)
+    assert data == [
+        EntryType(
+            id=data[0].id,
+            event_id=event_2_id,
+            competitor_id=c[1].id,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1972,
+            class_id=class_1_id,
+            class_name="Class 1",
+            chip="4455",
+            result=result_type.PersonRaceResult(status=ResultStatus.OK, time=2361),
+            start=start_type.PersonRaceStart(start_time=S3),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+        EntryType(
+            id=data[1].id,
+            event_id=event_2_id,
+            competitor_id=c[1].id,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1972,
+            class_id=class_1_id,
+            class_name="Class 1",
+            chip="4455",
+            result=result_type.PersonRaceResult(status=ResultStatus.OK, time=2200),
+            start=start_type.PersonRaceStart(start_time=S3),
+            club_id=club_id,
+            club_name="OL Bundestag",
+        ),
+    ]

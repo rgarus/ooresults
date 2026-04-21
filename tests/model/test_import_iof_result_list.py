@@ -111,6 +111,27 @@ def test_import_iof_result_list_snapshot(
   </Event>
   <ClassResult>
     <Class>
+      <Name>Bahn A - Kurz</Name>
+    </Class>
+    <PersonResult>
+      <Person sex="F">
+        <Name>
+          <Family>Merkel</Family>
+          <Given>Angela</Given>
+        </Name>
+        <BirthDate>1972-01-01</BirthDate>
+      </Person>
+      <Result>
+        <StartTime>2020-02-09T10:00:00+01:00</StartTime>
+        <FinishTime>2020-02-09T10:33:21+01:00</FinishTime>
+        <Time>2001</Time>
+        <Status>OK</Status>
+        <ControlCard punchingSystem="SI">1234567</ControlCard>
+      </Result>
+    </PersonResult>
+  </ClassResult>
+  <ClassResult>
+    <Class>
       <Name>Bahn A - Lang</Name>
     </Class>
     <PersonResult>
@@ -168,7 +189,7 @@ def test_import_iof_result_list_snapshot(
     assert classes == [
         ClassInfoType(
             id=classes[0].id,
-            name="Bahn A - Lang",
+            name="Bahn A - Kurz",
             short_name=None,
             course_id=None,
             course_name=None,
@@ -179,6 +200,17 @@ def test_import_iof_result_list_snapshot(
         ),
         ClassInfoType(
             id=classes[1].id,
+            name="Bahn A - Lang",
+            short_name=None,
+            course_id=None,
+            course_name=None,
+            course_length=None,
+            course_climb=None,
+            number_of_controls=None,
+            params=ClassParams(),
+        ),
+        ClassInfoType(
+            id=classes[2].id,
             name="Elite",
             short_name="E",
             course_id=None,
@@ -201,6 +233,33 @@ def test_import_iof_result_list_snapshot(
             gender="F",
             year=1972,
             class_id=classes[0].id,
+            class_name="Bahn A - Kurz",
+            not_competing=False,
+            chip="1234567",
+            fields={},
+            result=PersonRaceResult(
+                start_time=s,
+                finish_time=f,
+                punched_start_time=s,
+                punched_finish_time=f,
+                si_punched_start_time=s,
+                si_punched_finish_time=f,
+                status=ResultStatus.OK,
+                time=2001,
+            ),
+            start=PersonRaceStart(),
+            club_id=None,
+            club_name=None,
+        ),
+        EntryType(
+            id=entries[1].id,
+            event_id=event_id,
+            competitor_id=competitors[1].id,
+            first_name="Angela",
+            last_name="Merkel",
+            gender="F",
+            year=1972,
+            class_id=classes[1].id,
             class_name="Bahn A - Lang",
             not_competing=True,
             chip="1234567",

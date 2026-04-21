@@ -247,9 +247,9 @@ class Repo:
     ) -> list[int]:
         raise NotImplementedError
 
-    def get_entry_by_name(
+    def get_entries_by_name(
         self, event_id: int, first_name: str, last_name: str
-    ) -> EntryType:
+    ) -> list[EntryType]:
         raise NotImplementedError
 
     def add_entry(

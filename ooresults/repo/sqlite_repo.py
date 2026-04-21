@@ -954,9 +954,9 @@ class SqliteRepo(Repo):
         )
         return [row[0] for row in cur]
 
-    def get_entry_by_name(
+    def get_entries_by_name(
         self, event_id: int, first_name: str, last_name: str
-    ) -> EntryType:
+    ) -> list[EntryType]:
         cur = self.db.execute(
             """
             SELECT
@@ -990,30 +990,32 @@ class SqliteRepo(Repo):
             ),
         )
 
-        c = cur.fetchone()
-        if c:
+        entries = []
+        for c in cur:
             fields = {int(key): value for key, value in json.loads(c["fields"]).items()}
-
-            return EntryType(
-                id=c["id"],
-                event_id=c["event_id"],
-                competitor_id=c["competitor_id"],
-                first_name=c["first_name"],
-                last_name=c["last_name"],
-                gender=c["gender"],
-                year=c["year"],
-                class_id=c["class_id"],
-                class_name=c["class_name"],
-                not_competing=bool(c["not_competing"]),
-                chip=c["chip"],
-                fields=fields,
-                result=result_type.PersonRaceResult.from_json(json_data=c["result"]),
-                start=start_type.PersonRaceStart.from_json(json_data=c["start"]),
-                club_id=c["club_id"],
-                club_name=c["club_name"],
+            entries.append(
+                EntryType(
+                    id=c["id"],
+                    event_id=c["event_id"],
+                    competitor_id=c["competitor_id"],
+                    first_name=c["first_name"],
+                    last_name=c["last_name"],
+                    gender=c["gender"],
+                    year=c["year"],
+                    class_id=c["class_id"],
+                    class_name=c["class_name"],
+                    not_competing=bool(c["not_competing"]),
+                    chip=c["chip"],
+                    fields=fields,
+                    result=result_type.PersonRaceResult.from_json(
+                        json_data=c["result"]
+                    ),
+                    start=start_type.PersonRaceStart.from_json(json_data=c["start"]),
+                    club_id=c["club_id"],
+                    club_name=c["club_name"],
+                )
             )
-        else:
-            raise KeyError
+        return entries
 
     def add_entry(
         self,

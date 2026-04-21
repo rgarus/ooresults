@@ -57,7 +57,9 @@ def import_entries(
         if clear_entries:
             model.db.delete_entries(event_id=event_id)
 
-        list_of_entries = []
+        competitor_ids: set[int] = set()
+        list_of_entries: list[EntryBaseDataType] = []
+
         for c in entries:
             class_id = None
             class_ = None
@@ -132,31 +134,37 @@ def import_entries(
                     gender=gender if gender != "" else None,
                 )
 
-            try:
-                entry = model.db.get_entry_by_name(
-                    event_id=event_id,
-                    first_name=c["first_name"],
-                    last_name=c["last_name"],
-                )
+            entries_by_name = model.db.get_entries_by_name(
+                event_id=event_id,
+                first_name=c["first_name"],
+                last_name=c["last_name"],
+            )
 
-                not_competing = entry.not_competing
+            if entries_by_name:
+                # Check that each competitor has only one entry
+                # Otherwise, an entry might be incorrectly assigned to an existing entry
+                if len(entries_by_name) >= 2 or competitor_id in competitor_ids:
+                    raise repo.ConstraintError("Ambiguous update")
+
+                not_competing = entries_by_name[0].not_competing
                 if "not_competing" in c:
                     not_competing = c["not_competing"]
-                chip = entry.chip
+                chip = entries_by_name[0].chip
                 if "chip" in c:
                     chip = c["chip"]
-                fields = entry.fields
+                fields = entries_by_name[0].fields
                 if "fields" in c:
                     fields = copy.deepcopy(c["fields"])
-                result = entry.result
+                result = entries_by_name[0].result
                 if "result" in c:
                     result = copy.deepcopy(c["result"])
-                start = entry.start
+                start = entries_by_name[0].start
                 if "start" in c:
                     start = copy.deepcopy(c["start"])
 
+                competitor_ids.add(competitor_id)
                 model.db.update_entry(
-                    id=entry.id,
+                    id=entries_by_name[0].id,
                     class_id=class_id,
                     club_id=club_id,
                     not_competing=not_competing,
@@ -165,7 +173,8 @@ def import_entries(
                     result=result,
                     start=start,
                 )
-            except KeyError:
+
+            else:
                 entry_data = EntryBaseDataType(
                     event_id=event_id,
                     competitor_id=competitor_id,
@@ -184,16 +193,6 @@ def import_entries(
                     entry_data.not_competing = c["not_competing"]
 
                 list_of_entries.append(entry_data)
-
-        # check that each competitor has only one entry
-        competitor_ids: set[int] = set()
-        for entry_data in list_of_entries:
-            if entry_data.competitor_id in competitor_ids:
-                raise repo.ConstraintError(
-                    "Competitor already registered for this event"
-                )
-            else:
-                competitor_ids.add(entry_data.competitor_id)
 
         if list_of_entries:
             model.db.add_many_entries(list_of_entries=list_of_entries)
