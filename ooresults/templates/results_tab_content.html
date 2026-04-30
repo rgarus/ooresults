@@ -66,21 +66,25 @@
         data.append('event_id', window.event_id);
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                download(filename, this.response, 'application/pdf');
-                document.getElementById('res.pdfResultDialog').style.display = "none";
-            }
-            if (this.readyState == 4 && this.status == 409) {
-                window.alert(new TextDecoder().decode(this.response));
-            }
-            if (this.readyState == 4 && this.status == 500) {
-                window.alert(new TextDecoder().decode(this.response));
+            if (this.readyState == 4) {
+                document.getElementById('progress').style.display = 'none';
+                if (this.status == 200) {
+                    download(filename, this.response, 'application/pdf');
+                    document.getElementById('res.pdfResultDialog').style.display = "none";
+                }
+                if (this.status == 409) {
+                    showAlert(new TextDecoder().decode(this.response));
+                }
+                if (this.status == 500) {
+                    showAlert(new TextDecoder().decode(this.response));
+                }
             }
         };
         xhr.onerror = function() {
-            window.alert("Network error");
+            showAlert("Network error");
         };
         xhr.open("POST", "result/pdfResult", true);
+        document.getElementById('progress').style.display='flex';
         xhr.responseType = "arraybuffer";
         xhr.send(data);
     }
@@ -92,21 +96,25 @@
         data.append('event_id', window.event_id);
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                download(filename, this.response, 'application/pdf');
-                document.getElementById('res.pdfSplittimesDialog').style.display = "none";
-            }
-            if (this.readyState == 4 && this.status == 409) {
-                window.alert(new TextDecoder().decode(this.response));
-            }
-            if (this.readyState == 4 && this.status == 500) {
-                window.alert(new TextDecoder().decode(this.response));
+            if (this.readyState == 4) {
+                document.getElementById('progress').style.display = 'none';
+                if (this.status == 200) {
+                    download(filename, this.response, 'application/pdf');
+                    document.getElementById('res.pdfSplittimesDialog').style.display = "none";
+                }
+                if (this.status == 409) {
+                    showAlert(new TextDecoder().decode(this.response));
+                }
+                if (this.status == 500) {
+                    showAlert(new TextDecoder().decode(this.response));
+                }
             }
         };
         xhr.onerror = function() {
-            window.alert("Network error");
+            showAlert("Network error");
         };
         xhr.open("POST", "result/pdfSplittimes", true);
+        document.getElementById('progress').style.display='flex';
         xhr.responseType = "arraybuffer";
         xhr.send(data);
     }

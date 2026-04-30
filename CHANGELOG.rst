@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Added
+^^^^^
+
+- Show a progress bar while waiting for a PDF file to be generated
+
+
 [0.4.8] - 2026-04-26
 --------------------
 

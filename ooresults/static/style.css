@@ -50,7 +50,6 @@ th.h1 {
 .actions {
   position: sticky;
   top: 0px;
-  width=100%;
   background-color: Canvas;
   padding: 10px 12px 10px 12px;
 }
@@ -69,8 +68,24 @@ th.h1 {
   top: 0;
   width: 100%; /* Full width */
   height: 100%; /* Full height */
-  background-color: rgb(0,0,0); /* Fallback color */
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* The Modal (background) */
+.modal-progress {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 2; /* Sit on top */
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  justify-content: center;
+  align-items: center;
 }
 
 /* Modal Content/Box */
@@ -81,6 +96,19 @@ th.h1 {
   border: 1px solid #888;
   max-height: 80%;
   overflow: auto;
+}
+
+/* Modal Content/Box */
+.modal-content-progress {
+  border-radius: 8px;
+  background-color: #fefefe;
+  width: 50%;
+  height: 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Horizontal zentrieren */
+  align-items: center;
+  min-height: 100px;
 }
 
 /* The Close Button */

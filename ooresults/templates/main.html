@@ -31,6 +31,15 @@
   </div>
 </div>
 
+<!-- The Modal -->
+<div class="modal-progress" id="progress">
+  <!-- Modal content -->
+  <div class="modal-content-progress">
+    <p>Generating PDF</p>
+    <progress style="width: 80%"/>
+  </div>
+</div>
+
 <script>
     function myfunction() {
         document.getElementById("tab.entries").disabled = true;
@@ -247,4 +256,15 @@ ${clubs_tab_content | n}
         }
     }
     document.addEventListener('keydown', hotkey_alt_f, false);
+</script>
+
+<script>
+    // see https://stackoverflow.com/questions/75668911/how-do-you-make-the-screen-update-before-displaying-an-alert
+    function showAlert(message) {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                window.alert(message);
+            });
+        });
+    }
 </script>
