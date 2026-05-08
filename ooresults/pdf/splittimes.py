@@ -20,6 +20,8 @@
 from datetime import datetime
 from typing import Optional
 
+from fpdf.recorder import FPDFRecorder
+
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
@@ -133,24 +135,28 @@ def create_pdf(
     nr_split_times = 20 if landscape else 12
 
     def cell(
-        pdf: PDF, w: int, h: Optional[int] = None, txt: str = "", align: str = "L"
+        pdf: PDF | FPDFRecorder,
+        w: int,
+        h: Optional[int] = None,
+        text: str = "",
+        align: str = "L",
     ) -> None:
-        while pdf.get_string_width(txt) > w:
-            txt = txt[:-1]
-        pdf.cell(w=w, h=h, txt=txt, align=align)
+        while pdf.get_string_width(text) > w:
+            text = text[:-1]
+        pdf.cell(w=w, h=h, text=text, align=align)
 
-    def format_time(time: int, status: ResultStatus) -> str:
+    def format_time(time: Optional[int], status: ResultStatus) -> str:
         if status == ResultStatus.OK:
             return globals.minutes_seconds(time=time)
         else:
             return pdf.MAP_STATUS[status]
 
-    def pre(pdf: PDF, t1: str = "", t2: str = "", t3: str = "") -> None:
+    def pre(pdf: PDF | FPDFRecorder, t1: str = "", t2: str = "", t3: str = "") -> None:
         pdf.set_font(style="B")
-        cell(pdf=pdf, w=7, h=None, txt=t1, align="R")
-        cell(pdf=pdf, w=2, h=None, txt="")
-        cell(pdf=pdf, w=33, h=None, txt=t2, align="L")
-        cell(pdf=pdf, w=12, h=None, txt=t3, align="R")
+        cell(pdf=pdf, w=7, h=None, text=t1, align="R")
+        cell(pdf=pdf, w=2, h=None, text="")
+        cell(pdf=pdf, w=33, h=None, text=t2, align="L")
+        cell(pdf=pdf, w=12, h=None, text=t3, align="R")
         pdf.set_font(style="")
 
     first_class = True
@@ -185,19 +191,19 @@ def create_pdf(
                 pdf.ln()
 
         pdf.set_font(family="Carlito", style="B", size=8)
-        pdf.cell(txt=class_.name)
+        pdf.cell(text=class_.name)
 
         # print possible voided legs
         if ranked_results and ranked_results[0].entry.result is not None:
             voided_legs = ranked_results[0].entry.result.voided_legs()
             if voided_legs:
-                pdf.cell(txt=f'(Voided legs: {", ".join(voided_legs)})')
+                pdf.cell(text=f'(Voided legs: {", ".join(voided_legs)})')
 
         # course data
         course_data = pdf.course_data(class_)
         if course_data:
             pdf.set_x(x=max(pdf.get_x() + 12, 67))
-            pdf.cell(txt=course_data)
+            pdf.cell(text=course_data)
 
         pdf.ln()
         # add a separator line (1/2 height of a line)
@@ -217,12 +223,12 @@ def create_pdf(
             else:
                 codes.append(f"{str(i+1)}")
         codes.append("F")
-        for i, j in enumerate(codes):
+        for i, code in enumerate(codes):
             if i % nr_split_times == 0:
                 if i >= nr_split_times:
                     pdf.ln()
                 pre(pdf=pdf)
-            cell(pdf=pdf, w=10, h=None, txt=j, align="R")
+            cell(pdf=pdf, w=10, h=None, text=code, align="R")
 
         pdf.ln()
         pdf.ln()
@@ -266,7 +272,7 @@ def create_pdf(
                         pre(pdf=doc)
 
                     for i in line_1:
-                        cell(pdf=doc, w=10, h=None, txt=i, align="R")
+                        cell(pdf=doc, w=10, h=None, text=i, align="R")
 
                 def print_line_2(sp: int, line_2: list[str]) -> None:
                     if sp <= nr_split_times:
@@ -278,14 +284,14 @@ def create_pdf(
                         pre(pdf=doc)
 
                     for i in line_2:
-                        cell(pdf=doc, w=10, h=None, txt=i, align="R")
+                        cell(pdf=doc, w=10, h=None, text=i, align="R")
 
                 def print_line_3(sp: int, line_3: list[str]) -> None:
                     doc.ln()
                     pre(pdf=doc)
 
                     for i in line_3:
-                        cell(pdf=doc, w=10, h=None, txt=i, align="R")
+                        cell(pdf=doc, w=10, h=None, text=i, align="R")
 
                 line_1 = []
                 line_2 = []

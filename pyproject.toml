@@ -29,7 +29,7 @@ dependencies = [
     "cheroot >= 11.1.2",
     "clevercsv",
     "fastclasses-json",
-    "fpdf2 == 2.6.1",
+    "fpdf2 == 2.8.7",
     "iso8601",
     "jsonschema",
     "lxml",

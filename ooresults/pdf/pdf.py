@@ -39,7 +39,7 @@ class PDF(FPDF):
         ResultStatus.DISQUALIFIED: "DSQ",
     }
 
-    def __init__(self, name: str, landscape: bool = False):
+    def __init__(self, name: str, landscape: bool = False) -> None:
         orientation = "landscape" if landscape else "portrait"
         super().__init__(orientation=orientation)
         self.name = name
@@ -68,20 +68,20 @@ class PDF(FPDF):
             fname=str(self.fonts_dir / "Carlito-BoldItalic.ttf"),
         )
 
-    def header(self):
+    def header(self) -> None:
         self.set_font(family="Carlito", size=12)
-        self.cell(w=0, h=10, txt=self.name, border=1, align="C")
+        self.cell(w=0, h=10, text=self.name, border=1, align="C")
         self.ln(20)
 
-    def footer(self):
+    def footer(self) -> None:
         # Position cursor at 1.5 cm from bottom:
         self.set_y(-15)
         self.set_font(family="Carlito", size=12)
         # Printing page number
         self.cell(
-            w=0, h=10, txt=self.creation_time.strftime("%Y-%m-%d %H:%M:%S"), align="L"
+            w=0, h=10, text=self.creation_time.strftime("%Y-%m-%d %H:%M:%S"), align="L"
         )
-        self.cell(w=0, h=10, txt=f"Page {self.page_no()}/{{nb}}", align="R")
+        self.cell(w=0, h=10, text=f"Page {self.page_no()}/{{nb}}", align="R")
 
     def course_data(self, class_info: ClassInfoType) -> str:
         #

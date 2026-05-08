@@ -53,36 +53,38 @@ def create_pdf(
     pdf.set_auto_page_break(auto=True, margin=20)
     pdf.add_page()
 
-    def cell(w: int, h: Optional[int] = None, txt: str = "", align: str = "L") -> None:
-        while pdf.get_string_width(txt) > w:
-            txt = txt[:-1]
-        pdf.cell(w=w, h=h, txt=txt, align=align)
+    def cell(w: int, h: Optional[int] = None, text: str = "", align: str = "L") -> None:
+        while pdf.get_string_width(text) > w:
+            text = text[:-1]
+        pdf.cell(w=w, h=h, text=text, align=align)
 
-    def print_time(width: int, time: int, status: ResultStatus) -> None:
-        txt = ""
+    def print_time(width: int, time: Optional[int], status: ResultStatus) -> None:
+        text = ""
         if status == ResultStatus.OK:
-            txt = globals.minutes_seconds(time)
-        cell(w=width, h=None, txt=txt, align="R")
+            text = globals.minutes_seconds(time)
+        cell(w=width, h=None, text=text, align="R")
 
-    def print_time_or_status(width: int, time: int, status: ResultStatus) -> None:
-        txt = pdf.MAP_STATUS[status]
+    def print_time_or_status(
+        width: int, time: Optional[int], status: ResultStatus
+    ) -> None:
+        text = pdf.MAP_STATUS[status]
         if status == ResultStatus.OK:
-            txt = globals.minutes_seconds(time)
-        cell(w=width, h=None, txt=txt, align="R")
+            text = globals.minutes_seconds(time)
+        cell(w=width, h=None, text=text, align="R")
 
     def print_points(width: int, points: Optional[float], status: ResultStatus) -> None:
-        txt = ""
+        text = ""
         if points is not None and status == ResultStatus.OK:
-            txt = f"{points:.2f}"
-        cell(w=width, h=None, txt=txt, align="R")
+            text = f"{points:.2f}"
+        cell(w=width, h=None, text=text, align="R")
 
     def print_points_or_status(
         width: int, points: Optional[float], status: ResultStatus
     ) -> None:
-        txt = pdf.MAP_STATUS[status]
+        text = pdf.MAP_STATUS[status]
         if points is not None and status == ResultStatus.OK:
-            txt = f"{points:.2f}"
-        cell(w=width, h=None, txt=txt, align="R")
+            text = f"{points:.2f}"
+        cell(w=width, h=None, text=text, align="R")
 
     first_class = True
     for class_, ranked_results in results:
@@ -137,52 +139,52 @@ def create_pdf(
             width += W_TOTAL
 
         pdf.set_font(family="Carlito", style="B", size=12)
-        pdf.cell(txt=f"{class_.name}   ({len(ranked_results)})")
+        pdf.cell(text=f"{class_.name}   ({len(ranked_results)})")
 
         # print possible voided legs
         if ranked_results and ranked_results[0].entry.result is not None:
             voided_legs = ranked_results[0].entry.result.voided_legs()
             if voided_legs:
-                pdf.cell(txt=f'(Voided legs: {", ".join(voided_legs)})')
+                pdf.cell(text=f'(Voided legs: {", ".join(voided_legs)})')
 
         # course data
         course_data = pdf.course_data(class_)
         if course_data:
             pdf.set_x(x=max(pdf.get_x() + 15, 100))
-            pdf.cell(txt=course_data)
+            pdf.cell(text=course_data)
 
         pdf.ln()
         pdf.ln()
         pdf.set_font(family="Carlito", style="I", size=10)
-        cell(w=W_RANK, h=None, txt="Pl", align="R")
-        cell(w=W_SPACE, h=None, txt="")
-        cell(w=W_NAME, h=None, txt="Name", align="L")
-        cell(w=W_SPACE, h=None, txt="")
-        cell(w=W_YEAR, h=None, txt="Jg", align="R")
-        cell(w=W_SPACE, h=None, txt="")
-        cell(w=W_CLUB - width, h=None, txt="Verein", align="L")
-        cell(w=W_SPACE, h=None, txt="")
+        cell(w=W_RANK, h=None, text="Pl", align="R")
+        cell(w=W_SPACE, h=None, text="")
+        cell(w=W_NAME, h=None, text="Name", align="L")
+        cell(w=W_SPACE, h=None, text="")
+        cell(w=W_YEAR, h=None, text="Jg", align="R")
+        cell(w=W_SPACE, h=None, text="")
+        cell(w=W_CLUB - width, h=None, text="Verein", align="L")
+        cell(w=W_SPACE, h=None, text="")
         if class_.params.otype == "score":
             if class_.params.apply_handicap_rule:
-                cell(w=W_VALUE, h=None, txt="Faktor", align="R")
-            cell(w=W_RUNTIME, h=None, txt="Laufzeit", align="R")
-            cell(w=W_VALUE, h=None, txt="Sc-Posten", align="R")
-            cell(w=W_VALUE, h=None, txt="Sc-Zeit", align="R")
-            cell(w=W_TOTAL, h=None, txt="Score", align="R")
+                cell(w=W_VALUE, h=None, text="Faktor", align="R")
+            cell(w=W_RUNTIME, h=None, text="Laufzeit", align="R")
+            cell(w=W_VALUE, h=None, text="Sc-Posten", align="R")
+            cell(w=W_VALUE, h=None, text="Sc-Zeit", align="R")
+            cell(w=W_TOTAL, h=None, text="Score", align="R")
         else:
             if (
                 class_.params.penalty_controls is not None
                 or class_.params.penalty_overtime is not None
                 or class_.params.apply_handicap_rule
             ):
-                cell(w=W_RUNTIME, h=None, txt="Laufzeit", align="R")
+                cell(w=W_RUNTIME, h=None, text="Laufzeit", align="R")
             if class_.params.penalty_controls is not None:
-                cell(w=W_VALUE, h=None, txt="Str-Posten", align="R")
+                cell(w=W_VALUE, h=None, text="Str-Posten", align="R")
             if class_.params.penalty_overtime is not None:
-                cell(w=W_VALUE, h=None, txt="Str-Zeit", align="R")
+                cell(w=W_VALUE, h=None, text="Str-Zeit", align="R")
             if class_.params.apply_handicap_rule:
-                cell(w=W_VALUE, h=None, txt="Faktor", align="R")
-            cell(w=W_TOTAL, h=None, txt="Zeit", align="R")
+                cell(w=W_VALUE, h=None, text="Faktor", align="R")
+            cell(w=W_TOTAL, h=None, text="Zeit", align="R")
         pdf.ln()
         pdf.ln()
 
@@ -203,32 +205,32 @@ def create_pdf(
             cell(
                 w=W_RANK,
                 h=None,
-                txt=f(ranked_result.rank) if not entry.not_competing else "AK",
+                text=f(ranked_result.rank) if not entry.not_competing else "AK",
                 align="R",
             )
-            cell(w=W_SPACE, h=None, txt="")
+            cell(w=W_SPACE, h=None, text="")
             cell(
                 w=W_NAME,
                 h=None,
-                txt=f(entry.last_name) + " " + f(entry.first_name),
+                text=f(entry.last_name) + " " + f(entry.first_name),
                 align="L",
             )
-            cell(w=W_SPACE, h=None, txt="")
-            cell(w=W_YEAR, h=None, txt=f(entry.year), align="R")
-            cell(w=W_SPACE, h=None, txt="")
-            cell(w=W_CLUB - width, h=None, txt=f(entry.club_name), align="L")
-            cell(w=W_SPACE, h=None, txt="")
+            cell(w=W_SPACE, h=None, text="")
+            cell(w=W_YEAR, h=None, text=f(entry.year), align="R")
+            cell(w=W_SPACE, h=None, text="")
+            cell(w=W_CLUB - width, h=None, text=f(entry.club_name), align="L")
+            cell(w=W_SPACE, h=None, text="")
             if class_.params.otype == "score":
                 if class_.params.apply_handicap_rule:
                     if result.status == ResultStatus.OK:
                         cell(
                             w=W_VALUE,
                             h=None,
-                            txt="{:1.4f}".format(result.extensions.get("factor", 1)),
+                            text="{:1.4f}".format(result.extensions.get("factor", 1)),
                             align="R",
                         )
                     else:
-                        cell(w=W_VALUE, h=None, txt="")
+                        cell(w=W_VALUE, h=None, text="")
                 print_time(
                     width=W_RUNTIME,
                     time=result.time,
@@ -277,11 +279,11 @@ def create_pdf(
                         cell(
                             w=W_VALUE,
                             h=None,
-                            txt="{:1.4f}".format(result.extensions.get("factor", 1)),
+                            text="{:1.4f}".format(result.extensions.get("factor", 1)),
                             align="R",
                         )
                     else:
-                        cell(w=W_VALUE, h=None, txt="")
+                        cell(w=W_VALUE, h=None, text="")
                 print_time_or_status(
                     width=W_TOTAL,
                     time=result.time,

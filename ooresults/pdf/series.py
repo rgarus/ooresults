@@ -50,11 +50,11 @@ def create_pdf(
     pdf.set_auto_page_break(auto=True, margin=20)
     pdf.add_page()
 
-    def cell(w: int, h: Optional[int] = None, txt: str = "", align: str = "L") -> None:
+    def cell(w: int, h: Optional[int] = None, text: str = "", align: str = "L") -> None:
         if w > 0:
-            while pdf.get_string_width(txt) > w:
-                txt = txt[:-1]
-            pdf.cell(w=w, h=h, txt=txt, align=align)
+            while pdf.get_string_width(text) > w:
+                text = text[:-1]
+            pdf.cell(w=w, h=h, text=text, align=align)
 
     for i, class_results in enumerate(results):
         class_name, series_results = class_results
@@ -68,21 +68,21 @@ def create_pdf(
                 pdf.ln()
 
         pdf.set_font(family="Carlito", style="B", size=12)
-        pdf.cell(txt=class_name)
+        pdf.cell(text=class_name)
         pdf.ln()
         pdf.ln()
         pdf.set_font(family="Carlito", style="I", size=10)
-        cell(w=W_RANK, h=None, txt="Pl", align="R")
-        cell(w=W_SPACE, h=None, txt="")
-        cell(w=W_NAME, h=None, txt="Name", align="L")
-        cell(w=W_SPACE, h=None, txt="")
-        cell(w=W_YEAR, h=None, txt="Jg", align="R")
-        cell(w=W_SPACE, h=None, txt="")
-        cell(w=W_CLUB, h=None, txt="Verein", align="L")
-        cell(w=W_SPACE, h=None, txt="")
-        cell(w=W_SUM, h=None, txt="Gesamt", align="R")
+        cell(w=W_RANK, h=None, text="Pl", align="R")
+        cell(w=W_SPACE, h=None, text="")
+        cell(w=W_NAME, h=None, text="Name", align="L")
+        cell(w=W_SPACE, h=None, text="")
+        cell(w=W_YEAR, h=None, text="Jg", align="R")
+        cell(w=W_SPACE, h=None, text="")
+        cell(w=W_CLUB, h=None, text="Verein", align="L")
+        cell(w=W_SPACE, h=None, text="")
+        cell(w=W_SUM, h=None, text="Gesamt", align="R")
         for e in events:
-            cell(w=W_POINTS, h=None, txt=e.series, align="R")
+            cell(w=W_POINTS, h=None, text=e.series if e.series else "", align="R")
         pdf.ln()
         pdf.ln()
 
@@ -97,26 +97,26 @@ def create_pdf(
                 cell(
                     w=W_RANK,
                     h=None,
-                    txt=str(ser_result.rank) if ser_result.rank is not None else "-",
+                    text=str(ser_result.rank) if ser_result.rank is not None else "-",
                     align="R",
                 )
-                cell(w=W_SPACE, h=None, txt="")
+                cell(w=W_SPACE, h=None, text="")
                 cell(
                     w=W_NAME,
                     h=None,
-                    txt=get(ser_result.last_name) + " " + get(ser_result.first_name),
+                    text=get(ser_result.last_name) + " " + get(ser_result.first_name),
                     align="L",
                 )
-                cell(w=W_SPACE, h=None, txt="")
-                cell(w=W_YEAR, h=None, txt=str(get(ser_result.year)), align="R")
-                cell(w=W_SPACE, h=None, txt="")
-                cell(w=W_CLUB, h=None, txt=get(ser_result.club_name), align="L")
-                cell(w=W_SPACE, h=None, txt="")
+                cell(w=W_SPACE, h=None, text="")
+                cell(w=W_YEAR, h=None, text=str(get(ser_result.year)), align="R")
+                cell(w=W_SPACE, h=None, text="")
+                cell(w=W_CLUB, h=None, text=get(ser_result.club_name), align="L")
+                cell(w=W_SPACE, h=None, text="")
                 pdf.set_font(style="B")
                 cell(
                     w=W_SUM,
                     h=None,
-                    txt=str(ser_result.total_points),
+                    text=str(ser_result.total_points),
                     align="R",
                 )
                 pdf.set_font()
@@ -126,21 +126,21 @@ def create_pdf(
                             cell(
                                 w=W_POINTS,
                                 h=None,
-                                txt=f"({ser_result.races[j].points})",
+                                text=f"({ser_result.races[j].points})",
                                 align="R",
                             )
                         else:
                             cell(
                                 w=W_POINTS,
                                 h=None,
-                                txt=f"{ser_result.races[j].points}",
+                                text=f"{ser_result.races[j].points}",
                                 align="R",
                             )
                     else:
                         cell(
                             w=W_POINTS,
                             h=None,
-                            txt="-----",
+                            text="-----",
                             align="R",
                         )
                 pdf.ln()
