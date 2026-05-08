@@ -98,14 +98,14 @@ def test_delete_status(status_2, event):
 def test_register_awaitable(status_1):
     a = AsyncMock()
 
-    status_1.register(awaitable=a)
-    assert status_1.awaitable == a
+    status_1.register(callback=a)
+    assert status_1.callback == a
 
 
 def test_if_set_is_called_then_awaitable_is_called(status_1, event):
     a = AsyncMock()
 
-    status_1.register(awaitable=a)
+    status_1.register(callback=a)
     asyncio.run(status_1.set(event=event, status=Status.OK))
     a.assert_awaited_once_with(event)
 
@@ -113,7 +113,7 @@ def test_if_set_is_called_then_awaitable_is_called(status_1, event):
 def test_if_delete_is_called_then_awaitable_is_called(status_1, event):
     a = AsyncMock()
 
-    status_1.register(awaitable=a)
+    status_1.register(callback=a)
     asyncio.run(status_1.delete(event=event))
     a.assert_awaited_once_with(event)
 
@@ -121,7 +121,7 @@ def test_if_delete_is_called_then_awaitable_is_called(status_1, event):
 def test_awaitable_not_called_after_register_none(status_1, event):
     a = AsyncMock()
 
-    status_1.register(awaitable=a)
-    status_1.register(awaitable=None)
+    status_1.register(callback=a)
+    status_1.register(callback=None)
     asyncio.run(status_1.set(event=event, status=Status.OK))
     a.assert_not_awaited()

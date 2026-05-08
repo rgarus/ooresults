@@ -20,6 +20,7 @@
 import logging
 import threading
 from collections.abc import Awaitable
+from collections.abc import Callable
 from enum import Enum
 from typing import Optional
 
@@ -36,10 +37,10 @@ class Status(Enum):
 
 
 class StreamingStatus:
-    def __init__(self):
+    def __init__(self) -> None:
         self.status: dict[int, Status] = {}
         self.lock = threading.Lock()
-        self.awaitable = None
+        self.callback: Optional[Callable[[EventType], Awaitable[None]]] = None
 
     def get(self, id: int) -> Optional[Status]:
         with self.lock:
@@ -51,18 +52,20 @@ class StreamingStatus:
             self.status[event.id] = status
         if changed:
             logging.info(f"Streaming status: {status}, {comment}")
-        if changed and self.awaitable:
-            await self.awaitable(event)
+        if changed and self.callback:
+            await self.callback(event)
 
     async def delete(self, event: EventType) -> None:
         with self.lock:
             if event.id in self.status:
                 del self.status[event.id]
-        if self.awaitable:
-            await self.awaitable(event)
+        if self.callback:
+            await self.callback(event)
 
-    def register(self, awaitable: Optional[Awaitable[EventType]]) -> None:
-        self.awaitable = awaitable
+    def register(
+        self, callback: Optional[Callable[[EventType], Awaitable[None]]]
+    ) -> None:
+        self.callback = callback
 
 
 status = StreamingStatus()

@@ -60,7 +60,7 @@ class WebSocketHandler:
         self.cardreader_status: dict[int, str] = {}
         self.executor = ThreadPoolExecutor(max_workers=2)
         self.update_result = asyncio.Event()
-        streaming_status.status.register(awaitable=self.update_event)
+        streaming_status.status.register(callback=self.update_event)
 
         #
         # Cardreader status:
