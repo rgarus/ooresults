@@ -17,7 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import copy
 import json
 import pathlib
 from typing import Optional
@@ -260,7 +259,7 @@ def event_class_results(
 
     class_results = build_results.build_results(
         class_infos=classes,
-        entries=copy.deepcopy(entries),
+        entries=entries,
     )
     return event, class_results
 
@@ -271,7 +270,7 @@ def results_for_splitsbrowser(
     with model.db.transaction():
         event = model.db.get_event(id=event_id)
         classes = model.db.get_classes(event_id=event_id)
-        entries = copy.deepcopy(model.db.get_entries(event_id=event_id))
+        entries = model.db.get_entries(event_id=event_id)
 
     # filter entries - use only finished entries
     entries = [
@@ -324,7 +323,7 @@ def build_series_result() -> (
             entries = model.db.get_entries(event_id=event.id)
             class_results = build_results.build_results(
                 class_infos=classes,
-                entries=copy.deepcopy(entries),
+                entries=entries,
             )
             list_of_results.append(class_results)
             organizers.append(
