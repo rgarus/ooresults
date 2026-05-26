@@ -18,6 +18,7 @@
 
 
 from pathlib import Path
+from typing import Final
 from typing import Optional
 from typing import TypeVar
 
@@ -29,6 +30,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from webtests.controls.checkbox_control import CheckboxControl
 from webtests.controls.combobox_control import ComboboxControl
 from webtests.controls.number_control import NumberControl
+from webtests.controls.radiogroup_control import RadioGroupControl
 from webtests.controls.text_control import TextControl
 from webtests.pageobjects.actions import Actions
 from webtests.pageobjects.table import Table
@@ -179,6 +181,16 @@ class StatusDialog:
 
 
 class ImportEntryDialog:
+    ENTRY_LIST: Final = "IOF Interface Standard 3.0 Entry List"
+    RESULT_LIST: Final = "IOF Interface Standard 3.0 Result List"
+    OE2003_CSV: Final = "OE2003 csv, OE12 csv"
+
+    FILE_ID = {
+        ENTRY_LIST: "entr.import.file1",
+        RESULT_LIST: "entr.import.file2",
+        OE2003_CSV: "entr.import.file3",
+    }
+
     def __init__(self, driver: webdriver.Remote) -> None:
         self.driver = driver
 
@@ -187,9 +199,17 @@ class ImportEntryDialog:
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
-    def import_(self, path: Path, info_dialog: bool = False) -> Optional[StatusDialog]:
+    def format(self) -> RadioGroupControl:
+        return RadioGroupControl(driver=self.driver, name="entr_import")
+
+    def import_file(
+        self, path: Path, info_dialog: bool = False
+    ) -> Optional[StatusDialog]:
+        file_id = self.FILE_ID[self.format().selected()]
+        elem = self.driver.find_element(By.ID, file_id)
+        elem.send_keys(str(path))
+
         elem = self.driver.find_element(By.ID, "entr.import.form")
-        elem.find_element(By.ID, "file1").send_keys(str(path))
         elem.find_element(By.XPATH, "button[text()='Import']").click()
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
         if info_dialog:
@@ -239,6 +259,9 @@ class EntryPage:
 
     def filter(self) -> TextControl:
         return TextControl(driver=self.driver, id="entr.filter")
+
+    def view(self) -> ComboboxControl:
+        return ComboboxControl(driver=self.driver, id="entr.view")
 
     def get_event_name(self) -> str:
         return self.driver.find_element(By.ID, "entr.event_name").text

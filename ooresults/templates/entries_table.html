@@ -1,16 +1,126 @@
 ## event: EventType
 ## view: str
-## view_entries_list: List[Dict[str, List[EntryType]]]
+## view_entries_list: list[dict[str, list[RankedEntryType]]]
+## columns: set[str]
 
 
 <%!
+from typing import Optional
+
+from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.result_type import ResultStatus
 from ooresults.utils.globals import format_time
 from ooresults.utils.globals import MAP_STATUS
 from ooresults.utils.globals import minutes_seconds
 from ooresults.utils.rental_cards import format_card
 
 
-t = {"entries": "Entries", "classes": "Unassigned results", "clubs": "Individuals/No club", "states": "Unassigned results"}
+def format_rank_results(rank: Optional[int], not_competing: bool) -> str:
+    if rank is not None:
+        return str(rank)
+    elif not_competing:
+        return "NC"
+    else:
+        return ""
+
+
+def format_rank(rank: Optional[int], not_competing: bool) -> str:
+    if rank is not None:
+        return f"({rank})"
+    elif not_competing:
+        return "NC"
+    else:
+        return ""
+
+
+def format_club(name: Optional[str]) -> str:
+    if name:
+        if len(name) > 19:
+            return name[:15] + " ..."
+        else:
+            return name
+    else:
+        return ""
+
+
+def format_factor(entry: EntryType) -> str:
+    factor = entry.result.extensions.get("factor", None)
+    if factor is not None and entry.result.status == ResultStatus.OK:
+        return "{:1.4f}".format(factor)
+    else:
+        return ""
+
+
+def format_start_time(entry: EntryType) -> str:
+    if entry.result.start_time is not None:
+        return format_time(entry.result.start_time)
+    else:
+        return format_time(entry.start.start_time)
+
+
+def format_running_time(entry: EntryType, results: bool) -> str:
+    if results and entry.result.status not in [ResultStatus.OK, ResultStatus.FINISHED]:
+        return ""
+    t = entry.result.extensions.get("running_time", None)
+    if t is None:
+        if entry.result.start_time is not None and entry.result.finish_time is not None:
+            t = int((entry.result.finish_time - entry.result.start_time).total_seconds())
+        else:
+            t = entry.result.time
+    if entry.result.status == ResultStatus.FINISHED:
+        return minutes_seconds(t)
+    elif results and t == entry.result.time and len(entry.result.extensions) <= 1 and "score" not in entry.result.extensions:
+        return ""
+    else:
+        return minutes_seconds(t)
+
+
+def format_score_or_penalties_controls(entry: EntryType) -> str:
+    if entry.result.status != ResultStatus.OK:
+        return ""
+    if "score" in entry.result.extensions:
+        p = entry.result.extensions.get("score_controls", None)
+        return "{:.2f}".format(p) if p is not None else ""
+    else:
+        t = entry.result.extensions.get("penalties_controls", None)
+        return minutes_seconds(t)
+
+
+def format_score_or_penalties_overtime(entry: EntryType) -> str:
+    if entry.result.status != ResultStatus.OK:
+        return ""
+    if "score" in entry.result.extensions:
+        p = entry.result.extensions.get("score_overtime", None)
+        return "{:.2f}".format(p) if p is not None else ""
+    else:
+        t = entry.result.extensions.get("penalties_overtime", None)
+        return minutes_seconds(t)
+
+
+def format_score_or_time_total(entry: EntryType) -> str:
+    status = entry.result.status
+    if status == ResultStatus.INACTIVE and entry.start.start_time is not None:
+        return "Start at " + entry.start.start_time.strftime("%H:%M:%S")
+    else:
+        if "score" in entry.result.extensions:
+            p = entry.result.extensions["score"]
+            if status == ResultStatus.OK and p is not None:
+                return "{:.2f}".format(p)
+        else:
+            t = entry.result.time
+            if status == ResultStatus.OK and t is not None:
+                return minutes_seconds(t)
+        return MAP_STATUS[status]
+
+
+t = {
+    "entries": "Entries",
+    "classes": "Unassigned results",
+    "clubs": "Individuals/No club",
+    "results": "Unassigned results",
+    "states": "Unassigned results",
+    "competitors": "Unassigned results",
+}
 %>
 
 
@@ -32,7 +142,7 @@ t = {"entries": "Entries", "classes": "Unassigned results", "clubs": "Individual
 <input id="entr.filter" oninput="filter_table('entr.table', 'tr', this.value)" placeholder="Filter (Alt+F) ...">
 <label for="entr.view">&nbsp;&nbsp;&nbsp;&nbsp;View:&nbsp;&nbsp;</label>
 <select id="entr.view" onchange="entr_reload_view(this)">
-    % for value, text in (("entries", "Entries"), ("classes", "Classes"), ("clubs", "Clubs"), ("states", "States"), ("competitors", "Competitors")):
+    % for value, text in (("entries", "Entries"), ("classes", "Classes"), ("clubs", "Clubs"), ("results", "Results"), ("states", "States"), ("competitors", "Competitors")):
         % if view == value:
             <option value="${value}" selected>${text}</option>
         % else:
@@ -46,57 +156,112 @@ t = {"entries": "Entries", "classes": "Unassigned results", "clubs": "Individual
 <div>
     <table class="dte" id="entr.table" onclick="entr_highlight(event)" ondblclick="entr_highlight(event)" onmousedown="table_mousedown(event)">
         <thead>
-            <tr id="entr.theader" class="dth">
-                <th class="dth">&nbsp;&nbsp;NC&nbsp;&nbsp;</th>
-                <th class="dth">First name</th>
-                <th class="dth">Last name</th>
-                <th class="dth">Gender</th>
-                <th class="dth">Year</th>
-                <th class="dth">Chip</th>
-                % if view != "clubs":
+            <tr id="entr.theader" class="dth" style="vertical-align: top;">
+                % if view == "results":
+                    <th class="dth">Rank</th>
+                    <th class="dth">Name</th>
+                    <th class="dth">Year</th>
+                    <th class="dth">Chip</th>
                     <th class="dth">Club</th>
+                    % if "factor" in columns:
+                        <th class="dth">Handicap</th>
+                    % endif
+                    <th class="dth">Run time</th>
+                    % if "score" in columns:
+                        <th class="dth">Sc. controls</th>
+                    % elif "penalties_controls" in columns:
+                        <th class="dth">P. controls</th>
+                    % endif
+                    % if "score" in columns:
+                        <th class="dth">Sc. overtime</th>
+                    % elif "penalties_overtime" in columns:
+                        <th class="dth">P. overtime</th>
+                    % endif
+                    % if "score" in columns:
+                        <th class="dth">Total score</th>
+                    % else:
+                        <th class="dth">Total time</th>
+                    % endif
+                % else:
+                    <th class="dth">Rank</th>
+                    <th class="dth">First name</th>
+                    <th class="dth">Last name</th>
+                    <th class="dth">Gender</th>
+                    <th class="dth">Year</th>
+                    <th class="dth">Chip</th>
+                    % if view != "clubs":
+                        <th class="dth">Club</th>
+                    % endif
+                    % if view != "classes":
+                        <th class="dth">Class</th>
+                    % endif
+                    % if event is not None:
+                        % for field in event.fields:
+                            <th class="dth">${field}</th>
+                        % endfor
+                    % endif
+                    <th class="dth">Start time</th>
+                    <th class="dth">Run time</th>
+                    <th class="dth">Status</th>
                 % endif
-                % if view != "classes":
-                    <th class="dth">Class</th>
-                % endif
-                % if event is not None:
-                    % for field in event.fields:
-                        <th class="dth">${field}</th>
-                    % endfor
-                % endif
-                <th class="dth">Start</th>
-                <th class="dth">Time</th>
-                <th class="dth">Status</th>
             </tr>
         </thead>
         <tbody>
-            % for group_name, entries in view_entries_list:
-                % if entries:
+            % for group_name, ranked_entries in view_entries_list:
+                % if ranked_entries:
                     <tr class="dte h1">
-                        <th class="dte h1" colspan="99">${group_name if group_name is not None else t[view]}&nbsp;&nbsp;(${len(entries)})</th>
+                        <th class="dte h1" colspan="99">${group_name if group_name is not None else t[view]}&nbsp;&nbsp;(${len(ranked_entries)})</th>
                     </tr>
-                    % for entry in entries:
+
+                    % for ranked_entry in ranked_entries:
+                        <%
+                        rank = ranked_entry.rank
+                        entry = ranked_entry.entry
+                        %>
                         <tr class="dte" data-id="${entry.id}" data-assigned=${"true" if entry.last_name else "false"}>
-                            <td class="dte" style="text-align: center;">${"X" if entry.not_competing else ""}</td>
-                            <td class="dte">${entry.first_name}</td>
-                            <td class="dte">${entry.last_name}</td>
-                            <td class="dte">${entry.gender}</td>
-                            <td class="dte">${entry.year}</td>
-                            <td class="dte" style="text-align:right;">${format_card(entry.chip)}</td>
-                            % if view != "clubs":
-                                <td class="dte">${entry.club_name}</td>
+                            % if view == "results":
+                                <td class="dte">${format_rank_results(rank, entry.not_competing)}</td>
+                                % if entry.last_name:
+                                    <td class="dte">${entry.last_name}, ${entry.first_name}</td>
+                                % else:
+                                    <td class="dte"></td>
+                                % endif
+                                <td class="dte" style="text-align:right;">${entry.year}</td>
+                                <td class="dte" style="text-align:right;">${format_card(entry.chip)}</td>
+                                <td class="dte">${format_club(entry.club_name)}</td>
+                                % if "factor" in columns:
+                                    <td class="dte" style="text-align:right">${format_factor(entry)}</td>
+                                % endif
+                                <td class="dte" style="text-align:right">${format_running_time(entry=entry, results=True)}</td>
+                                % if "score" in columns or "penalties_controls" in columns:
+                                    <td class="dte" style="text-align:right">${format_score_or_penalties_controls(entry=entry)}</td>
+                                % endif
+                                % if "score" in columns or "penalties_overtime" in columns:
+                                    <td class="dte" style="text-align:right">${format_score_or_penalties_overtime(entry=entry)}</td>
+                                % endif
+                                <td class="dte" style="text-align:right">${format_score_or_time_total(entry=entry)}</td>
+                            % else:
+                                <td class="dte" style="text-align: right;">${format_rank(rank, entry.not_competing)}</td>
+                                <td class="dte">${entry.first_name}</td>
+                                <td class="dte">${entry.last_name}</td>
+                                <td class="dte">${entry.gender}</td>
+                                <td class="dte">${entry.year}</td>
+                                <td class="dte" style="text-align:right;">${format_card(entry.chip)}</td>
+                                % if view != "clubs":
+                                    <td class="dte">${entry.club_name}</td>
+                                % endif
+                                % if view != "classes":
+                                    <td class="dte">${entry.class_name}</td>
+                                % endif
+                                % if event is not None:
+                                    % for i in range(len(event.fields)):
+                                        <td class="dte">${entry.fields.get(i, "")}</td>
+                                    % endfor
+                                % endif
+                                <td class="dte" style="text-align:right;">${format_start_time(entry=entry)}</td>
+                                <td class="dte" style="text-align:right;">${format_running_time(entry=entry, results=False)}</td>
+                                <td class="dte">${MAP_STATUS[entry.result.status]}</td>
                             % endif
-                            % if view != "classes":
-                                <td class="dte">${entry.class_name}</td>
-                            % endif
-                            % if event is not None:
-                                % for i in range(len(event.fields)):
-                                    <td class="dte">${entry.fields.get(i, "")}</td>
-                                % endfor
-                            % endif
-                            <td class="dte" style="text-align:right;">${format_time(entry.start.start_time)}</td>
-                            <td class="dte" style="text-align:right;">${minutes_seconds(entry.result.extensions.get("running_time", entry.result.time))}</td>
-                            <td class="dte">${MAP_STATUS[entry.result.status]}</td>
                         </tr>
                     % endfor
                 % endif

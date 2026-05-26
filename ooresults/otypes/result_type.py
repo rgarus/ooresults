@@ -466,6 +466,11 @@ class PersonRaceResult(fastclasses_json.JSONMixin):
                 if self.last_leg_voided and run_time is not None and t1 is not None:
                     self.time -= run_time - t1
 
+        # compute handicap factor
+        handicap_factor = Handicap.factor(female=gender == "F", age=age)
+        if class_params.apply_handicap_rule:
+            self.extensions["factor"] = handicap_factor
+
         if class_params.otype == "score":
             self.extensions["score_controls"] = score_controls
 
@@ -480,8 +485,6 @@ class PersonRaceResult(fastclasses_json.JSONMixin):
 
                 # compute total score
                 if class_params.apply_handicap_rule:
-                    handicap_factor = Handicap.factor(female=gender == "F", age=age)
-                    self.extensions["factor"] = handicap_factor
                     score = score_controls / handicap_factor + score_overtime
                 else:
                     score = score_controls + score_overtime
@@ -531,8 +534,6 @@ class PersonRaceResult(fastclasses_json.JSONMixin):
 
                 # compute total time using handicap
                 if class_params.apply_handicap_rule and self.time is not None:
-                    handicap_factor = Handicap.factor(female=gender == "F", age=age)
-                    self.extensions["factor"] = handicap_factor
                     self.time = int(handicap_factor * self.time)
 
         # update result status

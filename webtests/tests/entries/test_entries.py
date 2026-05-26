@@ -73,7 +73,7 @@ def test_if_entry_page_is_selected_then_the_table_header_is_displayed(
     entry_page = main_page.goto_entries(event=event)
     assert entry_page.table.nr_of_columns() == 11
     assert entry_page.table.headers() == [
-        "  NC  ",
+        "Rank",
         "First name",
         "Last name",
         "Gender",
@@ -81,8 +81,8 @@ def test_if_entry_page_is_selected_then_the_table_header_is_displayed(
         "Chip",
         "Club",
         "Class",
-        "Start",
-        "Time",
+        "Start time",
+        "Run time",
         "Status",
     ]
 

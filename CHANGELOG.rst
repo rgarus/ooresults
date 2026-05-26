@@ -8,7 +8,9 @@ Changelog
 Added
 ^^^^^
 
-- Show a progress bar while waiting for a PDF file to be generated
+- Show a progress bar while waiting for a PDF file to be generated.
+- On the “Entries” tab, the data views are expanded to include “Results”.
+- On the “Entries” tab, the current ranking is displayed in all data views. 
 
 
 [0.4.8] - 2026-04-26

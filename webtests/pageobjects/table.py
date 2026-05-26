@@ -17,6 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from collections.abc import Iterator
+
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -76,3 +78,20 @@ class Table:
                 selected_rows.append(i + 1)
 
         return selected_rows
+
+
+class RowIterator:
+    def __init__(self, table: Table, start: int = 1) -> None:
+        assert start >= 1
+        self.table = table
+        self.index = start - 1
+
+    def __iter__(self) -> Iterator:
+        return self
+
+    def __next__(self) -> list[str]:
+        if self.index >= self.table.nr_of_rows():
+            raise StopIteration
+
+        self.index += 1
+        return self.table.row(self.index)

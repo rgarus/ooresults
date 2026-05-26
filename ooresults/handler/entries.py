@@ -19,6 +19,7 @@
 
 import datetime
 import io
+import itertools
 import json
 from collections import defaultdict
 from typing import Optional
@@ -28,6 +29,7 @@ import tzlocal
 
 from ooresults import model
 from ooresults.otypes.entry_type import EntryType
+from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.plugins import iof_entry_list
 from ooresults.plugins import iof_result_list
@@ -37,6 +39,7 @@ from ooresults.plugins.imports.entries import text
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.utils import render
+from ooresults.utils.globals import build_columns
 
 
 """
@@ -56,36 +59,34 @@ Handler for the entry routes.
 
 
 def update(event_id: int, view: str = "entries"):
-    entry_list = model.entries.get_entries(event_id=event_id)
     try:
-        event = model.events.get_event(id=event_id)
+        event, class_results, unassigned_results = (
+            model.results.event_class_results_and_unassigned_results(event_id=event_id)
+        )
+        re = [ranked_entries for _, ranked_entries in class_results]
+        ranked_entries = list(itertools.chain.from_iterable(re))
+        ranked_entries.sort(key=lambda e: e.entry.first_name)
+        ranked_entries.sort(key=lambda e: e.entry.last_name)
 
-        unassigned_results = 0
-        for e in entry_list:
-            if e.class_id is None:
-                unassigned_results += 1
-
-        if view == "entries":
-            if entry_list[unassigned_results:]:
-                view_entries_list = [("Entries", entry_list[unassigned_results:])]
-            else:
-                view_entries_list = []
-        elif view == "classes":
-            view_entries: defaultdict[str, list[EntryType]] = defaultdict(list)
-            for e in entry_list[unassigned_results:]:
-                view_entries[e.class_name].append(e)
+        columns: set[str] = set()
+        if view == "classes":
+            view_entries: defaultdict[str, list[RankedEntryType]] = defaultdict(list)
+            for e in ranked_entries:
+                view_entries[e.entry.class_name].append(e)
             view_entries_list = list(view_entries.items())
             view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
         elif view == "clubs":
-            view_entries: defaultdict[str, list[EntryType]] = defaultdict(list)
-            for e in entry_list[unassigned_results:]:
-                view_entries[e.club_name].append(e)
+            view_entries: defaultdict[str, list[RankedEntryType]] = defaultdict(list)
+            for e in ranked_entries:
+                view_entries[e.entry.club_name].append(e)
             view_entries_list = list(view_entries.items())
             view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
         elif view == "states":
-            view_entries: defaultdict[ResultStatus, list[EntryType]] = defaultdict(list)
-            for e in entry_list[unassigned_results:]:
-                view_entries[e.result.status].append(e)
+            view_entries: defaultdict[ResultStatus, list[RankedEntryType]] = (
+                defaultdict(list)
+            )
+            for e in ranked_entries:
+                view_entries[e.entry.result.status].append(e)
             view_entries_list = list(view_entries.items())
             f_order = {
                 ResultStatus.INACTIVE: 0,
@@ -112,26 +113,45 @@ def update(event_id: int, view: str = "entries"):
             }
             view_entries_list = [(f_name[v[0]], v[1]) for v in view_entries_list]
         elif view == "competitors":
-            view_entries: defaultdict[int, list[EntryType]] = defaultdict(list)
-            for e in entry_list[unassigned_results:]:
-                view_entries[e.competitor_id].append(e)
+            view_entries: defaultdict[int, list[RankedEntryType]] = defaultdict(list)
+            for e in ranked_entries:
+                view_entries[e.entry.competitor_id].append(e)
             view_entries_list = list(view_entries.items())
             view_entries_list.sort(key=lambda e: len(e[1]), reverse=True)
             view_entries_list = [
-                (f"{v[1][0].last_name}, {v[1][0].first_name}", v[1])
+                (f"{v[1][0].entry.last_name}, {v[1][0].entry.first_name}", v[1])
                 for v in view_entries_list
             ]
+        elif view == "results":
+            columns = build_columns(class_results)
+            view_entries_list = [
+                (class_info_type.name, ranked_entries)
+                for class_info_type, ranked_entries in class_results
+            ]
+        else:
+            if ranked_entries:
+                view_entries_list = [("Entries", ranked_entries)]
+            else:
+                view_entries_list = []
 
         # add unassigned results
-        if unassigned_results > 0:
-            unassigned_list = [("Unassigned results", entry_list[:unassigned_results])]
+        if unassigned_results:
+            unassigned_list = [
+                (
+                    "Unassigned results",
+                    [RankedEntryType(e) for e in unassigned_results],
+                )
+            ]
         else:
             unassigned_list = []
+
         return render.entries_table(
             event=event,
             view=view,
             view_entries_list=unassigned_list + view_entries_list,
+            columns=columns,
         )
+
     except EventNotFoundError:
         return bottle.HTTPResponse(status=409, body="Event deleted")
 

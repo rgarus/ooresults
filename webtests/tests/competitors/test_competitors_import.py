@@ -55,7 +55,7 @@ def test_import_competitor(main_page: MainPage, delete_competitors: None):
         path = pathlib.Path(td) / "competitors.xml"
         with open(path, mode="w") as f:
             f.write(content)
-        dialog.import_(path=path)
+        dialog.import_file(path=path)
 
     # check number of rows
     assert competitor_page.table.nr_of_rows() == 3

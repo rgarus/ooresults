@@ -1,0 +1,246 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
+  <Event>
+    <Name>1. O-Cup 2023 (Ostpark)</Name>
+    <StartTime>
+      <Date>2023-01-15</Date>
+    </StartTime>
+  </Event>
+  <ClassResult>
+    <Class>
+      <Name>Bahn A - Frauen</Name>
+    </Class>
+    <Course>
+      <Name>Bahn A</Name>
+      <NumberOfControls>4</NumberOfControls>
+    </Course>
+    <PersonResult>
+      <Person sex="F">
+        <Name>
+          <Family>Baerbock</Family>
+          <Given>Annalena</Given>
+        </Name>
+        <BirthDate>1980-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Grün</Name>
+      </Organisation>
+      <Result>
+        <StartTime>2023-01-15T10:10:00+01:00</StartTime>
+        <FinishTime>2023-01-15T10:24:39+01:00</FinishTime>
+        <Time>879</Time>
+        <TimeBehind>0</TimeBehind>
+        <Position>1</Position>
+        <Status>OK</Status>
+        <SplitTime>
+          <ControlCode>121</ControlCode>
+          <Time>129</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>124</ControlCode>
+          <Time>325</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>122</ControlCode>
+          <Time>494</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>123</ControlCode>
+          <Time>720</Time>
+        </SplitTime>
+        <ControlCard punchingSystem="SI">7379879</ControlCard>
+      </Result>
+    </PersonResult>
+    <PersonResult>
+      <Person sex="F">
+        <Name>
+          <Family>Faeser</Family>
+          <Given>Nancy</Given>
+        </Name>
+        <BirthDate>1970-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Rot</Name>
+      </Organisation>
+      <Result>
+        <StartTime>2023-01-15T10:18:00+01:00</StartTime>
+        <FinishTime>2023-01-15T10:47:22+01:00</FinishTime>
+        <Time>1762</Time>
+        <TimeBehind>883</TimeBehind>
+        <Position>2</Position>
+        <Status>OK</Status>
+        <SplitTime>
+          <ControlCode>121</ControlCode>
+          <Time>259</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>124</ControlCode>
+          <Time>1032</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>122</ControlCode>
+          <Time>1277</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>123</ControlCode>
+          <Time>1544</Time>
+        </SplitTime>
+        <ControlCard punchingSystem="SI">7040504</ControlCard>
+      </Result>
+    </PersonResult>
+  </ClassResult>
+  <ClassResult>
+    <Class>
+      <Name>Bahn A - Männer</Name>
+    </Class>
+    <Course>
+      <Name>Bahn A</Name>
+      <NumberOfControls>4</NumberOfControls>
+    </Course>
+    <PersonResult>
+      <Person sex="M">
+        <Name>
+          <Family>Lindner</Family>
+          <Given>Christian</Given>
+        </Name>
+        <BirthDate>1979-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Gelb</Name>
+      </Organisation>
+      <Result>
+        <StartTime>2023-01-15T10:14:02+01:00</StartTime>
+        <FinishTime>2023-01-15T10:27:23+01:00</FinishTime>
+        <Time>801</Time>
+        <TimeBehind>0</TimeBehind>
+        <Position>1</Position>
+        <Status>OK</Status>
+        <SplitTime>
+          <ControlCode>121</ControlCode>
+          <Time>67</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>124</ControlCode>
+          <Time>190</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>122</ControlCode>
+          <Time>358</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>123</ControlCode>
+          <Time>539</Time>
+        </SplitTime>
+        <ControlCard punchingSystem="SI">12345</ControlCard>
+      </Result>
+    </PersonResult>
+    <PersonResult>
+      <Person sex="M">
+        <Name>
+          <Family>Scholz</Family>
+          <Given>Olaf</Given>
+        </Name>
+        <BirthDate>1958-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Rot</Name>
+      </Organisation>
+      <Result>
+        <StartTime>2023-01-15T10:20:01+01:00</StartTime>
+        <FinishTime>2023-01-15T10:36:12+01:00</FinishTime>
+        <Time>971</Time>
+        <TimeBehind>170</TimeBehind>
+        <Position>2</Position>
+        <Status>OK</Status>
+        <SplitTime>
+          <ControlCode>121</ControlCode>
+          <Time>192</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>124</ControlCode>
+          <Time>392</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>122</ControlCode>
+          <Time>544</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>123</ControlCode>
+          <Time>735</Time>
+        </SplitTime>
+        <ControlCard punchingSystem="SI">7579050</ControlCard>
+      </Result>
+    </PersonResult>
+    <PersonResult>
+      <Person sex="M">
+        <Name>
+          <Family>Buschmann</Family>
+          <Given>Marco</Given>
+        </Name>
+        <BirthDate>1977-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Gelb</Name>
+      </Organisation>
+      <Result>
+        <StartTime>2023-01-15T10:16:03+01:00</StartTime>
+        <FinishTime>2023-01-15T10:33:33+01:00</FinishTime>
+        <Time>1050</Time>
+        <TimeBehind>249</TimeBehind>
+        <Position>3</Position>
+        <Status>OK</Status>
+        <SplitTime>
+          <ControlCode>121</ControlCode>
+          <Time>116</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>124</ControlCode>
+          <Time>432</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>122</ControlCode>
+          <Time>608</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>123</ControlCode>
+          <Time>850</Time>
+        </SplitTime>
+        <ControlCard punchingSystem="SI">7076815</ControlCard>
+      </Result>
+    </PersonResult>
+    <PersonResult>
+      <Person sex="M">
+        <Name>
+          <Family>Habeck</Family>
+          <Given>Robert</Given>
+        </Name>
+        <BirthDate>1969-01-01</BirthDate>
+      </Person>
+      <Organisation>
+        <Name>OC Grün</Name>
+      </Organisation>
+      <Result>
+        <StartTime>2023-01-15T10:12:00+01:00</StartTime>
+        <FinishTime>2023-01-15T10:26:04+01:00</FinishTime>
+        <Time>844</Time>
+        <Status>MissingPunch</Status>
+        <SplitTime>
+          <ControlCode>121</ControlCode>
+          <Time>129</Time>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>124</ControlCode>
+          <Time>420</Time>
+        </SplitTime>
+        <SplitTime status="Missing">
+          <ControlCode>122</ControlCode>
+        </SplitTime>
+        <SplitTime>
+          <ControlCode>123</ControlCode>
+          <Time>601</Time>
+        </SplitTime>
+        <ControlCard punchingSystem="SI">7509749</ControlCard>
+      </Result>
+    </PersonResult>
+  </ClassResult>
+</ResultList>

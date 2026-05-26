@@ -31,6 +31,7 @@ from ooresults.model.build_results import PersonSeriesResult
 from ooresults.otypes import result_type
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import ResultStatus
@@ -249,17 +250,29 @@ def update_series_settings(settings: Settings) -> None:
         model.db.update_series_settings(settings=settings)
 
 
-def event_class_results(
+def event_class_results_and_unassigned_results(
     event_id: int,
-) -> tuple[EventType, list[tuple[ClassInfoType, list[RankedEntryType]]]]:
+) -> tuple[
+    EventType, list[tuple[ClassInfoType, list[RankedEntryType]]], list[EntryType]
+]:
     with model.db.transaction():
         event = model.db.get_event(id=event_id)
         classes = model.db.get_classes(event_id=event_id)
         entries = model.db.get_entries(event_id=event_id)
 
+    unassigned_results = [e for e in entries if e.class_id is None]
     class_results = build_results.build_results(
         class_infos=classes,
         entries=entries,
+    )
+    return event, class_results, unassigned_results
+
+
+def event_class_results(
+    event_id: int,
+) -> tuple[EventType, list[tuple[ClassInfoType, list[RankedEntryType]]]]:
+    event, class_results, _ = event_class_results_and_unassigned_results(
+        event_id=event_id
     )
     return event, class_results
 

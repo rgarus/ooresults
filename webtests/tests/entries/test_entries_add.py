@@ -145,7 +145,7 @@ def test_if_an_entry_is_added_with_all_data_then_an_additional_entry_is_displaye
         "Entries  (1)",
     ]
     assert entry_page.table.row(i=2) == [
-        "X",
+        "NC",
         "Annalena",
         "Baerbock",
         "F",
@@ -193,7 +193,7 @@ def test_if_an_already_registered_competitor_is_added_with_not_competing_true_th
         "",
     ]
     assert entry_page.table.row(i=3) == [
-        "X",
+        "NC",
         "Annalena",
         "Baerbock",
         "F",
@@ -248,7 +248,7 @@ def test_if_an_already_registered_competitor_is_added_with_not_competing_false_t
         "",
     ]
     assert entry_page.table.row(i=3) == [
-        "X",
+        "NC",
         "Annalena",
         "Baerbock",
         "F",

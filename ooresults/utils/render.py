@@ -162,10 +162,11 @@ def add_course(course: Optional[CourseType]) -> str:
 def entries_table(
     event: Optional[EventType],
     view: str,
-    view_entries_list: list[tuple[Optional[str], list[EntryType]]],
+    view_entries_list: list[tuple[Optional[str], list[RankedEntryType]]],
+    columns: set[str],
 ) -> str:
     return _entries_table.render(
-        event=event, view=view, view_entries_list=view_entries_list
+        event=event, view=view, view_entries_list=view_entries_list, columns=columns
     )
 
 
@@ -248,7 +249,7 @@ def main(events: list[EventType]) -> str:
     events_table = _events_table.render(events=events)
     events_tab = _events_tab_content.render(events_table=events_table)
     entries_table = _entries_table.render(
-        event=None, view="entries", view_entries_list=[]
+        event=None, view="entries", view_entries_list=[], columns=set()
     )
     entries_tab = _entries_tab_content.render(entries_table=entries_table)
     classes_table = _classes_table.render(event=None, classes=[])

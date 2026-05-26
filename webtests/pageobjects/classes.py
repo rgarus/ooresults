@@ -191,7 +191,7 @@ class ImportClassDialog:
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
-    def import_(self, path: Path) -> None:
+    def import_file(self, path: Path) -> None:
         elem = self.driver.find_element(By.ID, "cls.import.form")
         elem.find_element(By.ID, "file1").send_keys(str(path))
         elem.find_element(By.XPATH, "button[text()='Import']").click()

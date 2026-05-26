@@ -85,7 +85,7 @@ def test_import_courses(main_page: MainPage, event: str, delete_courses: None):
         path = pathlib.Path(td) / "CourseData.xml"
         with open(path, mode="w") as f:
             f.write(content)
-        dialog.import_(path=path)
+        dialog.import_file(path=path)
 
     # check number of rows
     assert course_page.table.nr_of_rows() == 3

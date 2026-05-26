@@ -114,7 +114,7 @@ def test_import_entries(main_page: MainPage, event: str):
         path = pathlib.Path(td) / "EntryList.xml"
         with open(path, mode="w") as f:
             f.write(content)
-        dialog.import_(path=path)
+        dialog.import_file(path=path)
 
     # check number of rows
     assert entry_page.table.nr_of_rows() == 4
@@ -206,7 +206,7 @@ def test_if_a_competitor_is_contained_several_times_then_only_the_first_entry_is
         path = pathlib.Path(td) / "EntryList.xml"
         with open(path, mode="w") as f:
             f.write(content)
-        info_dialog = dialog.import_(path=path, info_dialog=True)
+        info_dialog = dialog.import_file(path=path, info_dialog=True)
     assert info_dialog.get_text() == [
         "1 of 2 entries imported.",
         "Warning:",

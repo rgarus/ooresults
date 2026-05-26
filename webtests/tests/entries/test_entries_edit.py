@@ -65,7 +65,7 @@ def test_if_an_entry_is_edited_then_the_changed_data_are_displayed(
         "Entries  (1)",
     ]
     assert entry_page.table.row(i=2) == [
-        "X",
+        "NC",
         "Anna Lena",
         "Bärbock",
         "",
@@ -118,7 +118,7 @@ def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
         "Entries  (1)",
     ]
     assert entry_page.table.row(i=2) == [
-        "X",
+        "NC",
         "Anna Lena",
         "Bärbock",
         "",
