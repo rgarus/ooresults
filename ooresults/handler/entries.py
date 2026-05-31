@@ -27,6 +27,8 @@ from typing import Optional
 import bottle
 import tzlocal
 
+import ooresults.pdf.result
+import ooresults.pdf.splittimes
 from ooresults import model
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
@@ -48,6 +50,7 @@ Handler for the entry routes.
 /entry/update
 /entry/import
 /entry/export
+/entry/print
 /entry/add
 /entry/fill_edit_form
 /entry/fill_competitors_form
@@ -274,6 +277,40 @@ def post_export():
             class_list = model.classes.get_classes(event_id=event_id)
             entry_list = model.entries.get_entries(event_id=event_id)
             content = oe12.create(entry_list, class_list)
+
+    except EventNotFoundError:
+        return bottle.HTTPResponse(status=409, body="Event deleted")
+
+    return content
+
+
+@bottle.post("/entry/print")
+def post_print():
+    """Print entries."""
+    data = bottle.request.forms
+    event_id = int(data.event_id) if data.event_id != "" else -1
+    try:
+        if data.entr_print == "entr.print.1":
+            include_dns = "res_include_dns" in data
+
+            event, class_results = model.results.event_class_results(event_id=event_id)
+            columns = build_columns(class_results)
+            content = ooresults.pdf.result.create_pdf(
+                event=event,
+                results=class_results,
+                include_dns=include_dns,
+                landscape=len(columns) > 0,
+            )
+
+        elif data.entr_print == "entr.print.2":
+            landscape = "res_landscape" in data
+
+            event, class_results = model.results.event_class_results(event_id=event_id)
+            content = ooresults.pdf.splittimes.create_pdf(
+                event=event,
+                results=class_results,
+                landscape=landscape,
+            )
 
     except EventNotFoundError:
         return bottle.HTTPResponse(status=409, body="Event deleted")

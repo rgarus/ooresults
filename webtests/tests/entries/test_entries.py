@@ -32,6 +32,7 @@ def test_if_entry_page_is_displayed_then_all_actions_are_displayed(
         "Reload",
         "Import ...",
         "Export ...",
+        "Print ...",
         "Add entry ...",
         "Edit entry ...",
         "Delete entry",
@@ -46,6 +47,7 @@ def test_if_no_row_is_selected_then_some_actions_are_disabled(
     assert entry_page.actions.action("Reload").is_enabled()
     assert entry_page.actions.action("Import ...").is_enabled()
     assert entry_page.actions.action("Export ...").is_enabled()
+    assert entry_page.actions.action("Print ...").is_enabled()
     assert entry_page.actions.action("Add entry ...").is_enabled()
     assert entry_page.actions.action("Edit entry ...").is_disabled()
     assert entry_page.actions.action("Delete entry").is_disabled()
@@ -61,6 +63,7 @@ def test_if_a_row_is_selected_then_all_actions_are_enabled(
     assert entry_page.actions.action("Reload").is_enabled()
     assert entry_page.actions.action("Import ...").is_enabled()
     assert entry_page.actions.action("Export ...").is_enabled()
+    assert entry_page.actions.action("Print ...").is_enabled()
     assert entry_page.actions.action("Add entry ...").is_enabled()
     assert entry_page.actions.action("Edit entry ...").is_enabled()
     assert entry_page.actions.action("Delete entry").is_enabled()

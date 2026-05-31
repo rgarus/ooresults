@@ -8,6 +8,7 @@
     <button id="entr.myBtnReload" onclick="entr_update()">Reload</button>
     <button id="entr.myBtnImport" onclick="entr_myImport()">Import ...</button>
     <button id="entr.myBtnExport" onclick="entr_myExport()">Export ...</button>
+    <button id="entr.myBtnPrint" onclick="entr_myPrint()">Print ...</button>
     <button id="entr.myBtnAdd" onclick="entr_myAdd()">Add entry ...</button>
     <button id="entr.myBtnEdit" disabled onclick="entr_myEdit()">Edit entry ...</button>
     <button id="entr.myBtnDelete" disabled onclick="entr_myDelete()">Delete entry</button>
@@ -144,6 +145,42 @@
   </div>
 
   <!-- The Modal -->
+  <div class="modal" id="entr.printDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('entr.printDialog').style.display='none'">&times;</span>
+      <form id="entr.print.form" class="form-container" onsubmit="entr_submitPrint(); return false;">
+        <p>Print</p>
+        <div>
+          <input id="entr_radio_print_1" name="entr_print" type="radio" value="entr.print.1"
+                 onchange="updateDisplayedParams('entr_print_1')" required checked/>
+          <label for="entr_radio_print_1">Results</label>
+        </div>
+        <div>
+          <input id="entr_radio_print_2" name="entr_print" type="radio" value="entr.print.2"
+                 onchange="updateDisplayedParams('entr_print_2')" required/>
+          <label for="entr_radio_print_2">Split times</label>
+        </div>
+        <p>Parameters</p>
+        <div id="entr_print">
+          <div id="entr_print_1" class="params">
+              <input id="pdf_r_i" name="res_include_dns" type="checkbox" value="res.include_dns"/>
+              <label for="pdf_r_i">Include not started competitors</label>
+          </div>
+          <div id="entr_print_2" class="params">
+              <input id="pdf_sp_l" name="res_landscape" type="checkbox" value="res.landscape"/>
+              <label for="pdf_sp_l">Landscape (page orientation)</label>
+          </div>
+        </div>
+        <p></p>
+        <p></p>
+        <button type="submit" class="btn">Create PDF</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('entr.printDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Modal -->
   <div class="modal" id="entr.addDialog">
   </div> 
 
@@ -231,6 +268,12 @@
         document.getElementById('entr.exportDialog').style.display = 'block';
         document.getElementById('entr_radio_export_1').checked = true;
         updateDisplayedParams("entr_export_1");
+    }
+
+    function entr_myPrint() {
+        document.getElementById('entr.printDialog').style.display = 'block';
+        document.getElementById('entr_radio_print_1').checked = true;
+        updateDisplayedParams("entr_print_1");
     }
 
     function entr_myAdd() {
@@ -427,6 +470,43 @@
             filename = "entries.csv";
             mimetype = "text/csv";
         }
+        xhr.send(data);
+    }
+
+    function entr_submitPrint() {
+        var form = document.getElementById('entr.print.form');
+        var data = new FormData(form);
+        data.append('event_id', window.event_id);
+        data.append('view', entr_view);
+        var selected = document.querySelector('input[name="entr_print"]:checked').value;
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                document.getElementById('progress').style.display = 'none';
+                if (this.status == 200) {
+                    download(filename, this.response, 'application/pdf');
+                    document.getElementById('entr.printDialog').style.display = "none";
+                }
+                if (this.status == 409) {
+                    showAlert(new TextDecoder().decode(this.response));
+                }
+                if (this.status == 500) {
+                    showAlert(new TextDecoder().decode(this.response));
+                }
+            }
+        };
+        xhr.onerror = function() {
+            showAlert("Network error");
+        };
+        xhr.open("POST", "entry/print", true);
+        document.getElementById('progress').style.display='flex';
+        xhr.responseType = "arraybuffer";
+        if (selected == "entr.print.1") {
+            filename = "result.pdf";
+        };
+        if (selected == "entr.print.2") {
+            filename = "splittimes.pdf";
+        };
         xhr.send(data);
     }
 

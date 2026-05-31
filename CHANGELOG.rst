@@ -10,7 +10,8 @@ Added
 
 - Show a progress bar while waiting for a PDF file to be generated.
 - On the “Entries” tab, the data views are expanded to include “Results”.
-- On the “Entries” tab, the current ranking is displayed in all data views. 
+- On the “Entries” tab, the current ranking is displayed in all data views.
+- On the "Entries" tab, the option to print results and split times has been added.
 
 
 [0.4.8] - 2026-04-26
