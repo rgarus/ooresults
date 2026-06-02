@@ -20,7 +20,7 @@
 import pathlib
 
 
-_rental_cards = []
+_rental_cards: list[str] = []
 
 
 def read_rental_cards(path: pathlib.Path) -> None:

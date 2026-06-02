@@ -122,3 +122,19 @@ ignore = [
 [tool.ruff.lint.isort]
 force-single-line = true
 lines-after-imports = 2
+
+[tool.mypy]
+python_version = 3.13
+allow_redefinition = true
+follow_untyped_imports = true
+follow_imports = "silent"
+packages = [
+    "ooresults.pdf",
+    "ooresults.otypes",
+    "ooresults.repo",
+    "ooresults.utils",
+    "tests.otypes",
+    "tests.pdf",
+    "tests.plugins",
+    "tests.repo",
+]

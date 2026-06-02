@@ -73,6 +73,19 @@ The rules used are defined in pyproject.toml in the sections
    python -m ruff check
 
 
+Static type checking with mypy
+------------------------------
+
+We use mypy for static type checking of the Python source code.
+The source files to be checked are defined in the pyproject.toml file under the [tool.mypy] section.
+
+.. code-block::
+
+   python -m pip install mypy
+   
+   cd <git-local>
+   python -m mypy
+
 
 Testing the ooresults software
 ------------------------------
