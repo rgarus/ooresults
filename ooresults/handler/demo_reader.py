@@ -27,6 +27,6 @@ Handler for the demo_reader routes.
 """
 
 
-def get_update():
+def get_update() -> str:
     """Update data."""
     return render.demo_reader()

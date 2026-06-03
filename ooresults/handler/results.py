@@ -37,7 +37,7 @@ Handler for the result routes.
 
 
 @bottle.post("/result/update")
-def post_update():
+def post_update() -> str | bottle.HTTPResponse:
     """Update data."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
@@ -50,7 +50,7 @@ def post_update():
 
 
 @bottle.post("/result/pdfResult")
-def post_pdf_result() -> bytes:
+def post_pdf_result() -> bytes | bottle.HTTPResponse:
     """Print results."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
@@ -71,7 +71,7 @@ def post_pdf_result() -> bytes:
 
 
 @bottle.post("/result/pdfSplittimes")
-def post_pdf_splittimes() -> bytes:
+def post_pdf_splittimes() -> bytes | bottle.HTTPResponse:
     """Print split times."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1

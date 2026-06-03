@@ -41,13 +41,13 @@ Handler for the competitor routes.
 
 
 @bottle.post("/competitor/update")
-def post_update():
+def post_update() -> str:
     """Update data."""
     return render.competitors_table(competitors=model.competitors.get_competitors())
 
 
 @bottle.post("/competitor/add")
-def post_add():
+def post_add() -> str | bottle.HTTPResponse:
     """Add or edit competitor."""
     data = bottle.request.forms
     try:
@@ -77,7 +77,7 @@ def post_add():
 
 
 @bottle.post("/competitor/import")
-def post_import():
+def post_import() -> str | bottle.HTTPResponse:
     """Import competitors."""
     data = bottle.request.forms
     try:
@@ -96,7 +96,7 @@ def post_import():
 
 
 @bottle.post("/competitor/export")
-def post_export():
+def post_export() -> bytes | bottle.HTTPResponse:
     """Export competitors."""
     data = bottle.request.forms
     if data.comp_export == "comp.export.1":
@@ -107,7 +107,7 @@ def post_export():
 
 
 @bottle.post("/competitor/delete")
-def post_delete():
+def post_delete() -> str | bottle.HTTPResponse:
     """Delete competitor."""
     data = bottle.request.forms
     try:
@@ -118,7 +118,7 @@ def post_delete():
 
 
 @bottle.post("/competitor/fill_edit_form")
-def post_fill_edit_form():
+def post_fill_edit_form() -> str | bottle.HTTPResponse:
     """Query data to fill add or edit form."""
     data = bottle.request.forms
     if data.id == "":

@@ -61,18 +61,19 @@ def get_cached_data(event_id: int):
         with lock:
             cached_data = cache.get(event_id, None)
 
-        if not (cached_data and cached_data.content is not None and cached_data.valid):
+        if cached_data is None or cached_data.content is None or not cached_data.valid:
             content = model.results.event_class_results(event_id=event_id)
 
             with lock:
                 cached_data = cache.get(event_id, None)
-                if cached_data:
+                if cached_data and event_lock == cached_data.lock:
                     cached_data.content = content
                     cache.move_to_end(key=event_id)
                     if len(cache) > MAX_SIZE:
                         cache.popitem(last=False)
-
-        return cached_data.content
+            return content
+        else:
+            return cached_data.content
 
 
 def clear_cache(event_id: Optional[int] = None, entry_id: Optional[int] = None) -> None:

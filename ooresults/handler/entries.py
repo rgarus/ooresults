@@ -61,36 +61,44 @@ Handler for the entry routes.
 """
 
 
-def update(event_id: int, view: str = "entries"):
+def update(event_id: int, view: str = "entries") -> str | bottle.HTTPResponse:
+    def to_str(item: Optional[str]) -> str:
+        return item if item is not None else ""
+
     try:
         event, class_results, unassigned_results = (
             model.results.event_class_results_and_unassigned_results(event_id=event_id)
         )
         re = [ranked_entries for _, ranked_entries in class_results]
         ranked_entries = list(itertools.chain.from_iterable(re))
-        ranked_entries.sort(key=lambda e: e.entry.first_name)
-        ranked_entries.sort(key=lambda e: e.entry.last_name)
+        ranked_entries.sort(key=lambda e: to_str(e.entry.first_name))
+        ranked_entries.sort(key=lambda e: to_str(e.entry.last_name))
 
+        view_entries_list: list[tuple[Optional[str], list[RankedEntryType]]]
         columns: set[str] = set()
         if view == "classes":
-            view_entries: defaultdict[str, list[RankedEntryType]] = defaultdict(list)
-            for e in ranked_entries:
-                view_entries[e.entry.class_name].append(e)
-            view_entries_list = list(view_entries.items())
-            view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
-        elif view == "clubs":
-            view_entries: defaultdict[str, list[RankedEntryType]] = defaultdict(list)
-            for e in ranked_entries:
-                view_entries[e.entry.club_name].append(e)
-            view_entries_list = list(view_entries.items())
-            view_entries_list.sort(key=lambda e: e[0] if e[0] is not None else "")
-        elif view == "states":
-            view_entries: defaultdict[ResultStatus, list[RankedEntryType]] = (
-                defaultdict(list)
+            view_clas: defaultdict[Optional[str], list[RankedEntryType]] = defaultdict(
+                list
             )
             for e in ranked_entries:
-                view_entries[e.entry.result.status].append(e)
-            view_entries_list = list(view_entries.items())
+                view_clas[e.entry.class_name].append(e)
+            view_entries_list = list(view_clas.items())
+            view_entries_list.sort(key=lambda e: to_str(e[0]))
+        elif view == "clubs":
+            view_club: defaultdict[Optional[str], list[RankedEntryType]] = defaultdict(
+                list
+            )
+            for e in ranked_entries:
+                view_club[e.entry.club_name].append(e)
+            view_entries_list = list(view_club.items())
+            view_entries_list.sort(key=lambda e: to_str(e[0]))
+        elif view == "states":
+            view_stat: defaultdict[ResultStatus, list[RankedEntryType]] = defaultdict(
+                list
+            )
+            for e in ranked_entries:
+                view_stat[e.entry.result.status].append(e)
+            view_stat_list = list(view_stat.items())
             f_order = {
                 ResultStatus.INACTIVE: 0,
                 ResultStatus.ACTIVE: 1,
@@ -102,7 +110,7 @@ def update(event_id: int, view: str = "entries"):
                 ResultStatus.DISQUALIFIED: 7,
                 ResultStatus.DID_NOT_START: 8,
             }
-            view_entries_list.sort(key=lambda e: f_order[e[0]])
+            view_stat_list.sort(key=lambda e: f_order[e[0]])
             f_name = {
                 ResultStatus.INACTIVE: "Registered",
                 ResultStatus.ACTIVE: "Started",
@@ -114,16 +122,18 @@ def update(event_id: int, view: str = "entries"):
                 ResultStatus.DISQUALIFIED: "Disqualified",
                 ResultStatus.DID_NOT_START: "Did not start",
             }
-            view_entries_list = [(f_name[v[0]], v[1]) for v in view_entries_list]
+            view_entries_list = [(f_name[v[0]], v[1]) for v in view_stat_list]
         elif view == "competitors":
-            view_entries: defaultdict[int, list[RankedEntryType]] = defaultdict(list)
+            view_comp: defaultdict[Optional[int], list[RankedEntryType]] = defaultdict(
+                list
+            )
             for e in ranked_entries:
-                view_entries[e.entry.competitor_id].append(e)
-            view_entries_list = list(view_entries.items())
-            view_entries_list.sort(key=lambda e: len(e[1]), reverse=True)
+                view_comp[e.entry.competitor_id].append(e)
+            view_comp_list = list(view_comp.items())
+            view_comp_list.sort(key=lambda e: len(e[1]), reverse=True)
             view_entries_list = [
                 (f"{v[1][0].entry.last_name}, {v[1][0].entry.first_name}", v[1])
-                for v in view_entries_list
+                for v in view_comp_list
             ]
         elif view == "results":
             columns = build_columns(class_results)
@@ -160,7 +170,7 @@ def update(event_id: int, view: str = "entries"):
 
 
 @bottle.post("/entry/update")
-def post_update():
+def post_update() -> str | bottle.HTTPResponse:
     """Update data."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
@@ -168,7 +178,7 @@ def post_update():
 
 
 @bottle.post("/entry/import")
-def post_import():
+def post_import() -> str | bottle.HTTPResponse:
     """Import entries."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
@@ -252,7 +262,7 @@ def post_import():
 
 
 @bottle.post("/entry/export")
-def post_export():
+def post_export() -> bytes | bottle.HTTPResponse:
     """Export entries."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
@@ -285,7 +295,7 @@ def post_export():
 
 
 @bottle.post("/entry/print")
-def post_print():
+def post_print() -> bytes | bottle.HTTPResponse:
     """Print entries."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
@@ -336,7 +346,7 @@ def parse_start_time(
 
 
 @bottle.post("/entry/add")
-def post_add():
+def post_add() -> str | bottle.HTTPResponse:
     """Add or edit entry."""
     try:
         data = bottle.request.forms
@@ -409,7 +419,7 @@ def collect_unassigned_si_results(entries: list[EntryType]) -> dict[int, str]:
 
 
 @bottle.post("/entry/fill_edit_form")
-def post_fill_edit_form():
+def post_fill_edit_form() -> str | bottle.HTTPResponse:
     """Query data to fill add or edit form."""
     try:
         data = bottle.request.forms
@@ -441,15 +451,14 @@ def post_fill_edit_form():
 
 
 @bottle.post("/entry/fill_competitors_form")
-def post_fill_competitors_form():
+def post_fill_competitors_form() -> str | bottle.HTTPResponse:
     """Query data to fill competitor selection form."""
     competitors = model.competitors.get_competitors()
-
     return render.add_entry_competitors(competitors=competitors)
 
 
 @bottle.post("/entry/fill_result_form")
-def post_fill_result_form():
+def post_fill_result_form() -> str | bottle.HTTPResponse:
     """Query data to fill result form."""
     data = bottle.request.forms
     try:
@@ -463,7 +472,7 @@ def post_fill_result_form():
 
 
 @bottle.post("/entry/delete")
-def post_delete():
+def post_delete() -> str | bottle.HTTPResponse:
     """Delete entry."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
@@ -472,14 +481,15 @@ def post_delete():
 
 
 @bottle.post("/entry/splitTimes")
-def post_split_times():
+def post_split_times() -> str | bottle.HTTPResponse:
+    """Open splt times editor."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     return update(event_id=event_id, view=data.view)
 
 
 @bottle.post("/entry/editPunch")
-def post_edit_punch():
+def post_edit_punch() -> str | bottle.HTTPResponse:
     """Change split times."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1

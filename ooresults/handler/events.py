@@ -37,18 +37,18 @@ Handler for the event routes.
 """
 
 
-def update():
+def update() -> str:
     return render.events_table(events=model.events.get_events())
 
 
 @bottle.post("/event/update")
-def post_update():
+def post_update() -> str:
     """Update data."""
     return update()
 
 
 @bottle.post("/event/add")
-def post_add():
+def post_add() -> str | bottle.HTTPResponse:
     """Add or edit event."""
     data = bottle.request.forms
     print(dict(data))
@@ -95,7 +95,7 @@ def post_add():
 
 
 @bottle.post("/event/delete")
-def post_delete():
+def post_delete() -> str | bottle.HTTPResponse:
     """Delete event."""
     data = bottle.request.forms
     model.events.delete_event(int(data.id))
@@ -103,7 +103,7 @@ def post_delete():
 
 
 @bottle.post("/event/fill_edit_form")
-def post_fill_edit_form():
+def post_fill_edit_form() -> str | bottle.HTTPResponse:
     """Query data to fill add or edit form."""
     data = bottle.request.forms
     try:

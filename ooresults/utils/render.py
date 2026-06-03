@@ -172,7 +172,7 @@ def entries_table(
 
 def add_entry(
     entry: Optional[EntryType],
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
     unassigned_results: dict[int, str],
     event_fields: list[str],

@@ -41,7 +41,7 @@ Handler for the course routes.
 """
 
 
-def update(event_id: int):
+def update(event_id: int) -> str | bottle.HTTPResponse:
     courses = model.courses.get_courses(event_id=event_id)
     try:
         event = model.events.get_event(id=event_id)
@@ -51,7 +51,7 @@ def update(event_id: int):
 
 
 @bottle.post("/course/update")
-def post_update():
+def post_update() -> str | bottle.HTTPResponse:
     """Update data."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
@@ -59,7 +59,7 @@ def post_update():
 
 
 @bottle.post("/course/import")
-def post_import():
+def post_import() -> str | bottle.HTTPResponse:
     """Import courses."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
@@ -83,7 +83,7 @@ def post_import():
 
 
 @bottle.post("/course/export")
-def post_export():
+def post_export() -> bytes | bottle.HTTPResponse:
     """Export courses."""
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
@@ -101,7 +101,7 @@ def post_export():
 
 
 @bottle.post("/course/add")
-def post_add():
+def post_add() -> str | bottle.HTTPResponse:
     """Add or edit course."""
     data = bottle.request.forms
     print(dict(data))
@@ -140,7 +140,7 @@ def post_add():
 
 
 @bottle.post("/course/delete")
-def post_delete():
+def post_delete() -> str | bottle.HTTPResponse:
     """Delete course."""
     data = bottle.request.forms
     print(dict(data))
@@ -153,7 +153,7 @@ def post_delete():
 
 
 @bottle.post("/course/fill_edit_form")
-def post_fill_edit_form():
+def post_fill_edit_form() -> str | bottle.HTTPResponse:
     """Query data to fill add or edit form."""
     data = bottle.request.forms
     try:

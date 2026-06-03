@@ -17,7 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import dataclasses
 import logging
 import threading
 import time
@@ -39,10 +38,10 @@ Handler for the root routes.
 """
 
 
-@dataclasses.dataclass
 class Data:
-    content: Optional[str] = None
-    valid: bool = True
+    def __init__(self, content: Optional[str] = None, valid: bool = True) -> None:
+        self.content = content
+        self.valid = valid
 
 
 MAX_SIZE = 4
@@ -61,7 +60,7 @@ def callback(event_id: Optional[int]) -> None:
 
 
 @bottle.get("/")
-def get_root():
+def get_root() -> str:
     t1 = time.time()
 
     events = model.events.get_events()
@@ -89,12 +88,8 @@ def get_root():
             content = render.root(results_table=results_table)
 
             with lock:
-                cached_data = cache.get(event.id, None)
-                if not (
-                    cached_data
-                    and cached_data.content is not None
-                    and cached_data.valid
-                ):
+                cached_data_1 = cache.get(event.id, None)
+                if cached_data_1 and cached_data_1 == cached_data and cached_data.valid:
                     cached_data.content = content
                     cache.move_to_end(key=event.id)
                 if len(cache) > MAX_SIZE:

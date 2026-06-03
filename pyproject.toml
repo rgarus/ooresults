@@ -129,6 +129,7 @@ allow_redefinition = true
 follow_untyped_imports = true
 follow_imports = "silent"
 packages = [
+    "ooresults.handler",
     "ooresults.pdf",
     "ooresults.otypes",
     "ooresults.repo",

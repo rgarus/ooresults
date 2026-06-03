@@ -31,7 +31,7 @@ Handler for the si2 routes.
 
 
 @bottle.get("/si2")
-def get_si2():
+def get_si2() -> str:
     event_id = None
     key = None
     data = bottle.request.params

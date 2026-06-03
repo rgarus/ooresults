@@ -18,6 +18,7 @@
 
 
 import io
+from typing import Any
 
 import bottle
 import clevercsv as csv
@@ -40,14 +41,14 @@ Handler for the series routes.
 
 
 @bottle.post("/series/update")
-def post_update():
+def post_update() -> str:
     """Update data."""
     settings, events, results = model.results.build_series_result()
     return render.series_table(events=events, results=results)
 
 
 @bottle.post("/series/settings")
-def post_settings():
+def post_settings() -> str:
     """Update series settings."""
     data = bottle.request.forms
     print(dict(data))
@@ -70,7 +71,7 @@ def post_settings():
 
 
 @bottle.post("/series/pdfResult")
-def post_pdf_result():
+def post_pdf_result() -> bytes | bottle.HTTPResponse:
     """Print series results."""
     data = bottle.request.forms
     landscape = "ser_landscape" in data
@@ -87,7 +88,7 @@ def post_pdf_result():
 
 
 @bottle.post("/series/csvResult")
-def post_csv_result():
+def post_csv_result() -> bytes | bottle.HTTPResponse:
     """Export results as csv for creating diplomas."""
     try:
         settings, events, results = model.results.build_series_result()
@@ -121,7 +122,7 @@ def post_csv_result():
                     else:
                         rank_eng = rank + "th"
 
-                    def format(value: any) -> str:
+                    def format(value: Any) -> str:
                         return str(value) if value is not None else ""
 
                     writer.writerow(
@@ -145,7 +146,7 @@ def post_csv_result():
 
 
 @bottle.post("/series/fill_settings_form")
-def post_fill_settings_form():
+def post_fill_settings_form() -> str:
     """Query data to fill settings form."""
     settings = model.results.get_series_settings()
     return render.series_settings(settings=settings)

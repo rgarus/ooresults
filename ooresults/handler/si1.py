@@ -31,7 +31,7 @@ Handler for the si1 routes.
 
 
 @bottle.get("/si1")
-def get_si1():
+def get_si1() -> str:
     event_id = None
     key = None
     view = 0
