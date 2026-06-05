@@ -22,7 +22,7 @@ from webtests.pageobjects.events import EventPage
 
 def test_if_an_event_is_deleted_then_the_event_is_no_longer_displayed(
     event_page: EventPage, event: None
-):
+) -> None:
     # add a second event
     dialog = event_page.actions.add()
     dialog.enter_values(
@@ -66,7 +66,7 @@ def test_if_an_event_is_deleted_then_the_event_is_no_longer_displayed(
 
 def test_if_an_event_is_deleted_then_no_event_is_selected(
     event_page: EventPage, event: None
-):
+) -> None:
     # add a second event
     dialog = event_page.actions.add()
     dialog.enter_values(
@@ -96,7 +96,7 @@ def test_if_an_event_is_deleted_then_no_event_is_selected(
 
 def test_if_deleting_an_event_is_cancelled_then_the_event_is_displayed_further(
     event_page: EventPage, event: None
-):
+) -> None:
     # select event
     event_page.table.select_row(2)
     assert event_page.table.selected_row() == 2

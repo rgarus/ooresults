@@ -26,7 +26,7 @@ EVENT_DATE = "2023-12-28"
 
 def test_if_an_entry_is_deleted_then_the_entry_is_no_longer_displayed(
     main_page: MainPage, event: str, add_classes: str, entry: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
 
     # add a second entry
@@ -66,7 +66,7 @@ def test_if_an_entry_is_deleted_then_the_entry_is_no_longer_displayed(
 
 def test_if_an_entry_is_deleted_then_no_entry_is_selected(
     main_page: MainPage, event: str, add_classes: str, entry: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
 
     # add a second entry
@@ -86,7 +86,7 @@ def test_if_an_entry_is_deleted_then_no_entry_is_selected(
 
 def test_if_deleting_an_entry_is_cancelled_then_the_entry_is_displayed_further(
     main_page: MainPage, event: str, add_classes: str, entry: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
 
     # select entry

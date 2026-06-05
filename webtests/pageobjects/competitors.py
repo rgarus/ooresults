@@ -174,7 +174,7 @@ class CompetitorPage:
 
     def select_competitor(self, first_name: str, last_name: str) -> None:
         for i in range(2, self.table.nr_of_rows() + 2):
-            if self.table.row(i=i)[0:2] == (first_name, last_name):
+            if self.table.row(i=i)[0:2] == [first_name, last_name]:
                 self.table.select_row(i=i)
                 break
         else:
@@ -231,5 +231,5 @@ class CompetitorTable(Table):
             return rows[0] if rows else None
 
     def double_click_row(self, i: int) -> AddCompetitorDialog:
-        super().double_click_row(i=i)
+        self.double_click(i=i)
         return AddCompetitorDialog(driver=self.driver)

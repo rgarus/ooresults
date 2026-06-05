@@ -145,5 +145,5 @@ class ClubTable(Table):
             return rows[0] if rows else None
 
     def double_click_row(self, i: int) -> AddClubDialog:
-        super().double_click_row(i=i)
+        self.double_click(i=i)
         return AddClubDialog(driver=self.driver)

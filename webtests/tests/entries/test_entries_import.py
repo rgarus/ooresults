@@ -48,7 +48,7 @@ def event(main_page: MainPage, delete_all: None) -> Iterator[str]:
     main_page.goto_events().delete_events()
 
 
-def test_import_entries(main_page: MainPage, event: str):
+def test_import_entries(main_page: MainPage, event: str) -> None:
     content = f"""\
 <?xml version='1.0' encoding='UTF-8'?>
 <EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -166,7 +166,7 @@ def test_import_entries(main_page: MainPage, event: str):
 
 def test_if_a_competitor_is_contained_several_times_then_only_the_first_entry_is_imported(
     main_page: MainPage, event: str
-):
+) -> None:
     content = f"""\
 <?xml version='1.0' encoding='UTF-8'?>
 <EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">

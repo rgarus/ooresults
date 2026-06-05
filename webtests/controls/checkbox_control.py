@@ -22,27 +22,27 @@ from selenium.webdriver.common.by import By
 
 
 class CheckboxControl:
-    def __init__(self, driver: webdriver.Remote, id: str):
+    def __init__(self, driver: webdriver.Remote, id: str) -> None:
         self.driver = driver
         self.elem = driver.find_element(By.ID, id)
 
     def is_disabled(self) -> bool:
-        return self.elem.get_attribute("disabled") == "true"
+        return not self.elem.is_enabled()
 
     def is_enabled(self) -> bool:
-        return not self.is_disabled()
+        return self.elem.is_enabled()
 
     def is_checked(self) -> bool:
-        return self.elem.get_attribute("checked") == "true"
+        return self.elem.is_selected()
 
     def click(self) -> None:
-        if self.is_enabled():
+        if self.elem.is_enabled():
             self.elem.click()
         else:
             raise RuntimeError("Checkbox control is disabled")
 
     def set_state(self, checked: bool) -> None:
-        if self.is_enabled():
+        if self.elem.is_enabled():
             if self.is_checked() != checked:
                 self.elem.click()
         else:

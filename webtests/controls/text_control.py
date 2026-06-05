@@ -23,21 +23,24 @@ from selenium.webdriver.common.keys import Keys
 
 
 class TextControl:
-    def __init__(self, driver: webdriver.Remote, id: str):
+    def __init__(self, driver: webdriver.Remote, id: str) -> None:
         self.driver = driver
         self.elem = driver.find_element(By.ID, id)
 
     def is_disabled(self) -> bool:
-        return self.elem.get_attribute("disabled") == "true"
+        return not self.elem.is_enabled()
 
     def is_enabled(self) -> bool:
-        return not self.is_disabled()
+        return self.elem.is_enabled()
 
     def get_text(self) -> str:
-        return self.elem.get_attribute("value")
+        if (value := self.elem.get_attribute("value")) is not None:
+            return value
+        else:
+            raise RuntimeError("Value attribute does not exist")
 
     def set_text(self, text: str) -> None:
-        if self.is_enabled():
+        if self.elem.is_enabled():
             self.elem.send_keys(Keys.CONTROL + "a")
             self.elem.send_keys(Keys.DELETE)
             self.elem.send_keys(text)

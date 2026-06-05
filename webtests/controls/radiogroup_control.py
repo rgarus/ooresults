@@ -22,7 +22,7 @@ from selenium.webdriver.common.by import By
 
 
 class RadioGroupControl:
-    def __init__(self, driver: webdriver.Remote, name: str):
+    def __init__(self, driver: webdriver.Remote, name: str) -> None:
         self.driver = driver
         self.name = name
 
@@ -31,8 +31,8 @@ class RadioGroupControl:
         for button in radiobuttons:
             label = button.find_element(By.XPATH, "../label")
             if label and label.text == text:
-                if not button.get_attribute("disabled") == "true":
-                    if not button.get_attribute("checked") == "true":
+                if button.is_enabled():
+                    if not button.is_selected():
                         button.click()
                         break
                 else:
@@ -43,7 +43,7 @@ class RadioGroupControl:
     def selected(self) -> str:
         radiobuttons = self.driver.find_elements(By.NAME, self.name)
         for button in radiobuttons:
-            if button.is_displayed() and button.get_attribute("checked") == "true":
+            if button.is_displayed() and button.is_selected():
                 label = button.find_element(By.XPATH, "../label")
                 return label.text
         raise RuntimeError("RadioButton not found")

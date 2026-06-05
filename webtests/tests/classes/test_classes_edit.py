@@ -26,7 +26,7 @@ EVENT_DATE = "2023-12-28"
 
 def test_if_a_class_is_edited_then_the_changed_data_are_displayed(
     main_page: MainPage, event: str, add_class: None
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     class_page.table.select_row(2)
 
@@ -83,7 +83,7 @@ def test_if_a_class_is_edited_then_the_changed_data_are_displayed(
 
 def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
     main_page: MainPage, event: str, add_class: str
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     dialog = class_page.table.double_click_row(2)
     dialog.check_values(

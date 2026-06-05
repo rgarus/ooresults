@@ -32,7 +32,7 @@ def test_if_an_entry_is_added_with_required_data_then_an_additional_entry_is_dis
     event: str,
     add_classes: str,
     delete_entries_and_competitors: None,
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.add()
     dialog.check_values(
@@ -81,7 +81,7 @@ def test_if_adding_an_entry_is_cancelled_then_no_additional_entry_is_displayed(
     event: str,
     add_classes: str,
     delete_entries_and_competitors: None,
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.add()
     dialog.enter_values(
@@ -108,7 +108,7 @@ def test_if_an_entry_is_added_with_all_data_then_an_additional_entry_is_displaye
     event: str,
     add_classes: str,
     delete_entries_and_competitors: None,
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.add()
     dialog.check_values(
@@ -161,7 +161,7 @@ def test_if_an_entry_is_added_with_all_data_then_an_additional_entry_is_displaye
 
 def test_if_an_already_registered_competitor_is_added_with_not_competing_true_then_an_additional_entry_is_displayed(
     main_page: MainPage, event: str, add_classes: str, entry: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.add()
     dialog.enter_values(
@@ -209,7 +209,7 @@ def test_if_an_already_registered_competitor_is_added_with_not_competing_true_th
 
 def test_if_an_already_registered_competitor_is_added_with_not_competing_false_then_not_competing_is_set_to_true(
     main_page: MainPage, event: str, add_classes: str, entry: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.add()
     dialog.enter_values(
@@ -269,7 +269,7 @@ def test_if_an_entry_is_added_you_can_choose_between_gender_unknown_and_female_a
     event: str,
     add_classes: str,
     delete_entries_and_competitors: None,
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.add()
     assert dialog.get_gender_list() == ["", "F", "M"]
@@ -311,7 +311,7 @@ def test_if_an_entry_is_added_you_can_choose_between_all_defined_classes(
     event: str,
     add_classes: str,
     delete_entries_and_competitors: None,
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.add()
     assert dialog.get_class_list() == ["Bahn A - Frauen", "Bahn A - Männer"]
@@ -347,7 +347,7 @@ def test_if_an_entry_is_added_you_can_choose_between_all_defined_classes(
 
 def test_if_an_entry_is_selected_and_a_new_entry_is_added_then_no_entry_is_selected(
     main_page: MainPage, event: str, add_classes: str, entry: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     nr_of_rows = entry_page.table.nr_of_rows()
     entry_page.table.select_row(i=2)
@@ -364,7 +364,7 @@ def test_if_an_entry_is_selected_and_a_new_entry_is_added_then_no_entry_is_selec
 
 def test_if_several_entries_are_added_then_the_added_entries_are_displayed(
     main_page: MainPage, event: str, add_classes: str, entry: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.add()
     dialog.enter_values(

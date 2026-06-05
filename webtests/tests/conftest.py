@@ -61,7 +61,7 @@ def main_page(ooresults_server: subprocess.Popen, driver: webdriver.Remote) -> M
     return MainPage(driver=driver)
 
 
-def post(url: str, data: dict[str, str]):
+def post(url: str, data: dict[str, str]) -> None:
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     r = requests.post(

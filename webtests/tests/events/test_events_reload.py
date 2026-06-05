@@ -23,7 +23,7 @@ from webtests.tests.conftest import post
 
 def test_if_an_event_is_added_by_another_user_then_it_is_displayed_after_reload(
     event_page: EventPage, event: None
-):
+) -> None:
     post(
         url="https://127.0.0.1:8080/event/add",
         data={

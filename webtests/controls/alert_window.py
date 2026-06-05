@@ -29,7 +29,7 @@ T = TypeVar("T", bound="AlertWindow")
 
 
 class AlertWindow:
-    def __init__(self, driver: webdriver.Remote):
+    def __init__(self, driver: webdriver.Remote) -> None:
         self.driver = driver
 
     def wait(self: T, timeout: int = 5) -> T:

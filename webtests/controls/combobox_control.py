@@ -23,21 +23,21 @@ from selenium.webdriver.support.ui import Select
 
 
 class ComboboxControl:
-    def __init__(self, driver: webdriver.Remote, id: str):
+    def __init__(self, driver: webdriver.Remote, id: str) -> None:
         self.driver = driver
         self.elem = driver.find_element(By.ID, id)
 
     def is_disabled(self) -> bool:
-        return self.elem.get_attribute("disabled") == "true"
+        return not self.elem.is_enabled()
 
     def is_enabled(self) -> bool:
-        return not self.is_disabled()
+        return self.elem.is_enabled()
 
     def values(self) -> list[str]:
         return [e.text for e in Select(self.elem).options]
 
     def select_by_text(self, text: str) -> None:
-        if self.is_enabled():
+        if self.elem.is_enabled():
             Select(self.elem).select_by_visible_text(text)
         else:
             raise RuntimeError("Combobox control is disabled")

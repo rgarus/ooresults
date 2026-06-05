@@ -22,7 +22,7 @@ from webtests.pageobjects.main_page import MainPage
 
 def test_if_a_competitor_is_edited_then_the_changed_data_are_displayed(
     main_page: MainPage, competitor: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
     competitor_page.table.select_row(2)
 
@@ -64,7 +64,7 @@ def test_if_a_competitor_is_edited_then_the_changed_data_are_displayed(
 
 def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
     main_page: MainPage, competitor: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
     dialog = competitor_page.table.double_click_row(2)
     dialog.check_values(

@@ -28,7 +28,7 @@ class Action(ButtonControl):
 
 
 class Actions:
-    def __init__(self, driver: webdriver.Remote, id: str):
+    def __init__(self, driver: webdriver.Remote, id: str) -> None:
         self.driver = driver
         self.id = id
 

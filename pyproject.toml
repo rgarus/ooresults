@@ -138,4 +138,5 @@ packages = [
     "tests.pdf",
     "tests.plugins",
     "tests.repo",
+    "webtests",
 ]

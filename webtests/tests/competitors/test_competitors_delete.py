@@ -22,7 +22,7 @@ from webtests.pageobjects.main_page import MainPage
 
 def test_if_a_competitor_is_deleted_then_the_competitor_is_no_longer_displayed(
     main_page: MainPage, competitor: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
 
     # add a second competitor
@@ -62,7 +62,7 @@ def test_if_a_competitor_is_deleted_then_the_competitor_is_no_longer_displayed(
 
 def test_if_a_competitor_is_deleted_then_no_competitor_is_selected(
     main_page: MainPage, competitor: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
 
     # add a second competitor
@@ -87,7 +87,7 @@ def test_if_a_competitor_is_deleted_then_no_competitor_is_selected(
 
 def test_if_deleting_a_competitor_is_cancelled_then_the_competitor_is_displayed_further(
     main_page: MainPage, competitor: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
 
     # select competitor

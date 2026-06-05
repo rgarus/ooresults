@@ -22,7 +22,7 @@ from webtests.pageobjects.events import EventPage
 
 def test_if_an_event_is_edited_then_the_changed_data_are_displayed(
     event_page: EventPage, event: None
-):
+) -> None:
     event_page.table.select_row(2)
 
     dialog = event_page.actions.edit()
@@ -70,7 +70,7 @@ def test_if_an_event_is_edited_then_the_changed_data_are_displayed(
 
 def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
     event_page: EventPage, event: None
-):
+) -> None:
     dialog = event_page.table.double_click_row(2)
     dialog.check_values(
         name="Test-Lauf heute",

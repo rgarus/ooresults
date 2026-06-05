@@ -19,8 +19,10 @@
 
 from pathlib import Path
 from typing import Final
+from typing import Literal
 from typing import Optional
 from typing import TypeVar
+from typing import overload
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -62,7 +64,7 @@ class AddEntryDialog:
         start_time: str,
         status: str,
         result: Optional[str] = None,
-    ):
+    ) -> None:
         self.wait()
         p = self.driver
         assert first_name == TextControl(driver=p, id="ent_firstName").get_text()
@@ -109,7 +111,7 @@ class AddEntryDialog:
         start_time: Optional[str] = None,
         status: Optional[str] = None,
         result: Optional[str] = None,
-    ):
+    ) -> None:
         self.wait()
         p = self.driver
         if first_name is not None:
@@ -202,6 +204,14 @@ class ImportEntryDialog:
     def format(self) -> RadioGroupControl:
         return RadioGroupControl(driver=self.driver, name="entr_import")
 
+    @overload
+    def import_file(self, path: Path, info_dialog: Literal[False] = False) -> None:
+        pass
+
+    @overload
+    def import_file(self, path: Path, info_dialog: Literal[True]) -> StatusDialog:
+        pass
+
     def import_file(
         self, path: Path, info_dialog: bool = False
     ) -> Optional[StatusDialog]:
@@ -214,6 +224,8 @@ class ImportEntryDialog:
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
         if info_dialog:
             return StatusDialog(driver=self.driver).wait()
+        else:
+            return None
 
 
 class ExportEntryDialog:
@@ -271,7 +283,7 @@ class EntryPage:
 
     def select_entry(self, first_name: str, last_name: str) -> None:
         for i in range(2, self.table.nr_of_rows() + 2):
-            if self.table.row(i=i)[0:2] == (first_name, last_name):
+            if self.table.row(i=i)[0:2] == [first_name, last_name]:
                 self.table.select_row(i=i)
                 break
         else:
@@ -281,7 +293,7 @@ class EntryPage:
         self.select_entry(first_name=first_name, last_name=last_name)
         self.actions.delete().ok()
 
-    def delete_entries(self):
+    def delete_entries(self) -> None:
         for i in range(self.table.nr_of_rows() - 1):
             self.table.select_row(2)
             self.actions.delete().ok()
@@ -332,5 +344,5 @@ class EntryTable(Table):
             return rows[0] if rows else None
 
     def double_click_row(self, i: int) -> AddEntryDialog:
-        super().double_click_row(i=i)
+        self.double_click(i=i)
         return AddEntryDialog(driver=self.driver)

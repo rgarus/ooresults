@@ -23,7 +23,7 @@ import tempfile
 from webtests.pageobjects.main_page import MainPage
 
 
-def test_import_competitor(main_page: MainPage, delete_competitors: None):
+def test_import_competitor(main_page: MainPage, delete_competitors: None) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">

@@ -22,14 +22,15 @@ from collections.abc import Iterator
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 
 
 class Table:
-    def __init__(self, driver: webdriver.Remote, xpath: str):
+    def __init__(self, driver: webdriver.Remote, xpath: str) -> None:
         self.driver = driver
         self.xpath = xpath
 
-    def _table(self):
+    def _table(self) -> WebElement:
         return self.driver.find_element(By.XPATH, self.xpath)
 
     def nr_of_rows(self) -> int:
@@ -62,7 +63,7 @@ class Table:
         rows = [row for row in rows if row.is_displayed()]
         rows[i - 1].find_elements(By.XPATH, ".//td")[0].click()
 
-    def double_click_row(self, i: int) -> None:
+    def double_click(self, i: int) -> None:
         rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
         rows = [row for row in rows if row.is_displayed()]
         row = rows[i - 1].find_elements(By.XPATH, ".//td")[0]

@@ -23,7 +23,7 @@ from webtests.pageobjects.main_page import MainPage
 
 def test_if_a_club_is_added_with_required_data_then_an_additional_club_is_displayed(
     main_page: MainPage, delete_clubs: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.check_values(name="")
@@ -40,7 +40,7 @@ def test_if_a_club_is_added_with_required_data_then_an_additional_club_is_displa
 
 def test_if_adding_a_club_is_cancelled_then_no_additional_club_is_displayed(
     main_page: MainPage, delete_clubs: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.check_values(name="")
@@ -54,7 +54,7 @@ def test_if_adding_a_club_is_cancelled_then_no_additional_club_is_displayed(
 
 def test_if_a_club_is_added_then_no_club_is_selected(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     club_page.table.select_row(i=2)
     assert club_page.table.selected_row() == 2
@@ -69,7 +69,7 @@ def test_if_a_club_is_added_then_no_club_is_selected(
 
 def test_if_several_clubs_are_added_then_the_added_clubs_are_displayed(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.enter_values(name="Verein 2")
@@ -91,7 +91,7 @@ def test_if_several_clubs_are_added_then_the_added_clubs_are_displayed(
 
 def test_if_a_club_is_added_a_second_time_then_an_error_message_will_be_displayed(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
 
     # add the club a second time

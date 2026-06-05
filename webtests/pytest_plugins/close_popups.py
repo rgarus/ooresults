@@ -17,6 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import Any
+
 import pytest
 from selenium.common.exceptions import NoAlertPresentException
 
@@ -24,7 +26,7 @@ from webtests.pageobjects.main_page import MainPage
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
+def pytest_runtest_makereport(item: Any, call: Any):
     # see https://docs.pytest.org/en/6.2.x/example/simple.html#making-test-result-information-available-in-fixtures
     # see https://docs.pytest.org/en/6.2.x/example/simple.html#post-process-test-reports-failures
     # execute all other hooks to obtain the report object

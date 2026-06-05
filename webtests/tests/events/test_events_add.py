@@ -22,7 +22,7 @@ from webtests.pageobjects.events import EventPage
 
 def test_if_an_event_is_added_with_required_data_then_an_additional_event_is_displayed(
     event_page: EventPage, delete_events: None
-):
+) -> None:
     dialog = event_page.actions.add()
     dialog.check_values(
         name="",
@@ -68,7 +68,7 @@ def test_if_an_event_is_added_with_required_data_then_an_additional_event_is_dis
 
 def test_if_adding_an_event_is_cancelled_then_no_additional_event_is_displayed(
     event_page: EventPage, delete_events: None
-):
+) -> None:
     dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf heute",
@@ -90,7 +90,7 @@ def test_if_adding_an_event_is_cancelled_then_no_additional_event_is_displayed(
 
 def test_if_an_event_is_added_with_all_data_then_an_additional_event_is_displayed(
     event_page: EventPage, delete_events: None
-):
+) -> None:
     dialog = event_page.actions.add()
     dialog.check_values(
         name="",
@@ -136,7 +136,7 @@ def test_if_an_event_is_added_with_all_data_then_an_additional_event_is_displaye
 
 def test_if_no_event_is_selected_and_a_new_event_is_added_then_no_event_is_selected(
     event_page: EventPage, event: None
-):
+) -> None:
     assert event_page.get_event_name() == ""
     assert event_page.get_event_date() == ""
 
@@ -161,7 +161,7 @@ def test_if_no_event_is_selected_and_a_new_event_is_added_then_no_event_is_selec
 
 def test_if_a_new_event_is_added_then_the_selected_event_is_not_changed(
     event_page: EventPage, event: None
-):
+) -> None:
     event_page.table.select_row(i=2)
     assert event_page.get_event_name() == "Test-Lauf heute"
     assert event_page.get_event_date() == "2023-12-28"
@@ -184,6 +184,7 @@ def test_if_a_new_event_is_added_then_the_selected_event_is_not_changed(
     assert event_page.get_event_name() == "Test-Lauf heute"
     assert event_page.get_event_date() == "2023-12-28"
     row = event_page.table.selected_row()
+    assert row is not None
     assert event_page.table.row(i=row) == [
         "Test-Lauf heute",
         "2023-12-28",
@@ -197,7 +198,7 @@ def test_if_a_new_event_is_added_then_the_selected_event_is_not_changed(
 
 def test_if_several_events_are_added_then_the_added_events_are_displayed(
     event_page: EventPage, event: None
-):
+) -> None:
     dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf 1",

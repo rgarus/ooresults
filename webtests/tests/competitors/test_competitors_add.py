@@ -24,7 +24,7 @@ from webtests.pageobjects.main_page import MainPage
 
 def test_if_a_competitor_is_added_with_required_data_then_an_additional_competitor_is_displayed(
     main_page: MainPage, delete_competitors: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     dialog.check_values(
@@ -64,7 +64,7 @@ def test_if_a_competitor_is_added_with_required_data_then_an_additional_competit
 
 def test_if_adding_a_competitor_is_cancelled_then_no_additional_competitor_is_displayed(
     main_page: MainPage, delete_competitors: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     dialog.enter_values(
@@ -84,7 +84,7 @@ def test_if_adding_a_competitor_is_cancelled_then_no_additional_competitor_is_di
 
 def test_if_a_competitor_is_added_with_all_data_then_an_additional_competitor_is_displayed(
     main_page: MainPage, delete_competitors: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     dialog.check_values(
@@ -125,7 +125,7 @@ def test_if_a_competitor_is_added_with_all_data_then_an_additional_competitor_is
 @pytest.mark.parametrize("gender", ["", "F", "M"])
 def test_if_a_competitor_is_added_you_can_choose_between_gender_unknown_and_female_and_male(
     gender: str, main_page: MainPage, delete_competitors: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     assert dialog.get_gender_list() == ["", "F", "M"]
@@ -159,7 +159,7 @@ def test_if_a_competitor_is_added_you_can_choose_between_gender_unknown_and_fema
 
 def test_if_a_competitor_is_selected_and_a_new_competitor_is_added_then_no_competitor_is_selected(
     main_page: MainPage, competitor: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
     competitor_page.table.select_row(i=2)
     assert competitor_page.table.selected_row() == 2
@@ -179,7 +179,7 @@ def test_if_a_competitor_is_selected_and_a_new_competitor_is_added_then_no_compe
 
 def test_if_several_competitors_are_added_then_the_added_competitors_are_displayed(
     main_page: MainPage, competitor: None
-):
+) -> None:
     competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
     dialog.enter_values(

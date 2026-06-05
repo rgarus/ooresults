@@ -27,7 +27,7 @@ EVENT_NAME = "Test for Classes"
 EVENT_DATE = "2023-12-28"
 
 
-def test_import_classes(main_page: MainPage, delete_classes: None):
+def test_import_classes(main_page: MainPage, delete_classes: None) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ClassList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">

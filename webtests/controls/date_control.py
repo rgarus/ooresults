@@ -22,22 +22,25 @@ from selenium.webdriver.common.by import By
 
 
 class DateControl:
-    def __init__(self, driver: webdriver.Remote, id: str):
+    def __init__(self, driver: webdriver.Remote, id: str) -> None:
         self.driver = driver
         self.elem = driver.find_element(By.ID, id)
 
     def is_disabled(self) -> bool:
-        return self.elem.get_attribute("disabled") == "true"
+        return not self.elem.is_enabled()
 
     def is_enabled(self) -> bool:
-        return not self.is_disabled()
+        return self.elem.is_enabled()
 
     def set_date(self, date: str) -> None:
-        if self.is_enabled():
+        if self.elem.is_enabled():
             self.elem.send_keys(date)
         else:
             raise RuntimeError("Date control is disabled")
 
     def get_date(self) -> str:
-        if self.is_enabled():
-            return self.elem.get_attribute("value")
+        value = self.elem.get_attribute("value")
+        if value is not None:
+            return value
+        else:
+            raise RuntimeError("Value attribute does not exist")

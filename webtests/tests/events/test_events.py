@@ -22,7 +22,7 @@ from webtests.pageobjects.events import EventPage
 
 def test_if_event_page_is_displayed_then_all_actions_are_displayed(
     event_page: EventPage,
-):
+) -> None:
     assert event_page.actions.texts() == [
         "Reload",
         "Add event ...",
@@ -33,7 +33,7 @@ def test_if_event_page_is_displayed_then_all_actions_are_displayed(
 
 def test_if_no_row_is_selected_then_some_actions_are_disabled(
     event_page: EventPage, event: None
-):
+) -> None:
     assert event_page.actions.action("Reload").is_enabled()
     assert event_page.actions.action("Add event ...").is_enabled()
     assert event_page.actions.action("Edit event ...").is_disabled()
@@ -42,7 +42,7 @@ def test_if_no_row_is_selected_then_some_actions_are_disabled(
 
 def test_if_a_row_is_selected_then_all_actions_are_enabled(
     event_page: EventPage, event: None
-):
+) -> None:
     event_page.table.select_row(i=2)
 
     assert event_page.actions.action("Reload").is_enabled()
@@ -53,7 +53,7 @@ def test_if_a_row_is_selected_then_all_actions_are_enabled(
 
 def test_if_event_page_is_selected_then_the_table_header_is_displayed(
     event_page: EventPage,
-):
+) -> None:
     assert event_page.table.nr_of_columns() == 7
     assert event_page.table.headers() == [
         "Name",
@@ -68,7 +68,7 @@ def test_if_event_page_is_selected_then_the_table_header_is_displayed(
 
 def test_events_are_displayed_ordered_by_date_descending(
     event_page: EventPage, event: None
-):
+) -> None:
     dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf 1",
@@ -135,7 +135,7 @@ def test_events_are_displayed_ordered_by_date_descending(
 
 def test_if_filter_is_set_then_only_matching_rows_are_displayed(
     event_page: EventPage, event: None
-):
+) -> None:
     dialog = event_page.actions.add()
     dialog.enter_values(
         name="Test-Lauf 1",

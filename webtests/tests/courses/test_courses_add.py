@@ -26,7 +26,7 @@ EVENT_DATE = "2023-12-28"
 
 def test_if_a_course_is_added_with_required_data_then_an_additional_course_is_displayed(
     main_page: MainPage, event: str, delete_courses: None
-):
+) -> None:
     course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.add()
     dialog.check_values(
@@ -60,7 +60,7 @@ def test_if_a_course_is_added_with_required_data_then_an_additional_course_is_di
 
 def test_if_adding_a_course_is_cancelled_then_no_additional_course_is_displayed(
     main_page: MainPage, event: str, delete_courses: None
-):
+) -> None:
     course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.add()
     dialog.enter_values(
@@ -78,7 +78,7 @@ def test_if_adding_a_course_is_cancelled_then_no_additional_course_is_displayed(
 
 def test_if_a_course_is_added_with_all_data_then_an_additional_course_is_displayed(
     main_page: MainPage, event: str, delete_courses: None
-):
+) -> None:
     course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.add()
     dialog.check_values(
@@ -112,7 +112,7 @@ def test_if_a_course_is_added_with_all_data_then_an_additional_course_is_display
 
 def test_if_a_course_is_selected_and_a_new_course_is_added_then_no_course_is_selected(
     main_page: MainPage, event: str, course: None
-):
+) -> None:
     course_page = main_page.goto_courses(event=event)
     course_page.table.select_row(i=2)
     assert course_page.table.selected_row() == 2
@@ -130,7 +130,7 @@ def test_if_a_course_is_selected_and_a_new_course_is_added_then_no_course_is_sel
 
 def test_if_several_courses_are_added_then_the_added_courses_are_displayed(
     main_page: MainPage, event: str, course: None
-):
+) -> None:
     course_page = main_page.goto_courses(event=event)
     dialog = course_page.actions.add()
     dialog.enter_values(

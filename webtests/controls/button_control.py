@@ -25,13 +25,13 @@ class ButtonControl:
         self.elem = elem
 
     def is_disabled(self) -> bool:
-        return self.elem.get_attribute("disabled") == "true"
+        return not self.elem.is_enabled()
 
     def is_enabled(self) -> bool:
-        return not self.is_disabled()
+        return self.elem.is_enabled()
 
     def click(self) -> None:
-        if self.is_enabled():
+        if self.elem.is_enabled():
             self.elem.click()
         else:
             raise RuntimeError("Button control is disabled")

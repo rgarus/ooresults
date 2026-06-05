@@ -28,7 +28,7 @@ EVENT_DATE = "2023-12-28"
 
 def test_if_a_class_is_added_with_required_data_then_an_additional_class_is_displayed(
     main_page: MainPage, event: str, delete_classes: None
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.check_values(
@@ -73,7 +73,7 @@ def test_if_a_class_is_added_with_required_data_then_an_additional_class_is_disp
 
 def test_if_adding_a_class_is_cancelled_then_no_additional_class_is_displayed(
     main_page: MainPage, event: str, delete_classes: None
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.enter_values(
@@ -98,7 +98,7 @@ def test_if_adding_a_class_is_cancelled_then_no_additional_class_is_displayed(
 
 def test_if_a_class_is_added_with_all_data_then_an_additional_class_is_displayed(
     main_page: MainPage, event: str, delete_classes: None
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.check_values(
@@ -158,7 +158,7 @@ def test_if_a_class_is_added_you_can_choose_between_all_defined_courses(
     delete_classes: None,
     add_courses: None,
     course: str,
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     assert dialog.get_course_list() == ["", "Bahn A", "Bahn B"]
@@ -197,7 +197,7 @@ def test_if_a_class_is_added_you_can_choose_between_type_standard_and_net_and_sc
     event: str,
     delete_classes: None,
     type: str,
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     assert dialog.get_type_list() == ["Standard", "Net", "Score"]
@@ -233,7 +233,7 @@ def test_if_a_class_is_added_you_can_choose_between_type_standard_and_net_and_sc
 @pytest.mark.parametrize("use_start_control", ["If punched", "No", "Yes"])
 def test_if_a_class_is_added_you_can_choose_between_use_start_control_if_punched_and_no_and_yes(
     main_page: MainPage, event: str, delete_classes: None, use_start_control: str
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     assert dialog.get_use_start_control_list() == ["If punched", "No", "Yes"]
@@ -268,7 +268,7 @@ def test_if_a_class_is_added_you_can_choose_between_use_start_control_if_punched
 
 def test_if_a_class_is_selected_and_a_new_class_is_added_then_no_class_is_selected(
     main_page: MainPage, event: str, add_class: None
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     class_page.table.select_row(i=2)
     assert class_page.table.selected_row() == 2
@@ -284,7 +284,7 @@ def test_if_a_class_is_selected_and_a_new_class_is_added_then_no_class_is_select
 
 def test_if_several_classes_are_added_then_the_added_classes_are_displayed(
     main_page: MainPage, event: str, add_class: str
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.enter_values(

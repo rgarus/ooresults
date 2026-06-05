@@ -62,7 +62,7 @@ def result_data(main_page: MainPage, event: str) -> None:
 
 def test_if_view_is_entries_then_group_by_entries_sorted_by_name(
     main_page: MainPage, event: str, result_data: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     entry_page.view().select_by_text(text="Entries")
 
@@ -168,7 +168,7 @@ def test_if_view_is_entries_then_group_by_entries_sorted_by_name(
 
 def test_if_view_is_classes_then_group_by_classes_sorted_by_name(
     main_page: MainPage, event: str, result_data: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     entry_page.view().select_by_text(text="Classes")
 
@@ -270,7 +270,7 @@ def test_if_view_is_classes_then_group_by_classes_sorted_by_name(
 
 def test_if_view_is_clubs_then_group_by_clubs_sorted_by_name(
     main_page: MainPage, event: str, result_data: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     entry_page.view().select_by_text(text="Clubs")
 
@@ -375,7 +375,7 @@ def test_if_view_is_clubs_then_group_by_clubs_sorted_by_name(
 
 def test_if_view_is_results_then_group_by_classes_sorted_by_rank(
     main_page: MainPage, event: str, result_data: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     entry_page.view().select_by_text(text="Results")
 
@@ -456,7 +456,7 @@ def test_if_view_is_results_then_group_by_classes_sorted_by_rank(
 
 def test_if_view_is_states_then_group_by_states_sorted_by_name(
     main_page: MainPage, event: str, result_data: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     entry_page.view().select_by_text(text="States")
 
@@ -565,7 +565,7 @@ def test_if_view_is_states_then_group_by_states_sorted_by_name(
 
 def test_if_view_is_competitors_then_group_by_competitors_sorted_by_name(
     main_page: MainPage, event: str, result_data: None
-):
+) -> None:
     entry_page = main_page.goto_entries(event=event)
     entry_page.view().select_by_text(text="Competitors")
 

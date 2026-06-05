@@ -50,7 +50,7 @@ class AddCourseDialog:
         length: str,
         climb: str,
         controls: str,
-    ):
+    ) -> None:
         self.wait()
 
         assert name == TextControl(driver=self.driver, id="cou_name").get_text()
@@ -64,7 +64,7 @@ class AddCourseDialog:
         length: Optional[str] = None,
         climb: Optional[str] = None,
         controls: Optional[str] = None,
-    ):
+    ) -> None:
         self.wait()
 
         if name is not None:
@@ -157,7 +157,7 @@ class CoursePage:
         self.select_course(name=name)
         self.actions.delete().ok()
 
-    def delete_courses(self):
+    def delete_courses(self) -> None:
         for i in range(self.table.nr_of_rows() - 1):
             self.table.select_row(2)
             self.actions.delete().ok()
@@ -204,5 +204,5 @@ class CourseTable(Table):
             return rows[0] if rows else None
 
     def double_click_row(self, i: int) -> AddCourseDialog:
-        super().double_click_row(i=i)
+        self.double_click(i=i)
         return AddCourseDialog(driver=self.driver)

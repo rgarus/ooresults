@@ -23,7 +23,7 @@ from webtests.tests.conftest import post
 
 def test_if_a_competitor_is_added_by_another_user_then_it_is_displayed_after_reload(
     main_page: MainPage, competitor: None
-):
+) -> None:
     post(
         url="https://127.0.0.1:8080/competitor/add",
         data={

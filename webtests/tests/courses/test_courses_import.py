@@ -27,7 +27,7 @@ EVENT_NAME = "Test for Courses"
 EVENT_DATE = "2023-12-28"
 
 
-def test_import_courses(main_page: MainPage, event: str, delete_courses: None):
+def test_import_courses(main_page: MainPage, event: str, delete_courses: None) -> None:
     content = f"""\
 <?xml version='1.0' encoding='UTF-8'?>
 <CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">

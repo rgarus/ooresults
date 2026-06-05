@@ -26,7 +26,7 @@ EVENT_DATE = "2023-12-28"
 
 def test_if_a_course_is_deleted_then_the_course_is_no_longer_displayed(
     main_page: MainPage, event: str, course: None
-):
+) -> None:
     course_page = main_page.goto_courses(event=event)
 
     # add a second course
@@ -62,7 +62,7 @@ def test_if_a_course_is_deleted_then_the_course_is_no_longer_displayed(
 
 def test_if_a_course_is_deleted_then_no_course_is_selected(
     main_page: MainPage, event: str, course: None
-):
+) -> None:
     course_page = main_page.goto_courses(event=event)
 
     # add a second course
@@ -85,7 +85,7 @@ def test_if_a_course_is_deleted_then_no_course_is_selected(
 
 def test_if_deleting_a_course_is_cancelled_then_the_course_is_displayed_further(
     main_page: MainPage, event: str, course: None
-):
+) -> None:
     course_page = main_page.goto_courses(event=event)
 
     # select course

@@ -60,7 +60,7 @@ class AddClassDialog:
         time_limit: str,
         penalty_controls: str,
         penalty_time_limit: str,
-    ):
+    ) -> None:
         self.wait()
 
         assert name == TextControl(driver=self.driver, id="cla_name").get_text()
@@ -125,7 +125,7 @@ class AddClassDialog:
         time_limit: Optional[str] = None,
         penalty_controls: Optional[str] = None,
         penalty_time_limit: Optional[str] = None,
-    ):
+    ) -> None:
         self.wait()
 
         if name is not None:
@@ -250,7 +250,7 @@ class ClassPage:
         self.select_class(name=name)
         self.actions.delete().ok()
 
-    def delete_classes(self):
+    def delete_classes(self) -> None:
         for i in range(self.table.nr_of_rows() - 1):
             self.table.select_row(2)
             self.actions.delete().ok()
@@ -297,5 +297,5 @@ class ClassTable(Table):
             return rows[0] if rows else None
 
     def double_click_row(self, i: int) -> AddClassDialog:
-        super().double_click_row(i=i)
+        self.double_click(i=i)
         return AddClassDialog(driver=self.driver)

@@ -26,7 +26,7 @@ EVENT_DATE = "2023-12-28"
 
 def test_if_class_page_is_displayed_then_all_actions_are_displayed(
     main_page: MainPage, event: str
-):
+) -> None:
     assert main_page.goto_classes(event=event).actions.texts() == [
         "Reload",
         "Import ...",
@@ -39,7 +39,7 @@ def test_if_class_page_is_displayed_then_all_actions_are_displayed(
 
 def test_if_no_row_is_selected_then_some_actions_are_disabled(
     main_page: MainPage, event: str, add_class: str
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
 
     assert class_page.actions.action("Reload").is_enabled()
@@ -52,7 +52,7 @@ def test_if_no_row_is_selected_then_some_actions_are_disabled(
 
 def test_if_a_row_is_selected_then_all_actions_are_enabled(
     main_page: MainPage, event: str, add_class: str
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     class_page.table.select_row(i=2)
 
@@ -66,7 +66,7 @@ def test_if_a_row_is_selected_then_all_actions_are_enabled(
 
 def test_if_class_page_is_selected_then_the_table_header_is_displayed(
     main_page: MainPage, event: str
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     assert class_page.table.nr_of_columns() == 11
     assert class_page.table.headers() == [
@@ -86,7 +86,7 @@ def test_if_class_page_is_selected_then_the_table_header_is_displayed(
 
 def test_if_filter_is_set_then_only_matching_rows_are_displayed(
     main_page: MainPage, event: str, add_class: str
-):
+) -> None:
     class_page = main_page.goto_classes(event=event)
     dialog = class_page.actions.add()
     dialog.enter_values(

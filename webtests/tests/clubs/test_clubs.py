@@ -20,7 +20,9 @@
 from webtests.pageobjects.main_page import MainPage
 
 
-def test_if_club_page_is_selected_then_all_actions_are_displayed(main_page: MainPage):
+def test_if_club_page_is_selected_then_all_actions_are_displayed(
+    main_page: MainPage,
+) -> None:
     club_page = main_page.goto_clubs()
     assert club_page.actions.texts() == [
         "Reload",
@@ -32,7 +34,7 @@ def test_if_club_page_is_selected_then_all_actions_are_displayed(main_page: Main
 
 def test_if_no_row_is_selected_then_some_actions_are_disabled(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     assert club_page.table.selected_row() is None
 
@@ -44,7 +46,7 @@ def test_if_no_row_is_selected_then_some_actions_are_disabled(
 
 def test_if_a_row_is_selected_then_all_actions_are_enabled(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     club_page.table.select_row(i=2)
     assert club_page.table.selected_row() == 2
@@ -55,7 +57,9 @@ def test_if_a_row_is_selected_then_all_actions_are_enabled(
     assert club_page.actions.action("Delete club").is_enabled()
 
 
-def test_if_club_page_is_selected_then_table_header_is_displayed(main_page: MainPage):
+def test_if_club_page_is_selected_then_table_header_is_displayed(
+    main_page: MainPage,
+) -> None:
     club_page = main_page.goto_clubs()
     assert club_page.table.nr_of_columns() == 1
     assert club_page.table.headers() == ["Name"]
@@ -63,7 +67,7 @@ def test_if_club_page_is_selected_then_table_header_is_displayed(main_page: Main
 
 def test_if_filter_is_set_then_only_matching_rows_are_displayed(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.enter_values(name="Verein 2")

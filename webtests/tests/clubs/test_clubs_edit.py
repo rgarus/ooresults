@@ -22,7 +22,7 @@ from webtests.pageobjects.main_page import MainPage
 
 def test_if_a_club_is_edited_then_the_changed_data_are_displayed(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     club_page.table.select_row(2)
 
@@ -41,7 +41,7 @@ def test_if_a_club_is_edited_then_the_changed_data_are_displayed(
 
 def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     dialog = club_page.table.double_click_row(2)
     dialog.check_values(name="OL Bundestag")
@@ -58,7 +58,7 @@ def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
 
 def test_if_a_club_is_edited_then_no_club_is_selected(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     club_page.table.select_row(i=2)
     dialog = club_page.actions.edit()

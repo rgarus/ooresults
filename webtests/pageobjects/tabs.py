@@ -29,7 +29,7 @@ class Tab(ButtonControl):
 
 
 class Tabs:
-    def __init__(self, driver: webdriver.Remote):
+    def __init__(self, driver: webdriver.Remote) -> None:
         self.driver = driver
 
     def tabs(self) -> list[Tab]:

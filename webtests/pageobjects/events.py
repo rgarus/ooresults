@@ -223,5 +223,5 @@ class EventTable(Table):
             return rows[0] if rows else None
 
     def double_click_row(self, i: int) -> AddEventDialog:
-        super().double_click_row(i=i)
+        self.double_click(i=i)
         return AddEventDialog(driver=self.driver)

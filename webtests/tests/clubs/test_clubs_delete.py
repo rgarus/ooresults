@@ -22,7 +22,7 @@ from webtests.pageobjects.main_page import MainPage
 
 def test_if_a_club_is_deleted_then_the_club_is_no_longer_displayed(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.enter_values(name="XXX Club")
@@ -44,7 +44,7 @@ def test_if_a_club_is_deleted_then_the_club_is_no_longer_displayed(
 
 def test_if_a_club_is_deleted_then_no_club_is_selected(
     main_page: MainPage, add_club: None
-):
+) -> None:
     club_page = main_page.goto_clubs()
     dialog = club_page.actions.add()
     dialog.enter_values(name="XXX Club")
@@ -64,7 +64,7 @@ def test_if_a_club_is_deleted_then_no_club_is_selected(
 
 def test_if_deleting_a_club_is_cancelled_then_the_club_is_displayed_further(
     main_page: MainPage, add_club: None
-):
+) -> None:
     # select club
     club_page = main_page.goto_clubs()
     club_page.table.select_row(2)
