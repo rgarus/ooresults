@@ -59,11 +59,11 @@ def missing(status: ResultStatus, missing_controls: List[str]) -> str:
     <table style="text-align: left">
         <tr>
             <th style="padding-right: 10px">Event name:</th>
-            <td>${event.name if event else ""}</td>
+            <td id="si2.event_name">${event.name if event else ""}</td>
         </tr>
         <tr>
             <th style="padding-right: 10px">Event date:</th>
-            <td>${event.date.isoformat() if event and event.date else ""}</td>
+            <td id="si2.event_date">${event.date.isoformat() if event and event.date else ""}</td>
         </tr>
     </table>
 </div>
@@ -112,22 +112,22 @@ def missing(status: ResultStatus, missing_controls: List[str]) -> str:
         % if status is None or status == "readerOffline":
             <tr style="color:red;">
                 <th style="padding-right: 10px">Card reader status:</th>
-                <td>Offline</td>
+                <td id="si2.reader_status">Offline</td>
             </tr>
         % elif status in ["readerConnected", "cardRead", "cardRemoved"]:
             <tr style="color:green;">
                 <th style="padding-right: 10px">Card reader status:</th>
-                <td>Connected</td>
+                <td id="si2.reader_status">Connected</td>
             </tr>
         % elif status == "readerDisconnected":
             <tr style="color:red;">
                 <th style="padding-right: 10px">Card reader status:</th>
-                <td>Disconnected</td>
+                <td id="si2.reader_status">Disconnected</td>
             </tr>
         % elif status == "cardInserted":
             <tr style="color:green;">
                 <th style="padding-right: 10px">Card reader status:</th>
-                <td>Reading card</td>
+                <td id="si2.reader_status">Reading card</td>
             </tr>
         % endif
 

@@ -76,7 +76,7 @@ def parse_cardreader_log(item: dict) -> result_type.CardReaderMessage:
             result.si_punched_finish_time = result.punched_finish_time
         result.start_time = result.punched_start_time
         result.finish_time = result.punched_finish_time
-        for p in item["punches"]:
+        for p in item.get("punches", []):
             result.split_times.append(
                 result_type.SplitTime(
                     control_code=p["controlCode"],

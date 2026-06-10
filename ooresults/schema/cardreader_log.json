@@ -43,14 +43,20 @@
             "punches": {
                 "type": "array",
                 "items": {
-                    "controlCode": {
-                        "type": "string",
-                        "description" : "control code of the station"
+                    "properties": {
+                        "controlCode": {
+                            "type": "string",
+                            "description": "control code of the station"
+                        },
+                        "punchTime": {
+                            "type": "string",
+                            "description": "time in iso format of punching the station"
+                        }
                     },
-                    "punchTime": {
-                        "type": "string",
-                        "description" : "time in iso format of punching the station"
-                    }
+                    "required": [
+                        "controlCode",
+                        "punchTime"
+                    ]
                 }
             }
         },

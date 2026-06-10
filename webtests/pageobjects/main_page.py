@@ -20,7 +20,11 @@
 from typing import Optional
 
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 
 from webtests.pageobjects.classes import ClassPage
 from webtests.pageobjects.clubs import ClubPage
@@ -28,6 +32,7 @@ from webtests.pageobjects.competitors import CompetitorPage
 from webtests.pageobjects.courses import CoursePage
 from webtests.pageobjects.entries import EntryPage
 from webtests.pageobjects.events import EventPage
+from webtests.pageobjects.si_reader import SiReaderPage
 from webtests.pageobjects.tabs import Tabs
 
 
@@ -35,6 +40,16 @@ class MainPage:
     def __init__(self, driver: webdriver.Remote):
         self.driver = driver
         self.tabs = Tabs(driver=driver)
+
+    def wait(self, timeout: int = 10) -> WebDriverWait:
+        return WebDriverWait(
+            driver=self.driver,
+            timeout=timeout,
+            ignored_exceptions=(
+                NoSuchElementException,
+                StaleElementReferenceException,
+            ),
+        )
 
     def load(self) -> None:
         self.driver.get("https://admin:admin@localhost:8080")
@@ -93,3 +108,16 @@ class MainPage:
         if not self.tabs.tab(text="Clubs").is_selected():
             self.tabs.select(text="Clubs")
         return ClubPage(driver=self.driver)
+
+    def goto_si_reader(self, event: Optional[str] = None) -> SiReaderPage:
+        if event:
+            self.goto_events().select_event(name=event)
+        number_of_windows = len(self.driver.window_handles)
+        self.tabs.select(text="SI Reader ...")
+        WebDriverWait(self.driver, 10).until(
+            EC.number_of_windows_to_be(number_of_windows + 1)
+        )
+        self.driver.switch_to.window(self.driver.window_handles[-1])
+        return SiReaderPage(
+            driver=self.driver, handle=self.driver.current_window_handle
+        )
