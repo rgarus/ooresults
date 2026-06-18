@@ -21,10 +21,10 @@ from datetime import date
 from typing import Optional
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.event_type import EventType
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 @pytest.fixture()
@@ -75,11 +75,11 @@ def events() -> list[EventType]:
 TABLE_ID = "evnt.table"
 
 
-def test_events_list_is_empty():
-    html = etree.HTML(render.events_table(events=[]))
+def test_events_list_is_empty() -> None:
+    html = Html(text=render.events_table(events=[]))
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Name",
         "Date",
@@ -91,15 +91,15 @@ def test_events_list_is_empty():
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr/")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr/")
     assert len(rows) == 0
 
 
-def test_events_list_is_not_empty(events: list[EventType]):
-    html = etree.HTML(render.events_table(events=events))
+def test_events_list_is_not_empty(events: list[EventType]) -> None:
+    html = Html(text=render.events_table(events=events))
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Name",
         "Date",
@@ -111,7 +111,7 @@ def test_events_list_is_not_empty(events: list[EventType]):
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 4
 
     # row 1
@@ -156,19 +156,19 @@ def test_events_list_is_not_empty(events: list[EventType]):
     ]
 
 
-def test_key_is_defined(events: list[EventType]):
+def test_key_is_defined(events: list[EventType]) -> None:
     events[0].key = "sevenOr"
-    html = etree.HTML(render.events_table(events=events))
+    html = Html(text=render.events_table(events=events))
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
     assert elem.text == "***"
 
 
-def test_publish_is_true(events: list[EventType]):
+def test_publish_is_true(events: list[EventType]) -> None:
     events[0].publish = True
-    html = etree.HTML(render.events_table(events=events))
+    html = Html(text=render.events_table(events=events))
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
     assert elem.text == "yes"
 
 
@@ -210,35 +210,35 @@ def test_streaming_is_defined(
     streaming_key: Optional[str],
     streaming_enabled: bool,
     value: Optional[str],
-):
+) -> None:
     events[0].streaming_address = streaming_address
     events[0].streaming_key = streaming_key
     events[0].streaming_enabled = streaming_enabled
-    html = etree.HTML(render.events_table(events=events))
+    html = Html(text=render.events_table(events=events))
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[5]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[5]")
     assert elem.text == value
 
 
-def test_series_is_defined(events: list[EventType]):
+def test_series_is_defined(events: list[EventType]) -> None:
     events[0].series = "Run 1"
-    html = etree.HTML(render.events_table(events=events))
+    html = Html(text=render.events_table(events=events))
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
     assert elem.text == "Run 1"
 
 
-def test_one_field(events: list[EventType]):
+def test_one_field(events: list[EventType]) -> None:
     events[0].fields = ["Start number"]
-    html = etree.HTML(render.events_table(events=events))
+    html = Html(text=render.events_table(events=events))
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
     assert elem.text == "Start number"
 
 
-def test_two_fields(events: list[EventType]):
+def test_two_fields(events: list[EventType]) -> None:
     events[0].fields = ["Start number", "Region"]
-    html = etree.HTML(render.events_table(events=events))
+    html = Html(text=render.events_table(events=events))
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
     assert elem.text == "Start number, Region"

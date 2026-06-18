@@ -18,10 +18,10 @@
 
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.club_type import ClubType
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 @pytest.fixture()
@@ -32,21 +32,21 @@ def club() -> ClubType:
     )
 
 
-def test_club_is_none():
-    html = etree.HTML(render.add_club(club=None))
+def test_club_is_none() -> None:
+    html = Html(text=render.add_club(club=None))
 
-    input_id = html.find(".//input[@name='id']")
+    input_id = html.find(path=".//input[@name='id']")
     assert input_id.attrib["value"] == ""
 
-    input_name = html.find(".//input[@name='name']")
+    input_name = html.find(path=".//input[@name='name']")
     assert input_name.attrib["value"] == ""
 
 
-def test_club_is_not_none(club: ClubType):
-    html = etree.HTML(render.add_club(club=club))
+def test_club_is_not_none(club: ClubType) -> None:
+    html = Html(text=render.add_club(club=club))
 
-    input_id = html.find(".//input[@name='id']")
+    input_id = html.find(path=".//input[@name='id']")
     assert input_id.attrib["value"] == "7"
 
-    input_name = html.find(".//input[@name='name']")
+    input_name = html.find(path=".//input[@name='name']")
     assert input_name.attrib["value"] == "OL Bundestag"

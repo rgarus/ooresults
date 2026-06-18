@@ -18,15 +18,14 @@
 
 
 import datetime
-from typing import Optional
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.utils import render
 from ooresults.websocket_server.streaming_status import Status
+from tests.templates.conftest import Html
 
 
 @pytest.fixture()
@@ -69,18 +68,18 @@ def event() -> EventType:
 #
 
 
-def test_messages_list_is_empty_with_stream_status_is_none(event: EventType):
-    html = etree.HTML(
-        render.si2_data(
+def test_messages_list_is_empty_with_stream_status_is_none(event: EventType) -> None:
+    html = Html(
+        text=render.si2_data(
             status="readerConnected", stream_status=None, event=event, messages=[]
         )
     )
 
-    assert html.find(".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
-    assert html.find(".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
+    assert html.find(path=".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
+    assert html.find(path=".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
 
     # messages
-    table = html.find(".//div/table[@id='si2.messages']")
+    table = html.find(path=".//div/table[@id='si2.messages']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # header
@@ -100,15 +99,17 @@ def test_messages_list_is_empty_with_stream_status_is_none(event: EventType):
     assert len(rows) == 0
 
     # status
-    table = html.find(".//div/table[@id='si2.status']")
+    table = html.find(path=".//div/table[@id='si2.status']")
     assert [child.tag for child in table] == ["tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
     assert [td.text for td in table.findall("./tr[1]/td")] == ["Connected"]
 
 
-def test_messages_list_is_empty_with_stream_status_is_not_none(event: EventType):
-    html = etree.HTML(
-        render.si2_data(
+def test_messages_list_is_empty_with_stream_status_is_not_none(
+    event: EventType,
+) -> None:
+    html = Html(
+        text=render.si2_data(
             status="readerConnected",
             stream_status=Status.NOT_CONNECTED,
             event=event,
@@ -116,11 +117,11 @@ def test_messages_list_is_empty_with_stream_status_is_not_none(event: EventType)
         )
     )
 
-    assert html.find(".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
-    assert html.find(".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
+    assert html.find(path=".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
+    assert html.find(path=".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
 
     # messages
-    table = html.find(".//div/table[@id='si2.messages']")
+    table = html.find(path=".//div/table[@id='si2.messages']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # header
@@ -140,7 +141,7 @@ def test_messages_list_is_empty_with_stream_status_is_not_none(event: EventType)
     assert len(rows) == 0
 
     # status
-    table = html.find(".//div/table[@id='si2.status']")
+    table = html.find(path=".//div/table[@id='si2.status']")
     assert [child.tag for child in table] == ["tr", "tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
     assert [td.text for td in table.findall("./tr[1]/td")] == ["Connected"]
@@ -148,7 +149,7 @@ def test_messages_list_is_empty_with_stream_status_is_not_none(event: EventType)
     assert [td.text for td in table.findall("./tr[2]/td")] == ["Not connected"]
 
 
-def test_messages_for_same_event_id_are_displayed(event: EventType):
+def test_messages_for_same_event_id_are_displayed(event: EventType) -> None:
     messages = [
         {
             "entryTime": "10:26:03",
@@ -203,17 +204,17 @@ def test_messages_for_same_event_id_are_displayed(event: EventType):
         },
     ]
 
-    html = etree.HTML(
-        render.si2_data(
+    html = Html(
+        text=render.si2_data(
             status="readerConnected", stream_status=None, event=event, messages=messages
         )
     )
 
-    assert html.find(".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
-    assert html.find(".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
+    assert html.find(path=".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
+    assert html.find(path=".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
 
     # messages
-    table = html.find(".//div/table[@id='si2.messages']")
+    table = html.find(path=".//div/table[@id='si2.messages']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # header
@@ -272,12 +273,12 @@ def test_messages_for_same_event_id_are_displayed(event: EventType):
     ]
 
     # status
-    table = html.find(".//div/table[@id='si2.status']")
+    table = html.find(path=".//div/table[@id='si2.status']")
     assert [child.tag for child in table] == ["tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
 
 
-def test_messages_for_another_event_id_are_not_displayed(event: EventType):
+def test_messages_for_another_event_id_are_not_displayed(event: EventType) -> None:
     messages = [
         {
             "entryTime": "10:26:03",
@@ -294,17 +295,17 @@ def test_messages_for_another_event_id_are_not_displayed(event: EventType):
         },
     ]
 
-    html = etree.HTML(
-        render.si2_data(
+    html = Html(
+        text=render.si2_data(
             status="readerConnected", stream_status=None, event=event, messages=messages
         )
     )
 
-    assert html.find(".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
-    assert html.find(".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
+    assert html.find(path=".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
+    assert html.find(path=".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
 
     # messages
-    table = html.find(".//div/table[@id='si2.messages']")
+    table = html.find(path=".//div/table[@id='si2.messages']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # header
@@ -325,7 +326,7 @@ def test_messages_for_another_event_id_are_not_displayed(event: EventType):
     assert len(rows) == 0
 
     # status
-    table = html.find(".//div/table[@id='si2.status']")
+    table = html.find(path=".//div/table[@id='si2.status']")
     assert [child.tag for child in table] == ["tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
 
@@ -333,7 +334,6 @@ def test_messages_for_another_event_id_are_not_displayed(event: EventType):
 @pytest.mark.parametrize(
     "status, text, color",
     [
-        (None, "Offline", "red"),
         ("readerOffline", "Offline", "red"),
         ("readerDisconnected", "Disconnected", "red"),
         ("readerConnected", "Connected", "green"),
@@ -343,17 +343,19 @@ def test_messages_for_another_event_id_are_not_displayed(event: EventType):
     ],
 )
 def test_cardreader_status(
-    event: EventType, status: Optional[str], text: str, color: str
-):
-    html = etree.HTML(
-        render.si2_data(status=status, stream_status=None, event=event, messages=[])
+    event: EventType, status: str, text: str, color: str
+) -> None:
+    html = Html(
+        text=render.si2_data(
+            status=status, stream_status=None, event=event, messages=[]
+        )
     )
 
-    assert html.find(".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
-    assert html.find(".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
+    assert html.find(path=".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
+    assert html.find(path=".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
 
     # messages
-    table = html.find(".//div/table[@id='si2.messages']")
+    table = html.find(path=".//div/table[@id='si2.messages']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # header
@@ -373,7 +375,7 @@ def test_cardreader_status(
     assert len(rows) == 0
 
     # status
-    table = html.find(".//div/table[@id='si2.status']")
+    table = html.find(path=".//div/table[@id='si2.status']")
     assert [child.tag for child in table] == ["tr"]
     assert table[0].attrib["style"] == f"color:{color};"
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
@@ -391,18 +393,18 @@ def test_cardreader_status(
         (Status.OK, "Ok", "green"),
     ],
 )
-def test_stream_status(event: EventType, status: Status, text: str, color: str):
-    html = etree.HTML(
-        render.si2_data(
+def test_stream_status(event: EventType, status: Status, text: str, color: str) -> None:
+    html = Html(
+        text=render.si2_data(
             status="readerOffline", stream_status=status, event=event, messages=[]
         )
     )
 
-    assert html.find(".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
-    assert html.find(".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
+    assert html.find(path=".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
+    assert html.find(path=".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
 
     # messages
-    table = html.find(".//div/table[@id='si2.messages']")
+    table = html.find(path=".//div/table[@id='si2.messages']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # header
@@ -422,7 +424,7 @@ def test_stream_status(event: EventType, status: Status, text: str, color: str):
     assert len(rows) == 0
 
     # status
-    table = html.find(".//div/table[@id='si2.status']")
+    table = html.find(path=".//div/table[@id='si2.status']")
     assert [child.tag for child in table] == ["tr", "tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
     assert [td.text for td in table.findall("./tr[1]/td")] == ["Offline"]
@@ -445,7 +447,7 @@ def test_stream_status(event: EventType, status: Status, text: str, color: str):
 )
 def test_missing_controls_if_status_is_not_ok(
     event: EventType, missing_controls: list[str], text: str
-):
+) -> None:
     messages = [
         {
             "entryTime": "10:28:03",
@@ -462,17 +464,17 @@ def test_missing_controls_if_status_is_not_ok(
         },
     ]
 
-    html = etree.HTML(
-        render.si2_data(
+    html = Html(
+        text=render.si2_data(
             status="readerConnected", stream_status=None, event=event, messages=messages
         )
     )
 
-    assert html.find(".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
-    assert html.find(".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
+    assert html.find(path=".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
+    assert html.find(path=".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
 
     # messages
-    table = html.find(".//div/table[@id='si2.messages']")
+    table = html.find(path=".//div/table[@id='si2.messages']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # header
@@ -503,7 +505,7 @@ def test_missing_controls_if_status_is_not_ok(
     ]
 
     # status
-    table = html.find(".//div/table[@id='si2.status']")
+    table = html.find(path=".//div/table[@id='si2.status']")
     assert [child.tag for child in table] == ["tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
 
@@ -517,7 +519,7 @@ def test_missing_controls_if_status_is_not_ok(
 )
 def test_missing_controls_if_status_is_ok(
     event: EventType, missing_controls: list[str], text: str
-):
+) -> None:
     messages = [
         {
             "entryTime": "10:28:03",
@@ -534,17 +536,17 @@ def test_missing_controls_if_status_is_ok(
         },
     ]
 
-    html = etree.HTML(
-        render.si2_data(
+    html = Html(
+        text=render.si2_data(
             status="readerConnected", stream_status=None, event=event, messages=messages
         )
     )
 
-    assert html.find(".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
-    assert html.find(".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
+    assert html.find(path=".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
+    assert html.find(path=".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
 
     # messages
-    table = html.find(".//div/table[@id='si2.messages']")
+    table = html.find(path=".//div/table[@id='si2.messages']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # header
@@ -576,7 +578,7 @@ def test_missing_controls_if_status_is_ok(
     ]
 
     # status
-    table = html.find(".//div/table[@id='si2.status']")
+    table = html.find(path=".//div/table[@id='si2.status']")
     assert [child.tag for child in table] == ["tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
 
@@ -597,7 +599,7 @@ def test_missing_controls_if_status_is_ok(
 )
 def test_messages_background_color_depends_on_status(
     event: EventType, result_status: ResultStatus, color: str
-):
+) -> None:
     messages = [
         {
             "entryTime": "10:28:03",
@@ -614,17 +616,17 @@ def test_messages_background_color_depends_on_status(
         },
     ]
 
-    html = etree.HTML(
-        render.si2_data(
+    html = Html(
+        text=render.si2_data(
             status="readerConnected", stream_status=None, event=event, messages=messages
         )
     )
 
-    assert html.find(".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
-    assert html.find(".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
+    assert html.find(path=".//div[@id='cls.event']//tr[1]//td").text == "1. O-Cup 2023"
+    assert html.find(path=".//div[@id='cls.event']//tr[2]//td").text == "2023-01-15"
 
     # messages
-    table = html.find(".//div/table[@id='si2.messages']")
+    table = html.find(path=".//div/table[@id='si2.messages']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # header

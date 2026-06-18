@@ -17,19 +17,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from lxml import etree
-
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
-def test_events_list_is_empty():
-    html = etree.HTML(render.main(events=[]))
-    assert html is not None
+def test_events_list_is_empty() -> None:
+    html = Html(text=render.main(events=[]))
 
-    assert len(html.findall(".//div[@id='tabs']")) == 1
-    assert len(html.findall(".//div[@id='eve_actions']")) == 1
-    assert len(html.findall(".//div[@id='entr.actions']")) == 1
-    assert len(html.findall(".//div[@id='clas.actions']")) == 1
-    assert len(html.findall(".//div[@id='cour.actions']")) == 1
-    assert len(html.findall(".//div[@id='comp.actions']")) == 1
-    assert len(html.findall(".//div[@id='club.actions']")) == 1
+    assert len(html.findall(path=".//div[@id='tabs']")) == 1
+    assert len(html.findall(path=".//div[@id='eve_actions']")) == 1
+    assert len(html.findall(path=".//div[@id='entr.actions']")) == 1
+    assert len(html.findall(path=".//div[@id='clas.actions']")) == 1
+    assert len(html.findall(path=".//div[@id='cour.actions']")) == 1
+    assert len(html.findall(path=".//div[@id='comp.actions']")) == 1
+    assert len(html.findall(path=".//div[@id='club.actions']")) == 1

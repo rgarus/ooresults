@@ -17,36 +17,41 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from lxml import etree
-
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
-def test_number_of_entries():
-    html = etree.HTML(
-        render.entries_import_status(
+def test_number_of_entries() -> None:
+    html = Html(
+        text=render.entries_import_status(
             number_of_imported_entries=13,
             number_of_entries=15,
             names=set(),
         )
     )
-    assert html.find(".//p[1]").text == "13 of 15 entries imported."
-    assert len(html.findall(".//p")) == 1
+
+    elem = html.find(path=".//p[1]")
+    assert elem.text == "13 of 15 entries imported."
+
+    assert len(html.findall(path=".//p")) == 1
 
 
-def test_names():
-    html = etree.HTML(
-        render.entries_import_status(
+def test_names() -> None:
+    html = Html(
+        text=render.entries_import_status(
             number_of_imported_entries=13,
             number_of_entries=15,
             names={("Merkel", "Angela"), ("Derkel", "Sabine")},
         )
     )
 
-    assert html.find(".//p[1]").text == "13 of 15 entries imported."
-    n1 = html.find(".//ul/li[1]").text
-    n2 = html.find(".//ul/li[2]").text
-    assert n1 in ("Merkel, Angela", "Derkel, Sabine")
-    assert n2 in ("Merkel, Angela", "Derkel, Sabine")
-    assert n1 != n2
-    assert len(html.findall(".//li")) == 2
+    elem = html.find(path=".//p[1]")
+    assert elem.text == "13 of 15 entries imported."
+
+    n1 = html.find(path=".//ul/li[1]")
+    n2 = html.find(path=".//ul/li[2]")
+    assert n1.text in ("Merkel, Angela", "Derkel, Sabine")
+    assert n2.text in ("Merkel, Angela", "Derkel, Sabine")
+    assert n1.text != n2.text
+
+    assert len(html.findall(path=".//li")) == 2

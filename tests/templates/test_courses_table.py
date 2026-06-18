@@ -20,11 +20,11 @@
 import datetime
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.course_type import CourseType
 from ooresults.otypes.event_type import EventType
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 @pytest.fixture()
@@ -69,11 +69,11 @@ def courses() -> list[CourseType]:
 TABLE_ID = "cou.table"
 
 
-def test_courses_list_is_empty(event: EventType):
-    html = etree.HTML(render.courses_table(event=event, courses=[]))
+def test_courses_list_is_empty(event: EventType) -> None:
+    html = Html(text=render.courses_table(event=event, courses=[]))
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Name",
         "Length",
@@ -82,18 +82,18 @@ def test_courses_list_is_empty(event: EventType):
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr/")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr/")
     assert len(rows) == 0
 
 
-def test_courses_list_is_not_empty(event: EventType, courses: list[CourseType]):
-    html = etree.HTML(render.courses_table(event=event, courses=courses))
+def test_courses_list_is_not_empty(event: EventType, courses: list[CourseType]) -> None:
+    html = Html(text=render.courses_table(event=event, courses=courses))
 
-    assert html.find(".//td[@id='cour.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='cour.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='cour.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='cour.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Name",
         "Length",
@@ -102,7 +102,7 @@ def test_courses_list_is_not_empty(event: EventType, courses: list[CourseType]):
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 3
 
     # row 1
@@ -129,25 +129,25 @@ def test_courses_list_is_not_empty(event: EventType, courses: list[CourseType]):
     ]
 
 
-def test_length_is_defined(event: EventType, courses: list[CourseType]):
+def test_length_is_defined(event: EventType, courses: list[CourseType]) -> None:
     courses[0].length = 5400.4
-    html = etree.HTML(render.courses_table(event=event, courses=courses))
+    html = Html(text=render.courses_table(event=event, courses=courses))
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[2]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[2]")
     assert elem.text == "5400"
 
 
-def test_climb_is_defined(event: EventType, courses: list[CourseType]):
+def test_climb_is_defined(event: EventType, courses: list[CourseType]) -> None:
     courses[0].climb = 159.8
-    html = etree.HTML(render.courses_table(event=event, courses=courses))
+    html = Html(text=render.courses_table(event=event, courses=courses))
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
     assert elem.text == "160"
 
 
-def test_controls_are_defined(event: EventType, courses: list[CourseType]):
+def test_controls_are_defined(event: EventType, courses: list[CourseType]) -> None:
     courses[0].controls = ["124", "137", "123", "129"]
-    html = etree.HTML(render.courses_table(event=event, courses=courses))
+    html = Html(text=render.courses_table(event=event, courses=courses))
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
     assert elem.text == "124 - 137 - 123 - 129"

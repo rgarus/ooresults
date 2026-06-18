@@ -17,11 +17,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from lxml import etree
-
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
-def test_html():
-    html = etree.HTML(render.entries_add_status())
-    assert len(html.findall(".//p")) == 7
+def test_html() -> None:
+    html = Html(text=render.entries_add_status())
+    assert len(html.findall(path=".//p")) == 7

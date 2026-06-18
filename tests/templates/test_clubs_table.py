@@ -18,10 +18,10 @@
 
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.club_type import ClubType
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 @pytest.fixture()
@@ -41,31 +41,31 @@ def clubs() -> list[ClubType]:
 TABLE_ID = "clb.table"
 
 
-def test_club_list_is_empty():
-    html = etree.HTML(render.clubs_table(clubs=[]))
+def test_club_list_is_empty() -> None:
+    html = Html(text=render.clubs_table(clubs=[]))
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Name",
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr/")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr/")
     assert len(rows) == 0
 
 
-def test_club_list_is_not_empty(clubs: list[ClubType]):
-    html = etree.HTML(render.clubs_table(clubs=clubs))
+def test_club_list_is_not_empty(clubs: list[ClubType]) -> None:
+    html = Html(text=render.clubs_table(clubs=clubs))
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Name",
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 3
 
     # row 1

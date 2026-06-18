@@ -17,20 +17,19 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from lxml import etree
-
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
-def test_results_table_is_none():
-    html = etree.HTML(render.root(results_table=None))
-    assert html is not None
+def test_results_table_is_none() -> None:
+    html = Html(text=render.root(results_table=None))
 
-    assert html.find("body/h2").text == "No results available"
+    elem = html.find(path="body/h2")
+    assert elem.text == "No results available"
 
 
-def test_results_table_is_not_none():
-    html = etree.HTML(render.root(results_table="<p>abc</p>"))
-    assert html is not None
+def test_results_table_is_not_none() -> None:
+    html = Html(text=render.root(results_table="<p>abc</p>"))
 
-    assert html.find("body/p").text == "abc"
+    elem = html.find(path="body/p")
+    assert elem.text == "abc"

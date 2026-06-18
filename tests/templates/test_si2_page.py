@@ -20,9 +20,9 @@
 from typing import Optional
 
 import pytest
-from lxml import etree
 
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 @pytest.mark.parametrize(
@@ -32,12 +32,11 @@ from ooresults.utils import render
         (2, "2"),
     ],
 )
-def test_event_id(event_id: Optional[int], value: str):
-    html = etree.HTML(render.si2_page(event_id=event_id, key=None))
-    assert html is not None
+def test_event_id(event_id: Optional[int], value: str) -> None:
+    html = Html(text=render.si2_page(event_id=event_id, key=None))
 
-    script = html.find("body/script").text.splitlines()
-    script = [line.strip() for line in script]
+    elem = html.find(path="body/script")
+    script = [line.strip() for line in elem.text.splitlines()]
     assert f'var event_id = "{value}";' in script
 
 
@@ -50,10 +49,9 @@ def test_event_id(event_id: Optional[int], value: str):
         ("<&>", "<&>"),
     ],
 )
-def test_key(key: Optional[str], value: str):
-    html = etree.HTML(render.si2_page(event_id=None, key=key))
-    assert html is not None
+def test_key(key: Optional[str], value: str) -> None:
+    html = Html(text=render.si2_page(event_id=None, key=key))
 
-    script = html.find("body/script").text.splitlines()
-    script = [line.strip() for line in script]
+    elem = html.find(path="body/script")
+    script = [line.strip() for line in elem.text.splitlines()]
     assert f'var key = "{value}";' in script

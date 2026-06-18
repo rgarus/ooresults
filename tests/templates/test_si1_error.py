@@ -17,10 +17,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from lxml import etree
-
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 #
@@ -39,7 +38,7 @@ from ooresults.utils import render
 #
 
 
-def test_error_is_not_empty():
+def test_error_is_not_empty() -> None:
     message = {
         "entryTime": "10:28:20",
         "eventId": 1,
@@ -53,13 +52,13 @@ def test_error_is_not_empty():
         "error": "Control card unknown",
     }
 
-    html = etree.HTML(render.si1_error(message=message))
-    div = html.find(".//div[@id='si1.div']")
+    html = Html(text=render.si1_error(message=message))
+    div = html.find(path=".//div[@id='si1.div']")
     assert div.attrib["class"] == "bgy"
 
-    t = html.find(".//div[@id='si1.div']/div[1]/p").text
-    assert t == "7223344"
-    t = html.find(".//div[@id='si1.div']/div[2]/p").text
-    assert t == "Control card unknown"
-    t = html.find(".//div[@id='si1.div']/div[3]/p").text
-    assert t == "Bitte im WKZ melden"
+    elem = html.find(path=".//div[@id='si1.div']/div[1]/p")
+    assert elem.text == "7223344"
+    elem = html.find(path=".//div[@id='si1.div']/div[2]/p")
+    assert elem.text == "Control card unknown"
+    elem = html.find(path=".//div[@id='si1.div']/div[3]/p")
+    assert elem.text == "Bitte im WKZ melden"

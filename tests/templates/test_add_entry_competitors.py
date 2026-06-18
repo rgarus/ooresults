@@ -18,10 +18,10 @@
 
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 @pytest.fixture()
@@ -50,98 +50,111 @@ def competitors() -> list[CompetitorType]:
     ]
 
 
-def test_competitor_list_is_not_empty(competitors: list[CompetitorType]):
-    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
+def test_competitor_list_is_not_empty(competitors: list[CompetitorType]) -> None:
+    html = Html(text=render.add_entry_competitors(competitors=competitors))
 
-    trs = html.findall(".//tbody/tr")
+    trs = html.findall(path=".//tbody/tr")
     assert len(trs) == 2
 
-    assert html.find(".//tbody/tr[1]").attrib["data-id"] == "7"
-    assert html.find(".//tbody/tr[1]/td[1]").text == "Angela"
-    assert html.find(".//tbody/tr[1]/td[2]").text == "Merkel"
-    assert html.find(".//tbody/tr[1]/td[3]").text is None
-    assert html.find(".//tbody/tr[1]/td[4]").text is None
-    assert html.find(".//tbody/tr[1]/td[5]").text is None
-    assert html.find(".//tbody/tr[1]/td[6]").text is None
-    assert html.find(".//tbody/tr[1]/td[7]").text is None
+    assert trs[0].attrib["data-id"] == "7"
+    tds = html.findall(path=".//tbody/tr[1]/td")
+    assert len(tds) == 7
+    assert tds[0].text == "Angela"
+    assert tds[1].text == "Merkel"
+    assert tds[2].text is None
+    assert tds[3].text is None
+    assert tds[4].text is None
+    assert tds[5].text is None
+    assert tds[6].text is None
 
-    assert html.find(".//tbody/tr[2]").attrib["data-id"] == "17"
-    assert html.find(".//tbody/tr[2]/td[1]").text == "Birgit"
-    assert html.find(".//tbody/tr[2]/td[2]").text == "Derkel"
-    assert html.find(".//tbody/tr[2]/td[3]").text is None
-    assert html.find(".//tbody/tr[2]/td[4]").text is None
-    assert html.find(".//tbody/tr[2]/td[5]").text is None
-    assert html.find(".//tbody/tr[2]/td[6]").text is None
-    assert html.find(".//tbody/tr[2]/td[7]").text is None
+    assert trs[1].attrib["data-id"] == "17"
+    tds = html.findall(path=".//tbody/tr[2]/td")
+    assert len(tds) == 7
+    assert tds[0].text == "Birgit"
+    assert tds[1].text == "Derkel"
+    assert tds[2].text is None
+    assert tds[3].text is None
+    assert tds[4].text is None
+    assert tds[5].text is None
+    assert tds[6].text is None
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_unknown(competitors: list[CompetitorType], row: int):
+def test_gender_is_unknown(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].gender = ""
-    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
+    html = Html(text=render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
-        assert html.find(f".//tbody/tr[{i}]/td[3]").text is None
+        elem = html.find(path=f".//tbody/tr[{i}]/td[3]")
+        assert elem.text is None
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_female(competitors: list[CompetitorType], row: int):
+def test_gender_is_female(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].gender = "F"
-    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
+    html = Html(text=render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
+        elem = html.find(path=f".//tbody/tr[{i}]/td[3]")
         if i == row:
-            assert html.find(f".//tbody/tr[{i}]/td[3]").text == "F"
+            assert elem.text == "F"
         else:
-            assert html.find(f".//tbody/tr[{i}]/td[3]").text is None
+            assert elem.text is None
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_male(competitors: list[CompetitorType], row: int):
+def test_gender_is_male(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].gender = "M"
-    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
+    html = Html(text=render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
+        elem = html.find(path=f".//tbody/tr[{i}]/td[3]")
         if i == row:
-            assert html.find(f".//tbody/tr[{i}]/td[3]").text == "M"
+            assert elem.text == "M"
         else:
-            assert html.find(f".//tbody/tr[{i}]/td[3]").text is None
+            assert elem.text is None
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_year_is_defined(competitors: list[CompetitorType], row: int):
+def test_year_is_defined(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].year = 1957
-    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
+    html = Html(text=render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
+        elem = html.find(path=f".//tbody/tr[{i}]/td[4]")
         if i == row:
-            assert html.find(f".//tbody/tr[{i}]/td[4]").text == "1957"
+            assert elem.text == "1957"
         else:
-            assert html.find(f".//tbody/tr[{i}]/td[4]").text is None
+            assert elem.text is None
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_chip_is_defined(competitors: list[CompetitorType], row: int):
+def test_chip_is_defined(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].chip = "1234567"
-    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
+    html = Html(text=render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
+        elem = html.find(path=f".//tbody/tr[{i}]/td[5]")
         if i == row:
-            assert html.find(f".//tbody/tr[{i}]/td[5]").text == "1234567"
+            assert elem.text == "1234567"
         else:
-            assert html.find(f".//tbody/tr[{i}]/td[5]").text is None
+            assert elem.text is None
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_club_is_defined(competitors: list[CompetitorType], row: int):
+def test_club_is_defined(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].club_id = 2
     competitors[row - 1].club_name = "OL Bundestag"
-    html = etree.HTML(render.add_entry_competitors(competitors=competitors))
+    html = Html(text=render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
         if i == row:
-            assert html.find(f".//tbody/tr[{i}]/td[6]").text == "OL Bundestag"
-            assert html.find(f".//tbody/tr[{i}]/td[7]").text == "2"
+            elem = html.find(path=f".//tbody/tr[{i}]/td[6]")
+            assert elem.text == "OL Bundestag"
+            elem = html.find(path=f".//tbody/tr[{i}]/td[7]")
+            assert elem.text == "2"
         else:
-            assert html.find(f".//tbody/tr[{i}]/td[6]").text is None
-            assert html.find(f".//tbody/tr[{i}]/td[7]").text is None
+            elem = html.find(path=f".//tbody/tr[{i}]/td[6]")
+            assert elem.text is None
+            elem = html.find(path=f".//tbody/tr[{i}]/td[7]")
+            assert elem.text is None

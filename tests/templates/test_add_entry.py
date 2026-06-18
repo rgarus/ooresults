@@ -22,10 +22,9 @@ from datetime import timedelta
 from datetime import timezone
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.class_params import ClassParams
-from ooresults.otypes.class_type import ClassType
+from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.club_type import ClubType
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
@@ -34,28 +33,35 @@ from ooresults.otypes.result_type import SplitTime
 from ooresults.otypes.result_type import SpStatus
 from ooresults.otypes.start_type import PersonRaceStart
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 S1 = datetime(2021, 8, 19, 18, 43, 33, tzinfo=timezone(timedelta(hours=2)))
 
 
 @pytest.fixture()
-def classes() -> list[ClassType]:
+def classes() -> list[ClassInfoType]:
     return [
-        ClassType(
+        ClassInfoType(
             id=7,
-            event_id=1,
             name="Elite Men",
             short_name="E Men",
             course_id=2,
+            course_name="Bahn A",
+            course_length=None,
+            course_climb=None,
+            number_of_controls=4,
             params=ClassParams(),
         ),
-        ClassType(
+        ClassInfoType(
             id=8,
-            event_id=1,
             name="Elite Women",
             short_name="E Women",
             course_id=2,
+            course_name="Bahn A",
+            course_length=None,
+            course_climb=None,
+            number_of_controls=4,
             params=ClassParams(),
         ),
     ]
@@ -100,9 +106,9 @@ def entry() -> EntryType:
     )
 
 
-def test_entry_is_none(classes: list[ClassType], clubs: list[ClubType]):
-    html = etree.HTML(
-        render.add_entry(
+def test_entry_is_none(classes: list[ClassInfoType], clubs: list[ClubType]) -> None:
+    html = Html(
+        text=render.add_entry(
             entry=None,
             classes=classes,
             clubs=clubs,
@@ -111,20 +117,21 @@ def test_entry_is_none(classes: list[ClassType], clubs: list[ClubType]):
         )
     )
 
-    input_id = html.find(".//input[@name='id']")
+    input_id = html.find(path=".//input[@name='id']")
     assert input_id.attrib["value"] == ""
 
-    input_competitor_id = html.find(".//input[@name='competitor_id']")
+    input_competitor_id = html.find(path=".//input[@name='competitor_id']")
     assert input_competitor_id.attrib["value"] == ""
 
-    input_first_name = html.find(".//input[@name='first_name']")
+    input_first_name = html.find(path=".//input[@name='first_name']")
     assert input_first_name.attrib["value"] == ""
-    assert html.find(".//input[@name='first_name']/../button").text == "Competitors ..."
+    button = html.find(path=".//input[@name='first_name']/../button")
+    assert button.text == "Competitors ..."
 
-    input_last_name = html.find(".//input[@name='last_name']")
+    input_last_name = html.find(path=".//input[@name='last_name']")
     assert input_last_name.attrib["value"] == ""
 
-    options_gender = html.findall(".//select[@name='gender']/option")
+    options_gender = html.findall(path=".//select[@name='gender']/option")
     assert len(options_gender) == 3
     assert options_gender[0].attrib == {"value": "", "selected": "selected"}
     assert options_gender[0].text is None
@@ -133,13 +140,13 @@ def test_entry_is_none(classes: list[ClassType], clubs: list[ClubType]):
     assert options_gender[2].attrib == {"value": "M"}
     assert options_gender[2].text == "M"
 
-    input_year = html.find(".//input[@name='year']")
+    input_year = html.find(path=".//input[@name='year']")
     assert input_year.attrib["value"] == ""
 
-    input_chip = html.find(".//input[@name='chip']")
+    input_chip = html.find(path=".//input[@name='chip']")
     assert input_chip.attrib["value"] == ""
 
-    option_club_id = html.findall(".//select[@name='club_id']/option")
+    option_club_id = html.findall(path=".//select[@name='club_id']/option")
     assert len(option_club_id) == 3
     assert option_club_id[0].attrib == {"value": "", "selected": "selected"}
     assert option_club_id[0].text is None
@@ -148,21 +155,21 @@ def test_entry_is_none(classes: list[ClassType], clubs: list[ClubType]):
     assert option_club_id[2].attrib == {"value": "2"}
     assert option_club_id[2].text == "OL Bundestag"
 
-    option_class_id = html.findall(".//select[@name='class_id']/option")
+    option_class_id = html.findall(path=".//select[@name='class_id']/option")
     assert len(option_class_id) == 2
     assert option_class_id[0].attrib == {"value": "7"}
     assert option_class_id[0].text == "Elite Men"
     assert option_class_id[1].attrib == {"value": "8"}
     assert option_class_id[1].text == "Elite Women"
 
-    input_not_competing = html.find(".//input[@name='not_competing']")
+    input_not_competing = html.find(path=".//input[@name='not_competing']")
     assert input_not_competing.attrib["value"] == "true"
     assert "checked" not in input_not_competing.attrib
 
-    input_start_time = html.find(".//input[@name='start_time']")
+    input_start_time = html.find(path=".//input[@name='start_time']")
     assert input_start_time.attrib["value"] == ""
 
-    option_status = html.findall(".//select[@name='status']/option")
+    option_status = html.findall(path=".//select[@name='status']/option")
     assert len(option_status) == 9
     assert option_status[0].attrib == {"value": "0", "selected": "selected"}
     assert option_status[0].text is None
@@ -183,16 +190,16 @@ def test_entry_is_none(classes: list[ClassType], clubs: list[ClubType]):
     assert option_status[8].attrib == {"value": "8"}
     assert option_status[8].text == "DSQ"
 
-    assert html.findall(".//select[@name='result']/option") == []
+    assert html.findall(path=".//select[@name='result']/option") == []
 
 
 def test_entry_is_not_none(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
-    html = etree.HTML(
-        render.add_entry(
+) -> None:
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -201,20 +208,20 @@ def test_entry_is_not_none(
         )
     )
 
-    input_id = html.find(".//input[@name='id']")
+    input_id = html.find(path=".//input[@name='id']")
     assert input_id.attrib["value"] == "11"
 
-    input_competitor_id = html.find(".//input[@name='competitor_id']")
+    input_competitor_id = html.find(path=".//input[@name='competitor_id']")
     assert input_competitor_id.attrib["value"] == ""
 
-    input_first_name = html.find(".//input[@name='first_name']")
+    input_first_name = html.find(path=".//input[@name='first_name']")
     assert input_first_name.attrib["value"] == ""
-    assert html.find(".//input[@name='first_name']/../button") is None
+    html.find_not(path=".//input[@name='first_name']/../button")
 
-    input_last_name = html.find(".//input[@name='last_name']")
+    input_last_name = html.find(path=".//input[@name='last_name']")
     assert input_last_name.attrib["value"] == ""
 
-    options_gender = html.findall(".//select[@name='gender']/option")
+    options_gender = html.findall(path=".//select[@name='gender']/option")
     assert len(options_gender) == 3
     assert options_gender[0].attrib == {"value": "", "selected": "selected"}
     assert options_gender[0].text is None
@@ -223,13 +230,13 @@ def test_entry_is_not_none(
     assert options_gender[2].attrib == {"value": "M"}
     assert options_gender[2].text == "M"
 
-    input_year = html.find(".//input[@name='year']")
+    input_year = html.find(path=".//input[@name='year']")
     assert input_year.attrib["value"] == ""
 
-    input_chip = html.find(".//input[@name='chip']")
+    input_chip = html.find(path=".//input[@name='chip']")
     assert input_chip.attrib["value"] == ""
 
-    option_club_id = html.findall(".//select[@name='club_id']/option")
+    option_club_id = html.findall(path=".//select[@name='club_id']/option")
     assert len(option_club_id) == 3
     assert option_club_id[0].attrib == {"value": "", "selected": "selected"}
     assert option_club_id[0].text is None
@@ -238,21 +245,21 @@ def test_entry_is_not_none(
     assert option_club_id[2].attrib == {"value": "2"}
     assert option_club_id[2].text == "OL Bundestag"
 
-    option_class_id = html.findall(".//select[@name='class_id']/option")
+    option_class_id = html.findall(path=".//select[@name='class_id']/option")
     assert len(option_class_id) == 2
     assert option_class_id[0].attrib == {"value": "7"}
     assert option_class_id[0].text == "Elite Men"
     assert option_class_id[1].attrib == {"value": "8"}
     assert option_class_id[1].text == "Elite Women"
 
-    input_not_competing = html.find(".//input[@name='not_competing']")
+    input_not_competing = html.find(path=".//input[@name='not_competing']")
     assert input_not_competing.attrib["value"] == "true"
     assert "checked" not in input_not_competing.attrib
 
-    input_start_time = html.find(".//input[@name='start_time']")
+    input_start_time = html.find(path=".//input[@name='start_time']")
     assert input_start_time.attrib["value"] == ""
 
-    option_status = html.findall(".//select[@name='status']/option")
+    option_status = html.findall(path=".//select[@name='status']/option")
     assert len(option_status) == 9
     assert option_status[0].attrib == {"value": "0", "selected": "selected"}
     assert option_status[0].text is None
@@ -273,17 +280,17 @@ def test_entry_is_not_none(
     assert option_status[8].attrib == {"value": "8"}
     assert option_status[8].text == "DSQ"
 
-    assert html.findall(".//select[@name='result']/option") == []
+    assert html.findall(path=".//select[@name='result']/option") == []
 
 
 def test_competitor_id_is_defined(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.competitor_id = 3
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -292,19 +299,19 @@ def test_competitor_id_is_defined(
         )
     )
 
-    input_competitor_id = html.find(".//input[@name='competitor_id']")
+    input_competitor_id = html.find(path=".//input[@name='competitor_id']")
     assert input_competitor_id.attrib["value"] == "3"
-    assert html.find(".//input[@name='first_name']/../button") is None
+    html.find_not(path=".//input[@name='first_name']/../button")
 
 
 def test_first_name_is_defined(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.first_name = "Angela"
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -313,18 +320,18 @@ def test_first_name_is_defined(
         )
     )
 
-    input_first_name = html.find(".//input[@name='first_name']")
+    input_first_name = html.find(path=".//input[@name='first_name']")
     assert input_first_name.attrib["value"] == "Angela"
 
 
 def test_last_name_is_defined(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.last_name = "Merkel"
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -333,18 +340,18 @@ def test_last_name_is_defined(
         )
     )
 
-    input_last_name = html.find(".//input[@name='last_name']")
+    input_last_name = html.find(path=".//input[@name='last_name']")
     assert input_last_name.attrib["value"] == "Merkel"
 
 
 def test_gender_is_unknown(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.gender = ""
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -353,7 +360,7 @@ def test_gender_is_unknown(
         )
     )
 
-    options_gender = html.findall(".//select[@name='gender']/option")
+    options_gender = html.findall(path=".//select[@name='gender']/option")
     assert len(options_gender) == 3
     assert options_gender[0].attrib == {"value": "", "selected": "selected"}
     assert options_gender[0].text is None
@@ -365,12 +372,12 @@ def test_gender_is_unknown(
 
 def test_gender_is_female(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.gender = "F"
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -379,7 +386,7 @@ def test_gender_is_female(
         )
     )
 
-    options_gender = html.findall(".//select[@name='gender']/option")
+    options_gender = html.findall(path=".//select[@name='gender']/option")
     assert len(options_gender) == 3
     assert options_gender[0].attrib == {"value": ""}
     assert options_gender[0].text is None
@@ -391,12 +398,12 @@ def test_gender_is_female(
 
 def test_gender_is_male(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.gender = "M"
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -405,7 +412,7 @@ def test_gender_is_male(
         )
     )
 
-    options_gender = html.findall(".//select[@name='gender']/option")
+    options_gender = html.findall(path=".//select[@name='gender']/option")
     assert len(options_gender) == 3
     assert options_gender[0].attrib == {"value": ""}
     assert options_gender[0].text is None
@@ -417,12 +424,12 @@ def test_gender_is_male(
 
 def test_year_is_defined(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.year = 1957
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -431,19 +438,19 @@ def test_year_is_defined(
         )
     )
 
-    input_year = html.find(".//input[@name='year']")
+    input_year = html.find(path=".//input[@name='year']")
     assert input_year.attrib["value"] == "1957"
 
 
 def test_class_id_is_7(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.class_id = 7
     entry.class_name = "Elite Men"
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -452,7 +459,7 @@ def test_class_id_is_7(
         )
     )
 
-    option_class_id = html.findall(".//select[@name='class_id']/option")
+    option_class_id = html.findall(path=".//select[@name='class_id']/option")
     assert len(option_class_id) == 2
     assert option_class_id[0].attrib == {"value": "7", "selected": "selected"}
     assert option_class_id[0].text == "Elite Men"
@@ -462,13 +469,13 @@ def test_class_id_is_7(
 
 def test_class_id_is_3(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.class_id = 8
     entry.class_name = "Elite Women"
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -477,7 +484,7 @@ def test_class_id_is_3(
         )
     )
 
-    option_class_id = html.findall(".//select[@name='class_id']/option")
+    option_class_id = html.findall(path=".//select[@name='class_id']/option")
     assert len(option_class_id) == 2
     assert option_class_id[0].attrib == {"value": "7"}
     assert option_class_id[0].text == "Elite Men"
@@ -487,12 +494,12 @@ def test_class_id_is_3(
 
 def test_not_competing_is_true(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.not_competing = True
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -501,19 +508,19 @@ def test_not_competing_is_true(
         )
     )
 
-    input_not_competing = html.find(".//input[@name='not_competing']")
+    input_not_competing = html.find(path=".//input[@name='not_competing']")
     assert input_not_competing.attrib["value"] == "true"
     assert input_not_competing.attrib["checked"] == "checked"
 
 
 def test_chip_is_defined(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.chip = "1234567"
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -522,19 +529,19 @@ def test_chip_is_defined(
         )
     )
 
-    input_chip = html.find(".//input[@name='chip']")
+    input_chip = html.find(path=".//input[@name='chip']")
     assert input_chip.attrib["value"] == "1234567"
 
 
 def test_club_id_is_2(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.club_id = 2
     entry.club_name = "OL Bundestag"
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -543,7 +550,7 @@ def test_club_id_is_2(
         )
     )
 
-    option_club = html.findall(".//select[@name='club_id']/option")
+    option_club = html.findall(path=".//select[@name='club_id']/option")
     assert len(option_club) == 3
     assert option_club[0].attrib == {"value": ""}
     assert option_club[0].text is None
@@ -555,13 +562,13 @@ def test_club_id_is_2(
 
 def test_club_id_is_3(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.club_id = 3
     entry.club_name = "OC Bundestag"
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -570,7 +577,7 @@ def test_club_id_is_3(
         )
     )
 
-    option_club = html.findall(".//select[@name='club_id']/option")
+    option_club = html.findall(path=".//select[@name='club_id']/option")
     assert len(option_club) == 3
     assert option_club[0].attrib == {"value": ""}
     assert option_club[0].text is None
@@ -582,12 +589,12 @@ def test_club_id_is_3(
 
 def test_with_one_field(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.fields = {0: "1024"}
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -596,18 +603,18 @@ def test_with_one_field(
         )
     )
 
-    input_fields = html.find(".//input[@name='f0']")
+    input_fields = html.find(path=".//input[@name='f0']")
     assert input_fields.attrib["value"] == "1024"
 
 
 def test_with_two_fields(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.fields = {0: "1024", 1: "Thüringen"}
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -616,21 +623,21 @@ def test_with_two_fields(
         )
     )
 
-    input_fields = html.find(".//input[@name='f0']")
+    input_fields = html.find(path=".//input[@name='f0']")
     assert input_fields.attrib["value"] == "1024"
 
-    input_fields = html.find(".//input[@name='f1']")
+    input_fields = html.find(path=".//input[@name='f1']")
     assert input_fields.attrib["value"] == "Thüringen"
 
 
 def test_start_time_is_defined(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.start = PersonRaceStart(start_time=S1)
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -639,7 +646,7 @@ def test_start_time_is_defined(
         )
     )
 
-    input_start_time = html.find(".//input[@name='start_time']")
+    input_start_time = html.find(path=".//input[@name='start_time']")
     assert input_start_time.attrib["value"] == "18:43:33"
 
 
@@ -659,14 +666,14 @@ def test_start_time_is_defined(
 )
 def test_status(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
     status: ResultStatus,
     position: int,
-):
+) -> None:
     entry.result = PersonRaceResult(status=status)
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -675,7 +682,7 @@ def test_status(
         )
     )
 
-    option_status = html.findall(".//select[@name='status']/option")
+    option_status = html.findall(path=".//select[@name='status']/option")
     assert len(option_status) == 9
 
     assert option_status[0].text is None
@@ -697,12 +704,12 @@ def test_status(
 
 def test_without_result_and_without_unassigned_results(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.result = PersonRaceResult()
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -711,21 +718,21 @@ def test_without_result_and_without_unassigned_results(
         )
     )
 
-    assert html.findall(".//select[@name='result']/option") == []
+    assert html.findall(path=".//select[@name='result']/option") == []
 
-    input_chip = html.find(".//input[@name='chip']")
+    input_chip = html.find(path=".//input[@name='chip']")
     assert "readonly" not in input_chip.attrib
 
 
 def test_without_result_but_with_unassigned_results(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
     unassigned_results: dict[int, str],
-):
+) -> None:
     entry.result = PersonRaceResult()
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -734,7 +741,7 @@ def test_without_result_but_with_unassigned_results(
         )
     )
 
-    option_result = html.findall(".//select[@name='result']/option")
+    option_result = html.findall(path=".//select[@name='result']/option")
     assert len(option_result) == 4
     assert option_result[0].attrib == {"value": "", "selected": "selected"}
     assert option_result[0].text is None
@@ -745,15 +752,15 @@ def test_without_result_but_with_unassigned_results(
     assert option_result[3].attrib == {"value": "26"}
     assert option_result[3].text == "16:00:11   --   8123599"
 
-    input_chip = html.find(".//input[@name='chip']")
+    input_chip = html.find(path=".//input[@name='chip']")
     assert "readonly" not in input_chip.attrib
 
 
 def test_with_results_but_without_unassigned_results(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
-):
+) -> None:
     entry.result = PersonRaceResult(
         start_time=datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))),
         finish_time=datetime(
@@ -769,8 +776,8 @@ def test_with_results_but_without_unassigned_results(
             SplitTime(control_code="31", status=SpStatus.OK, time=1593),
         ],
     )
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -779,7 +786,7 @@ def test_with_results_but_without_unassigned_results(
         )
     )
 
-    option_status = html.findall(".//select[@name='status']/option")
+    option_status = html.findall(path=".//select[@name='status']/option")
     assert len(option_status) == 6
     assert option_status[0].attrib == {"value": "2"}
     assert option_status[0].text == "Finished"
@@ -794,23 +801,23 @@ def test_with_results_but_without_unassigned_results(
     assert option_status[5].attrib == {"value": "8"}
     assert option_status[5].text == "DSQ"
 
-    option_result = html.findall(".//select[@name='result']/option")
+    option_result = html.findall(path=".//select[@name='result']/option")
     assert len(option_result) == 2
     assert option_result[0].attrib == {"value": "", "selected": "selected"}
     assert option_result[0].text is None
     assert option_result[1].attrib == {"value": "-1"}
     assert option_result[1].text == "Remove result"
 
-    input_chip = html.find(".//input[@name='chip']")
+    input_chip = html.find(path=".//input[@name='chip']")
     assert "readonly" in input_chip.attrib
 
 
 def test_with_results_and_with_unassigned_results(
     entry: EntryType,
-    classes: list[ClassType],
+    classes: list[ClassInfoType],
     clubs: list[ClubType],
     unassigned_results: dict[int, str],
-):
+) -> None:
     entry.result = PersonRaceResult(
         start_time=datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1))),
         finish_time=datetime(
@@ -826,8 +833,8 @@ def test_with_results_and_with_unassigned_results(
             SplitTime(control_code="31", status=SpStatus.OK, time=1593),
         ],
     )
-    html = etree.HTML(
-        render.add_entry(
+    html = Html(
+        text=render.add_entry(
             entry=entry,
             classes=classes,
             clubs=clubs,
@@ -836,7 +843,7 @@ def test_with_results_and_with_unassigned_results(
         )
     )
 
-    option_status = html.findall(".//select[@name='status']/option")
+    option_status = html.findall(path=".//select[@name='status']/option")
     assert len(option_status) == 6
     assert option_status[0].attrib == {"value": "2"}
     assert option_status[0].text == "Finished"
@@ -851,7 +858,7 @@ def test_with_results_and_with_unassigned_results(
     assert option_status[5].attrib == {"value": "8"}
     assert option_status[5].text == "DSQ"
 
-    option_result = html.findall(".//select[@name='result']/option")
+    option_result = html.findall(path=".//select[@name='result']/option")
     assert len(option_result) == 5
     assert option_result[0].attrib == {"value": "", "selected": "selected"}
     assert option_result[0].text is None
@@ -864,5 +871,5 @@ def test_with_results_and_with_unassigned_results(
     assert option_result[4].attrib == {"value": "26"}
     assert option_result[4].text == "16:00:11   --   8123599"
 
-    input_chip = html.find(".//input[@name='chip']")
+    input_chip = html.find(path=".//input[@name='chip']")
     assert "readonly" in input_chip.attrib

@@ -21,12 +21,12 @@ import datetime
 from decimal import Decimal
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.series_type import PersonSeriesResult
 from ooresults.otypes.series_type import Points
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 @pytest.fixture()
@@ -158,10 +158,10 @@ def results() -> list[tuple[str, list[PersonSeriesResult]]]:
 def test_series_results(
     events: list[EventType],
     results: list[tuple[str, list[PersonSeriesResult]]],
-):
-    html = etree.HTML(render.series_table(events=events, results=results))
+) -> None:
+    html = Html(text=render.series_table(events=events, results=results))
 
-    table = html.find(".//table")
+    table = html.find(path=".//table")
     assert [child.tag for child in table] == ["thead", "tbody", "thead", "tbody"]
 
     # headers
@@ -170,7 +170,8 @@ def test_series_results(
 
     # header 1
     assert len(headers[0].findall(".//th")) == 1
-    assert headers[0].find(".//th[1]/h3").text == "Bahn A - Frauen"
+    elem = headers[0].find(".//th[1]/h3")
+    assert elem.text == "Bahn A - Frauen"
 
     # header 2
     assert [td.text for td in headers[1].findall(".//th")] == [
@@ -215,7 +216,8 @@ def test_series_results(
 
     # header 1
     assert len(headers[0].findall(".//th")) == 1
-    assert headers[0].find(".//th[1]/h3").text == "Bahn A - Männer"
+    elem = headers[0].find(".//th[1]/h3")
+    assert elem.text == "Bahn A - Männer"
 
     # header 2
     assert [td.text for td in headers[1].findall(".//th")] == [

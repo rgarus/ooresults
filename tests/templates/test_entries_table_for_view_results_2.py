@@ -22,7 +22,6 @@ from datetime import timezone
 from typing import Optional
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
@@ -31,6 +30,7 @@ from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 @pytest.fixture()
@@ -119,9 +119,9 @@ def entry_3(event: EventType) -> EntryType:
 TABLE_ID = "entr.table"
 
 
-def test_class_results_list_is_empty(event: EventType):
-    html = etree.HTML(
-        render.entries_table(
+def test_class_results_list_is_empty(event: EventType) -> None:
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[],
@@ -129,11 +129,11 @@ def test_class_results_list_is_empty(event: EventType):
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -145,15 +145,15 @@ def test_class_results_list_is_empty(event: EventType):
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr/")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr/")
     assert len(rows) == 0
 
 
 def test_class_results_list_with_one_class_but_without_results(
     event: EventType, class_info_1: ClassInfoType
-):
-    html = etree.HTML(
-        render.entries_table(
+) -> None:
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[(class_info_1.name, [])],
@@ -161,11 +161,11 @@ def test_class_results_list_with_one_class_but_without_results(
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -177,28 +177,28 @@ def test_class_results_list_with_one_class_but_without_results(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr/")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr/")
     assert len(rows) == 0
 
 
 def test_class_results_list_with_one_class_and_with_results(
     event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
-):
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+) -> None:
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns=set(),
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -210,7 +210,7 @@ def test_class_results_list_with_one_class_and_with_results(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -239,25 +239,26 @@ def test_class_results_list_with_two_classes_and_with_results(
     entry_1: EntryType,
     entry_2: EntryType,
     entry_3: EntryType,
-):
-    results_list = [
-        (class_info_1.name, [RankedEntryType(entry=entry_1), RankedEntryType(entry_2)]),
-        (class_info_2.name, [RankedEntryType(entry=entry_3)]),
-    ]
-    html = etree.HTML(
-        render.entries_table(
+) -> None:
+    results_list_1 = [RankedEntryType(entry=entry_1), RankedEntryType(entry_2)]
+    results_list_2 = [RankedEntryType(entry=entry_3)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[
+                (class_info_1.name, results_list_1),
+                (class_info_2.name, results_list_2),
+            ],
             columns=set(),
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -269,7 +270,7 @@ def test_class_results_list_with_two_classes_and_with_results(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 5
 
     # row 1
@@ -322,23 +323,25 @@ def test_class_results_list_with_two_classes_and_with_results(
     ]
 
 
-def test_score(event: EventType, class_info_1: ClassInfoType, entry_1: EntryType):
+def test_score(
+    event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
+) -> None:
     class_info_1.params.otype = "score"
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"score"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -352,7 +355,7 @@ def test_score(event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -395,26 +398,26 @@ def test_score_and_status_is_not_inactive_or_ok(
     status: ResultStatus,
     text: Optional[str],
     run_time: Optional[str],
-):
+) -> None:
     class_info_1.params.otype = "score"
     entry_1.result.status = status
     entry_1.result.time = 417
     entry_1.start.start_time = S1
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"score"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -428,7 +431,7 @@ def test_score_and_status_is_not_inactive_or_ok(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -454,7 +457,7 @@ def test_score_and_status_is_not_inactive_or_ok(
 
 def test_score_and_status_is_ok(
     event: EventType, class_info_1: ClassInfoType, entry_1: EntryType
-):
+) -> None:
     class_info_1.params.otype = "score"
     entry_1.result.status = ResultStatus.OK
     entry_1.result.time = 417
@@ -464,21 +467,21 @@ def test_score_and_status_is_ok(
         "score_overtime": 2.1,
         "score": 45.1,
     }
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"score"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -492,7 +495,7 @@ def test_score_and_status_is_ok(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -520,26 +523,26 @@ def test_score_and_status_is_ok_but_no_values_defined(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.otype = "score"
     entry_1.result.status = ResultStatus.OK
     entry_1.result.time = 417
     entry_1.result.extensions = {"score": 45.72}
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"score"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -553,7 +556,7 @@ def test_score_and_status_is_ok_but_no_values_defined(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -581,25 +584,25 @@ def test_score_status_is_inactive_with_start_time(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.otype = "score"
     entry_1.result.time = 417
     entry_1.start.start_time = S1
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"score"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -613,7 +616,7 @@ def test_score_status_is_inactive_with_start_time(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -641,28 +644,28 @@ def test_score_and_handicap_defined_and_status_is_ok(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.otype = "score"
     class_info_1.params.apply_handicap_rule = True
     entry_1.year = 1960
     entry_1.gender = "F"
     entry_1.result.extensions = {"factor": 0.4567}
     entry_1.result.status = ResultStatus.OK
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"score", "factor"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -677,7 +680,7 @@ def test_score_and_handicap_defined_and_status_is_ok(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -706,27 +709,27 @@ def test_score_and_handicap_defined_but_status_is_not_ok(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.otype = "score"
     class_info_1.params.apply_handicap_rule = True
     entry_1.year = 1960
     entry_1.gender = "F"
     entry_1.result.extensions = {"factor": 0.4567}
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"score", "factor"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -741,7 +744,7 @@ def test_score_and_handicap_defined_but_status_is_not_ok(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -770,28 +773,28 @@ def test_class_results_list_no_score_all_columns(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.penalty_controls = 30
     class_info_1.params.penalty_overtime = 30
     class_info_1.params.apply_handicap_rule = True
     entry_1.year = 1960
     entry_1.gender = "F"
     entry_1.result.extensions = {"factor": 0.4567}
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"factor", "penalties_controls", "penalties_overtime"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -806,7 +809,7 @@ def test_class_results_list_no_score_all_columns(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -835,26 +838,26 @@ def test_no_score_and_handicap_defined_and_status_is_ok(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.apply_handicap_rule = True
     entry_1.gender = "F"
     entry_1.result.extensions = {"factor": 0.4567}
     entry_1.result.status = ResultStatus.OK
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"factor"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -867,7 +870,7 @@ def test_no_score_and_handicap_defined_and_status_is_ok(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -894,25 +897,25 @@ def test_no_score_and_handicap_defined_and_status_is_not_ok(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.apply_handicap_rule = True
     entry_1.year = 1960
     entry_1.result.extensions = {"factor": 0.4567}
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"factor"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -925,7 +928,7 @@ def test_no_score_and_handicap_defined_and_status_is_not_ok(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -951,26 +954,26 @@ def test_no_score_and_handicap_defined_and_status_is_not_ok(
         event: EventType,
         class_info_1: ClassInfoType,
         entry_1: EntryType,
-    ):
+    ) -> None:
         class_info_1.params.apply_handicap_rule = True
         entry_1.year = 1960
         entry_1.gender = "F"
         entry_1.result.extensions = {"factor": 0.4567}
-        results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-        html = etree.HTML(
-            render.entries_table(
+        results_list = [RankedEntryType(entry=entry_1)]
+        html = Html(
+            text=render.entries_table(
                 event=event,
                 view="results",
-                view_entries_list=results_list,
+                view_entries_list=[(class_info_1.name, results_list)],
                 columns={"factor"},
             )
         )
 
-        assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-        assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+        assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+        assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
         # headers
-        headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+        headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
         assert [h.text for h in headers] == [
             "Rank",
             "Name",
@@ -983,7 +986,7 @@ def test_no_score_and_handicap_defined_and_status_is_not_ok(
         ]
 
         # rows
-        rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+        rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
         assert len(rows) == 2
 
         # row 1
@@ -1025,27 +1028,27 @@ def test_no_score_and_status_is_not_inactive_or_ok(
     status: ResultStatus,
     text: Optional[str],
     run_time: Optional[str],
-):
+) -> None:
     class_info_1.params.penalty_controls = 30
     class_info_1.params.penalty_overtime = 30
     entry_1.result.status = status
     entry_1.result.time = 417
     entry_1.start.start_time = S1
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"penalties_controls", "penalties_overtime"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -1059,7 +1062,7 @@ def test_no_score_and_status_is_not_inactive_or_ok(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -1087,7 +1090,7 @@ def test_no_score_and_status_is_ok(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     entry_1.result.status = ResultStatus.OK
     entry_1.result.time = 417
     entry_1.start.start_time = S1
@@ -1098,21 +1101,21 @@ def test_no_score_and_status_is_ok(
     }
     class_info_1.params.penalty_controls = 30
     class_info_1.params.penalty_overtime = 30
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"penalties_controls", "penalties_overtime"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -1126,7 +1129,7 @@ def test_no_score_and_status_is_ok(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -1154,26 +1157,26 @@ def test_no_score_and_status_is_ok_but_no_values_defined(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.penalty_controls = 30
     class_info_1.params.penalty_overtime = 30
     entry_1.result.status = ResultStatus.OK
     entry_1.result.time = 417
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"factor", "penalties_controls", "penalties_overtime"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -1188,7 +1191,7 @@ def test_no_score_and_status_is_ok_but_no_values_defined(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -1217,26 +1220,26 @@ def test_no_score_status_is_inactive_with_start_time(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.penalty_controls = 30
     class_info_1.params.penalty_overtime = 30
     entry_1.result.time = 417
     entry_1.start.start_time = S1
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"penalties_controls", "penalties_overtime"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -1250,7 +1253,7 @@ def test_no_score_status_is_inactive_with_start_time(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -1278,7 +1281,7 @@ def test_no_score_and_status_is_ok_and_only_penalties_controls(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.penalty_controls = 30
     entry_1.result.status = ResultStatus.OK
     entry_1.result.time = 417
@@ -1287,21 +1290,21 @@ def test_no_score_and_status_is_ok_and_only_penalties_controls(
         "running_time": 313,
         "penalties_controls": 112,
     }
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"penalties_controls"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -1314,7 +1317,7 @@ def test_no_score_and_status_is_ok_and_only_penalties_controls(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1
@@ -1341,7 +1344,7 @@ def test_no_score_and_status_is_ok_and_only_penalties_overtime(
     event: EventType,
     class_info_1: ClassInfoType,
     entry_1: EntryType,
-):
+) -> None:
     class_info_1.params.penalty_overtime = 30
     entry_1.result.status = ResultStatus.OK
     entry_1.result.time = 417
@@ -1350,21 +1353,21 @@ def test_no_score_and_status_is_ok_and_only_penalties_overtime(
         "running_time": 313,
         "penalties_overtime": 212,
     }
-    results_list = [(class_info_1.name, [RankedEntryType(entry=entry_1)])]
-    html = etree.HTML(
-        render.entries_table(
+    results_list = [RankedEntryType(entry=entry_1)]
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
-            view_entries_list=results_list,
+            view_entries_list=[(class_info_1.name, results_list)],
             columns={"penalties_overtime"},
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -1377,7 +1380,7 @@ def test_no_score_and_status_is_ok_and_only_penalties_overtime(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 2
 
     # row 1

@@ -20,10 +20,10 @@
 from typing import Optional
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 #
@@ -42,7 +42,7 @@ from ooresults.utils import render
 #
 
 
-def test_status_is_ok():
+def test_status_is_ok() -> None:
     message = {
         "entryTime": "10:26:03",
         "eventId": 1,
@@ -57,19 +57,19 @@ def test_status_is_ok():
         "missingControls": [],
     }
 
-    html = etree.HTML(render.si1_data(message=message))
-    div = html.find(".//div[@id='si1.div']")
+    html = Html(text=render.si1_data(message=message))
+    div = html.find(path=".//div[@id='si1.div']")
     assert div.attrib["class"] == "bgg"
 
-    t = html.find(".//div[@id='si1.div']/div[1]/p").text
-    assert t == "Baerbock, Annalena"
-    t = html.find(".//div[@id='si1.div']/div[2]/p").text
-    assert t == "7379879, Bahn A - Frauen"
-    t = html.find(".//div[@id='si1.div']/div[3]/p").text
-    assert t == "OK, 14:39 min"
+    elem = html.find(path=".//div[@id='si1.div']/div[1]/p")
+    assert elem.text == "Baerbock, Annalena"
+    elem = html.find(path=".//div[@id='si1.div']/div[2]/p")
+    assert elem.text == "7379879, Bahn A - Frauen"
+    elem = html.find(path=".//div[@id='si1.div']/div[3]/p")
+    assert elem.text == "OK, 14:39 min"
 
 
-def test_status_is_missing_punch():
+def test_status_is_missing_punch() -> None:
     message = {
         "entryTime": "10:28:03",
         "eventId": 1,
@@ -84,17 +84,17 @@ def test_status_is_missing_punch():
         "missingControls": ["122"],
     }
 
-    html = etree.HTML(render.si1_data(message=message))
+    html = Html(text=render.si1_data(message=message))
 
-    div = html.find(".//div[@id='si1.div']")
+    div = html.find(path=".//div[@id='si1.div']")
     assert div.attrib["class"] == "bgr"
 
-    t = html.find(".//div[@id='si1.div']/div[1]/p").text
-    assert t == "Habeck, Robert"
-    t = html.find(".//div[@id='si1.div']/div[2]/p").text
-    assert t == "7509749, Bahn A - Männer"
-    t = html.find(".//div[@id='si1.div']/div[3]/p").text
-    assert t == "MP"
+    elem = html.find(path=".//div[@id='si1.div']/div[1]/p")
+    assert elem.text == "Habeck, Robert"
+    elem = html.find(path=".//div[@id='si1.div']/div[2]/p")
+    assert elem.text == "7509749, Bahn A - Männer"
+    elem = html.find(path=".//div[@id='si1.div']/div[3]/p")
+    assert elem.text == "MP"
 
 
 @pytest.mark.parametrize(
@@ -111,7 +111,7 @@ def test_status_is_missing_punch():
         ResultStatus.DISQUALIFIED,
     ],
 )
-def test_background_color_depends_on_result_status(result_status: ResultStatus):
+def test_background_color_depends_on_result_status(result_status: ResultStatus) -> None:
     message = {
         "entryTime": "10:28:03",
         "eventId": 1,
@@ -126,9 +126,9 @@ def test_background_color_depends_on_result_status(result_status: ResultStatus):
         "missingControls": [],
     }
 
-    html = etree.HTML(render.si1_data(message=message))
+    html = Html(text=render.si1_data(message=message))
 
-    div = html.find(".//div[@id='si1.div']")
+    div = html.find(path=".//div[@id='si1.div']")
     if result_status == ResultStatus.OK:
         assert div.attrib["class"] == "bgg"
     else:
@@ -151,7 +151,7 @@ def test_background_color_depends_on_result_status(result_status: ResultStatus):
 )
 def test_background_status_and_time_depends_on_result_status(
     result_status: ResultStatus, text: Optional[str]
-):
+) -> None:
     message = {
         "entryTime": "10:28:03",
         "eventId": 1,
@@ -166,10 +166,10 @@ def test_background_status_and_time_depends_on_result_status(
         "missingControls": [],
     }
 
-    html = etree.HTML(render.si1_data(message=message))
+    html = Html(text=render.si1_data(message=message))
 
-    t = html.find(".//div[@id='si1.div']/div[3]/p").text
+    elem = html.find(path=".//div[@id='si1.div']/div[3]/p")
     if result_status == ResultStatus.OK:
-        assert t == "OK, 14:04 min"
+        assert elem.text == "OK, 14:04 min"
     else:
-        assert t == text
+        assert elem.text == text

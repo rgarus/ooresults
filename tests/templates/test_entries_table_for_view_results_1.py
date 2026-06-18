@@ -22,13 +22,13 @@ from datetime import timezone
 from typing import Optional
 
 import pytest
-from lxml import etree
 
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
 @pytest.fixture()
@@ -51,18 +51,18 @@ def event() -> EventType:
 TABLE_ID = "entr.table"
 
 
-def test_entries_list_is_empty(event: EventType):
-    html = etree.HTML(
-        render.entries_table(
+def test_entries_list_is_empty(event: EventType) -> None:
+    html = Html(
+        text=render.entries_table(
             event=event, view="results", view_entries_list=[], columns=set()
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -74,7 +74,7 @@ def test_entries_list_is_empty(event: EventType):
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr/")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr/")
     assert len(rows) == 0
 
 
@@ -131,9 +131,9 @@ def ranked_entries(
 
 def test_entry_list_with_one_group(
     event: EventType, ranked_entries: list[RankedEntryType]
-):
-    html = etree.HTML(
-        render.entries_table(
+) -> None:
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("Group XY", ranked_entries)],
@@ -141,11 +141,11 @@ def test_entry_list_with_one_group(
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -157,7 +157,7 @@ def test_entry_list_with_one_group(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 4
 
     # row 1
@@ -207,9 +207,9 @@ def test_entry_list_with_one_group(
 
 def test_entry_list_with_unassigned_group(
     event: EventType, ranked_entries: list[RankedEntryType]
-):
-    html = etree.HTML(
-        render.entries_table(
+) -> None:
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[(None, ranked_entries)],
@@ -217,11 +217,11 @@ def test_entry_list_with_unassigned_group(
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -233,7 +233,7 @@ def test_entry_list_with_unassigned_group(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 4
 
     # row 1
@@ -286,9 +286,9 @@ def test_entry_list_with_two_groups(
     ranked_entry_1: RankedEntryType,
     ranked_entry_2: RankedEntryType,
     ranked_entry_3: RankedEntryType,
-):
-    html = etree.HTML(
-        render.entries_table(
+) -> None:
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[
@@ -299,11 +299,11 @@ def test_entry_list_with_two_groups(
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -315,7 +315,7 @@ def test_entry_list_with_two_groups(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 5
 
     # row 1
@@ -373,9 +373,9 @@ def test_entry_list_with_three_groups(
     ranked_entry_1: RankedEntryType,
     ranked_entry_2: RankedEntryType,
     ranked_entry_3: RankedEntryType,
-):
-    html = etree.HTML(
-        render.entries_table(
+) -> None:
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[
@@ -387,11 +387,11 @@ def test_entry_list_with_three_groups(
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -403,7 +403,7 @@ def test_entry_list_with_three_groups(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 6
 
     # row 1
@@ -461,10 +461,12 @@ def test_entry_list_with_three_groups(
     ]
 
 
-def test_not_competing_is_true(event: EventType, ranked_entries: list[RankedEntryType]):
+def test_not_competing_is_true(
+    event: EventType, ranked_entries: list[RankedEntryType]
+) -> None:
     ranked_entries[0].entry.not_competing = True
-    html = etree.HTML(
-        render.entries_table(
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("Group XY", ranked_entries)],
@@ -472,14 +474,16 @@ def test_not_competing_is_true(event: EventType, ranked_entries: list[RankedEntr
         )
     )
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[1]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[1]")
     assert elem.text == "NC"
 
 
-def test_rank_is_defined(event: EventType, ranked_entries: list[RankedEntryType]):
+def test_rank_is_defined(
+    event: EventType, ranked_entries: list[RankedEntryType]
+) -> None:
     ranked_entries[0].rank = 14
-    html = etree.HTML(
-        render.entries_table(
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("Group XY", ranked_entries)],
@@ -487,16 +491,18 @@ def test_rank_is_defined(event: EventType, ranked_entries: list[RankedEntryType]
         )
     )
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[1]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[1]")
     assert elem.text == "14"
 
 
-def test_last_name_is_defined(event: EventType, ranked_entries: list[RankedEntryType]):
+def test_last_name_is_defined(
+    event: EventType, ranked_entries: list[RankedEntryType]
+) -> None:
     ranked_entries[0].entry.last_name = "Derkel"
     ranked_entries[0].entry.first_name = "Barbara"
 
-    html = etree.HTML(
-        render.entries_table(
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("Group XY", ranked_entries)],
@@ -504,14 +510,16 @@ def test_last_name_is_defined(event: EventType, ranked_entries: list[RankedEntry
         )
     )
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[2]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[2]")
     assert elem.text == "Derkel, Barbara"
 
 
-def test_year_is_defined(event: EventType, ranked_entries: list[RankedEntryType]):
+def test_year_is_defined(
+    event: EventType, ranked_entries: list[RankedEntryType]
+) -> None:
     ranked_entries[0].entry.year = 1957
-    html = etree.HTML(
-        render.entries_table(
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("Group XY", ranked_entries)],
@@ -519,14 +527,16 @@ def test_year_is_defined(event: EventType, ranked_entries: list[RankedEntryType]
         )
     )
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
     assert elem.text == "1957"
 
 
-def test_chip_is_defined(event: EventType, ranked_entries: list[RankedEntryType]):
+def test_chip_is_defined(
+    event: EventType, ranked_entries: list[RankedEntryType]
+) -> None:
     ranked_entries[0].entry.chip = "1234567"
-    html = etree.HTML(
-        render.entries_table(
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("Group XY", ranked_entries)],
@@ -534,7 +544,7 @@ def test_chip_is_defined(event: EventType, ranked_entries: list[RankedEntryType]
         )
     )
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
     assert elem.text == "1234567"
 
 
@@ -551,11 +561,11 @@ def test_club_is_shortened_if_view_is_results(
     ranked_entries: list[RankedEntryType],
     name: str,
     displayed_name: str,
-):
+) -> None:
     ranked_entries[0].entry.club_id = 3
     ranked_entries[0].entry.club_name = name
-    html = etree.HTML(
-        render.entries_table(
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("None", ranked_entries)],
@@ -563,19 +573,19 @@ def test_club_is_shortened_if_view_is_results(
         )
     )
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[5]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[5]")
     assert elem.text == displayed_name
 
 
 def test_status_is_inactive_with_start_time(
     event: EventType, ranked_entries: list[RankedEntryType]
-):
+) -> None:
 
     ranked_entries[0].entry.result.status = ResultStatus.INACTIVE
     ranked_entries[0].entry.result.time = 417
     ranked_entries[0].entry.start.start_time = S1
-    html = etree.HTML(
-        render.entries_table(
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("None", ranked_entries)],
@@ -583,17 +593,20 @@ def test_status_is_inactive_with_start_time(
         )
     )
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
     assert elem.text is None
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
+
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
     assert elem.text == "Start at 12:38:59"
 
 
-def test_total_time_is_defined(event: EventType, ranked_entries: list[RankedEntryType]):
+def test_total_time_is_defined(
+    event: EventType, ranked_entries: list[RankedEntryType]
+) -> None:
     ranked_entries[0].entry.result.status = ResultStatus.OK
     ranked_entries[0].entry.result.time = 8
-    html = etree.HTML(
-        render.entries_table(
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("Group XY", ranked_entries)],
@@ -601,9 +614,10 @@ def test_total_time_is_defined(event: EventType, ranked_entries: list[RankedEntr
         )
     )
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
     assert elem.text is None
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
+
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
     assert elem.text == "0:08"
 
 
@@ -626,10 +640,10 @@ def test_status(
     ranked_entries: list[RankedEntryType],
     status: ResultStatus,
     text: Optional[str],
-):
+) -> None:
     ranked_entries[0].entry.result.status = status
-    html = etree.HTML(
-        render.entries_table(
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("Group XY", ranked_entries)],
@@ -637,17 +651,17 @@ def test_status(
         )
     )
 
-    elem = html.find(f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
+    elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[7]")
     assert elem.text == text
 
 
 def test_entry_list_with_fields(
     event: EventType, ranked_entries: list[RankedEntryType]
-):
+) -> None:
     event.fields = ["Start number", "Region"]
     ranked_entries[0].entry.fields = {0: "121", 1: "Bayern"}
-    html = etree.HTML(
-        render.entries_table(
+    html = Html(
+        text=render.entries_table(
             event=event,
             view="results",
             view_entries_list=[("Group XY", ranked_entries)],
@@ -655,11 +669,11 @@ def test_entry_list_with_fields(
         )
     )
 
-    assert html.find(".//td[@id='entr.event_name']").text == "Test-Lauf 1"
-    assert html.find(".//td[@id='entr.event_date']").text == "2023-12-29"
+    assert html.find(path=".//td[@id='entr.event_name']").text == "Test-Lauf 1"
+    assert html.find(path=".//td[@id='entr.event_date']").text == "2023-12-29"
 
     # headers
-    headers = html.findall(f".//table[@id='{TABLE_ID}']/thead/tr/th")
+    headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
     assert [h.text for h in headers] == [
         "Rank",
         "Name",
@@ -671,7 +685,7 @@ def test_entry_list_with_fields(
     ]
 
     # rows
-    rows = html.findall(f".//table[@id='{TABLE_ID}']/tbody/tr")
+    rows = html.findall(path=f".//table[@id='{TABLE_ID}']/tbody/tr")
     assert len(rows) == 4
 
     # row 1

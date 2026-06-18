@@ -17,10 +17,23 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from ooresults.utils import render
-from tests.templates.conftest import Html
+from lxml import etree
+from lxml.html import HtmlElement
 
 
-def test_demo_reader() -> None:
-    html = Html(text=render.demo_reader())
-    assert len(html.findall(path=".//form[@id='demo']")) == 1
+class Html:
+    def __init__(self, text: str) -> None:
+        self.html: HtmlElement = etree.HTML(text=text)
+        assert self.html is not None
+
+    def findall(self, path: str) -> list[HtmlElement]:
+        return self.html.findall(path=path)
+
+    def find(self, path: str) -> HtmlElement:
+        elem: HtmlElement = self.html.find(path=path)
+
+        assert elem is not None, f"Path not found: {path}"
+        return elem
+
+    def find_not(self, path: str) -> None:
+        assert self.html.find(path=path) is None, f"Path found: {path}"

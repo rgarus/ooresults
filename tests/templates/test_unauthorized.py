@@ -17,11 +17,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from lxml import etree
-
 from ooresults.utils import render
+from tests.templates.conftest import Html
 
 
-def test_unauthorized():
-    html = etree.HTML(render.unauthorized())
-    assert html is not None
+def test_unauthorized() -> None:
+    Html(text=render.unauthorized())
