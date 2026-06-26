@@ -36,7 +36,7 @@ def db() -> Iterator[SqliteRepo]:
 
 
 @pytest.fixture
-def event_id(db):
+def event_id(db: SqliteRepo) -> int:
     with db.transaction():
         return db.add_event(
             name="Event",
@@ -49,7 +49,7 @@ def event_id(db):
 
 
 @pytest.fixture
-def course_1_id(db, event_id):
+def course_1_id(db: SqliteRepo, event_id: int) -> int:
     with db.transaction():
         return db.add_course(
             event_id=event_id,
@@ -61,7 +61,7 @@ def course_1_id(db, event_id):
 
 
 @pytest.fixture
-def course_2_id(db, event_id):
+def course_2_id(db: SqliteRepo, event_id: int) -> int:
     with db.transaction():
         return db.add_course(
             event_id=event_id,
@@ -73,7 +73,7 @@ def course_2_id(db, event_id):
 
 
 @pytest.fixture
-def class_id(db, event_id, course_1_id):
+def class_id(db: SqliteRepo, event_id: int, course_1_id: int) -> int:
     with db.transaction():
         return db.add_class(
             event_id=event_id,
@@ -84,7 +84,9 @@ def class_id(db, event_id, course_1_id):
         )
 
 
-def test_get_courses_after_adding_one_course(db, event_id, course_1_id):
+def test_get_courses_after_adding_one_course(
+    db: SqliteRepo, event_id: int, course_1_id: int
+) -> None:
     with db.transaction():
         c = db.get_courses(event_id=event_id)
     assert len(c) == 1
@@ -98,7 +100,9 @@ def test_get_courses_after_adding_one_course(db, event_id, course_1_id):
     )
 
 
-def test_get_courses_after_adding_two_courses(db, event_id, course_1_id, course_2_id):
+def test_get_courses_after_adding_two_courses(
+    db: SqliteRepo, event_id: int, course_1_id: int, course_2_id: int
+) -> None:
     with db.transaction():
         c = db.get_courses(event_id=event_id)
     assert len(c) == 2
@@ -122,7 +126,9 @@ def test_get_courses_after_adding_two_courses(db, event_id, course_1_id, course_
     )
 
 
-def test_get_first_added_course(db, event_id, course_1_id, course_2_id):
+def test_get_first_added_course(
+    db: SqliteRepo, event_id: int, course_1_id: int, course_2_id: int
+) -> None:
     with db.transaction():
         c = db.get_course(id=course_1_id)
     assert c == CourseType(
@@ -135,7 +141,9 @@ def test_get_first_added_course(db, event_id, course_1_id, course_2_id):
     )
 
 
-def test_get_last_added_course(db, event_id, course_1_id, course_2_id):
+def test_get_last_added_course(
+    db: SqliteRepo, event_id: int, course_1_id: int, course_2_id: int
+) -> None:
     with db.transaction():
         c = db.get_course(id=course_2_id)
     assert c == CourseType(
@@ -148,7 +156,9 @@ def test_get_last_added_course(db, event_id, course_1_id, course_2_id):
     )
 
 
-def test_update_first_added_course(db, event_id, course_1_id, course_2_id):
+def test_update_first_added_course(
+    db: SqliteRepo, event_id: int, course_1_id: int, course_2_id: int
+) -> None:
     with db.transaction():
         db.update_course(
             id=course_1_id, name="Course 3", length=3900, climb=150, controls=["101"]
@@ -176,7 +186,9 @@ def test_update_first_added_course(db, event_id, course_1_id, course_2_id):
     )
 
 
-def test_update_last_added_course(db, event_id, course_1_id, course_2_id):
+def test_update_last_added_course(
+    db: SqliteRepo, event_id: int, course_1_id: int, course_2_id: int
+) -> None:
     with db.transaction():
         db.update_course(
             id=course_2_id,
@@ -208,7 +220,9 @@ def test_update_last_added_course(db, event_id, course_1_id, course_2_id):
     )
 
 
-def test_delete_first_added_course(db, event_id, course_1_id, course_2_id):
+def test_delete_first_added_course(
+    db: SqliteRepo, event_id: int, course_1_id: int, course_2_id: int
+) -> None:
     with db.transaction():
         db.delete_course(id=course_1_id)
     with db.transaction():
@@ -224,7 +238,9 @@ def test_delete_first_added_course(db, event_id, course_1_id, course_2_id):
     )
 
 
-def test_delete_last_added_course(db, event_id, course_1_id, course_2_id):
+def test_delete_last_added_course(
+    db: SqliteRepo, event_id: int, course_1_id: int, course_2_id: int
+) -> None:
     with db.transaction():
         db.delete_course(id=course_2_id)
     with db.transaction():
@@ -240,7 +256,9 @@ def test_delete_last_added_course(db, event_id, course_1_id, course_2_id):
     )
 
 
-def test_delete_courses_deletes_all_courses(db, event_id, course_1_id, course_2_id):
+def test_delete_courses_deletes_all_courses(
+    db: SqliteRepo, event_id: int, course_1_id: int, course_2_id: int
+) -> None:
     with db.transaction():
         db.delete_courses(event_id=event_id)
     with db.transaction():
@@ -248,7 +266,9 @@ def test_delete_courses_deletes_all_courses(db, event_id, course_1_id, course_2_
     assert len(c) == 0
 
 
-def test_add_existing_name_raises_exception(db, event_id, course_1_id):
+def test_add_existing_name_raises_exception(
+    db: SqliteRepo, event_id: int, course_1_id: int
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Course already exist"):
         with db.transaction():
             db.add_course(
@@ -256,7 +276,9 @@ def test_add_existing_name_raises_exception(db, event_id, course_1_id):
             )
 
 
-def test_change_to_existing_name_raises_exception(db, course_1_id, course_2_id):
+def test_change_to_existing_name_raises_exception(
+    db: SqliteRepo, course_1_id: int, course_2_id: int
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Course already exist"):
         with db.transaction():
             db.update_course(
@@ -264,7 +286,9 @@ def test_change_to_existing_name_raises_exception(db, course_1_id, course_2_id):
             )
 
 
-def test_update_with_unknown_id_raises_exception(db, course_1_id):
+def test_update_with_unknown_id_raises_exception(
+    db: SqliteRepo, course_1_id: int
+) -> None:
     with pytest.raises(KeyError):
         with db.transaction():
             db.update_course(
@@ -276,7 +300,9 @@ def test_update_with_unknown_id_raises_exception(db, course_1_id):
             )
 
 
-def test_add_course_with_unknown_event_id_raises_exception(db, event_id):
+def test_add_course_with_unknown_event_id_raises_exception(
+    db: SqliteRepo, event_id: int
+) -> None:
     with pytest.raises(repo.EventNotFoundError):
         with db.transaction():
             db.add_course(
@@ -289,8 +315,8 @@ def test_add_course_with_unknown_event_id_raises_exception(db, event_id):
 
 
 def test_delete_course_with_unknown_id_do_not_change_anything(
-    db, event_id, course_1_id
-):
+    db: SqliteRepo, event_id: int, course_1_id: int
+) -> None:
     with db.transaction():
         db.delete_course(id=course_1_id + 1)
     with db.transaction():
@@ -307,16 +333,16 @@ def test_delete_course_with_unknown_id_do_not_change_anything(
 
 
 def test_delete_course_used_in_class_raises_exception(
-    db, event_id, class_id, course_1_id
-):
+    db: SqliteRepo, event_id: int, class_id: int, course_1_id: int
+) -> None:
     with pytest.raises(repo.CourseUsedError):
         with db.transaction():
             db.delete_course(id=course_1_id)
 
 
 def test_delete_courses_used_in_class_raises_exception(
-    db, event_id, class_id, course_1_id
-):
+    db: SqliteRepo, event_id, class_id: int, course_1_id: int
+) -> None:
     with pytest.raises(repo.CourseUsedError):
         with db.transaction():
             db.delete_courses(event_id=event_id)

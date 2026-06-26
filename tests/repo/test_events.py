@@ -41,7 +41,7 @@ def db() -> Iterator[SqliteRepo]:
 
 
 @pytest.fixture
-def event_1_id(db):
+def event_1_id(db: SqliteRepo) -> int:
     with db.transaction():
         return db.add_event(
             name="XX",
@@ -54,7 +54,7 @@ def event_1_id(db):
 
 
 @pytest.fixture
-def event_2_id(db):
+def event_2_id(db: SqliteRepo) -> int:
     with db.transaction():
         return db.add_event(
             name="YY",
@@ -66,7 +66,7 @@ def event_2_id(db):
         )
 
 
-def test_get_events_after_adding_one_event(db, event_1_id):
+def test_get_events_after_adding_one_event(db: SqliteRepo, event_1_id: int) -> None:
     with db.transaction():
         c = db.get_events()
     assert c == [
@@ -82,7 +82,9 @@ def test_get_events_after_adding_one_event(db, event_1_id):
     ]
 
 
-def test_get_events_after_adding_two_events(db, event_1_id, event_2_id):
+def test_get_events_after_adding_two_events(
+    db: SqliteRepo, event_1_id: int, event_2_id: int
+) -> None:
     with db.transaction():
         c = db.get_events()
     assert c[0].id != c[1].id
@@ -109,7 +111,9 @@ def test_get_events_after_adding_two_events(db, event_1_id, event_2_id):
     ]
 
 
-def test_get_first_added_event(db, event_1_id, event_2_id):
+def test_get_first_added_event(
+    db: SqliteRepo, event_1_id: int, event_2_id: int
+) -> None:
     with db.transaction():
         c = db.get_event(id=event_1_id)
     assert c == EventType(
@@ -123,7 +127,7 @@ def test_get_first_added_event(db, event_1_id, event_2_id):
     )
 
 
-def test_get_last_added_event(db, event_1_id, event_2_id):
+def test_get_last_added_event(db: SqliteRepo, event_1_id: int, event_2_id: int) -> None:
     with db.transaction():
         c = db.get_event(id=event_2_id)
     assert c == EventType(
@@ -137,7 +141,9 @@ def test_get_last_added_event(db, event_1_id, event_2_id):
     )
 
 
-def test_update_first_added_event(db, event_1_id, event_2_id):
+def test_update_first_added_event(
+    db: SqliteRepo, event_1_id: int, event_2_id: int
+) -> None:
     with db.transaction():
         db.update_event(
             id=event_1_id,
@@ -174,7 +180,9 @@ def test_update_first_added_event(db, event_1_id, event_2_id):
     ]
 
 
-def test_update_last_added_event(db, event_1_id, event_2_id):
+def test_update_last_added_event(
+    db: SqliteRepo, event_1_id: int, event_2_id: int
+) -> None:
     with db.transaction():
         db.update_event(
             id=event_2_id,
@@ -211,7 +219,9 @@ def test_update_last_added_event(db, event_1_id, event_2_id):
     ]
 
 
-def test_delete_first_added_event(db, event_1_id, event_2_id):
+def test_delete_first_added_event(
+    db: SqliteRepo, event_1_id: int, event_2_id: int
+) -> None:
     with db.transaction():
         db.delete_event(id=event_1_id)
     with db.transaction():
@@ -229,7 +239,9 @@ def test_delete_first_added_event(db, event_1_id, event_2_id):
     ]
 
 
-def test_delete_last_added_event(db, event_1_id, event_2_id):
+def test_delete_last_added_event(
+    db: SqliteRepo, event_1_id: int, event_2_id: int
+) -> None:
     with db.transaction():
         db.delete_event(id=event_2_id)
     with db.transaction():
@@ -247,7 +259,7 @@ def test_delete_last_added_event(db, event_1_id, event_2_id):
     ]
 
 
-def test_add_existing_name_raises_exception(db, event_1_id):
+def test_add_existing_name_raises_exception(db: SqliteRepo, event_1_id: int) -> None:
     with pytest.raises(repo.ConstraintError, match="Event or event key already exist"):
         with db.transaction():
             db.add_event(
@@ -260,7 +272,7 @@ def test_add_existing_name_raises_exception(db, event_1_id):
             )
 
 
-def test_add_existing_key_raises_exception(db, event_1_id):
+def test_add_existing_key_raises_exception(db: SqliteRepo, event_1_id: int) -> None:
     with pytest.raises(repo.ConstraintError, match="Event or event key already exist"):
         with db.transaction():
             db.add_event(
@@ -273,7 +285,9 @@ def test_add_existing_key_raises_exception(db, event_1_id):
             )
 
 
-def test_change_to_existing_name_raises_exception(db, event_1_id, event_2_id):
+def test_change_to_existing_name_raises_exception(
+    db: SqliteRepo, event_1_id: int, event_2_id: int
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Event or event key already exist"):
         with db.transaction():
             db.update_event(
@@ -287,7 +301,9 @@ def test_change_to_existing_name_raises_exception(db, event_1_id, event_2_id):
             )
 
 
-def test_change_to_existing_key_raises_exception(db, event_1_id, event_2_id):
+def test_change_to_existing_key_raises_exception(
+    db: SqliteRepo, event_1_id: int, event_2_id: int
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Event or event key already exist"):
         with db.transaction():
             db.update_event(
@@ -301,7 +317,9 @@ def test_change_to_existing_key_raises_exception(db, event_1_id, event_2_id):
             )
 
 
-def test_update_with_unknown_id_raises_exception(db, event_1_id):
+def test_update_with_unknown_id_raises_exception(
+    db: SqliteRepo, event_1_id: int
+) -> None:
     with pytest.raises(KeyError):
         with db.transaction():
             db.update_event(
@@ -315,13 +333,17 @@ def test_update_with_unknown_id_raises_exception(db, event_1_id):
             )
 
 
-def test_get_event_with_unknown_id_raises_exception(db, event_1_id):
+def test_get_event_with_unknown_id_raises_exception(
+    db: SqliteRepo, event_1_id: int
+) -> None:
     with pytest.raises(repo.EventNotFoundError):
         with db.transaction():
             db.get_event(id=event_1_id + 1)
 
 
-def test_delete_event_with_unknown_id_do_not_change_anything(db, event_1_id):
+def test_delete_event_with_unknown_id_do_not_change_anything(
+    db: SqliteRepo, event_1_id: int
+) -> None:
     with db.transaction():
         db.delete_event(id=event_1_id + 1)
     with db.transaction():

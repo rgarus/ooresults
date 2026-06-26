@@ -115,7 +115,7 @@ def competitor_2_id(db: SqliteRepo, club_id: int) -> int:
 
 def test_get_competitors_after_adding_one_competitor(
     db: SqliteRepo, competitor_1_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         c = db.get_competitors()
     assert len(c) == 1
@@ -133,7 +133,7 @@ def test_get_competitors_after_adding_one_competitor(
 
 def test_get_competitors_after_adding_two_competitors(
     db: SqliteRepo, competitor_1_id: int, competitor_2_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         c = db.get_competitors()
     assert len(c) == 2
@@ -163,7 +163,7 @@ def test_get_competitors_after_adding_two_competitors(
 
 def test_get_first_added_competitor(
     db: SqliteRepo, competitor_1_id: int, competitor_2_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         c = db.get_competitor(id=competitor_1_id)
     assert c == CompetitorType(
@@ -180,7 +180,7 @@ def test_get_first_added_competitor(
 
 def test_get_last_added_competitor(
     db: SqliteRepo, competitor_1_id: int, competitor_2_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         c = db.get_competitor(id=competitor_2_id)
     assert c == CompetitorType(
@@ -197,7 +197,7 @@ def test_get_last_added_competitor(
 
 def test_get_competitor_by_name(
     db: SqliteRepo, competitor_1_id: int, competitor_2_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         c = db.get_competitor_by_name(first_name="Angela", last_name="Merkel")
     assert c == CompetitorType(
@@ -213,8 +213,8 @@ def test_get_competitor_by_name(
 
 
 def test_if_no_item_found_then_get_competitor_by_name_returns_none(
-    db, competitor_1_id: int
-):
+    db: SqliteRepo, competitor_1_id: int
+) -> None:
     with db.transaction():
         c = db.get_competitor_by_name(first_name="abc", last_name="def")
     assert c is None
@@ -222,7 +222,7 @@ def test_if_no_item_found_then_get_competitor_by_name_returns_none(
 
 def test_update_first_added_competitor(
     db: SqliteRepo, competitor_1_id: int, competitor_2_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         db.update_competitor(
             id=competitor_1_id,
@@ -262,7 +262,7 @@ def test_update_first_added_competitor(
 
 def test_update_last_added_competitor(
     db: SqliteRepo, competitor_1_id: int, competitor_2_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         db.update_competitor(
             id=competitor_2_id,
@@ -302,7 +302,7 @@ def test_update_last_added_competitor(
 
 def test_add_competitor_with_same_first_name(
     db: SqliteRepo, competitor_1_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         competitor_2_id = db.add_competitor(
             first_name="Jogi",
@@ -341,7 +341,7 @@ def test_add_competitor_with_same_first_name(
 
 def test_add_competitor_with_same_last_name(
     db: SqliteRepo, competitor_1_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         competitor_2_id = db.add_competitor(
             first_name="Norbert",
@@ -380,7 +380,7 @@ def test_add_competitor_with_same_last_name(
 
 def test_delete_first_added_competitor(
     db: SqliteRepo, competitor_1_id: int, competitor_2_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         db.delete_competitor(id=competitor_1_id)
     with db.transaction():
@@ -400,7 +400,7 @@ def test_delete_first_added_competitor(
 
 def test_delete_last_added_competitor(
     db: SqliteRepo, competitor_1_id: int, competitor_2_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         db.delete_competitor(id=competitor_2_id)
     with db.transaction():
@@ -418,7 +418,9 @@ def test_delete_last_added_competitor(
     )
 
 
-def test_add_existing_name_raises_exception(db: SqliteRepo, competitor_1_id: int):
+def test_add_existing_name_raises_exception(
+    db: SqliteRepo, competitor_1_id: int
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Competitor already exist"):
         with db.transaction():
             db.add_competitor(
@@ -431,7 +433,7 @@ def test_add_existing_name_raises_exception(db: SqliteRepo, competitor_1_id: int
             )
 
 
-def test_add_many(db: SqliteRepo, club_id: int):
+def test_add_many(db: SqliteRepo, club_id: int) -> None:
     with db.transaction():
         db.add_many_competitors(
             [
@@ -481,7 +483,7 @@ def test_add_many(db: SqliteRepo, club_id: int):
 
 def test_add_many_with_existing_name_raises_exception(
     db: SqliteRepo, competitor_1_id: int
-):
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Competitor already exist"):
         with db.transaction():
             db.add_many_competitors(
@@ -520,7 +522,7 @@ def test_add_many_with_existing_name_raises_exception(
     ]
 
 
-def test_add_with_not_existing_club_id_raises_exception(db: SqliteRepo):
+def test_add_with_not_existing_club_id_raises_exception(db: SqliteRepo) -> None:
     with pytest.raises(repo.ConstraintError, match="Club id does not exist"):
         with db.transaction():
             db.add_competitor(
@@ -535,7 +537,7 @@ def test_add_with_not_existing_club_id_raises_exception(db: SqliteRepo):
 
 def test_change_to_existing_name_raises_exception(
     db: SqliteRepo, competitor_1_id: int, competitor_2_id: int
-):
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Competitor already exist"):
         with db.transaction():
             db.update_competitor(
@@ -549,7 +551,9 @@ def test_change_to_existing_name_raises_exception(
             )
 
 
-def test_update_with_unknown_id_raises_exception(db: SqliteRepo, competitor_1_id: int):
+def test_update_with_unknown_id_raises_exception(
+    db: SqliteRepo, competitor_1_id: int
+) -> None:
     with pytest.raises(KeyError):
         with db.transaction():
             db.update_competitor(
@@ -565,7 +569,7 @@ def test_update_with_unknown_id_raises_exception(db: SqliteRepo, competitor_1_id
 
 def test_delete_competitor_with_unknown_id_do_not_change_anything(
     db: SqliteRepo, competitor_1_id: int
-):
+) -> None:
     with db.transaction():
         db.delete_competitor(id=competitor_1_id + 1)
     with db.transaction():
@@ -585,7 +589,7 @@ def test_delete_competitor_with_unknown_id_do_not_change_anything(
 
 def test_delete_competitor_used_in_entry_raises_exception(
     db: SqliteRepo, entry_id: int, competitor_1_id: int
-):
+) -> None:
     with pytest.raises(repo.CompetitorUsedError):
         with db.transaction():
             db.delete_competitor(id=competitor_1_id)

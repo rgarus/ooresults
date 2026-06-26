@@ -29,6 +29,7 @@ from ooresults.otypes.class_type import ClassType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.start_type import PersonRaceStart
 from ooresults.repo import repo
+from ooresults.repo.repo import ConstraintError
 from ooresults.repo.sqlite_repo import SqliteRepo
 
 
@@ -156,7 +157,9 @@ def entry_id(
         )
 
 
-def test_get_classes_after_adding_one_class(db, event_1_id, class_1_id):
+def test_get_classes_after_adding_one_class(
+    db: SqliteRepo, event_1_id: int, class_1_id: int
+) -> None:
     with db.transaction():
         c = db.get_classes(event_id=event_1_id)
     assert len(c) == 1
@@ -174,8 +177,13 @@ def test_get_classes_after_adding_one_class(db, event_1_id, class_1_id):
 
 
 def test_get_classes_for_first_event(
-    db, event_1_id, course_1_id, class_1_id, class_2_id, class_3_id
-):
+    db: SqliteRepo,
+    event_1_id: int,
+    course_1_id: int,
+    class_1_id: int,
+    class_2_id: int,
+    class_3_id: int,
+) -> None:
     with db.transaction():
         c = db.get_classes(event_id=event_1_id)
     assert len(c) == 2
@@ -206,8 +214,13 @@ def test_get_classes_for_first_event(
 
 
 def test_get_classes_for_second_event(
-    db, event_2_id, course_1_id, class_1_id, class_2_id, class_3_id
-):
+    db: SqliteRepo,
+    event_2_id: int,
+    course_1_id: int,
+    class_1_id: int,
+    class_2_id: int,
+    class_3_id: int,
+) -> None:
     with db.transaction():
         c = db.get_classes(event_id=event_2_id)
     assert len(c) == 1
@@ -224,7 +237,9 @@ def test_get_classes_for_second_event(
     )
 
 
-def test_get_first_added_class(db, event_1_id, class_1_id, class_2_id):
+def test_get_first_added_class(
+    db: SqliteRepo, event_1_id: int, class_1_id: int, class_2_id: int
+) -> None:
     with db.transaction():
         c = db.get_class(id=class_1_id)
     assert c == ClassType(
@@ -237,7 +252,9 @@ def test_get_first_added_class(db, event_1_id, class_1_id, class_2_id):
     )
 
 
-def test_get_last_added_class(db, event_1_id, course_1_id, class_1_id, class_2_id):
+def test_get_last_added_class(
+    db: SqliteRepo, event_1_id: int, course_1_id: int, class_1_id: int, class_2_id: int
+) -> None:
     with db.transaction():
         c = db.get_class(id=class_2_id)
     assert c == ClassType(
@@ -250,7 +267,9 @@ def test_get_last_added_class(db, event_1_id, course_1_id, class_1_id, class_2_i
     )
 
 
-def test_update_first_added_class(db, event_1_id, course_1_id, class_1_id, class_2_id):
+def test_update_first_added_class(
+    db: SqliteRepo, event_1_id: int, course_1_id: int, class_1_id: int, class_2_id: int
+) -> None:
     with db.transaction():
         db.update_class(
             id=class_1_id,
@@ -306,7 +325,9 @@ def test_update_first_added_class(db, event_1_id, course_1_id, class_1_id, class
     )
 
 
-def test_update_last_added_class(db, event_1_id, class_1_id, class_2_id):
+def test_update_last_added_class(
+    db: SqliteRepo, event_1_id: int, class_1_id: int, class_2_id: int
+) -> None:
     with db.transaction():
         db.update_class(
             id=class_2_id,
@@ -344,7 +365,9 @@ def test_update_last_added_class(db, event_1_id, class_1_id, class_2_id):
     )
 
 
-def test_delete_first_added_class(db, event_1_id, course_1_id, class_1_id, class_2_id):
+def test_delete_first_added_class(
+    db: SqliteRepo, event_1_id: int, course_1_id: int, class_1_id: int, class_2_id: int
+) -> None:
     with db.transaction():
         db.delete_class(id=class_1_id)
     with db.transaction():
@@ -363,7 +386,9 @@ def test_delete_first_added_class(db, event_1_id, course_1_id, class_1_id, class
     )
 
 
-def test_delete_last_added_class(db, event_1_id, class_1_id, class_2_id):
+def test_delete_last_added_class(
+    db: SqliteRepo, event_1_id: int, class_1_id: int, class_2_id: int
+) -> None:
     with db.transaction():
         db.delete_class(id=class_2_id)
     with db.transaction():
@@ -382,7 +407,9 @@ def test_delete_last_added_class(db, event_1_id, class_1_id, class_2_id):
     )
 
 
-def test_delete_classes_deletes_all_classes(db, event_1_id, class_1_id, class_2_id):
+def test_delete_classes_deletes_all_classes(
+    db: SqliteRepo, event_1_id: int, class_1_id: int, class_2_id: int
+) -> None:
     with db.transaction():
         db.delete_classes(event_id=event_1_id)
     with db.transaction():
@@ -390,7 +417,9 @@ def test_delete_classes_deletes_all_classes(db, event_1_id, class_1_id, class_2_
     assert len(c) == 0
 
 
-def test_add_existing_name_raises_exception(db, event_1_id, class_1_id):
+def test_add_existing_name_raises_exception(
+    db: SqliteRepo, event_1_id: int, class_1_id: int
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Class already exist"):
         with db.transaction():
             db.add_class(
@@ -402,7 +431,9 @@ def test_add_existing_name_raises_exception(db, event_1_id, class_1_id):
             )
 
 
-def test_change_to_existing_name_raises_exception(db, class_1_id, class_2_id):
+def test_change_to_existing_name_raises_exception(
+    db: SqliteRepo, class_1_id: int, class_2_id: int
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Class already exist"):
         with db.transaction():
             db.update_class(
@@ -414,7 +445,9 @@ def test_change_to_existing_name_raises_exception(db, class_1_id, class_2_id):
             )
 
 
-def test_update_with_unknown_id_raises_exception(db, class_1_id):
+def test_update_with_unknown_id_raises_exception(
+    db: SqliteRepo, class_1_id: int
+) -> None:
     with pytest.raises(KeyError):
         with db.transaction():
             db.update_class(
@@ -426,7 +459,23 @@ def test_update_with_unknown_id_raises_exception(db, class_1_id):
             )
 
 
-def test_add_class_with_unknown_event_id_raises_exception(db, event_1_id):
+def test_update_with_unknown_course_id_raises_exception(
+    db: SqliteRepo, class_1_id: int, course_2_id: int
+) -> None:
+    with pytest.raises(ConstraintError):
+        with db.transaction():
+            db.update_class(
+                id=class_1_id,
+                name="Class 2",
+                short_name="C 2",
+                course_id=course_2_id + 1,
+                params=ClassParams(),
+            )
+
+
+def test_add_class_with_unknown_event_id_raises_exception(
+    db: SqliteRepo, event_1_id: int
+) -> None:
     with pytest.raises(repo.EventNotFoundError):
         with db.transaction():
             db.add_class(
@@ -439,8 +488,8 @@ def test_add_class_with_unknown_event_id_raises_exception(db, event_1_id):
 
 
 def test_delete_class_with_unknown_id_do_not_change_anything(
-    db, event_1_id, class_1_id
-):
+    db: SqliteRepo, event_1_id: int, class_1_id: int
+) -> None:
     with db.transaction():
         db.delete_class(id=class_1_id + 1)
     with db.transaction():
@@ -460,24 +509,29 @@ def test_delete_class_with_unknown_id_do_not_change_anything(
 
 
 def test_delete_class_used_in_entry_raises_exception(
-    db, event_1_id, entry_id, class_1_id
-):
+    db: SqliteRepo, event_1_id: int, entry_id: int, class_1_id: int
+) -> None:
     with pytest.raises(repo.ClassUsedError):
         with db.transaction():
             db.delete_class(id=class_1_id)
 
 
 def test_delete_classes_if_entry_exist_raises_exception(
-    db, event_1_id, entry_id, class_1_id
-):
+    db: SqliteRepo, event_1_id: int, entry_id: int, class_1_id: int
+) -> None:
     with pytest.raises(repo.ClassUsedError):
         with db.transaction():
             db.delete_classes(event_id=event_1_id)
 
 
 def test_get_course_data(
-    db, event_1_id, course_1_id, course_2_id, class_1_id, class_2_id
-):
+    db: SqliteRepo,
+    event_1_id: int,
+    course_1_id: int,
+    course_2_id: int,
+    class_1_id: int,
+    class_2_id: int,
+) -> None:
     with db.transaction():
         db.update_class(
             id=class_1_id,

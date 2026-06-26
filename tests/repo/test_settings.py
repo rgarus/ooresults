@@ -32,13 +32,13 @@ def db() -> Iterator[SqliteRepo]:
     _db.close()
 
 
-def test_series_settings_defaults(db):
+def test_series_settings_defaults(db: SqliteRepo) -> None:
     with db.transaction():
         s = db.get_series_settings()
     assert s == Settings()
 
 
-def test_series_settings_update_1(db):
+def test_series_settings_update_1(db: SqliteRepo) -> None:
     settings = Settings(
         name="Series 1",
         nr_of_best_results=4,
@@ -54,7 +54,7 @@ def test_series_settings_update_1(db):
     assert db.get_series_settings() == settings
 
 
-def test_series_settings_update_2(db):
+def test_series_settings_update_2(db: SqliteRepo) -> None:
     settings = Settings(
         name="Series 2",
         nr_of_best_results=None,
@@ -68,7 +68,7 @@ def test_series_settings_update_2(db):
         assert db.get_series_settings() == settings
 
 
-def test_series_settings_updates(db):
+def test_series_settings_updates(db: SqliteRepo) -> None:
     settings = Settings(
         name="Series 1",
         nr_of_best_results=4,

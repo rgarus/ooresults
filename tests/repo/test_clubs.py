@@ -93,7 +93,7 @@ def class_id(db: SqliteRepo, event_id: int) -> int:
 
 @pytest.fixture
 def entry_id(
-    db, event_id: int, class_id: int, club_1_id: int, competitor_id: int
+    db: SqliteRepo, event_id: int, class_id: int, club_1_id: int, competitor_id: int
 ) -> int:
     with db.transaction():
         return db.add_entry(
@@ -109,14 +109,16 @@ def entry_id(
         )
 
 
-def test_get_clubs_after_adding_one_club(db, club_1_id):
+def test_get_clubs_after_adding_one_club(db: SqliteRepo, club_1_id: int) -> None:
     with db.transaction():
         c = db.get_clubs()
     assert len(c) == 1
     assert c[0] == ClubType(id=club_1_id, name="Club 1")
 
 
-def test_get_clubs_after_adding_two_clubs(db, club_1_id, club_2_id):
+def test_get_clubs_after_adding_two_clubs(
+    db: SqliteRepo, club_1_id: int, club_2_id: int
+) -> None:
     with db.transaction():
         c = db.get_clubs()
     assert len(c) == 2
@@ -126,19 +128,21 @@ def test_get_clubs_after_adding_two_clubs(db, club_1_id, club_2_id):
     assert c[1] == ClubType(id=club_2_id, name="Club 2")
 
 
-def test_get_first_added_club(db, club_1_id, club_2_id):
+def test_get_first_added_club(db: SqliteRepo, club_1_id: int, club_2_id: int) -> None:
     with db.transaction():
         c = db.get_club(id=club_1_id)
     assert c == ClubType(id=club_1_id, name="Club 1")
 
 
-def test_get_last_added_club(db, club_1_id, club_2_id):
+def test_get_last_added_club(db: SqliteRepo, club_1_id: int, club_2_id: int) -> None:
     with db.transaction():
         c = db.get_club(id=club_2_id)
     assert c == ClubType(id=club_2_id, name="Club 2")
 
 
-def test_update_first_added_club(db, club_1_id, club_2_id):
+def test_update_first_added_club(
+    db: SqliteRepo, club_1_id: int, club_2_id: int
+) -> None:
     with db.transaction():
         db.update_club(id=club_1_id, name="Club 3")
     with db.transaction():
@@ -150,7 +154,7 @@ def test_update_first_added_club(db, club_1_id, club_2_id):
     assert c[1] == ClubType(id=club_1_id, name="Club 3")
 
 
-def test_update_last_added_club(db, club_1_id, club_2_id):
+def test_update_last_added_club(db: SqliteRepo, club_1_id: int, club_2_id: int) -> None:
     with db.transaction():
         db.update_club(id=club_2_id, name="Club 3")
     with db.transaction():
@@ -162,7 +166,9 @@ def test_update_last_added_club(db, club_1_id, club_2_id):
     assert c[1] == ClubType(id=club_2_id, name="Club 3")
 
 
-def test_delete_first_added_club(db, club_1_id, club_2_id):
+def test_delete_first_added_club(
+    db: SqliteRepo, club_1_id: int, club_2_id: int
+) -> None:
     with db.transaction():
         db.delete_club(id=club_1_id)
     with db.transaction():
@@ -171,7 +177,7 @@ def test_delete_first_added_club(db, club_1_id, club_2_id):
     assert c[0] == ClubType(id=club_2_id, name="Club 2")
 
 
-def test_delete_last_added_club(db, club_1_id, club_2_id):
+def test_delete_last_added_club(db: SqliteRepo, club_1_id: int, club_2_id: int) -> None:
     with db.transaction():
         db.delete_club(id=club_2_id)
     with db.transaction():
@@ -180,25 +186,31 @@ def test_delete_last_added_club(db, club_1_id, club_2_id):
     assert c[0] == ClubType(id=club_1_id, name="Club 1")
 
 
-def test_add_existing_name_raises_exception(db, club_1_id):
+def test_add_existing_name_raises_exception(db: SqliteRepo, club_1_id: int) -> None:
     with pytest.raises(repo.ConstraintError, match="Club already exist"):
         with db.transaction():
             db.add_club(name="Club 1")
 
 
-def test_change_to_existing_name_raises_exception(db, club_1_id, club_2_id):
+def test_change_to_existing_name_raises_exception(
+    db: SqliteRepo, club_1_id: int, club_2_id: int
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Club already exist"):
         with db.transaction():
             db.update_club(id=club_1_id, name="Club 2")
 
 
-def test_update_with_unknown_id_raises_exception(db, club_1_id):
+def test_update_with_unknown_id_raises_exception(
+    db: SqliteRepo, club_1_id: int
+) -> None:
     with pytest.raises(KeyError):
         with db.transaction():
             db.update_club(id=club_1_id + 1, name="Club 2")
 
 
-def test_delete_club_with_unknown_id_do_not_change_anything(db, club_1_id):
+def test_delete_club_with_unknown_id_do_not_change_anything(
+    db: SqliteRepo, club_1_id: int
+) -> None:
     with db.transaction():
         db.delete_club(id=club_1_id + 1)
     with db.transaction():
@@ -207,13 +219,17 @@ def test_delete_club_with_unknown_id_do_not_change_anything(db, club_1_id):
     assert c[0] == ClubType(id=club_1_id, name="Club 1")
 
 
-def test_delete_club_used_in_competitor_raises_exception(db, competitor_id, club_1_id):
+def test_delete_club_used_in_competitor_raises_exception(
+    db: SqliteRepo, competitor_id: int, club_1_id: int
+) -> None:
     with pytest.raises(repo.ClubUsedError):
         with db.transaction():
             db.delete_club(id=club_1_id)
 
 
-def test_delete_club_used_in_entry_raises_exception(db, entry_id, club_1_id):
+def test_delete_club_used_in_entry_raises_exception(
+    db: SqliteRepo, entry_id: int, club_1_id: int
+) -> None:
     with pytest.raises(repo.ClubUsedError):
         with db.transaction():
             db.delete_club(id=club_1_id)

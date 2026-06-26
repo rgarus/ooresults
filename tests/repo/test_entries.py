@@ -201,7 +201,7 @@ def entry_3_id(
 
 def test_add_entry(
     db: SqliteRepo, event_1_id: int, class_1_id: int, club_id: int, competitor_1_id: int
-):
+) -> None:
     with db.transaction():
         id = db.add_entry(
             event_id=event_1_id,
@@ -241,7 +241,7 @@ def test_add_entry(
 
 def test_add_entry_if_an_entry_with_the_competitor_already_exists(
     db: SqliteRepo, event_1_id: int, class_1_id: int, club_id: int, competitor_1_id: int
-):
+) -> None:
     with db.transaction():
         id1 = db.add_entry(
             event_id=event_1_id,
@@ -317,7 +317,7 @@ def test_add_entry_if_an_entry_with_the_competitor_already_exists(
 
 def test_add_many_entries(
     db: SqliteRepo, event_1_id: int, class_1_id: int, club_id: int, competitor_1_id: int
-):
+) -> None:
     with db.transaction():
         db.add_many_entries(
             [
@@ -361,7 +361,7 @@ def test_add_many_entries(
 
 def test_add_many_entries_with_two_entries_for_one_competitor(
     db: SqliteRepo, event_1_id: int, class_1_id: int, club_id: int, competitor_1_id: int
-):
+) -> None:
     with db.transaction():
         db.add_many_entries(
             [
@@ -441,7 +441,7 @@ def test_get_entries(
     entry_3_id: int,
     club_id: int,
     class_2_id: int,
-):
+) -> None:
     with db.transaction():
         c1 = db.get_competitor_by_name(first_name="Jogi", last_name="Löw")
         c2 = db.get_competitor_by_name(first_name="Angela", last_name="Merkel")
@@ -498,7 +498,7 @@ def test_get_entries_by_name(
     club_id: int,
     competitor_2_id: int,
     class_2_id: int,
-):
+) -> None:
     with db.transaction():
         data = db.get_entries_by_name(
             event_id=event_2_id, first_name="Angela", last_name="Merkel"
@@ -527,7 +527,7 @@ def test_get_entries_by_name(
 
 def test_get_entries_by_name_with_two_entries_for_one_competitor(
     db: SqliteRepo, event_1_id: int, class_1_id: int, club_id: int, competitor_1_id: int
-):
+) -> None:
     with db.transaction():
         db.add_many_entries(
             [
@@ -607,7 +607,7 @@ def test_get_first_added_entry(
     entry_1_id: int,
     entry_2_id: int,
     entry_3_id: int,
-):
+) -> None:
     with db.transaction():
         competitor = db.get_competitor_by_name(first_name="Angela", last_name="Merkel")
     assert competitor is not None
@@ -652,7 +652,7 @@ def test_get_last_added_entry(
     entry_1_id: int,
     entry_2_id: int,
     entry_3_id: int,
-):
+) -> None:
     with db.transaction():
         competitor = db.get_competitor_by_name(first_name="Jogi", last_name="Löw")
     assert competitor is not None
@@ -691,7 +691,7 @@ def test_get_last_added_entry(
 
 def test_get_entry_with_unknown_id_raises_exception(
     db: SqliteRepo,
-):
+) -> None:
     with pytest.raises(KeyError):
         with db.transaction():
             db.get_entry(id=1)
@@ -705,7 +705,7 @@ def test_update_first_added_entry(
     club_id: int,
     entry_2_id: int,
     entry_3_id: int,
-):
+) -> None:
     with db.transaction():
         db.update_entry(
             id=entry_2_id,
@@ -793,7 +793,7 @@ def test_update_result_first_added_entry(
     club_id: int,
     entry_2_id: int,
     entry_3_id: int,
-):
+) -> None:
     with db.transaction():
         db.update_entry_result(
             id=entry_2_id,
@@ -857,7 +857,7 @@ def test_update_last_added_entry(
     club_id: int,
     entry_2_id: int,
     entry_3_id: int,
-):
+) -> None:
     with db.transaction():
         db.update_entry(
             id=entry_3_id,
@@ -945,7 +945,7 @@ def test_update_result_last_added_entry(
     club_id: int,
     entry_2_id: int,
     entry_3_id: int,
-):
+) -> None:
     with db.transaction():
         db.update_entry_result(
             id=entry_3_id,
@@ -1003,7 +1003,7 @@ def test_update_result_last_added_entry(
 
 def test_add_entry_result(
     db: SqliteRepo, event_2_id: int, class_2_id: int, club_id: int, entry_2_id: int
-):
+) -> None:
     with db.transaction():
         entry_id_1_result = db.add_entry_result(
             event_id=event_2_id,
