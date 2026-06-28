@@ -70,14 +70,14 @@ def class_info() -> ClassInfoType:
 
 
 class SleepAsyncMock(mock.AsyncMock):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.side_effect = self._sleep
         self.event_sync = asyncio.Event()
         self.event_continue = asyncio.Event()
         self.first = True
 
-    async def sync(self):
+    async def sync(self) -> None:
         if self.first:
             self.first = False
         else:
@@ -151,14 +151,14 @@ def parent(
 
 
 class C:
-    def __init__(self, name: str, args=None, kwargs=None, value: Any = None):
+    def __init__(self, name: str, args=None, kwargs=None, value: Any = None) -> None:
         self.name = name
         self.args = args
         self.kwargs = kwargs
         self.value = value
 
 
-def check_calls(parent: mock.MagicMock, calls: list[C]):
+def check_calls(parent: mock.MagicMock, calls: list[C]) -> None:
     for i, c in enumerate(parent.mock_calls):
         name, args, kwargs = c
         print(c, name, args, kwargs)
@@ -182,7 +182,7 @@ def check_calls(parent: mock.MagicMock, calls: list[C]):
     assert parent.mock_sleep.await_count == len(c)
 
 
-def value_calls(parent: mock.MagicMock, calls: list[C]):
+def value_calls(parent: mock.MagicMock, calls: list[C]) -> None:
     for i, c in enumerate(calls):
         if c.name == "mock_connect":
             if c.value == ClientConnection:
@@ -210,7 +210,7 @@ async def test_if_streaming_is_disabled_then_connect_is_not_called_after_softwar
     event: EventType,
     mock_get_events: mock.Mock,
     mock_connect: mock.AsyncMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
 
     mock_get_events.return_value = [event]
@@ -230,7 +230,7 @@ async def test_if_streaming_is_disabled_then_connect_is_not_called_after_softwar
 async def test_if_streaming_is_enabled_then_connect_is_called_until_connected(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -312,7 +312,7 @@ async def test_if_streaming_is_enabled_then_connect_is_called_until_connected(
 async def test_if_answer_is_event_not_found_then_reconnect_after_45_sec(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -383,7 +383,7 @@ async def test_if_answer_is_event_not_found_then_reconnect_after_45_sec(
 async def test_if_no_answer_then_reconnect_after_45_sec(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -454,7 +454,7 @@ async def test_if_no_answer_then_reconnect_after_45_sec(
 async def test_if_unexpected_answer_then_reconnect_after_45_sec(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -525,7 +525,7 @@ async def test_if_unexpected_answer_then_reconnect_after_45_sec(
 async def test_if_answer_is_error_then_repeat_sending_actual_result_after_30_sec(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -599,7 +599,7 @@ async def test_if_answer_is_error_then_repeat_sending_actual_result_after_30_sec
 async def test_if_after_connect_an_unknown_exception_is_raised_new_state_is_internal_error(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -659,7 +659,7 @@ async def test_if_answer_is_ok_then_repeat_sending_different_results_every_30_se
     event: EventType,
     class_info: ClassInfoType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -738,7 +738,7 @@ async def test_if_answer_is_ok_then_do_not_send_the_same_result_again(
     event: EventType,
     class_info: ClassInfoType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -836,7 +836,7 @@ async def test_if_answer_is_ok_then_do_not_send_the_same_result_again(
 async def test_if_answer_is_ok_and_connection_closed_then_reconnect_after_30_sec(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -916,7 +916,7 @@ async def test_if_answer_is_ok_and_connection_closed_then_reconnect_after_30_sec
 async def test_if_stream_parameters_are_changed_then_reconnect(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -1001,7 +1001,7 @@ async def test_if_stream_parameters_are_changed_then_reconnect(
 async def test_if_stream_is_disabled_then_results_are_no_longer_send(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = True
 
@@ -1065,7 +1065,7 @@ async def test_if_stream_is_disabled_then_results_are_no_longer_send(
 async def test_if_stream_is_disabled_then_connect_is_not_called(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     loop = asyncio.get_running_loop()
     event.streaming_enabled = False
 
@@ -1093,7 +1093,7 @@ async def test_if_stream_is_disabled_then_connect_is_not_called(
 async def test_if_stream_is_enabled_then_connect_to_server(
     event: EventType,
     parent: mock.MagicMock,
-):
+) -> None:
     calls = [
         # get_events -> []
         C(name="mock_get_events", value=[event]),

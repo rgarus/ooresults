@@ -23,13 +23,16 @@ import datetime
 import json
 import tempfile
 import threading
+from collections.abc import AsyncGenerator
 from collections.abc import Iterator
+from typing import Optional
 
 import pytest
 import pytest_asyncio
 import websockets.exceptions
 from websockets.asyncio.client import ClientConnection
 from websockets.asyncio.client import connect
+from websockets.asyncio.server import Server
 from websockets.asyncio.server import serve
 
 from ooresults import model
@@ -72,16 +75,15 @@ class WebSocketServer(threading.Thread):
     ):
         super().__init__()
         self.barrier = barrier
-        self.handler = None
+        self.handler = WebSocketHandler(import_stream=True)
         self.streaming = None
         self.host = host
         self.port = port
-        self.server = None
+        self.server: Optional[Server] = None
         self.loop = asyncio.new_event_loop()
 
-    def run(self):
+    def run(self) -> None:
         asyncio.set_event_loop(loop=self.loop)
-        self.handler = WebSocketHandler(import_stream=True)
         self.loop.create_task(self.start_server())
         try:
             self.loop.run_forever()
@@ -96,8 +98,8 @@ class WebSocketServer(threading.Thread):
         )
         self.barrier.wait()
 
-    def close(self):
-        if self.loop:
+    def close(self) -> None:
+        if self.loop and self.server:
             self.server.close()
             future = asyncio.run_coroutine_threadsafe(
                 coro=self.server.wait_closed(), loop=self.loop
@@ -107,20 +109,20 @@ class WebSocketServer(threading.Thread):
 
 
 @pytest.fixture
-def websocket_server():
+def websocket_server() -> Iterator[WebSocketServer]:
     barrier = threading.Barrier(parties=2, timeout=10)
-    model.results.websocket_server = WebSocketServer(barrier=barrier)
-    model.results.websocket_server.start()
+    websocket_server = WebSocketServer(barrier=barrier)
+    websocket_server.start()
     barrier.wait()
-    yield model.results.websocket_server
-    model.results.websocket_server.close()
+    yield websocket_server
+    websocket_server.close()
 
 
 @pytest.mark.asyncio
 async def test_no_access_if_event_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
-):
+) -> None:
     async with connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send("xxx,local,false")
         response = await si1_client.recv()
@@ -135,7 +137,7 @@ async def test_no_access_if_event_not_found(
 async def test_no_access_if_key_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
-):
+) -> None:
     async with connect("ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},xxx,false")
         response = await si1_client.recv()
@@ -150,7 +152,7 @@ async def test_no_access_if_key_not_found(
 async def test_reader_status_received_if_event_and_key_found(
     event_id: int,
     websocket_server: WebSocketServer,
-):
+) -> None:
     async with connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},local,false")
         response = await si1_client.recv()
@@ -162,7 +164,7 @@ async def test_reader_status_received_if_event_and_key_found(
 async def test_cardreader_event_key_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
-):
+) -> None:
     async with connect(
         uri="ws://localhost:8081/cardreader",
         additional_headers={"X-Event-Key": "xxx"},
@@ -185,7 +187,7 @@ async def test_cardreader_event_key_not_found(
 async def test_cardreader_event_key_found_and_reader_disconnected(
     event_id: int,
     websocket_server: WebSocketServer,
-):
+) -> None:
     async with connect(uri="ws://localhost:8081/si1") as si1_client:
         await si1_client.send(f"{event_id},local,false")
         response = await si1_client.recv()
@@ -224,7 +226,7 @@ async def test_cardreader_event_key_found_and_reader_disconnected(
 async def reader(
     event_id: int,
     websocket_server: WebSocketServer,
-) -> ClientConnection:
+) -> AsyncGenerator[ClientConnection]:
     client = await connect(
         uri="ws://localhost:8081/cardreader",
         additional_headers={"X-Event-Key": "local"},
@@ -250,7 +252,7 @@ async def si1_clients(
     event_id: int,
     reader: ClientConnection,
     websocket_server: WebSocketServer,
-):
+) -> AsyncGenerator[list[ClientConnection]]:
     connect_1 = connect(uri="ws://localhost:8081/si1")
     connect_2 = connect(uri="ws://localhost:8081/si1")
     connect_3 = connect(uri="ws://localhost:8081/si1")
@@ -273,7 +275,7 @@ async def test_cardreader_reader_connected(
     reader: ClientConnection,
     si1_clients: list[ClientConnection],
     websocket_server: WebSocketServer,
-):
+) -> None:
     item = {
         "entryType": "readerConnected",
         "entryTime": "2021-05-18T17:24:33+02:00",
@@ -299,7 +301,7 @@ async def test_cardreader_reader_disconnected(
     reader: ClientConnection,
     si1_clients: list[ClientConnection],
     websocket_server: WebSocketServer,
-):
+) -> None:
     item = {
         "entryType": "readerDisconnected",
         "entryTime": "2021-05-18T17:24:33+02:00",
@@ -325,7 +327,7 @@ async def test_cardreader_card_inserted(
     reader: ClientConnection,
     si1_clients: list[ClientConnection],
     websocket_server: WebSocketServer,
-):
+) -> None:
     item = {
         "entryType": "cardInserted",
         "entryTime": "2021-05-18T17:24:33+02:00",
@@ -353,7 +355,7 @@ async def test_cardreader_card_removed(
     reader: ClientConnection,
     si1_clients: list[ClientConnection],
     websocket_server: WebSocketServer,
-):
+) -> None:
     item = {
         "entryType": "cardRemoved",
         "entryTime": "2021-05-18T17:24:33+02:00",
@@ -380,7 +382,7 @@ async def test_cardreader_card_read(
     reader: ClientConnection,
     si1_clients: list[ClientConnection],
     websocket_server: WebSocketServer,
-):
+) -> None:
     item = {
         "entryType": "cardRead",
         "entryTime": "2021-05-18T17:24:33+02:00",

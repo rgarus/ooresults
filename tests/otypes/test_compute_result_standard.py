@@ -52,7 +52,7 @@ def t(a: datetime, b: datetime) -> int:
 def test_compute_result_status_ok(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -112,7 +112,7 @@ def test_compute_result_status_ok(
 def test_compute_result_status_mispunched(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c3 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
@@ -173,7 +173,7 @@ def test_compute_result_status_mispunched(
 def test_compute_result_status_ok_with_additionals(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -274,7 +274,7 @@ def test_compute_result_status_ok_with_additionals(
 def test_compute_result_with_unknown_punch_times(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = SplitTime.NO_TIME
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -351,7 +351,7 @@ def test_compute_result_with_unknown_punch_times(
 def test_compute_result_and_delete_additional_splittime_without_punch_times(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c3 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
@@ -445,7 +445,7 @@ def test_compute_result_and_delete_additional_splittime_without_punch_times(
 def test_compute_result_and_contain_additional_splittime_with_si_punch_time_but_without_punch_time(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -529,7 +529,7 @@ def test_compute_result_and_contain_additional_splittime_with_si_punch_time_but_
     )
 
 
-def test_compute_result_first_leg_voided():
+def test_compute_result_first_leg_voided() -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -585,7 +585,7 @@ def test_compute_result_first_leg_voided():
     )
 
 
-def test_compute_result_last_leg_voided():
+def test_compute_result_last_leg_voided() -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -641,7 +641,7 @@ def test_compute_result_last_leg_voided():
     )
 
 
-def test_compute_result_several_legs_voided():
+def test_compute_result_several_legs_voided() -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -699,7 +699,9 @@ def test_compute_result_several_legs_voided():
     )
 
 
-def test_compute_result_legs_voided_with_unknown_punch_times_can_not_always_be_substracted_1():
+def test_compute_result_legs_voided_with_unknown_punch_times_can_not_always_be_substracted_1() -> (
+    None
+):
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = SplitTime.NO_TIME
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -757,7 +759,9 @@ def test_compute_result_legs_voided_with_unknown_punch_times_can_not_always_be_s
     )
 
 
-def test_compute_result_legs_voided_with_unknown_punch_times_can_not_always_be_substracted_2():
+def test_compute_result_legs_voided_with_unknown_punch_times_can_not_always_be_substracted_2() -> (
+    None
+):
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = SplitTime.NO_TIME
@@ -815,7 +819,9 @@ def test_compute_result_legs_voided_with_unknown_punch_times_can_not_always_be_s
     )
 
 
-def test_compute_result_legs_voided_with_unknown_punch_times_are_substracted_if_possible():
+def test_compute_result_legs_voided_with_unknown_punch_times_are_substracted_if_possible() -> (
+    None
+):
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = SplitTime.NO_TIME

@@ -17,6 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import datetime
 from decimal import Decimal
 
 import pytest
@@ -40,7 +41,7 @@ def event_1() -> EventType:
     return EventType(
         id=1,
         name="ev1",
-        date="2021-03-20",
+        date=datetime.date(year=2021, month=3, day=20),
         key=None,
         publish=False,
         series="Run 1",
@@ -53,7 +54,7 @@ def event_2() -> EventType:
     return EventType(
         id=2,
         name="ev2",
-        date="2021-02-20",
+        date=datetime.date(year=2021, month=2, day=20),
         key=None,
         publish=False,
         series=None,
@@ -66,7 +67,7 @@ def event_3() -> EventType:
     return EventType(
         id=3,
         name="ev3",
-        date="2021-02-21",
+        date=datetime.date(year=2021, month=2, day=21),
         key=None,
         publish=False,
         series="Run 3",
@@ -79,7 +80,7 @@ def event_4() -> EventType:
     return EventType(
         id=4,
         name="ev4",
-        date="2021-02-21",
+        date=datetime.date(year=2021, month=2, day=21),
         key=None,
         publish=False,
         series="Run 4",
@@ -92,7 +93,7 @@ def event_5() -> EventType:
     return EventType(
         id=5,
         name="ev5",
-        date="2021-02-19",
+        date=datetime.date(year=2021, month=2, day=19),
         key=None,
         publish=False,
         series="Run 5",
@@ -177,7 +178,7 @@ def class_info_5() -> ClassInfoType:
 
 def test_use_only_events_in_series(
     event_1: EventType, event_2: EventType, event_3: EventType
-):
+) -> None:
     events = [event_1, event_2, event_3]
     data = model.results.create_event_list(events=events)
     assert data == [event_3, event_1]
@@ -185,7 +186,7 @@ def test_use_only_events_in_series(
 
 def test_sort_events_by_date(
     event_1: EventType, event_3: EventType, event_5: EventType
-):
+) -> None:
     events = [event_1, event_3, event_5]
     data = model.results.create_event_list(events=events)
     assert data == [event_5, event_3, event_1]
@@ -195,7 +196,9 @@ def test_sort_events_by_date(
     assert data == [event_5, event_3, event_1]
 
 
-def test_sort_events_by_name_if_dates_are_equal(event_3: EventType, event_4: EventType):
+def test_sort_events_by_name_if_dates_are_equal(
+    event_3: EventType, event_4: EventType
+) -> None:
     events = [event_3, event_4]
     data = model.results.create_event_list(events=events)
     assert data == [event_3, event_4]
@@ -205,7 +208,7 @@ def test_sort_events_by_name_if_dates_are_equal(event_3: EventType, event_4: Eve
     assert data == [event_3, event_4]
 
 
-def test_no_results(event_1: EventType, class_info_1: ClassInfoType):
+def test_no_results(event_1: EventType, class_info_1: ClassInfoType) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -260,7 +263,7 @@ def test_no_results(event_1: EventType, class_info_1: ClassInfoType):
     assert data == [(class_info_1.name, [])]
 
 
-def test_best_3_of_1_race(event_1: EventType, class_info_1: ClassInfoType):
+def test_best_3_of_1_race(event_1: EventType, class_info_1: ClassInfoType) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -315,7 +318,7 @@ def test_best_3_of_1_race(event_1: EventType, class_info_1: ClassInfoType):
 
 def test_if_started_several_times_in_a_class_at_an_event_then_use_best_result(
     event_1: EventType, class_info_1: ClassInfoType
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -389,7 +392,7 @@ def test_best_3_of_2_races(
     event_2: EventType,
     class_info_1: ClassInfoType,
     class_info_2: ClassInfoType,
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -476,7 +479,7 @@ def test_best_3_of_4_races(
     class_info_2: ClassInfoType,
     class_info_3: ClassInfoType,
     class_info_4: ClassInfoType,
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -611,7 +614,7 @@ def test_bonus_1_race(
     event_2: EventType,
     class_info_1: ClassInfoType,
     class_info_2: ClassInfoType,
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -689,7 +692,7 @@ def test_bonus_2_races(
     class_info_1: ClassInfoType,
     class_info_2: ClassInfoType,
     class_info_3: ClassInfoType,
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -797,7 +800,7 @@ def test_bonus_4_races(
     class_info_3: ClassInfoType,
     class_info_4: ClassInfoType,
     class_info_5: ClassInfoType,
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -946,7 +949,7 @@ def test_bonus_4_races(
     ]
 
 
-def test_ranking_1(event_1: EventType, class_info_1: ClassInfoType):
+def test_ranking_1(event_1: EventType, class_info_1: ClassInfoType) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -1030,7 +1033,7 @@ def test_ranking_2(
     event_2: EventType,
     class_info_1: ClassInfoType,
     class_info_2: ClassInfoType,
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -1139,7 +1142,7 @@ def test_ranking_3(
     event_2: EventType,
     class_info_1: ClassInfoType,
     class_info_2: ClassInfoType,
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -1266,7 +1269,7 @@ def test_if_sum_is_0_then_rank_is_none(
     event_2: EventType,
     class_info_1: ClassInfoType,
     class_info_2: ClassInfoType,
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -1373,7 +1376,7 @@ def test_if_sum_is_0_then_rank_is_none(
 
 def test_compute_points_for_max_points_100_and_decimals_2(
     event_1: EventType, class_info_1: ClassInfoType
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -1457,7 +1460,7 @@ def test_compute_points_for_max_points_100_and_decimals_2(
 
 def test_compute_points_for_max_points_85_and_decimals_3(
     event_1: EventType, class_info_1: ClassInfoType
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -1555,7 +1558,7 @@ def test_points_are_none_for_not_started_entries(
     class_info_1: ClassInfoType,
     status: ResultStatus,
     not_competing: bool,
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,
@@ -1613,7 +1616,7 @@ def test_points_are_0_for_not_classified_entries(
     class_info_1: ClassInfoType,
     status: ResultStatus,
     not_competing: bool,
-):
+) -> None:
     entry_1 = EntryType(
         id=1,
         event_id=event_1.id,

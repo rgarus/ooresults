@@ -134,10 +134,6 @@ packages = [
     "ooresults.otypes",
     "ooresults.repo",
     "ooresults.utils",
-    "tests.otypes",
-    "tests.pdf",
-    "tests.plugins",
-    "tests.repo",
-    "tests.templates",
+    "tests",
     "webtests",
 ]

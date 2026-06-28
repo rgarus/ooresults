@@ -40,7 +40,7 @@ class ClassInfoType:
     short_name: Optional[str]
     course_id: Optional[int]
     course_name: Optional[str]
-    course_length: Optional[int]
-    course_climb: Optional[int]
+    course_length: Optional[float]
+    course_climb: Optional[float]
     number_of_controls: Optional[int]
     params: ClassParams

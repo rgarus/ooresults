@@ -43,17 +43,17 @@ def j_max() -> str:
     return '{"control1":"257","control2":"147"}'
 
 
-def test_max_to_dict(c_max: VoidedLeg, d_max: dict):
+def test_max_to_dict(c_max: VoidedLeg, d_max: dict) -> None:
     assert c_max.to_dict() == d_max
 
 
-def test_max_to_json(c_max: VoidedLeg, j_max: str):
+def test_max_to_json(c_max: VoidedLeg, j_max: str) -> None:
     assert c_max.to_json() == j_max
 
 
-def test_max_from_dict(d_max: dict, c_max: VoidedLeg):
+def test_max_from_dict(d_max: dict, c_max: VoidedLeg) -> None:
     assert VoidedLeg.from_dict(d_max) == c_max
 
 
-def test_max_from_json(j_max: str, c_max: VoidedLeg):
+def test_max_from_json(j_max: str, c_max: VoidedLeg) -> None:
     assert VoidedLeg.from_json(j_max) == c_max

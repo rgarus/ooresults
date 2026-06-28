@@ -99,7 +99,7 @@ def entry_id(db: SqliteRepo, event_id: int, class_id: int, competitor_id: int) -
 def test_import_iof_result_list_snapshot(
     event_id: int,
     entry_id: int,
-):
+) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" status="Snapshot">
@@ -284,7 +284,7 @@ def test_import_iof_result_list_snapshot(
 def test_import_iof_result_list_delta(
     event_id: int,
     entry_id: int,
-):
+) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" status="Delta">

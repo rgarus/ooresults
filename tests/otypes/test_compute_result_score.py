@@ -55,7 +55,7 @@ def test_compute_result_status_ok(
     score_overtime: int,
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -120,7 +120,7 @@ def test_compute_result_status_ok(
 def test_compute_result_status_with_missing_punches(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c3 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
@@ -186,7 +186,7 @@ def test_compute_result_status_with_missing_punches(
 def test_compute_result_status_ok_with_additionals(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -283,7 +283,7 @@ def test_compute_result_status_ok_with_additionals(
 def test_compute_result_with_unknown_punch_times(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = SplitTime.NO_TIME
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -352,7 +352,9 @@ def test_compute_result_with_unknown_punch_times(
 @pytest.mark.parametrize(
     "female, year_of_birth", [(True, 2000), (True, 1981), (False, 1941)]
 )
-def test_compute_handicap_ok(time_limit, score_overtime, female, year_of_birth):
+def test_compute_handicap_ok(
+    time_limit: int, score_overtime: int, female: bool, year_of_birth: int
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     f1 = datetime(2015, 1, 1, 12, 41, 7, tzinfo=timezone.utc)
@@ -402,7 +404,7 @@ def test_compute_handicap_ok(time_limit, score_overtime, female, year_of_birth):
 @pytest.mark.parametrize(
     "female, year_of_birth", [(True, 2000), (True, 1981), (False, 1941)]
 )
-def test_compute_handicap_mp(female, year_of_birth):
+def test_compute_handicap_mp(female: bool, year_of_birth: int) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     f1 = datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
 

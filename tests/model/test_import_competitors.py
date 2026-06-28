@@ -68,7 +68,7 @@ def competitor_2_id(db: SqliteRepo, club_id: int) -> int:
         )
 
 
-def test_import_competitors(db: SqliteRepo):
+def test_import_competitors(db: SqliteRepo) -> None:
     model.competitors.import_competitors(
         competitors=[
             {
@@ -126,7 +126,7 @@ def test_import_competitors(db: SqliteRepo):
 
 def test_import_competitors_new_competitors_are_added(
     db: SqliteRepo, competitor_1_id: int, competitor_2_id: int, club_id: int
-):
+) -> None:
     model.competitors.import_competitors(
         competitors=[
             {
@@ -187,7 +187,7 @@ def test_import_competitors_new_competitors_are_added(
 
 def test_import_competitors_imported_values_overwrite_existing_values(
     db: SqliteRepo, competitor_2_id: int, club_id: int
-):
+) -> None:
     model.competitors.import_competitors(
         competitors=[
             {
@@ -230,7 +230,7 @@ def test_import_competitors_imported_values_overwrite_existing_values(
 
 def test_import_competitors_missing_values_do_not_change_anything(
     db: SqliteRepo, competitor_2_id: int, club_id: int
-):
+) -> None:
     model.competitors.import_competitors(
         competitors=[
             {

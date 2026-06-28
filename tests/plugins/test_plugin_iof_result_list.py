@@ -37,7 +37,7 @@ from ooresults.plugins import iof_result_list
 from ooresults.plugins.iof_result_list import ResultListStatus
 
 
-def test_import_result_list():
+def test_import_result_list() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -167,7 +167,7 @@ def test_import_result_list():
     ]
 
 
-def test_import_result_list_not_competing():
+def test_import_result_list_not_competing() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -238,7 +238,7 @@ def test_import_result_list_not_competing():
     ]
 
 
-def test_export_result_list():
+def test_export_result_list() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -372,7 +372,7 @@ def test_export_result_list():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_export_result_list_not_competing():
+def test_export_result_list_not_competing() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -467,7 +467,7 @@ def test_export_result_list_not_competing():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_import_result_list_with_start_time_but_not_finished():
+def test_import_result_list_with_start_time_but_not_finished() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -531,7 +531,7 @@ def test_import_result_list_with_start_time_but_not_finished():
     ]
 
 
-def test_export_result_list_with_start_time_but_not_started():
+def test_export_result_list_with_start_time_but_not_started() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -622,7 +622,7 @@ def test_export_result_list_with_start_time_but_not_started():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_import_result_list_without_class_result():
+def test_import_result_list_without_class_result() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -645,7 +645,7 @@ def test_import_result_list_without_class_result():
     assert results == []
 
 
-def test_export_result_list_without_class_result():
+def test_export_result_list_without_class_result() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -672,7 +672,7 @@ def test_export_result_list_without_class_result():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_import_result_list_classes():
+def test_import_result_list_classes() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -921,7 +921,7 @@ def test_import_result_list_classes():
     ]
 
 
-def test_export_result_list_classes():
+def test_export_result_list_classes() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -1203,7 +1203,7 @@ def test_export_result_list_classes():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_import_result_list_with_unknown_punch_times():
+def test_import_result_list_with_unknown_punch_times() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -1327,7 +1327,7 @@ def test_import_result_list_with_unknown_punch_times():
     ]
 
 
-def test_export_result_list_with_unknown_punch_times():
+def test_export_result_list_with_unknown_punch_times() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -1458,7 +1458,7 @@ def test_export_result_list_with_unknown_punch_times():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_export_result_list_with_edited_punch_times():
+def test_export_result_list_with_edited_punch_times() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -1619,7 +1619,7 @@ def test_export_result_list_with_edited_punch_times():
 )
 def test_import_result_list_with_status_attribute(
     status: ResultListStatus, status_xml: str
-):
+) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" {attr}>
@@ -1652,7 +1652,9 @@ def test_import_result_list_with_status_attribute(
         (ResultListStatus.SNAPSHOT, 'status="Snapshot"'),
     ],
 )
-def test_export_result_list_with_status_comp(status: ResultListStatus, status_xml: str):
+def test_export_result_list_with_status_comp(
+    status: ResultListStatus, status_xml: str
+) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)" {attr}>

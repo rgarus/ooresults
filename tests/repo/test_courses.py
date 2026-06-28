@@ -341,7 +341,7 @@ def test_delete_course_used_in_class_raises_exception(
 
 
 def test_delete_courses_used_in_class_raises_exception(
-    db: SqliteRepo, event_id, class_id: int, course_1_id: int
+    db: SqliteRepo, event_id: int, class_id: int, course_1_id: int
 ) -> None:
     with pytest.raises(repo.CourseUsedError):
         with db.transaction():

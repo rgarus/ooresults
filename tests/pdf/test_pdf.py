@@ -46,7 +46,7 @@ def test_course_data(
     climb: Optional[int],
     number_of_controls: Optional[int],
     result: str,
-):
+) -> None:
     class_info = ClassInfoType(
         id=1,
         name="cl",

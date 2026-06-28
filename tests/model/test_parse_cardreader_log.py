@@ -31,7 +31,7 @@ from ooresults.otypes.result_type import SplitTime
 from ooresults.otypes.result_type import SpStatus
 
 
-def test_parse_with_start_time_and_with_finish_time():
+def test_parse_with_start_time_and_with_finish_time() -> None:
     e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
@@ -86,7 +86,7 @@ def test_parse_with_start_time_and_with_finish_time():
     )
 
 
-def test_parse_without_start_time_and_with_finish_time():
+def test_parse_without_start_time_and_with_finish_time() -> None:
     e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
@@ -139,7 +139,7 @@ def test_parse_without_start_time_and_with_finish_time():
     )
 
 
-def test_parse_with_start_time_and_without_finish_time():
+def test_parse_with_start_time_and_without_finish_time() -> None:
     e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
@@ -192,7 +192,7 @@ def test_parse_with_start_time_and_without_finish_time():
     )
 
 
-def test_parse_without_start_time_and_without_finish_time():
+def test_parse_without_start_time_and_without_finish_time() -> None:
     e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
@@ -243,7 +243,7 @@ def test_parse_without_start_time_and_without_finish_time():
     )
 
 
-def test_parse_with_clear_time():
+def test_parse_with_clear_time() -> None:
     e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
     cl = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
@@ -296,7 +296,7 @@ def test_parse_with_clear_time():
     )
 
 
-def test_parse_with_check_time():
+def test_parse_with_check_time() -> None:
     e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
     ch = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
@@ -349,7 +349,7 @@ def test_parse_with_check_time():
     )
 
 
-def test_parse_without_controls():
+def test_parse_without_controls() -> None:
     e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     f1 = datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
@@ -384,7 +384,7 @@ def test_parse_without_controls():
     )
 
 
-def test_parse_with_many_controls():
+def test_parse_with_many_controls() -> None:
     e1 = datetime(2015, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
@@ -484,7 +484,7 @@ def test_parse_with_many_controls():
     )
 
 
-def test_parse_without_entry_type_raises_exception():
+def test_parse_without_entry_type_raises_exception() -> None:
     item = {
         "entryTime": "2015-01-01T13:00:00Z",
         "startTime": "2015-01-01T12:38:59Z",
@@ -500,7 +500,7 @@ def test_parse_without_entry_type_raises_exception():
         model.results.parse_cardreader_log(item=item)
 
 
-def test_parse_without_entry_time_raises_exception():
+def test_parse_without_entry_time_raises_exception() -> None:
     item = {
         "entryType": "cardRead",
         "startTime": "2015-01-01T12:38:59Z",
@@ -516,7 +516,7 @@ def test_parse_without_entry_time_raises_exception():
         model.results.parse_cardreader_log(item=item)
 
 
-def test_parse_without_control_card_raises_exception():
+def test_parse_without_control_card_raises_exception() -> None:
     item = {
         "entryType": "cardRead",
         "entryTime": "2015-01-01T13:00:00Z",

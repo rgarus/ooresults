@@ -65,11 +65,11 @@ def event() -> EventType:
     )
 
 
-def test_get_status(status_1):
+def test_get_status(status_1: StreamingStatus) -> None:
     assert status_1.get(id=2) == Status.ERROR
 
 
-def test_set_status(status_1, event):
+def test_set_status(status_1: StreamingStatus, event: EventType) -> None:
     asyncio.run(status_1.set(event=event, status=Status.OK))
     assert status_1.status == {
         2: Status.ERROR,
@@ -78,7 +78,7 @@ def test_set_status(status_1, event):
     }
 
 
-def test_update_status(status_2, event):
+def test_update_status(status_2: StreamingStatus, event: EventType) -> None:
     asyncio.run(status_2.set(event=event, status=Status.PROTOCOL_ERROR))
     assert status_2.status == {
         2: Status.ERROR,
@@ -87,7 +87,7 @@ def test_update_status(status_2, event):
     }
 
 
-def test_delete_status(status_2, event):
+def test_delete_status(status_2: StreamingStatus, event: EventType) -> None:
     asyncio.run(status_2.delete(event=event))
     assert status_2.status == {
         2: Status.ERROR,
@@ -95,14 +95,16 @@ def test_delete_status(status_2, event):
     }
 
 
-def test_register_awaitable(status_1):
+def test_register_awaitable(status_1: StreamingStatus) -> None:
     a = AsyncMock()
 
     status_1.register(callback=a)
     assert status_1.callback == a
 
 
-def test_if_set_is_called_then_awaitable_is_called(status_1, event):
+def test_if_set_is_called_then_awaitable_is_called(
+    status_1: StreamingStatus, event: EventType
+) -> None:
     a = AsyncMock()
 
     status_1.register(callback=a)
@@ -110,7 +112,9 @@ def test_if_set_is_called_then_awaitable_is_called(status_1, event):
     a.assert_awaited_once_with(event)
 
 
-def test_if_delete_is_called_then_awaitable_is_called(status_1, event):
+def test_if_delete_is_called_then_awaitable_is_called(
+    status_1: StreamingStatus, event: EventType
+) -> None:
     a = AsyncMock()
 
     status_1.register(callback=a)
@@ -118,7 +122,9 @@ def test_if_delete_is_called_then_awaitable_is_called(status_1, event):
     a.assert_awaited_once_with(event)
 
 
-def test_awaitable_not_called_after_register_none(status_1, event):
+def test_awaitable_not_called_after_register_none(
+    status_1: StreamingStatus, event: EventType
+) -> None:
     a = AsyncMock()
 
     status_1.register(callback=a)

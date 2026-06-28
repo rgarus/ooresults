@@ -160,7 +160,7 @@ def entry_1(
 
 def test_import_class_data_update_existing_class(
     event_id: int, class_1_id: int, course_1_id: int
-):
+) -> None:
     classes = [
         {
             "name": "Elite Men",
@@ -186,7 +186,7 @@ def test_import_class_data_update_existing_class(
 
 def test_import_class_data_without_short_name_does_not_change_existing_short_name(
     event_id: int, class_1_id: int, course_1_id: int
-):
+) -> None:
     classes = [
         {
             "name": "Elite Men",
@@ -211,7 +211,7 @@ def test_import_class_data_without_short_name_does_not_change_existing_short_nam
 
 def test_import_class_data_add_not_existing_class(
     event_id: int, class_1_id: int, course_1_id: int
-):
+) -> None:
     classes = [
         {
             "name": "Elite",
@@ -250,7 +250,7 @@ def test_import_class_data_add_not_existing_class(
 
 def test_import_class_data_update_or_add_class(
     event_id: int, class_1_id: int, course_1_id: int
-):
+) -> None:
     classes = [
         {
             "name": "Beginners",
@@ -313,7 +313,7 @@ def test_update_class_data_recalculates_entry_result(
     course_1_id: int,
     course_2_id: int,
     entry_1: EntryType,
-):
+) -> None:
     model.classes.update_class(
         id=class_1_id,
         event_id=event_id,

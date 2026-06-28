@@ -41,5 +41,5 @@ from ooresults.utils import globals
         (-6000, "-100:00"),
     ],
 )
-def test_minutes_seconds(time: Optional[int], value: str):
+def test_minutes_seconds(time: Optional[int], value: str) -> None:
     assert globals.minutes_seconds(time=time) == value

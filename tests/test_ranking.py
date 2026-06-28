@@ -29,7 +29,7 @@ from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.start_type import PersonRaceStart
 
 
-def test_ranking_with_one_class():
+def test_ranking_with_one_class() -> None:
     class_info_a = ClassInfoType(
         id=1,
         name="Bahn A - Lang",
@@ -169,7 +169,7 @@ def test_ranking_with_one_class():
     ]
 
 
-def test_ranking_with_two_classes():
+def test_ranking_with_two_classes() -> None:
     class_info_a = ClassInfoType(
         id=1,
         name="Bahn A - Lang",
@@ -328,7 +328,7 @@ def test_ranking_with_two_classes():
     ]
 
 
-def test_ranking_with_two_winners():
+def test_ranking_with_two_winners() -> None:
     class_info_a = ClassInfoType(
         id=1,
         name="Bahn A - Lang",
@@ -441,7 +441,7 @@ def test_ranking_with_two_winners():
     ]
 
 
-def test_ranking_entries_with_same_time_are_orderd_by_name():
+def test_ranking_entries_with_same_time_are_orderd_by_name() -> None:
     class_info_a = ClassInfoType(
         id=1,
         name="Bahn A - Lang",
@@ -582,7 +582,7 @@ def test_ranking_entries_with_same_time_are_orderd_by_name():
     ]
 
 
-def test_ranking_entries_with_same_time_are_orderd_by_name_score():
+def test_ranking_entries_with_same_time_are_orderd_by_name_score() -> None:
     class_info_a = ClassInfoType(
         id=1,
         name="Bahn A - Lang",
@@ -727,7 +727,7 @@ def test_ranking_entries_with_same_time_are_orderd_by_name_score():
     ]
 
 
-def test_ranking_with_not_competing_runners():
+def test_ranking_with_not_competing_runners() -> None:
     class_info_a = ClassInfoType(
         id=1,
         name="Bahn A - Lang",
@@ -867,7 +867,7 @@ def test_ranking_with_not_competing_runners():
     ]
 
 
-def test_ranking_with_started_and_finished_runners():
+def test_ranking_with_started_and_finished_runners() -> None:
     class_info_a = ClassInfoType(
         id=1,
         name="Bahn A - Lang",
@@ -1008,7 +1008,7 @@ def test_ranking_with_started_and_finished_runners():
 
 
 @pytest.mark.parametrize("status", list(ResultStatus))
-def test_if_entry_has_no_runtime_then_rank_is_none(status: ResultStatus):
+def test_if_entry_has_no_runtime_then_rank_is_none(status: ResultStatus) -> None:
     class_info_a = ClassInfoType(
         id=1,
         name="Bahn A - Lang",

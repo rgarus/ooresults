@@ -23,7 +23,7 @@ import tempfile
 from ooresults.utils import rental_cards
 
 
-def test_read_existing_rental_cards_file():
+def test_read_existing_rental_cards_file() -> None:
     rental_cards._rental_cards = []
 
     with tempfile.TemporaryDirectory() as hd:
@@ -35,7 +35,7 @@ def test_read_existing_rental_cards_file():
         assert rental_cards._rental_cards == ["123", "456", "789"]
 
 
-def test_read_not_existing_rental_cards_file():
+def test_read_not_existing_rental_cards_file() -> None:
     rental_cards._rental_cards = []
 
     with tempfile.TemporaryDirectory() as hd:
@@ -45,7 +45,7 @@ def test_read_not_existing_rental_cards_file():
         assert rental_cards._rental_cards == []
 
 
-def test_read_empty_rental_cards_file():
+def test_read_empty_rental_cards_file() -> None:
     rental_cards._rental_cards = []
 
     with tempfile.TemporaryDirectory() as hd:
@@ -57,7 +57,7 @@ def test_read_empty_rental_cards_file():
         assert rental_cards._rental_cards == []
 
 
-def test_read_non_utf8_rental_cards_file():
+def test_read_non_utf8_rental_cards_file() -> None:
     rental_cards._rental_cards = []
 
     with tempfile.TemporaryDirectory() as hd:
@@ -69,7 +69,7 @@ def test_read_non_utf8_rental_cards_file():
         assert rental_cards._rental_cards == []
 
 
-def test_read_directory_as_rental_cards_file():
+def test_read_directory_as_rental_cards_file() -> None:
     rental_cards._rental_cards = []
 
     with tempfile.TemporaryDirectory() as hd:
@@ -81,7 +81,7 @@ def test_read_directory_as_rental_cards_file():
         assert rental_cards._rental_cards == []
 
 
-def test_is_a_rental_card():
+def test_is_a_rental_card() -> None:
     rental_cards._rental_cards = ["123", "456", "789"]
 
     assert rental_cards.is_rental_card(card_number="123") is True
@@ -89,13 +89,13 @@ def test_is_a_rental_card():
     assert rental_cards.is_rental_card(card_number="789") is True
 
 
-def test_is_not_a_rental_card():
+def test_is_not_a_rental_card() -> None:
     rental_cards._rental_cards = ["123", "456", "789"]
 
     assert rental_cards.is_rental_card(card_number="234") is False
 
 
-def test_format_a_rental_card():
+def test_format_a_rental_card() -> None:
     rental_cards._rental_cards = ["123", "456", "789"]
 
     assert rental_cards.format_card(card_number="123") == "RC (123)"
@@ -103,7 +103,7 @@ def test_format_a_rental_card():
     assert rental_cards.format_card(card_number="789") == "RC (789)"
 
 
-def test_format_not_a_rental_card():
+def test_format_not_a_rental_card() -> None:
     rental_cards._rental_cards = ["123", "456", "789"]
 
     assert rental_cards.format_card(card_number="234") == "234"

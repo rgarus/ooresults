@@ -44,7 +44,7 @@ c3 = datetime.datetime(2015, 1, 1, 12, 39, 5, tzinfo=datetime.timezone.utc)
 f1 = datetime.datetime(2015, 1, 1, 12, 39, 7, tzinfo=datetime.timezone.utc)
 
 
-def t(a: datetime, b: datetime) -> int:
+def t(a: datetime.datetime, b: datetime.datetime) -> int:
     diff = b.replace(microsecond=0) - a.replace(microsecond=0)
     return int(diff.total_seconds())
 
@@ -208,6 +208,8 @@ def entry_2(
 def entry_2_with_result(
     db: SqliteRepo, event_id: int, class_id: int, entry_2: EntryType
 ) -> EntryType:
+    assert entry_2.chip is not None
+
     with db.transaction():
         db.update_entry_result(
             id=entry_2.id,
@@ -318,7 +320,7 @@ def test_assign_to_entry_if_cardnumber_is_unique(
     entry_1: EntryType,
     entry_2: EntryType,
     entry_3: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -423,7 +425,7 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_finish_time_is_missing(
     entry_1: EntryType,
     entry_2: EntryType,
     entry_3: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -528,7 +530,7 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_start_time_is_missing(
     entry_1: EntryType,
     entry_2: EntryType,
     entry_3: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=None,
@@ -633,7 +635,7 @@ def test_assign_to_entry_if_cardnumber_is_unique_but_controls_are_missing(
     entry_1: EntryType,
     entry_2: EntryType,
     entry_3: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -727,7 +729,7 @@ def test_assign_to_entry_and_delete_unnamed_entry_with_same_result(
     entry_2: EntryType,
     entry_3: EntryType,
     unassigned_entry: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -834,7 +836,7 @@ def test_store_as_new_entry_if_another_result_exists(
     entry_2: EntryType,
     entry_3: EntryType,
     unassigned_entry: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -950,7 +952,7 @@ def test_do_not_store_as_new_entry_if_result_already_exists(
     entry_1: EntryType,
     entry_3: EntryType,
     unassigned_entry: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -1020,7 +1022,7 @@ def test_store_as_new_entry_if_cardnumber_is_unknown(
     entry_1: EntryType,
     entry_2: EntryType,
     entry_3: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -1144,7 +1146,7 @@ def test_store_as_new_entry_if_cardnumber_exist_several_times(
     entry_1: EntryType,
     entry_2: EntryType,
     entry_3: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -1268,7 +1270,7 @@ def test_use_already_assigned_entry_if_it_has_the_same_result(
     entry_1: EntryType,
     entry_2_with_result: EntryType,
     entry_3: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -1339,7 +1341,7 @@ def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
     entry_1: EntryType,
     entry_2_with_result: EntryType,
     entry_3: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -1463,7 +1465,7 @@ def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
 
 def test_use_empty_control_list_if_course_is_undefined(
     db: SqliteRepo, event_id: int, entry_1_without_course: EntryType
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,
@@ -1566,7 +1568,7 @@ def test_raise_exception_if_event_key_is_unknown(
     entry_1: EntryType,
     entry_2: EntryType,
     entry_3: EntryType,
-):
+) -> None:
     result = PersonRaceResult(
         status=ResultStatus.FINISHED,
         punched_start_time=s1,

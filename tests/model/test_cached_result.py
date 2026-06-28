@@ -52,7 +52,7 @@ def fill_cache(m: mock.Mock) -> None:
 
 def test_if_a_cache_value_is_defined_then_the_cache_value_is_used(
     fill_cache: None, m: mock.Mock
-):
+) -> None:
     assert "A-1" == cached_result.get_cached_data(event_id=1)
     assert "A-2" == cached_result.get_cached_data(event_id=2)
     m.assert_not_called()
@@ -60,7 +60,7 @@ def test_if_a_cache_value_is_defined_then_the_cache_value_is_used(
 
 def test_if_the_whole_cache_is_cleared_then_all_cache_values_are_recomputed(
     fill_cache: None, m: mock.Mock
-):
+) -> None:
     cached_result.clear_cache()
 
     m.return_value = "B-1"
@@ -72,7 +72,9 @@ def test_if_the_whole_cache_is_cleared_then_all_cache_values_are_recomputed(
     assert m.call_args_list == [mock.call(event_id=1), mock.call(event_id=2)]
 
 
-def test_cache_can_be_cleared_for_a_special_event(fill_cache: None, m: mock.Mock):
+def test_cache_can_be_cleared_for_a_special_event(
+    fill_cache: None, m: mock.Mock
+) -> None:
     cached_result.clear_cache(event_id=1)
 
     m.return_value = "B-1"
@@ -81,7 +83,7 @@ def test_cache_can_be_cleared_for_a_special_event(fill_cache: None, m: mock.Mock
     m.assert_called_once_with(event_id=1)
 
 
-def test_at_least_max_size_events_can_be_stored_in_the_cache(m: mock.Mock):
+def test_at_least_max_size_events_can_be_stored_in_the_cache(m: mock.Mock) -> None:
     cached_result.clear_cache()
     max_size = cached_result.MAX_SIZE
 
@@ -98,7 +100,7 @@ def test_at_least_max_size_events_can_be_stored_in_the_cache(m: mock.Mock):
     m.assert_not_called()
 
 
-def test_at_most_max_size_events_can_be_stored_in_the_cache(m: mock.Mock):
+def test_at_most_max_size_events_can_be_stored_in_the_cache(m: mock.Mock) -> None:
     cached_result.clear_cache()
     max_size = cached_result.MAX_SIZE
 
@@ -113,7 +115,7 @@ def test_at_most_max_size_events_can_be_stored_in_the_cache(m: mock.Mock):
     m.assert_called_once_with(event_id=0)
 
 
-def test_least_recently_used_events_are_stored_in_the_cache(m: mock.Mock):
+def test_least_recently_used_events_are_stored_in_the_cache(m: mock.Mock) -> None:
     cached_result.clear_cache()
     max_size = cached_result.MAX_SIZE
 
@@ -135,7 +137,9 @@ def test_least_recently_used_events_are_stored_in_the_cache(m: mock.Mock):
     m.assert_not_called()
 
 
-def test_if_a_callback_is_registered_and_the_cache_is_cleared_then_the_callback_is_called():
+def test_if_a_callback_is_registered_and_the_cache_is_cleared_then_the_callback_is_called() -> (
+    None
+):
     m1 = mock.Mock()
     m2 = mock.Mock()
     cached_result.register(callback=m1)
@@ -145,7 +149,9 @@ def test_if_a_callback_is_registered_and_the_cache_is_cleared_then_the_callback_
     m2.assert_called_once_with(None)
 
 
-def test_if_a_callback_is_registered_then_the_callback_is_called_with_event_id():
+def test_if_a_callback_is_registered_then_the_callback_is_called_with_event_id() -> (
+    None
+):
     m1 = mock.Mock()
     m2 = mock.Mock()
     cached_result.register(callback=m1)
@@ -155,7 +161,7 @@ def test_if_a_callback_is_registered_then_the_callback_is_called_with_event_id()
     m2.assert_called_once_with(1)
 
 
-def test_if_a_callback_is_unregistered_then_the_callback_is_no_longer_called():
+def test_if_a_callback_is_unregistered_then_the_callback_is_no_longer_called() -> None:
     m1 = mock.Mock()
     m2 = mock.Mock()
     cached_result.register(callback=m1)

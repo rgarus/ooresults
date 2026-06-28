@@ -186,17 +186,6 @@ def entry_1(
 @pytest.fixture
 def entry_2(db: SqliteRepo, event_id: int) -> EntryType:
     with db.transaction():
-        id = db.add_entry(
-            event_id=event_id,
-            competitor_id=None,
-            class_id=None,
-            club_id=None,
-            not_competing=False,
-            chip="4748495",
-            fields={},
-            result=PersonRaceResult(),
-            start=PersonRaceStart(),
-        )
         result = PersonRaceResult(
             punched_start_time=S1,
             punched_finish_time=F1,
@@ -226,19 +215,18 @@ def entry_2(db: SqliteRepo, event_id: int) -> EntryType:
             ],
         )
         result.compute_result(controls=[], class_params=ClassParams())
-        db.update_entry_result(
-            id=id,
+        id = db.add_entry_result(
+            event_id=event_id,
             chip="4748495",
             result=result,
             start=PersonRaceStart(),
         )
-        item = db.get_entry(id=id)
-        return copy.deepcopy(item)
+        return db.get_entry(id=id)
 
 
 def test_if_an_entry_is_added_and_the_event_no_longer_exists_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, class_1_id: int
-):
+) -> None:
     model.events.delete_event(id=event_id)
     with db.transaction():
         with pytest.raises(repo.EventNotFoundError):
@@ -266,7 +254,9 @@ def test_if_an_entry_is_added_and_the_event_no_longer_exists_then_an_exception_i
 
 def test_if_an_entry_is_updated_and_the_event_no_longer_exists_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, entry_1: EntryType
-):
+) -> None:
+    assert entry_1.class_id is not None
+
     model.events.delete_event(id=event_id)
     with db.transaction():
         with pytest.raises(repo.EventNotFoundError):
@@ -294,7 +284,7 @@ def test_if_an_entry_is_updated_and_the_event_no_longer_exists_then_an_exception
 
 def test_if_an_entry_is_added_and_the_competitor_no_longer_exists_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, competitor_id: int, class_1_id: int
-):
+) -> None:
     model.competitors.delete_competitor(id=competitor_id)
     with db.transaction():
         with pytest.raises(KeyError):
@@ -322,7 +312,9 @@ def test_if_an_entry_is_added_and_the_competitor_no_longer_exists_then_an_except
 
 def test_if_an_entry_is_updated_and_the_entry_no_longer_exists_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, entry_1: EntryType
-):
+) -> None:
+    assert entry_1.class_id is not None
+
     model.entries.delete_entry(id=entry_1.id)
     with db.transaction():
         with pytest.raises(KeyError):
@@ -350,7 +342,7 @@ def test_if_an_entry_is_updated_and_the_entry_no_longer_exists_then_an_exception
 
 def test_if_an_entry_is_added_and_the_class_no_longer_exists_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, class_2_id: int
-):
+) -> None:
     model.classes.delete_class(id=class_2_id)
     with db.transaction():
         with pytest.raises(KeyError):
@@ -378,7 +370,7 @@ def test_if_an_entry_is_added_and_the_class_no_longer_exists_then_an_exception_i
 
 def test_if_an_entry_is_updated_and_the_class_no_longer_exists_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, entry_1: EntryType, class_2_id: int
-):
+) -> None:
     model.classes.delete_class(id=class_2_id)
     with db.transaction():
         with pytest.raises(KeyError):
@@ -406,7 +398,7 @@ def test_if_an_entry_is_updated_and_the_class_no_longer_exists_then_an_exception
 
 def test_if_an_entry_is_added_and_the_club_no_longer_exists_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, class_1_id: int, club_id: int
-):
+) -> None:
     model.clubs.delete_club(id=club_id)
     with db.transaction():
         with pytest.raises(KeyError):
@@ -434,7 +426,9 @@ def test_if_an_entry_is_added_and_the_club_no_longer_exists_then_an_exception_is
 
 def test_if_an_entry_is_updated_and_the_club_no_longer_exists_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, entry_1: EntryType, club_id: int
-):
+) -> None:
+    assert entry_1.class_id is not None
+
     model.clubs.delete_club(id=club_id)
     with db.transaction():
         with pytest.raises(KeyError):
@@ -462,7 +456,7 @@ def test_if_an_entry_is_updated_and_the_club_no_longer_exists_then_an_exception_
 
 def test_if_an_entry_is_added_and_the_result_no_longer_exists_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, class_2_id: int, entry_2: EntryType
-):
+) -> None:
     model.entries.delete_entry(id=entry_2.id)
     with db.transaction():
         with pytest.raises(KeyError):
@@ -490,7 +484,9 @@ def test_if_an_entry_is_added_and_the_result_no_longer_exists_then_an_exception_
 
 def test_if_an_entry_is_updated_and_the_result_no_longer_exists_then_an_exception_is_raised(
     db: SqliteRepo, entry_1: EntryType, entry_2: EntryType
-):
+) -> None:
+    assert entry_1.class_id is not None
+
     model.entries.delete_entry(id=entry_2.id)
     with db.transaction():
         with pytest.raises(KeyError):
@@ -521,7 +517,7 @@ def test_if_an_entry_is_updated_and_the_result_no_longer_exists_then_an_exceptio
 
 def test_if_an_entry_is_added_and_the_name_is_changed_to_an_existing_name_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, competitor_id: int, class_1_id: int
-):
+) -> None:
     with db.transaction():
         db.add_competitor(
             first_name="Birgit",
@@ -554,7 +550,9 @@ def test_if_an_entry_is_added_and_the_name_is_changed_to_an_existing_name_then_a
 
 def test_if_an_entry_is_updated_and_the_name_is_changed_to_an_existing_name_then_an_exception_is_raised(
     db: SqliteRepo, event_id: int, entry_1: EntryType
-):
+) -> None:
+    assert entry_1.class_id is not None
+
     with db.transaction():
         db.add_competitor(
             first_name="Birgit",

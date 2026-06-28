@@ -24,7 +24,7 @@ import tempfile
 from ooresults import user
 
 
-def test_default_values_if_file_not_exist():
+def test_default_values_if_file_not_exist() -> None:
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "users.json"
 
@@ -38,7 +38,7 @@ def test_default_values_if_file_not_exist():
         assert user.Users.users == {"admin": "admin"}
 
 
-def test_update_values_if_file_exist():
+def test_update_values_if_file_exist() -> None:
     users = [
         {"username": "a", "password": "x"},
         {"username": "b", "password": "y"},
@@ -59,7 +59,7 @@ def test_update_values_if_file_exist():
         assert user.Users.users == {"a": "x", "b": "y", "c": "z"}
 
 
-def test_check_username_and_password():
+def test_check_username_and_password() -> None:
     user.Users.users = {
         "abc": "p1",
         "def": "p2",

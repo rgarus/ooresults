@@ -47,7 +47,7 @@ def t(a: datetime, b: datetime) -> int:
 def test_given_result_status_is_otl_dsq_when_compute_result_then_result_status_is_not_changed(
     otype: str,
     status: ResultStatus,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -112,7 +112,7 @@ def test_given_result_status_is_otl_dsq_when_compute_result_then_result_status_i
 def test_given_no_controls_and_status_is_not_inactive_active_finished_then_result_is_not_changed(
     otype: str,
     status: ResultStatus,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -168,7 +168,7 @@ def test_given_no_controls_but_punches_and_status_inactive_active_finished_then_
     otype: str,
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -253,7 +253,7 @@ def test_given_no_controls_and_no_punches_and_status_inactive_active_finished_th
     otype: str,
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
 
     controls: list[str] = []
@@ -304,7 +304,7 @@ def test_given_no_punches_and_status_inactive_active_dns_when_compute_result_the
     otype: str,
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
 
     controls = ["101", "102"]
@@ -352,7 +352,7 @@ def test_given_no_punches_and_status_inactive_active_dns_when_compute_result_the
 @pytest.mark.parametrize("otype", ["standard", "net", "score"])
 def test_compute_result_status_no_start_time(
     otype: str,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -405,7 +405,7 @@ def test_compute_result_status_no_start_time(
 @pytest.mark.parametrize("otype", ["standard", "net", "score"])
 def test_compute_result_status_no_finish_time(
     otype: str,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
@@ -464,7 +464,7 @@ def test_compute_result_status_no_finish_time(
 @pytest.mark.parametrize("otype", ["standard", "net", "score"])
 def test_given_no_punches_and_status_is_inactive_when_compute_result_then_new_status_is_inactive(
     otype: str,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
 
     controls: list[str] = []
@@ -505,7 +505,7 @@ def test_given_no_punches_and_status_is_inactive_when_compute_result_then_new_st
 @pytest.mark.parametrize("otype", ["standard", "net"])
 def test_given_no_controls_but_punches_when_compute_result_then_status_is_finished(
     otype: str,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -557,7 +557,7 @@ def test_compute_handicap_ok(
     otype: str,
     female: bool,
     year_of_birth: int,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     f1 = datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
@@ -608,7 +608,7 @@ def test_compute_handicap_mp(
     otype: str,
     female: bool,
     year_of_birth: int,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     f1 = datetime(2015, 1, 1, 12, 39, 7, tzinfo=timezone.utc)
 
@@ -651,7 +651,7 @@ def test_compute_handicap_mp(
 @pytest.mark.parametrize("otype", ["standard", "net", "score"])
 def test_compute_result_use_personal_start_time_if_using_start_control_is_no(
     otype: str,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     p1 = datetime(2015, 1, 1, 12, 38, 50, tzinfo=timezone.utc)
@@ -703,7 +703,7 @@ def test_compute_result_use_personal_start_time_if_using_start_control_is_no(
 @pytest.mark.parametrize("otype", ["standard", "net", "score"])
 def test_compute_result_use_mass_time_if_no_personal_start_time_and_using_start_control_is_no(
     otype: str,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     p1 = datetime(2015, 1, 1, 12, 38, 50, tzinfo=timezone.utc)
@@ -756,7 +756,7 @@ def test_compute_result_use_mass_time_if_no_personal_start_time_and_using_start_
 @pytest.mark.parametrize("otype", ["standard", "net", "score"])
 def test_compute_result_use_punched_time_if_using_start_control_is_yes(
     otype: str,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     p1 = datetime(2015, 1, 1, 12, 38, 50, tzinfo=timezone.utc)
@@ -809,7 +809,7 @@ def test_compute_result_use_punched_time_if_using_start_control_is_yes(
 @pytest.mark.parametrize("otype", ["standard", "net", "score"])
 def test_compute_result_use_personal_start_time_if_using_start_control_is_if_punched_and_no_punch_time(
     otype: str,
-):
+) -> None:
     time_limit = 60 if otype == "score" else None
     p1 = datetime(2015, 1, 1, 12, 38, 50, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)

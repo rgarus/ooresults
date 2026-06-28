@@ -27,11 +27,13 @@ import threading
 from collections.abc import Iterator
 from datetime import timedelta
 from datetime import timezone
+from typing import Optional
 
 import jsonschema
 import pytest
 import websockets.exceptions
 from websockets.asyncio.client import connect
+from websockets.asyncio.server import Server
 from websockets.asyncio.server import serve
 
 import ooresults
@@ -127,16 +129,15 @@ class WebSocketServer(threading.Thread):
     ):
         super().__init__()
         self.barrier = barrier
-        self.handler = None
+        self.handler = WebSocketHandler(import_stream=True)
         self.streaming = None
         self.host = host
         self.port = port
-        self.server = None
+        self.server: Optional[Server] = None
         self.loop = asyncio.new_event_loop()
 
-    def run(self):
+    def run(self) -> None:
         asyncio.set_event_loop(loop=self.loop)
-        self.handler = WebSocketHandler(import_stream=True)
         self.loop.create_task(self.start_server())
         try:
             self.loop.run_forever()
@@ -151,8 +152,8 @@ class WebSocketServer(threading.Thread):
         )
         self.barrier.wait()
 
-    def close(self):
-        if self.loop:
+    def close(self) -> None:
+        if self.loop and self.server:
             self.server.close()
             future = asyncio.run_coroutine_threadsafe(
                 coro=self.server.wait_closed(), loop=self.loop
@@ -162,20 +163,20 @@ class WebSocketServer(threading.Thread):
 
 
 @pytest.fixture
-def websocket_server():
+def websocket_server() -> Iterator[WebSocketServer]:
     barrier = threading.Barrier(parties=2, timeout=10)
-    model.results.websocket_server = WebSocketServer(barrier=barrier)
-    model.results.websocket_server.start()
+    websocket_server = WebSocketServer(barrier=barrier)
+    websocket_server.start()
     barrier.wait()
-    yield model.results.websocket_server
-    model.results.websocket_server.close()
+    yield websocket_server
+    websocket_server.close()
 
 
 @pytest.mark.asyncio
 async def test_live_server_event_key_not_found(
     event_id: int,
     websocket_server: WebSocketServer,
-):
+) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -207,7 +208,7 @@ async def test_live_server_event_key_not_found(
 async def test_live_server_event_key_found_but_parse_error_in_result_list(
     event_id: int,
     websocket_server: WebSocketServer,
-):
+) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -238,7 +239,7 @@ async def test_live_server_event_key_found_but_parse_error_in_result_list(
 async def test_live_server_event_key_found(
     event_id: int,
     websocket_server: WebSocketServer,
-):
+) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -267,7 +268,7 @@ async def test_live_server_import_result_list_snapshot(
     event_id: int,
     entry_id: int,
     websocket_server: WebSocketServer,
-):
+) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" status="Snapshot">
@@ -401,7 +402,7 @@ async def test_live_server_import_result_list_delta(
     event_id: int,
     entry_id: int,
     websocket_server: WebSocketServer,
-):
+) -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" status="Delta">

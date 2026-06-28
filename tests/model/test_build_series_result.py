@@ -288,7 +288,7 @@ def competitor_4_id(db: SqliteRepo) -> int:
 
 @pytest.fixture
 def entry_4(
-    db: SqliteRepo, event_1: EventType, class_a: ClassType, competitor_4_id
+    db: SqliteRepo, event_1: EventType, class_a: ClassType, competitor_4_id: int
 ) -> EntryType:
     with db.transaction():
         id = db.add_entry(
@@ -327,7 +327,7 @@ def test_build_series_result(
     entry_2: EntryType,
     entry_3: EntryType,
     entry_4: EntryType,
-):
+) -> None:
     m_settings, m_events, m_ranked_classes = model.results.build_series_result()
 
     assert m_settings == settings

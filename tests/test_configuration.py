@@ -26,7 +26,7 @@ import pytest
 from ooresults import configuration
 
 
-def test_configuration_create_default_config_if_not_exists():
+def test_configuration_create_default_config_if_not_exists() -> None:
     with tempfile.TemporaryDirectory() as hd:
         home = pathlib.Path(hd)
 
@@ -45,7 +45,7 @@ def test_configuration_create_default_config_if_not_exists():
             assert (home / ".ooresults" / "config.ini").exists()
 
 
-def test_configuration_cert_files_are_created_in_home():
+def test_configuration_cert_files_are_created_in_home() -> None:
     with tempfile.TemporaryDirectory() as td:
         with tempfile.TemporaryDirectory() as hd:
             temp = pathlib.Path(td)
@@ -68,7 +68,7 @@ def test_configuration_cert_files_are_created_in_home():
                 assert (temp / "config.ini").exists()
 
 
-def test_configuration_cert_files_are_only_created_if_not_exist():
+def test_configuration_cert_files_are_only_created_if_not_exist() -> None:
     with tempfile.TemporaryDirectory() as td:
         with tempfile.TemporaryDirectory() as hd:
             temp = pathlib.Path(td)
@@ -91,7 +91,7 @@ def test_configuration_cert_files_are_only_created_if_not_exist():
                 assert c.ssl_key == ssl_key
 
 
-def test_configuration_cert_files_are_not_created_if_defined_in_config():
+def test_configuration_cert_files_are_not_created_if_defined_in_config() -> None:
     with tempfile.TemporaryDirectory() as td:
         with tempfile.TemporaryDirectory() as hd:
             temp = pathlib.Path(td)
@@ -124,7 +124,7 @@ def test_configuration_cert_files_are_not_created_if_defined_in_config():
                 assert c.ssl_key.stat().st_size == 0
 
 
-def test_configuration_exception_if_cert_files_defined_but_not_found():
+def test_configuration_exception_if_cert_files_defined_but_not_found() -> None:
     with tempfile.TemporaryDirectory() as td:
         with tempfile.TemporaryDirectory() as hd:
             temp = pathlib.Path(td)
@@ -154,7 +154,7 @@ def test_configuration_exception_if_cert_files_defined_but_not_found():
                 assert not (home / "config.ini").exists()
 
 
-def test_configuration_demo_reader_default_is_false():
+def test_configuration_demo_reader_default_is_false() -> None:
     with tempfile.TemporaryDirectory() as td:
         home = pathlib.Path(td)
 
@@ -170,7 +170,7 @@ def test_configuration_demo_reader_default_is_false():
             assert c.demo_reader is False
 
 
-def test_configuration_import_stream_default_is_false():
+def test_configuration_import_stream_default_is_false() -> None:
     with tempfile.TemporaryDirectory() as td:
         home = pathlib.Path(td)
 
@@ -186,7 +186,7 @@ def test_configuration_import_stream_default_is_false():
             assert c.import_stream is False
 
 
-def test_configuration_config_file_is_read_if_exists_1():
+def test_configuration_config_file_is_read_if_exists_1() -> None:
     with tempfile.TemporaryDirectory() as td:
         home = pathlib.Path(td)
 
@@ -205,7 +205,7 @@ def test_configuration_config_file_is_read_if_exists_1():
             assert c.import_stream is True
 
 
-def test_configuration_config_file_is_read_if_exists_2():
+def test_configuration_config_file_is_read_if_exists_2() -> None:
     with tempfile.TemporaryDirectory() as td:
         home = pathlib.Path(td)
 

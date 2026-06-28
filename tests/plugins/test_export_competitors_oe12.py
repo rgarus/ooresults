@@ -93,7 +93,7 @@ header = (
 encoding = "windows-1252"
 
 
-def test_separator_semicolon():
+def test_separator_semicolon() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -112,7 +112,7 @@ def test_separator_semicolon():
     assert content == bytes(header + "\r\n" + v1 + "\r\n", encoding=encoding)
 
 
-def test_quote_within_quotes():
+def test_quote_within_quotes() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -131,7 +131,7 @@ def test_quote_within_quotes():
     assert content == bytes(header + "\r\n" + v1 + "\r\n", encoding=encoding)
 
 
-def test_separator_within_quotes():
+def test_separator_within_quotes() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -150,7 +150,7 @@ def test_separator_within_quotes():
     assert content == bytes(header + "\r\n" + v1 + "\r\n", encoding=encoding)
 
 
-def test_newline_within_quotes():
+def test_newline_within_quotes() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -169,7 +169,7 @@ def test_newline_within_quotes():
     assert content == bytes(header + "\r\n" + v1 + "\r\n", encoding=encoding)
 
 
-def test_special_characters():
+def test_special_characters() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -188,7 +188,7 @@ def test_special_characters():
     assert content == bytes(header + "\r\n" + v1 + "\r\n", encoding=encoding)
 
 
-def test_multiline():
+def test_multiline() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -227,7 +227,7 @@ def test_multiline():
     )
 
 
-def test_year():
+def test_year() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -269,7 +269,7 @@ def test_year():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_gender():
+def test_gender() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -301,7 +301,7 @@ def test_gender():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_not_competing():
+def test_not_competing() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -333,7 +333,7 @@ def test_not_competing():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_club():
+def test_club() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -367,7 +367,7 @@ def test_club():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_club_not_exported_without_club_id():
+def test_club_not_exported_without_club_id() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -401,7 +401,7 @@ def test_club_not_exported_without_club_id():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_class():
+def test_class() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -458,7 +458,7 @@ def test_class():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_class_short_name():
+def test_class_short_name() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -515,7 +515,7 @@ def test_class_short_name():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_start_time():
+def test_start_time() -> None:
     s1 = datetime.datetime(
         2020, 2, 9, 10, 0, 15, tzinfo=datetime.timezone(datetime.timedelta(hours=1))
     )
@@ -553,7 +553,7 @@ def test_start_time():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_finish_time():
+def test_finish_time() -> None:
     f1 = datetime.datetime(
         2020, 2, 9, 10, 0, 15, tzinfo=datetime.timezone(datetime.timedelta(hours=1))
     )
@@ -591,7 +591,7 @@ def test_finish_time():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_time():
+def test_time() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -623,7 +623,7 @@ def test_time():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_status_ok():
+def test_status_ok() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -655,7 +655,7 @@ def test_status_ok():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_status_dns():
+def test_status_dns() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -687,7 +687,7 @@ def test_status_dns():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_status_dnf():
+def test_status_dnf() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -719,7 +719,7 @@ def test_status_dnf():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_status_mp():
+def test_status_mp() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -751,7 +751,7 @@ def test_status_mp():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_status_disq():
+def test_status_disq() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -783,7 +783,7 @@ def test_status_disq():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_status_otl():
+def test_status_otl() -> None:
     content = oe12.create(
         entries=[
             EntryType(
@@ -815,7 +815,7 @@ def test_status_otl():
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_status_diacritic_characters_cp1252_encoding():
+def test_status_diacritic_characters_cp1252_encoding() -> None:
     content = oe12.create(
         entries=[
             EntryType(

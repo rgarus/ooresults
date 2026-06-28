@@ -161,7 +161,7 @@ def entry_1(
 
 def test_import_course_data_with_climb_update_existing_course(
     event_id: int, course_1_id: int
-):
+) -> None:
     courses = [
         {
             "name": "Bahn A",
@@ -186,7 +186,7 @@ def test_import_course_data_with_climb_update_existing_course(
 
 def test_import_course_data_without_climb_update_existing_course(
     event_id: int, course_1_id: int
-):
+) -> None:
     courses = [
         {
             "name": "Bahn A",
@@ -209,7 +209,9 @@ def test_import_course_data_without_climb_update_existing_course(
     )
 
 
-def test_import_course_data_add_not_existing_course(event_id: int, course_1_id: int):
+def test_import_course_data_add_not_existing_course(
+    event_id: int, course_1_id: int
+) -> None:
     courses = [
         {
             "name": "Bahn B",
@@ -242,8 +244,10 @@ def test_import_course_data_add_not_existing_course(event_id: int, course_1_id: 
     )
 
 
-def test_import_course_data_update_or_add_courses(event_id: int, course_1_id: int):
-    courses = [
+def test_import_course_data_update_or_add_courses(
+    event_id: int, course_1_id: int
+) -> None:
+    courses: list[dict] = [
         {
             "name": "Bahn A",
             "length": 4800,
@@ -299,7 +303,7 @@ def test_import_course_data_update_or_add_courses(event_id: int, course_1_id: in
 
 def test_import_course_data_add_not_existing_class(
     event_id: int, class_1_id: int, course_1_id: int
-):
+) -> None:
     class_course = [
         {
             "class_name": "Beginners",
@@ -351,7 +355,7 @@ def test_import_course_data_add_not_existing_class(
 
 def test_import_course_data_update_class_course_assignment(
     event_id: int, class_1_id: int, class_2_id: int, course_1_id: int
-):
+) -> None:
     courses = [
         {
             "name": "Bahn B",
@@ -420,7 +424,7 @@ def test_import_course_data_update_class_course_assignment(
 
 def test_import_course_data_remove_class_course_assigment(
     event_id: int, class_1_id: int, course_1_id: int
-):
+) -> None:
     class_course = [
         {
             "class_name": "Elite Men",
@@ -461,8 +465,8 @@ def test_import_course_data_remove_class_course_assigment(
 
 def test_import_course_data_update_or_add_class_course_assigments(
     event_id: int, course_1_id: int, class_1_id: int, class_2_id: int
-):
-    courses = [
+) -> None:
+    courses: list[dict] = [
         {
             "name": "Bahn A",
             "length": 4800,
@@ -476,7 +480,7 @@ def test_import_course_data_update_or_add_class_course_assigments(
             "controls": ["104"],
         },
     ]
-    class_course = [
+    class_course: list[dict] = [
         {
             "class_name": "Elite Men",
             "course_name": "Bahn B",
@@ -572,7 +576,7 @@ def test_import_course_data_update_or_add_class_course_assigments(
 
 def test_update_course_data_recalculates_entry_result(
     event_id: int, class_1_id: int, course_1_id: int, entry_1: EntryType
-):
+) -> None:
     model.courses.update_course(
         id=course_1_id,
         event_id=event_id,

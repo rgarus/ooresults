@@ -20,33 +20,33 @@
 from ooresults.otypes.handicap import Handicap
 
 
-def test_female_without_year():
+def test_female_without_year() -> None:
     assert Handicap.factor(female=True, age=None) == 0.8716
 
 
-def test_female_less_min_year():
+def test_female_less_min_year() -> None:
     assert Handicap.factor(female=True, age=1) == 0.7626
 
 
-def test_female_greater_max_year():
+def test_female_greater_max_year() -> None:
     assert Handicap.factor(female=True, age=99) == 0.3191
 
 
-def test_female_with_year():
+def test_female_with_year() -> None:
     assert Handicap.factor(female=True, age=44) == 0.8154
 
 
-def test_male_without_year():
+def test_male_without_year() -> None:
     assert Handicap.factor(female=False, age=None) == 1.0000
 
 
-def test_male_less_min_year():
+def test_male_less_min_year() -> None:
     assert Handicap.factor(female=False, age=1) == 0.7886
 
 
-def test_male_greater_max_year():
+def test_male_greater_max_year() -> None:
     assert Handicap.factor(female=False, age=99) == 0.4321
 
 
-def test_male_with_year():
+def test_male_with_year() -> None:
     assert Handicap.factor(female=False, age=44) == 0.9169

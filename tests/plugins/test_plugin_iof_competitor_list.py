@@ -21,7 +21,7 @@ from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.plugins import iof_competitor_list
 
 
-def test_import_name():
+def test_import_name() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -49,7 +49,7 @@ def test_import_name():
     ]
 
 
-def test_export_name():
+def test_export_name() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -80,7 +80,7 @@ def test_export_name():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_import_full():
+def test_import_full() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -116,7 +116,7 @@ def test_import_full():
     ]
 
 
-def test_export_full():
+def test_export_full() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">

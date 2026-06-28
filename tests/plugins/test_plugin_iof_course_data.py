@@ -26,7 +26,7 @@ from ooresults.otypes.event_type import EventType
 from ooresults.plugins import iof_course_data
 
 
-def test_import_course_data():
+def test_import_course_data() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -108,7 +108,7 @@ def test_import_course_data():
     assert class_course == []
 
 
-def test_import_course_data_with_class_assignment():
+def test_import_course_data_with_class_assignment() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -199,7 +199,7 @@ def test_import_course_data_with_class_assignment():
     ]
 
 
-def test_export_course_data():
+def test_export_course_data() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -290,7 +290,7 @@ def test_export_course_data():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_export_course_data_with_class_assignment():
+def test_export_course_data_with_class_assignment() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">

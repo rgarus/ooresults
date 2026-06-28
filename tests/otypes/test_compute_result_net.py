@@ -51,7 +51,7 @@ def t(a: datetime, b: datetime) -> int:
 def test_compute_result_status_ok(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -111,7 +111,7 @@ def test_compute_result_status_ok(
 def test_compute_result_status_mispunched(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c3 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
@@ -172,7 +172,7 @@ def test_compute_result_status_mispunched(
 def test_compute_result_status_ok_with_additionals(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -264,7 +264,7 @@ def test_compute_result_status_ok_with_additionals(
 def test_compute_result_with_unknown_punch_times(
     status_old: ResultStatus,
     status_new: ResultStatus,
-):
+) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = SplitTime.NO_TIME
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)

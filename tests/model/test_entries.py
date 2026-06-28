@@ -177,19 +177,8 @@ def entry_1(
 
 
 @pytest.fixture
-def entry_2(db: SqliteRepo, event_id: int, class_1_id: int) -> EntryType:
+def entry_2(db: SqliteRepo, event_id: int) -> EntryType:
     with db.transaction():
-        id = db.add_entry(
-            event_id=event_id,
-            competitor_id=None,
-            class_id=class_1_id,
-            club_id=None,
-            not_competing=False,
-            chip="4748495",
-            fields={},
-            result=PersonRaceResult(),
-            start=PersonRaceStart(),
-        )
         result = PersonRaceResult(
             punched_start_time=S1,
             punched_finish_time=F1,
@@ -219,19 +208,18 @@ def entry_2(db: SqliteRepo, event_id: int, class_1_id: int) -> EntryType:
             ],
         )
         result.compute_result(controls=[], class_params=ClassParams())
-        db.update_entry_result(
-            id=id,
+        id = db.add_entry_result(
+            event_id=event_id,
             chip="4748495",
             result=result,
             start=PersonRaceStart(),
         )
-        item = db.get_entry(id=id)
-        return copy.deepcopy(item)
+        return db.get_entry(id=id)
 
 
 def test_if_competitor_does_not_exist_a_new_competitor_is_added(
     db: SqliteRepo, event_id: int, class_1_id: int, club_id: int
-):
+) -> None:
     id, nc_changed = model.entries.add_or_update_entry(
         id=None,
         event_id=event_id,
@@ -298,7 +286,7 @@ def test_if_competitor_does_not_exist_a_new_competitor_is_added(
 
 def test_add_existing_competitor_but_do_not_update_competitors_chip_and_club_if_already_defined(
     db: SqliteRepo, event_id: int, class_1_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         competitor_id = db.add_competitor(
             first_name="Angela",
@@ -372,7 +360,7 @@ def test_add_existing_competitor_but_do_not_update_competitors_chip_and_club_if_
 
 def test_add_existing_competitor_and_update_competitors_chip_and_club_if_undefined(
     db: SqliteRepo, event_id: int, class_1_id: int, club_id: int
-):
+) -> None:
     with db.transaction():
         competitor_id = db.add_competitor(
             first_name="Angela",
@@ -449,7 +437,7 @@ def test_add_entry_without_result(
     class_1_id: int,
     club_id: int,
     competitor_id: int,
-):
+) -> None:
     id, nc_changed = model.entries.add_or_update_entry(
         id=None,
         event_id=event_id,
@@ -499,12 +487,19 @@ def test_add_entry_without_result(
 
 
 def test_if_updating_an_entry_then_the_key_data_of_the_competitor_are_also_updated(
-    db: SqliteRepo, event_id: int, class_1_id: int, club_id: int, entry_1: EntryType
-):
+    db: SqliteRepo,
+    event_id: int,
+    class_1_id: int,
+    club_id: int,
+    competitor_id: int,
+    entry_1: EntryType,
+) -> None:
+    assert competitor_id == entry_1.competitor_id
+
     model.entries.add_or_update_entry(
         id=entry_1.id,
         event_id=event_id,
-        competitor_id=entry_1.competitor_id,
+        competitor_id=competitor_id,
         first_name="angela",
         last_name="merkel",
         gender="",
@@ -523,7 +518,7 @@ def test_if_updating_an_entry_then_the_key_data_of_the_competitor_are_also_updat
         competitors = db.get_competitors()
     assert competitors == [
         CompetitorType(
-            id=entry_1.competitor_id,
+            id=competitor_id,
             first_name="angela",
             last_name="merkel",
             gender="",
@@ -541,7 +536,7 @@ def test_if_updating_an_entry_then_the_key_data_of_the_competitor_are_also_updat
     assert data[0] == EntryType(
         id=entry_1.id,
         event_id=event_id,
-        competitor_id=entry_1.competitor_id,
+        competitor_id=competitor_id,
         first_name="angela",
         last_name="merkel",
         gender="",
@@ -574,7 +569,7 @@ def test_if_an_already_registered_competitor_is_added_then_not_competing_is_set_
     class_1_id: int,
     club_id: int,
     competitor_id: int,
-):
+) -> None:
     id1, nc_changed = model.entries.add_or_update_entry(
         id=None,
         event_id=event_id,
@@ -672,7 +667,7 @@ def test_add_entry_with_result(
     club_id: int,
     competitor_id: int,
     entry_2: EntryType,
-):
+) -> None:
     id, nc_changed = model.entries.add_or_update_entry(
         id=None,
         event_id=event_id,
@@ -753,7 +748,7 @@ def test_update_entry_remove_result_and_store_removed_result_without_edits(
     club_id: int,
     competitor_id: int,
     entry_1: EntryType,
-):
+) -> None:
     id, _ = model.entries.add_or_update_entry(
         id=entry_1.id,
         event_id=event_id,
@@ -834,7 +829,7 @@ def test_update_entry_remove_result_with_status_disqualified_do_not_change_statu
     club_id: int,
     competitor_id: int,
     entry_1: EntryType,
-):
+) -> None:
     id, _ = model.entries.add_or_update_entry(
         id=entry_1.id,
         event_id=event_id,
@@ -916,7 +911,7 @@ def test_update_entry_change_status_and_remove_result_stores_changed_status(
     club_id: int,
     competitor_id: int,
     entry_1: EntryType,
-):
+) -> None:
     id, _ = model.entries.add_or_update_entry(
         id=entry_1.id,
         event_id=event_id,
@@ -999,7 +994,7 @@ def test_update_entry_replace_result_and_store_replaced_result_without_edits(
     competitor_id: int,
     entry_1: EntryType,
     entry_2: EntryType,
-):
+) -> None:
     id, _ = model.entries.add_or_update_entry(
         id=entry_1.id,
         event_id=event_id,
@@ -1105,7 +1100,7 @@ def test_update_entry_set_status_to_dns(
     class_1_id: int,
     club_id: int,
     competitor_id: int,
-):
+) -> None:
     id, _ = model.entries.add_or_update_entry(
         id=None,
         event_id=event_id,

@@ -35,7 +35,7 @@ def t(a: datetime, b: datetime) -> int:
 
 
 @pytest.mark.parametrize("standard", [True, False])
-def test_format_result_status_ok(standard):
+def test_format_result_status_ok(standard: bool) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 59, 3, tzinfo=timezone.utc)
@@ -80,7 +80,7 @@ def test_format_result_status_ok(standard):
 
 
 @pytest.mark.parametrize("standard", [True, False])
-def test_format_result_status_mispunched(standard):
+def test_format_result_status_mispunched(standard: bool) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c3 = datetime(2015, 1, 1, 12, 39, 5, tzinfo=timezone.utc)
@@ -129,7 +129,7 @@ def test_format_result_status_mispunched(standard):
 
 
 @pytest.mark.parametrize("standard", [True, False])
-def test_compute_result_status_ok_with_additionals(standard):
+def test_compute_result_status_ok_with_additionals(standard: bool) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)
@@ -221,7 +221,7 @@ def test_compute_result_status_ok_with_additionals(standard):
 
 
 @pytest.mark.parametrize("standard", [True, False])
-def test_format_result_with_si_times_changed(standard):
+def test_format_result_with_si_times_changed(standard: bool) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 40, 1, tzinfo=timezone.utc)
     f1 = datetime(2015, 1, 1, 12, 43, 7, tzinfo=timezone.utc)
@@ -273,7 +273,7 @@ def test_format_result_with_si_times_changed(standard):
 
 
 @pytest.mark.parametrize("standard", [True, False])
-def test_format_result_with_unknown_punch_times(standard):
+def test_format_result_with_unknown_punch_times(standard: bool) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = SplitTime.NO_TIME
     c2 = SplitTime.NO_TIME
@@ -308,7 +308,7 @@ def test_format_result_with_unknown_punch_times(standard):
 
 
 @pytest.mark.parametrize("standard", [True, False])
-def test_format_result_with_no_start_time(standard):
+def test_format_result_with_no_start_time(standard: bool) -> None:
     c1 = datetime(2015, 1, 1, 12, 40, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 41, 3, tzinfo=timezone.utc)
     c3 = datetime(2015, 1, 1, 12, 41, 5, tzinfo=timezone.utc)
@@ -363,7 +363,7 @@ def test_format_result_with_no_start_time(standard):
 
 
 @pytest.mark.parametrize("standard", [True, False])
-def test_format_result_with_no_start_time_and_no_finish_time(standard):
+def test_format_result_with_no_start_time_and_no_finish_time(standard: bool) -> None:
     c1 = datetime(2015, 1, 1, 12, 40, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 41, 3, tzinfo=timezone.utc)
     c3 = datetime(2015, 1, 1, 12, 41, 5, tzinfo=timezone.utc)
@@ -417,7 +417,7 @@ def test_format_result_with_no_start_time_and_no_finish_time(standard):
 
 
 @pytest.mark.parametrize("standard", [True, False])
-def test_format_result_with_no_finish_time(standard):
+def test_format_result_with_no_finish_time(standard: bool) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 40, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 41, 3, tzinfo=timezone.utc)
@@ -455,7 +455,7 @@ def test_format_result_with_no_finish_time(standard):
 
 
 @pytest.mark.parametrize("standard", [True, False])
-def test_format_result_with_voided_legs(standard):
+def test_format_result_with_voided_legs(standard: bool) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 43, 3, tzinfo=timezone.utc)
@@ -501,7 +501,7 @@ def test_format_result_with_voided_legs(standard):
         ]
 
 
-def test_format_result_with_voided_leg_and_missing_punch():
+def test_format_result_with_voided_leg_and_missing_punch() -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 43, 3, tzinfo=timezone.utc)
@@ -540,7 +540,7 @@ def test_format_result_with_voided_leg_and_missing_punch():
     ]
 
 
-def test_format_result_with_voided_leg_and_unknown_punch_time():
+def test_format_result_with_voided_leg_and_unknown_punch_time() -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = SplitTime.NO_TIME
     c2 = datetime(2015, 1, 1, 12, 43, 3, tzinfo=timezone.utc)
@@ -580,7 +580,7 @@ def test_format_result_with_voided_leg_and_unknown_punch_time():
 
 
 @pytest.mark.parametrize("standard", [True, False])
-def test_compute_result_remove_unnecessary_additionals(standard):
+def test_compute_result_remove_unnecessary_additionals(standard: bool) -> None:
     s1 = datetime(2015, 1, 1, 12, 38, 59, tzinfo=timezone.utc)
     c1 = datetime(2015, 1, 1, 12, 39, 1, tzinfo=timezone.utc)
     c2 = datetime(2015, 1, 1, 12, 39, 3, tzinfo=timezone.utc)

@@ -60,19 +60,19 @@ def j_min() -> str:
     )
 
 
-def test_min_to_dict(c_min: PersonRaceResult, d_min: dict):
+def test_min_to_dict(c_min: PersonRaceResult, d_min: dict) -> None:
     assert c_min.to_dict() == d_min
 
 
-def test_min_to_json(c_min: PersonRaceResult, j_min: str):
+def test_min_to_json(c_min: PersonRaceResult, j_min: str) -> None:
     assert c_min.to_json() == j_min
 
 
-def test_min_from_dict(d_min: dict, c_min: PersonRaceResult):
+def test_min_from_dict(d_min: dict, c_min: PersonRaceResult) -> None:
     assert PersonRaceResult.from_dict(d_min) == c_min
 
 
-def test_min_from_json(j_min: str, c_min: PersonRaceResult):
+def test_min_from_json(j_min: str, c_min: PersonRaceResult) -> None:
     assert PersonRaceResult.from_json(j_min) == c_min
 
 
@@ -210,17 +210,17 @@ def j_max() -> str:
     )
 
 
-def test_max_to_dict(c_max: PersonRaceResult, d_max: dict):
+def test_max_to_dict(c_max: PersonRaceResult, d_max: dict) -> None:
     assert c_max.to_dict() == d_max
 
 
-def test_max_to_json(c_max: PersonRaceResult, j_max: str):
+def test_max_to_json(c_max: PersonRaceResult, j_max: str) -> None:
     assert c_max.to_json() == j_max
 
 
-def test_max_from_dict(d_max: dict, c_max: PersonRaceResult):
+def test_max_from_dict(d_max: dict, c_max: PersonRaceResult) -> None:
     assert PersonRaceResult.from_dict(d_max) == c_max
 
 
-def test_max_from_json(j_max: str, c_max: PersonRaceResult):
+def test_max_from_json(j_max: str, c_max: PersonRaceResult) -> None:
     assert PersonRaceResult.from_json(j_max) == c_max

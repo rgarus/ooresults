@@ -203,7 +203,7 @@ def entry_3_id(
         )
 
 
-def test_import_entries_empty_db(db: SqliteRepo, event_2_id: int):
+def test_import_entries_empty_db(db: SqliteRepo, event_2_id: int) -> None:
     model.entries.import_entries(
         event_id=event_2_id,
         entries=[
@@ -340,7 +340,9 @@ def test_import_entries_empty_db(db: SqliteRepo, event_2_id: int):
     )
 
 
-def test_import_entries(db: SqliteRepo, event_2_id: int, class_1_id: int, club_id: int):
+def test_import_entries(
+    db: SqliteRepo, event_2_id: int, class_1_id: int, club_id: int
+) -> None:
     model.entries.import_entries(
         event_id=event_2_id,
         entries=[
@@ -448,7 +450,7 @@ def test_if_competitor_has_already_one_entry_and_import_list_has_one_entry_then_
     club_id: int,
     entry_2_id: int,
     entry_3_id: int,
-):
+) -> None:
     model.entries.import_entries(
         event_id=event_2_id,
         entries=[
@@ -556,7 +558,7 @@ def test_if_competitor_has_already_one_entry_and_import_list_has_two_entries_the
     class_2_id: int,
     club_id: int,
     entry_2_id: int,
-):
+) -> None:
     with pytest.raises(repo.ConstraintError, match="Ambiguous update"):
         model.entries.import_entries(
             event_id=event_2_id,
@@ -636,7 +638,7 @@ def test_if_competitor_has_already_two_entries_and_import_list_has_one_entry_the
     class_2_id: int,
     club_id: int,
     competitor_2_id: int,
-):
+) -> None:
     with db.transaction():
         c1 = db.add_entry(
             event_id=event_2_id,
@@ -745,7 +747,7 @@ def test_if_competitor_has_no_entry_then_add_all_entries_of_import_list(
     class_2_id: int,
     club_id: int,
     entry_3_id: int,
-):
+) -> None:
     model.entries.import_entries(
         event_id=event_2_id,
         entries=[
@@ -875,7 +877,9 @@ def test_if_competitor_has_no_entry_then_add_all_entries_of_import_list(
     ]
 
 
-def test_import_entries_with_results(db: SqliteRepo, event_2_id: int, class_1_id: int):
+def test_import_entries_with_results(
+    db: SqliteRepo, event_2_id: int, class_1_id: int
+) -> None:
     model.entries.import_entries(
         event_id=event_2_id,
         entries=[
@@ -962,7 +966,7 @@ def test_import_entries_with_results(db: SqliteRepo, event_2_id: int, class_1_id
 
 def test_import_entries_already_exist_with_results(
     db: SqliteRepo, event_2_id: int, class_1_id: int
-):
+) -> None:
     model.entries.import_entries(
         event_id=event_2_id,
         entries=[
@@ -1093,7 +1097,7 @@ def test_if_clear_entries_is_true_then_all_entries_are_deleted_before_the_import
     club_id: int,
     entry_2_id: int,
     entry_3_id: int,
-):
+) -> None:
     model.entries.import_entries(
         event_id=event_2_id,
         entries=[

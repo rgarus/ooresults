@@ -106,8 +106,8 @@ def post_add() -> str | bottle.HTTPResponse:
     data = bottle.request.forms
     print(dict(data))
     event_id = int(data.event_id) if data.event_id != "" else -1
-    length = int(data.length) if data.length != "" else None
-    climb = int(data.climb) if data.climb != "" else None
+    length = float(data.length) if data.length != "" else None
+    climb = float(data.climb) if data.climb != "" else None
     controls = data.controls.split("-") if data.controls != "" else []
     controls = [c.strip() for c in controls]
     try:

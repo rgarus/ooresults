@@ -25,7 +25,7 @@ from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.plugins import iof_entry_list
 
 
-def test_import_entry_list_with_one_entry():
+def test_import_entry_list_with_one_entry() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -72,7 +72,7 @@ def test_import_entry_list_with_one_entry():
     ]
 
 
-def test_export_entry_list_with_one_entry():
+def test_export_entry_list_with_one_entry() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -131,7 +131,7 @@ def test_export_entry_list_with_one_entry():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_import_entry_list_without_person_entries():
+def test_import_entry_list_without_person_entries() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -151,7 +151,7 @@ def test_import_entry_list_without_person_entries():
     assert entries == []
 
 
-def test_export_entry_list_without_person_entries():
+def test_export_entry_list_without_person_entries() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
@@ -178,7 +178,7 @@ def test_export_entry_list_without_person_entries():
     assert document == bytes(content, encoding="utf-8")
 
 
-def test_import_entry_list_with_several_entries():
+def test_import_entry_list_with_several_entries() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -263,7 +263,7 @@ def test_import_entry_list_with_several_entries():
     ]
 
 
-def test_export_entry_list_with_several_entries():
+def test_export_entry_list_with_several_entries() -> None:
     content = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
