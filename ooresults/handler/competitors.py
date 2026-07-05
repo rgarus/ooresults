@@ -18,10 +18,13 @@
 
 
 import io
+from collections import defaultdict
+from typing import Optional
 
 import bottle
 
 from ooresults import model
+from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.plugins import iof_competitor_list
 from ooresults.repo.repo import CompetitorUsedError
 from ooresults.repo.repo import ConstraintError
@@ -40,10 +43,30 @@ Handler for the competitor routes.
 """
 
 
+def update(view: str = "Competitors") -> str:
+    def to_str(item: Optional[str]) -> str:
+        return item if item is not None else ""
+
+    competitors = model.competitors.get_competitors()
+
+    view_comp_list: list[tuple[Optional[str], list[CompetitorType]]] = []
+    if view == "clubs":
+        view_club: defaultdict[Optional[str], list[CompetitorType]] = defaultdict(list)
+        for competitor in competitors:
+            view_club[competitor.club_name].append(competitor)
+        view_comp_list = list(view_club.items())
+        view_comp_list.sort(key=lambda c: to_str(c[0]))
+    elif competitors:
+        view_comp_list = [("Competitors", competitors)]
+
+    return render.competitors_table(view=view, view_comp_list=view_comp_list)
+
+
 @bottle.post("/competitor/update")
 def post_update() -> str:
     """Update data."""
-    return render.competitors_table(competitors=model.competitors.get_competitors())
+    data = bottle.request.forms
+    return update(view=data.view)
 
 
 @bottle.post("/competitor/add")
@@ -73,7 +96,7 @@ def post_add() -> str | bottle.HTTPResponse:
     except ConstraintError as e:
         return bottle.HTTPResponse(status=409, body=str(e))
 
-    return render.competitors_table(competitors=model.competitors.get_competitors())
+    return update(view=data.view)
 
 
 @bottle.post("/competitor/import")
@@ -92,7 +115,7 @@ def post_import() -> str | bottle.HTTPResponse:
     except Exception as e:
         return bottle.HTTPResponse(status=409, body=str(e))
 
-    return render.competitors_table(competitors=model.competitors.get_competitors())
+    return update(view=data.view)
 
 
 @bottle.post("/competitor/export")
@@ -112,7 +135,7 @@ def post_delete() -> str | bottle.HTTPResponse:
     data = bottle.request.forms
     try:
         model.competitors.delete_competitor(int(data.id))
-        return render.competitors_table(competitors=model.competitors.get_competitors())
+        return update(view=data.view)
     except CompetitorUsedError:
         return bottle.HTTPResponse(status=409, body="Competitor used in entries")
 

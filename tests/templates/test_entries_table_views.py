@@ -287,7 +287,7 @@ def test_entry_list_with_view_is_clubs(
 
     # row 1
     assert [th.text for th in rows[0].findall(".//th")] == [
-        "Individuals/No club\xa0\xa0(1)",
+        "-- Not assigned to any club --\xa0\xa0(1)",
     ]
 
     # row 2

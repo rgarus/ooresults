@@ -74,7 +74,7 @@ def update(event_id: int, view: str = "entries") -> str | bottle.HTTPResponse:
         ranked_entries.sort(key=lambda e: to_str(e.entry.first_name))
         ranked_entries.sort(key=lambda e: to_str(e.entry.last_name))
 
-        view_entries_list: list[tuple[Optional[str], list[RankedEntryType]]]
+        view_entries_list: list[tuple[Optional[str], list[RankedEntryType]]] = []
         columns: set[str] = set()
         if view == "classes":
             view_clas: defaultdict[Optional[str], list[RankedEntryType]] = defaultdict(
@@ -141,11 +141,8 @@ def update(event_id: int, view: str = "entries") -> str | bottle.HTTPResponse:
                 (class_info_type.name, ranked_entries)
                 for class_info_type, ranked_entries in class_results
             ]
-        else:
-            if ranked_entries:
-                view_entries_list = [("Entries", ranked_entries)]
-            else:
-                view_entries_list = []
+        elif ranked_entries:
+            view_entries_list = [("Entries", ranked_entries)]
 
         # add unassigned results
         if unassigned_results:

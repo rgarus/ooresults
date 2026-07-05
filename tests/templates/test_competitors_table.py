@@ -64,7 +64,7 @@ TABLE_ID = "comp.table"
 
 
 def test_competitor_list_is_empty() -> None:
-    html = Html(text=render.competitors_table(competitors=[]))
+    html = Html(text=render.competitors_table(view="competitors", view_comp_list=[]))
 
     # headers
     headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
@@ -83,7 +83,11 @@ def test_competitor_list_is_empty() -> None:
 
 
 def test_competitor_list_is_not_empty(competitors: list[CompetitorType]) -> None:
-    html = Html(text=render.competitors_table(competitors=competitors))
+    html = Html(
+        text=render.competitors_table(
+            view="competitors", view_comp_list=[("Competitors", competitors)]
+        )
+    )
 
     # headers
     headers = html.findall(path=f".//table[@id='{TABLE_ID}']/thead/tr/th")
@@ -141,7 +145,11 @@ def test_competitor_list_is_not_empty(competitors: list[CompetitorType]) -> None
 
 def test_gender_is_unknown(competitors: list[CompetitorType]) -> None:
     competitors[0].gender = ""
-    html = Html(text=render.competitors_table(competitors=competitors))
+    html = Html(
+        text=render.competitors_table(
+            view="competitors", view_comp_list=[("Competitors", competitors)]
+        )
+    )
 
     elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
     assert elem.text is None
@@ -149,7 +157,11 @@ def test_gender_is_unknown(competitors: list[CompetitorType]) -> None:
 
 def test_gender_is_female(competitors: list[CompetitorType]) -> None:
     competitors[0].gender = "F"
-    html = Html(text=render.competitors_table(competitors=competitors))
+    html = Html(
+        text=render.competitors_table(
+            view="competitors", view_comp_list=[("Competitors", competitors)]
+        )
+    )
 
     elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
     assert elem.text == "F"
@@ -157,7 +169,11 @@ def test_gender_is_female(competitors: list[CompetitorType]) -> None:
 
 def test_gender_is_male(competitors: list[CompetitorType]) -> None:
     competitors[0].gender = "M"
-    html = Html(text=render.competitors_table(competitors=competitors))
+    html = Html(
+        text=render.competitors_table(
+            view="competitors", view_comp_list=[("Competitors", competitors)]
+        )
+    )
 
     elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[3]")
     assert elem.text == "M"
@@ -165,7 +181,11 @@ def test_gender_is_male(competitors: list[CompetitorType]) -> None:
 
 def test_year_is_defined(competitors: list[CompetitorType]) -> None:
     competitors[0].year = 1957
-    html = Html(text=render.competitors_table(competitors=competitors))
+    html = Html(
+        text=render.competitors_table(
+            view="competitors", view_comp_list=[("Competitors", competitors)]
+        )
+    )
 
     elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[4]")
     assert elem.text == "1957"
@@ -173,7 +193,11 @@ def test_year_is_defined(competitors: list[CompetitorType]) -> None:
 
 def test_chip_is_defined(competitors: list[CompetitorType]) -> None:
     competitors[0].chip = "1234567"
-    html = Html(text=render.competitors_table(competitors=competitors))
+    html = Html(
+        text=render.competitors_table(
+            view="competitors", view_comp_list=[("Competitors", competitors)]
+        )
+    )
 
     elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[5]")
     assert elem.text == "1234567"
@@ -182,7 +206,11 @@ def test_chip_is_defined(competitors: list[CompetitorType]) -> None:
 def test_club_is_defined(competitors: list[CompetitorType]) -> None:
     competitors[0].club_id = 2
     competitors[0].club_name = "OL Bundestag"
-    html = Html(text=render.competitors_table(competitors=competitors))
+    html = Html(
+        text=render.competitors_table(
+            view="competitors", view_comp_list=[("Competitors", competitors)]
+        )
+    )
 
     elem = html.find(path=f".//table[@id='{TABLE_ID}']/tbody/tr[2]/td[6]")
     assert elem.text == "OL Bundestag"

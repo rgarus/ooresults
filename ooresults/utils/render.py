@@ -143,8 +143,11 @@ def add_club(club: Optional[ClubType]) -> str:
     return _add_club.render(club=club)
 
 
-def competitors_table(competitors: list[CompetitorType]) -> str:
-    return _competitors_table.render(competitors=competitors)
+def competitors_table(
+    view: str,
+    view_comp_list: list[tuple[Optional[str], list[CompetitorType]]],
+) -> str:
+    return _competitors_table.render(view=view, view_comp_list=view_comp_list)
 
 
 def add_competitor(competitor: Optional[CompetitorType], clubs: list[ClubType]) -> str:
@@ -260,7 +263,7 @@ def main(events: list[EventType]) -> str:
     results_tab = _results_tab_content.render(results=results_table)
     series_table = _series_table.render(events=[], results=[])
     series_tab = _series_tab_content.render(results=series_table)
-    competitors_table = _competitors_table.render(competitors=[])
+    competitors_table = _competitors_table.render(view="competitors", view_comp_list=[])
     competitors_tab = _competitors_tab_content.render(
         competitors_table=competitors_table
     )

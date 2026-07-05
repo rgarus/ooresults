@@ -172,6 +172,9 @@ class CompetitorPage:
     def filter(self) -> TextControl:
         return TextControl(driver=self.driver, id="comp.filter")
 
+    def view(self) -> ComboboxControl:
+        return ComboboxControl(driver=self.driver, id="comp.view")
+
     def select_competitor(self, first_name: str, last_name: str) -> None:
         for i in range(2, self.table.nr_of_rows() + 2):
             if self.table.row(i=i)[0:2] == [first_name, last_name]:
@@ -185,6 +188,7 @@ class CompetitorPage:
         self.actions.delete().ok()
 
     def delete_competitors(self) -> None:
+        self.view().select_by_text("Competitors")
         for i in range(self.table.nr_of_rows() - 1):
             self.table.select_row(2)
             self.actions.delete().ok()

@@ -294,6 +294,7 @@ class EntryPage:
         self.actions.delete().ok()
 
     def delete_entries(self) -> None:
+        self.view().select_by_text("Entries")
         for i in range(self.table.nr_of_rows() - 1):
             self.table.select_row(2)
             self.actions.delete().ok()

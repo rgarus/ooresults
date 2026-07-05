@@ -1,7 +1,27 @@
-## competitors: List[CompetitorType]
+## view: str
+## view_comp_list: list[tuple[Optional[str], list[CompetitorType]]]
+
+
+<%!
+t = {
+    "competitors": "Competitors",
+    "clubs": "-- Not assigned to any club --",
+}
+%>
 
 
 <input id="comp.filter" oninput="filter_table('comp.table', 'tr', this.value)" placeholder="Filter (Alt+F) ..."/>
+<label for="comp.view">&nbsp;&nbsp;&nbsp;&nbsp;View:&nbsp;&nbsp;</label>
+<select id="comp.view" onchange="comp_reload_view(this)">
+    % for value, text in (("competitors", "Competitors"), ("clubs", "Clubs")):
+        % if view == value:
+            <option value="${value}" selected>${text}</option>
+        % else:
+            <option value="${value}">${text}</option>
+        % endif
+    % endfor
+</select>
+
 <p/>
 
 <table class="dte" id="comp.table" onclick="comp_highlight(event)" ondblclick="comp_highlight(event)" onmousedown="table_mousedown(event)">
@@ -12,25 +32,31 @@
             <th class="dth">Gender</th>
             <th class="dth">Year</th>
             <th class="dth">Chip</th>
-            <th class="dth">Club</th>
+            % if view != "clubs":
+                <th class="dth">Club</th>
+            % endif
         </tr>
     </thead>
     <tbody id="competitors_tbody">
-        % if competitors:
-            <tr class="dte h1">
-                <th class="dte h1" colspan="99">Competitors&nbsp;&nbsp;(${len(competitors)})</th>
-            </tr>
-            % for competitor in competitors:
-                <tr class="dte" data-id="${competitor.id}">
-                    <td class="dte">${competitor.first_name}</td>
-                    <td class="dte">${competitor.last_name}</td>
-                    <td class="dte">${competitor.gender}</td>
-                    <td class="dte">${competitor.year if competitor.year is not None else ""}</td>
-                    <td class="dte" style="text-align:right">${competitor.chip if competitor.chip else ""}</td>
-                    <td class="dte">${competitor.club_name if competitor.club_name else ""}</td>
+        % for group_name, competitors in view_comp_list:
+            % if competitors:
+                <tr class="dte h1">
+                    <th class="dte h1" colspan="99">${group_name if group_name is not None else t[view]}&nbsp;&nbsp;(${len(competitors)})</th>
                 </tr>
-            % endfor
-        % endif
+                % for competitor in competitors:
+                    <tr class="dte" data-id="${competitor.id}">
+                        <td class="dte">${competitor.first_name}</td>
+                        <td class="dte">${competitor.last_name}</td>
+                        <td class="dte">${competitor.gender}</td>
+                        <td class="dte">${competitor.year if competitor.year is not None else ""}</td>
+                        <td class="dte" style="text-align:right">${competitor.chip if competitor.chip else ""}</td>
+                        % if view != "clubs":
+                            <td class="dte">${competitor.club_name if competitor.club_name else ""}</td>
+                        % endif
+                    </tr>
+                % endfor
+            % endif
+        % endfor
     </tbody>
 </table>
 

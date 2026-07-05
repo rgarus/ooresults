@@ -94,7 +94,13 @@
 
 
 <script>
+    var comp_view = "competitors";
     var comp_selected = document.getElementById('comp.table').getElementsByClassName('selected')[0];
+
+    function comp_reload_view(self) {
+        comp_view = self.value;
+        comp_update();
+    }
 
     function comp_highlight(e) {
         if (e.target.tagName == "TD") {
@@ -185,6 +191,8 @@
     function comp_submitAdd() {
         var form = document.getElementById('comp.formAdd');
         var data = new FormData(form);
+        data.append('view', comp_view);
+
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -207,6 +215,8 @@
     function comp_submitImport() {
         var form = document.getElementById('comp.import.form');
         var data = new FormData(form);
+        data.append('view', comp_view);
+
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -264,6 +274,8 @@
     function comp_submitDelete() {
         var form = document.getElementById('comp.formDelete');
         var data = new FormData(form);
+        data.append('view', comp_view);
+
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -284,10 +296,14 @@
     }
 
     function comp_update() {
+        var data = new FormData();
+        data.append('view', comp_view);
+
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                comp_updateTable(this.responseText)
+                comp_updateTable(this.responseText);
+                document.getElementById('comp.view').value = comp_view;
             }
             if (this.readyState == 4 && this.status == 409) {
                 window.alert(this.responseText);
@@ -300,7 +316,7 @@
             window.alert("Network error");
         };
         xhr.open("POST", "competitor/update", true);
-        xhr.send();
+        xhr.send(data);
     }
 
     function set_comp_table_header_top() {
