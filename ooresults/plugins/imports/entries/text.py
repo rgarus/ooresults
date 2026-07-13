@@ -17,14 +17,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import Any
+
 from ooresults.otypes import result_type
 
 
-def parse(content: bytes):
+def parse(content: bytes) -> list[dict[str, Any]]:
     try:
-        content = content.decode(encoding="utf-8")
+        decoded_content = content.decode(encoding="utf-8")
     except Exception:
-        content = content.decode(encoding="windows-1252")
+        decoded_content = content.decode(encoding="windows-1252")
 
     # Format:
     #
@@ -38,12 +40,12 @@ def parse(content: bytes):
     #  1  Olaf Scholz                                  OC Rot                          28:29
 
     results = []
-    for line in content.split("\n"):
+    for line in decoded_content.split("\n"):
         if line != "":
             if line[0] != " ":
                 class_ = line.strip()
             else:
-                r = {}
+                r: dict[str, Any] = {}
                 r["class_"] = class_
 
                 a, _, b = line[4:].strip().partition("  ")

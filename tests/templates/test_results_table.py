@@ -159,7 +159,7 @@ def test_class_results_list_with_one_class_and_with_results(
     # header 1
     assert len(headers[0].findall(".//th")) == 1
     elem = headers[0].find(".//th[1]/h3")
-    assert elem.text == "Elite Women"
+    assert elem is not None and elem.text == "Elite Women"
 
     # header 2
     assert [td.text for td in headers[1].findall(".//th")] == [
@@ -297,7 +297,7 @@ def test_class_results_list_with_two_classes_and_with_results(
     # header 1
     assert len(headers[0].findall(".//th")) == 1
     elem = headers[0].find(".//th[1]/h3")
-    assert elem.text == "Elite Women"
+    assert elem is not None and elem.text == "Elite Women"
 
     # header 2
     assert [td.text for td in headers[1].findall(".//th")] == [
@@ -334,7 +334,7 @@ def test_class_results_list_with_two_classes_and_with_results(
     # header 1
     assert len(headers[0].findall(".//th")) == 1
     elem = headers[0].find(".//th[1]/h3")
-    assert elem.text == "Elite Men"
+    assert elem is not None and elem.text == "Elite Men"
 
     # header 2
     assert [td.text for td in headers[1].findall(".//th")] == [
@@ -367,7 +367,8 @@ def check_header(html: Html, values: list[str]) -> None:
 
     # header 1
     assert len(headers[0].findall(".//th")) == 1
-    assert headers[0].find(".//th[1]/h3").text == "Elite Women"
+    elem = headers[0].find(".//th[1]/h3")
+    assert elem is not None and elem.text == "Elite Women"
 
     # header 2
     assert [td.text for td in headers[1].findall(".//th")] == values

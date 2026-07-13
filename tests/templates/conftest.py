@@ -18,19 +18,19 @@
 
 
 from lxml import etree
-from lxml.html import HtmlElement
+from lxml.etree import Element
 
 
 class Html:
     def __init__(self, text: str) -> None:
-        self.html: HtmlElement = etree.HTML(text=text)
+        self.html: Element = etree.HTML(text=text)
         assert self.html is not None
 
-    def findall(self, path: str) -> list[HtmlElement]:
+    def findall(self, path: str) -> list[Element]:
         return self.html.findall(path=path)
 
-    def find(self, path: str) -> HtmlElement:
-        elem: HtmlElement = self.html.find(path=path)
+    def find(self, path: str) -> Element:
+        elem = self.html.find(path=path)
 
         assert elem is not None, f"Path not found: {path}"
         return elem

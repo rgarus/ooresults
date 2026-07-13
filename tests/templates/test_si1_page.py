@@ -36,6 +36,7 @@ def test_event_id(event_id: Optional[int], value: str) -> None:
     html = Html(text=render.si1_page(event_id=event_id, key=None, view=0))
 
     elem = html.find(path="body/script")
+    assert elem is not None and elem.text is not None
     script = [line.strip() for line in elem.text.splitlines()]
     assert f'var event_id = "{value}";' in script
 
@@ -53,6 +54,7 @@ def test_key(key: Optional[str], value: str) -> None:
     html = Html(text=render.si1_page(event_id=None, key=key, view=0))
 
     elem = html.find(path="body/script")
+    assert elem is not None and elem.text is not None
     script = [line.strip() for line in elem.text.splitlines()]
     assert f'var key = "{value}";' in script
 
@@ -68,5 +70,6 @@ def test_view(view: int, value: str) -> None:
     html = Html(text=render.si1_page(event_id=None, key=None, view=view))
 
     elem = html.find(path="body/script")
+    assert elem is not None and elem.text is not None
     script = [line.strip() for line in elem.text.splitlines()]
     assert f"var view = {value};  // 0: both, 1: only reader" in script

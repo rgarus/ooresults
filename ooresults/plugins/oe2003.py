@@ -20,6 +20,7 @@
 import io
 from datetime import datetime
 from datetime import timedelta
+from typing import Any
 
 import clevercsv as csv
 from unidecode import unidecode
@@ -99,9 +100,9 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
 
         # export only items with defined name
         if e.last_name:
-            chip = e.chip if e.chip is not None else ""
             last_name = e.last_name
-            first_name = e.first_name
+            first_name = e.first_name if e.first_name is not None else ""
+            chip = e.chip if e.chip is not None else ""
 
             year = str(e.year) if e.year is not None else ""
 
@@ -125,12 +126,9 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
 
             status = STATUS_MAP.get(e.result.status, "")
 
-            club_id = ""
-            if e.club_id is not None:
-                club_id = str(e.club_id)
-
+            club_id = str(e.club_id) if e.club_id is not None else ""
             club_name = ""
-            if e.club_id is not None:
+            if e.club_id is not None and e.club_name is not None:
                 club_name = e.club_name
 
             writer.writerow(
@@ -163,17 +161,17 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
     return content.encode(encoding="windows-1252")
 
 
-def parse(content: bytes) -> list[dict]:
+def parse(content: bytes) -> list[dict[str, Any]]:
     column_nr: dict[str, int] = {}
-    result = []
+    parsed_result: list[dict[str, Any]] = []
 
     try:
-        content = content.decode(encoding="utf-8")
+        decoded_content = content.decode(encoding="utf-8")
     except Exception:
-        content = content.decode(encoding="windows-1252")
+        decoded_content = content.decode(encoding="windows-1252")
 
-    dialect = csv.Sniffer().sniff(content, delimiters=",;\t")
-    for values in csv.reader(io.StringIO(content), dialect=dialect):
+    dialect = csv.Sniffer().sniff(decoded_content, delimiters=",;\t")
+    for values in csv.reader(io.StringIO(decoded_content), dialect=dialect):
         if column_nr == {}:
             for i, v in enumerate(values):
                 if v in ["Chip", "Chipno", "Chipnr", "SI card1"]:
@@ -286,10 +284,9 @@ def parse(content: bytes) -> list[dict]:
                     column_nr["split_time"] = i
                     break
         else:
-            r = {
-                "start": start_type.PersonRaceStart(),
-                "result": result_type.PersonRaceResult(),
-            }
+            r: dict[str, Any] = {}
+            start = start_type.PersonRaceStart()
+            result = result_type.PersonRaceResult()
             fields = {}
 
             for column, nr in column_nr.items():
@@ -303,28 +300,28 @@ def parse(content: bytes) -> list[dict]:
                         "4": ResultStatus.DISQUALIFIED,
                         "5": ResultStatus.OVER_TIME,
                     }
-                    r["result"].status = mapping.get(item, ResultStatus.INACTIVE)
+                    result.status = mapping.get(item, ResultStatus.INACTIVE)
                 elif column == "start_time":
                     if item != "":
                         t = 0
                         for i in item.split(":"):
                             t = 60 * t + int(i)
                         d = datetime(year=1900, month=1, day=1) + timedelta(seconds=t)
-                        r["start"].start_time = d
+                        start.start_time = d
                 elif column == "finish_time":
                     if item != "":
                         t = 0
                         for i in item.split(":"):
                             t = 60 * t + int(i)
                         d = datetime(year=1900, month=1, day=1) + timedelta(seconds=t)
-                        r["result"].finish_time = d
-                        r["result"].punched_finish_time = d
+                        result.finish_time = d
+                        result.punched_finish_time = d
                 elif column == "time":
                     try:
                         t = 0
                         for i in item.split(":"):
                             t = 60 * t + int(i)
-                        r["result"].time = t
+                        result.time = t
                     except Exception:
                         pass
                 elif column == "year":
@@ -365,11 +362,11 @@ def parse(content: bytes) -> list[dict]:
                             t = None
 
                         punch_time = None
-                        if r["start"].start_time and t is not None:
-                            punch_time = r["start"].start_time + timedelta(seconds=t)
+                        if start.start_time and t is not None:
+                            punch_time = start.start_time + timedelta(seconds=t)
 
                         status = SpStatus.MISSING if control_time == "-----" else None
-                        r["result"].split_times.append(
+                        result.split_times.append(
                             result_type.SplitTime(
                                 punch_time=punch_time,
                                 control_code=control_code,
@@ -386,11 +383,11 @@ def parse(content: bytes) -> list[dict]:
 
             # correct status
             if (
-                r["result"].time is None
-                and r["result"].finish_time is None
-                and r["result"].status == ResultStatus.OK
+                result.time is None
+                and result.finish_time is None
+                and result.status == ResultStatus.OK
             ):
-                r["result"].status = ResultStatus.INACTIVE
+                result.status = ResultStatus.INACTIVE
 
             # SportSoftware use column "club", but OOnet use column "club1"
             # In contrast to SportSoftware, OOnet does not write any gender information
@@ -401,17 +398,19 @@ def parse(content: bytes) -> list[dict]:
 
             # store start time as start punch time only if finish time is defined
             # or status is missing punch, did not finished or over time
-            if r["result"].finish_time is not None or r["result"].status in [
+            if result.finish_time is not None or result.status in [
                 ResultStatus.MISSING_PUNCH,
                 ResultStatus.DID_NOT_FINISH,
                 ResultStatus.OVER_TIME,
             ]:
-                r["result"].start_time = r["start"].start_time
-                r["result"].punched_start_time = r["start"].start_time
+                result.start_time = start.start_time
+                result.punched_start_time = start.start_time
 
+            r["start"] = start
+            r["result"] = result
             # do not import entries with special names
             blacklist = ("Vacant", "Vakant", "Reserve")
             if r["last_name"] not in blacklist or r["first_name"] != "":
-                result.append(r)
+                parsed_result.append(r)
 
-    return result
+    return parsed_result

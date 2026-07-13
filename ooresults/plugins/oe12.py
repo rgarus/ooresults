@@ -135,9 +135,9 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
 
         # export only items with defined name
         if e.last_name:
-            chip = e.chip if e.chip is not None else ""
             last_name = e.last_name
-            first_name = e.first_name
+            first_name = e.first_name if e.first_name is not None else ""
+            chip = e.chip if e.chip is not None else ""
 
             year = str(e.year) if e.year is not None else ""
 
@@ -161,12 +161,9 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
 
             status = STATUS_MAP.get(e.result.status, "")
 
-            club_id = ""
-            if e.club_id is not None:
-                club_id = str(e.club_id)
-
+            club_id = str(e.club_id) if e.club_id is not None else ""
             club_name = ""
-            if e.club_id is not None:
+            if e.club_id is not None and e.club_name is not None:
                 club_name = e.club_name
 
             writer.writerow(

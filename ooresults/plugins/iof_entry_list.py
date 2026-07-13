@@ -32,12 +32,12 @@ schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
 xml_schema = etree.XMLSchema(etree.parse(str(schema_file)))
 
 
-iof_namespace = "http://www.orienteering.org/datastandard/3.0"
-namespaces = {None: iof_namespace}
+IOF_NAMESPACE = "http://www.orienteering.org/datastandard/3.0"
+NSMAP = {None: IOF_NAMESPACE}
 
 
 def create_entry_list(event: EventType, entries: list[EntryType]) -> bytes:
-    E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
+    E = ElementMaker(namespace=IOF_NAMESPACE, nsmap=NSMAP)
 
     ENTRYLIST = E.EntryList
     EVENT = E.Event
@@ -104,11 +104,13 @@ def create_entry_list(event: EventType, entries: list[EntryType]) -> bytes:
 
 
 def parse_entry_list(content: bytes) -> tuple[dict, list[dict]]:
+    namespaces = {"": IOF_NAMESPACE}
+
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
-    if not root.tag == "{" + iof_namespace + "}EntryList":
-        raise RuntimeError("Root element is " + root.tag + " but should be EntryList")
+    if not root.tag == "{" + IOF_NAMESPACE + "}EntryList":
+        raise RuntimeError(f"Root element is {root.tag} but should be EntryList")
 
     event = {}
     event["name"] = root.find("Event/Name", namespaces=namespaces).text

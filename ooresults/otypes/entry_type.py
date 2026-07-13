@@ -34,8 +34,8 @@ class EntryBaseDataType:
     not_competing: bool = False
     chip: Optional[str] = None
     fields: dict[int, str] = field(default_factory=lambda: {})
-    result: PersonRaceResult = field(default_factory=lambda: PersonRaceResult())
-    start: PersonRaceStart = field(default_factory=lambda: PersonRaceStart())
+    result: PersonRaceResult = field(default_factory=PersonRaceResult)
+    start: PersonRaceStart = field(default_factory=PersonRaceStart)
 
 
 @dataclasses.dataclass
@@ -52,8 +52,8 @@ class EntryType:
     not_competing: bool = False
     chip: Optional[str] = None
     fields: dict[int, str] = field(default_factory=lambda: {})
-    result: PersonRaceResult = field(default_factory=lambda: PersonRaceResult())
-    start: PersonRaceStart = field(default_factory=lambda: PersonRaceStart())
+    result: PersonRaceResult = field(default_factory=PersonRaceResult)
+    start: PersonRaceStart = field(default_factory=PersonRaceStart)
     club_id: Optional[int] = None
     club_name: Optional[str] = None
 

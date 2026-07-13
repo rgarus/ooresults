@@ -36,6 +36,7 @@ def test_event_id(event_id: Optional[int], value: str) -> None:
     html = Html(text=render.si2_page(event_id=event_id, key=None))
 
     elem = html.find(path="body/script")
+    assert elem is not None and elem.text is not None
     script = [line.strip() for line in elem.text.splitlines()]
     assert f'var event_id = "{value}";' in script
 
@@ -53,5 +54,6 @@ def test_key(key: Optional[str], value: str) -> None:
     html = Html(text=render.si2_page(event_id=None, key=key))
 
     elem = html.find(path="body/script")
+    assert elem is not None and elem.text is not None
     script = [line.strip() for line in elem.text.splitlines()]
     assert f'var key = "{value}";' in script

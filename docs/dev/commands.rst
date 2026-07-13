@@ -22,14 +22,14 @@ Cloning the software
 
 
 
-Installing the software in editable mode
-----------------------------------------
+Installing the software in editable mode for development and test
+-----------------------------------------------------------------
 
 .. code-block::
 
    python -m venv <venv>
    cd <git-local>
-   <venv>/bin/python -m pip install -e .[test]
+   <venv>/bin/python -m pip install -e .[dev,test]
 
 
 
@@ -49,8 +49,6 @@ defined in pyproject.toml in section [tool.isort]:
 Format the code:
 
 .. code-block::
-
-   python -m pip install black isort
    
    cd <git-local>
    python -m isort .
@@ -66,9 +64,7 @@ The rules used are defined in pyproject.toml in the sections
 [tool.ruff.lint] and [tool.ruff.lint.isort].
 
 .. code-block::
-
-   python -m pip install ruff
-   
+  
    cd <git-local>
    python -m ruff check
 
@@ -80,8 +76,6 @@ We use mypy for static type checking of the Python source code.
 The source files to be checked are defined in the pyproject.toml file under the [tool.mypy] section.
 
 .. code-block::
-
-   python -m pip install mypy
    
    cd <git-local>
    python -m mypy

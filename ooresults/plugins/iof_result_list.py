@@ -39,8 +39,8 @@ schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
 xml_schema = etree.XMLSchema(etree.parse(str(schema_file)))
 
 
-iof_namespace = "http://www.orienteering.org/datastandard/3.0"
-namespaces = {None: iof_namespace}
+IOF_NAMESPACE = "http://www.orienteering.org/datastandard/3.0"
+NSMAP = {None: IOF_NAMESPACE}
 
 
 class ResultListStatus(Enum):
@@ -68,7 +68,7 @@ def create_result_list(
     class_results: list[tuple[ClassInfoType, list[RankedEntryType]]],
     status: Optional[ResultListStatus] = None,
 ) -> bytes:
-    E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
+    E = ElementMaker(namespace=IOF_NAMESPACE, nsmap=NSMAP)
 
     RESULTLIST = E.ResultList
     EVENT = E.Event
@@ -242,11 +242,13 @@ SPSTATUS_MAP = {
 def parse_result_list(
     content: bytes,
 ) -> tuple[dict, list[dict], Optional[ResultListStatus]]:
+    namespaces = {"": IOF_NAMESPACE}
+
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
-    if not root.tag == "{" + iof_namespace + "}ResultList":
-        raise RuntimeError("Root element is " + root.tag + " but should be ResultList")
+    if not root.tag == "{" + IOF_NAMESPACE + "}ResultList":
+        raise RuntimeError(f"Root element is {root.tag} but should be ResultList")
 
     result_list_status = root.attrib.get("status", None)
     if result_list_status is not None:

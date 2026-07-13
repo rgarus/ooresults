@@ -173,6 +173,7 @@ def test_with_competitor_but_without_punches(entry: EntryType) -> None:
     assert tds[4].text is None
     assert tds[5].text is None
     inp = tds[6].find("./input")
+    assert inp is not None
     assert inp.attrib["name"] == "edit_start"
     assert inp.attrib["onclick"] == "entr_myPunchEdit(-1)"
 
@@ -186,6 +187,7 @@ def test_with_competitor_but_without_punches(entry: EntryType) -> None:
     assert tds[4].text is None
     assert tds[5].text is None
     inp = tds[6].find("./input")
+    assert inp is not None
     assert inp.attrib["name"] == "edit_finish"
     assert inp.attrib["onclick"] == "entr_myPunchEdit(-2)"
 
@@ -456,6 +458,7 @@ def test_with_competitor_and_with_punches(
     assert tds[4].text is None
     assert tds[5].text == "0:00"
     inp = tds[6].find("./input")
+    assert inp is not None
     assert inp.attrib["name"] == "edit_start"
     assert inp.attrib["onclick"] == "entr_myPunchEdit(-1)"
 
@@ -469,6 +472,7 @@ def test_with_competitor_and_with_punches(
     assert tds[4].text is None
     assert tds[5].text == "33:21"
     inp = tds[6].find("./input")
+    assert inp is not None
     assert inp.attrib["name"] == "edit_finish"
     assert inp.attrib["onclick"] == "entr_myPunchEdit(-2)"
 
@@ -482,6 +486,7 @@ def test_with_competitor_and_with_punches(
     assert tds[4].text is None
     assert tds[5].text is None
     inp = tds[6].find("./input")
+    assert inp is not None
     assert inp.attrib["name"] == "edit_0"
     assert inp.attrib["onclick"] == "entr_myPunchEdit(0)"
 
@@ -495,6 +500,7 @@ def test_with_competitor_and_with_punches(
     assert tds[4].text is None
     assert tds[5].text is None
     inp = tds[6].find("./input")
+    assert inp is not None
     assert inp.attrib["name"] == "edit_1"
     assert inp.attrib["onclick"] == "entr_myPunchEdit(1)"
 
@@ -508,6 +514,7 @@ def test_with_competitor_and_with_punches(
     assert tds[4].text is None
     assert tds[5].text == "13:38"
     inp = tds[6].find("./input")
+    assert inp is not None
     assert inp.attrib["name"] == "edit_2"
     assert inp.attrib["onclick"] == "entr_myPunchEdit(2)"
 
@@ -521,6 +528,7 @@ def test_with_competitor_and_with_punches(
     assert tds[4].text is None
     assert tds[5].text == "18:56"
     inp = tds[6].find("./input")
+    assert inp is not None
     assert inp.attrib["name"] == "edit_3"
     assert inp.attrib["onclick"] == "entr_myPunchEdit(3)"
 
@@ -534,5 +542,6 @@ def test_with_competitor_and_with_punches(
     assert tds[4].text is None
     assert tds[5].text == "26:33"
     inp = tds[6].find("./input")
+    assert inp is not None
     assert inp.attrib["name"] == "edit_4"
     assert inp.attrib["onclick"] == "entr_myPunchEdit(4)"

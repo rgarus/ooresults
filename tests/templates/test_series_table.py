@@ -171,7 +171,7 @@ def test_series_results(
     # header 1
     assert len(headers[0].findall(".//th")) == 1
     elem = headers[0].find(".//th[1]/h3")
-    assert elem.text == "Bahn A - Frauen"
+    assert elem is not None and elem.text == "Bahn A - Frauen"
 
     # header 2
     assert [td.text for td in headers[1].findall(".//th")] == [
@@ -217,7 +217,7 @@ def test_series_results(
     # header 1
     assert len(headers[0].findall(".//th")) == 1
     elem = headers[0].find(".//th[1]/h3")
-    assert elem.text == "Bahn A - Männer"
+    assert elem is not None and elem.text == "Bahn A - Männer"
 
     # header 2
     assert [td.text for td in headers[1].findall(".//th")] == [

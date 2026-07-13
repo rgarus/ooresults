@@ -32,14 +32,14 @@ schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
 xml_schema = etree.XMLSchema(etree.parse(str(schema_file)))
 
 
-iof_namespace = "http://www.orienteering.org/datastandard/3.0"
-namespaces = {None: iof_namespace}
+IOF_NAMESPACE = "http://www.orienteering.org/datastandard/3.0"
+NSMAP = {None: IOF_NAMESPACE}
 
 
 def create_course_data(
     event: EventType, courses: list[CourseType], classes: list[ClassInfoType]
 ) -> bytes:
-    E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
+    E = ElementMaker(namespace=IOF_NAMESPACE, nsmap=NSMAP)
 
     COURSEDATA = E.CourseData
     EVENT = E.Event
@@ -114,11 +114,13 @@ def parse_course_data(content: bytes) -> tuple[dict, list[dict], list[dict]]:
     # Course: Dict of {'name': str, 'length': Optional[float], 'climb': Optional[float], 'controls': List[str]}
     # ClassCourseAssignment: Dict of {'class_name': str, 'course_name': Optional[str]}
 
+    namespaces = {"": IOF_NAMESPACE}
+
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
-    if not root.tag == "{" + iof_namespace + "}CourseData":
-        raise RuntimeError("Root element is " + root.tag + " but should be CourseData")
+    if not root.tag == "{" + IOF_NAMESPACE + "}CourseData":
+        raise RuntimeError(f"Root element is {root.tag} but should be CourseData")
 
     event = {}
     event["name"] = root.find("Event/Name", namespaces=namespaces).text

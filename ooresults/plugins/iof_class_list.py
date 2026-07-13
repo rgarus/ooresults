@@ -29,12 +29,12 @@ schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
 xml_schema = etree.XMLSchema(etree.parse(str(schema_file)))
 
 
-iof_namespace = "http://www.orienteering.org/datastandard/3.0"
-namespaces = {None: iof_namespace}
+IOF_NAMESPACE = "http://www.orienteering.org/datastandard/3.0"
+NSMAP = {None: IOF_NAMESPACE}
 
 
 def create_class_list(classes: list[ClassInfoType]) -> bytes:
-    E = ElementMaker(namespace=iof_namespace, nsmap=namespaces)
+    E = ElementMaker(namespace=IOF_NAMESPACE, nsmap=NSMAP)
 
     CLASSLIST = E.ClassList
     CLASS = E.Class
@@ -65,11 +65,13 @@ def create_class_list(classes: list[ClassInfoType]) -> bytes:
 def parse_class_list(content: bytes) -> list[dict]:
     # Class: Dict of {'name': str, 'short_name': Optional[str]}
 
+    namespaces = {"": IOF_NAMESPACE}
+
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
-    if not root.tag == "{" + iof_namespace + "}ClassList":
-        raise RuntimeError("Root element is " + root.tag + " but should be ClassList")
+    if not root.tag == "{" + IOF_NAMESPACE + "}ClassList":
+        raise RuntimeError(f"Root element is {root.tag} but should be ClassList")
 
     classes = []
     class_list = root.findall("Class", namespaces=namespaces)
