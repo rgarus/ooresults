@@ -18,9 +18,14 @@
 
 
 import configparser
+import datetime
 import pathlib
 
-from OpenSSL import crypto
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import NameOID
 
 
 class Config:
@@ -62,11 +67,11 @@ class Config:
         ssl_key = config.get("Server", "ssl_key", fallback=None)
 
         if ssl_cert or ssl_key:
-            if pathlib.Path(ssl_cert).exists() and pathlib.Path(ssl_cert).is_file():
+            if ssl_cert is not None and pathlib.Path(ssl_cert).is_file():
                 self.ssl_cert = pathlib.Path(ssl_cert)
             else:
                 raise FileNotFoundError(f"Certificate file '{ssl_cert}' not found")
-            if pathlib.Path(ssl_key).exists() and pathlib.Path(ssl_key).is_file():
+            if ssl_key is not None and pathlib.Path(ssl_key).is_file():
                 self.ssl_key = pathlib.Path(ssl_key)
             else:
                 raise FileNotFoundError(f"Private key file '{ssl_key}' not found")
@@ -102,27 +107,42 @@ class Config:
             config.write(f)
 
     def create_self_signed_cert(self) -> None:
-        # create a key pair
-        k = crypto.PKey()
-        k.generate_key(crypto.TYPE_RSA, 2048)
+        # Generate private key
+        key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        # Write key unencrypted to disk
+        self.ssl_key.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.ssl_key, "wb") as f:
+            f.write(
+                key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.TraditionalOpenSSL,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+            )
 
-        # create a self-signed cert
-        cert = crypto.X509()
-        cert.get_subject().C = "DE"
-        cert.get_subject().O = "ooresults"
-        cert.get_subject().OU = "ooresults"
-        cert.get_subject().CN = "localhost"
-        cert.gmtime_adj_notBefore(0)
-        cert.gmtime_adj_notAfter(20 * 365 * 24 * 60 * 60)
-        cert.set_issuer(cert.get_subject())
-        cert.set_pubkey(k)
-        cert.sign(k, "sha1")
-
-        if not self.ssl_cert.exists():
-            self.ssl_cert.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.ssl_cert, "wb") as f:
-                f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
-        if not self.ssl_key.exists():
-            self.ssl_key.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.ssl_key, "wb") as f:
-                f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
+        # For a self-signed certificate the subject and issuer are always the same
+        subject = issuer = x509.Name(
+            [
+                x509.NameAttribute(NameOID.COUNTRY_NAME, "DE"),
+                x509.NameAttribute(NameOID.ORGANIZATION_NAME, "ooresults"),
+                x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "ooresults"),
+                x509.NameAttribute(NameOID.COMMON_NAME, "localhost"),
+            ]
+        )
+        # Create and sign certificate
+        now = datetime.datetime.now(datetime.timezone.utc)
+        expiry = now + datetime.timedelta(days=20 * 365)
+        cert = (
+            x509.CertificateBuilder()
+            .subject_name(subject)
+            .issuer_name(issuer)
+            .public_key(key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(now)
+            .not_valid_after(expiry)
+            .sign(key, hashes.SHA256())
+        )
+        # Write certificate to disk
+        self.ssl_cert.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.ssl_cert, "wb") as f:
+            f.write(cert.public_bytes(encoding=serialization.Encoding.PEM))

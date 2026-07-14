@@ -14,6 +14,11 @@ Added
 - On the "Entries" tab, the option to print results and split times has been added.
 - Display of competitor data grouped by 'Competitors' and 'Clubs' added.
 
+Changed
+^^^^^^^
+
+- Python package pyOpenSSL replaced by cryptography. 
+
 
 [0.4.8] - 2026-04-26
 --------------------
