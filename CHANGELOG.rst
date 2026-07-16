@@ -2,8 +2,8 @@ Changelog
 =========
 
 
-[Unreleased]
-------------
+[0.4.9] - 2026-07-16
+--------------------
 
 Added
 ^^^^^
@@ -12,12 +12,12 @@ Added
 - On the “Entries” tab, the data views are expanded to include “Results”.
 - On the “Entries” tab, the current ranking is displayed in all data views.
 - On the "Entries" tab, the option to print results and split times has been added.
-- Display of competitor data grouped by 'Competitors' and 'Clubs' added.
+- Display of competitor data grouped by "Competitors" and "Clubs" added.
 
 Changed
 ^^^^^^^
 
-- Python package pyOpenSSL replaced by cryptography. 
+- Python package pyOpenSSL replaced by cryptography. To avoid any potential dependency conflicts during the upgrade process, uninstall pyOpenSSL before upgrading to ooresults version 0.4.9 or later using the command “python -m pip uninstall pyopenssl”.
 
 
 [0.4.8] - 2026-04-26
