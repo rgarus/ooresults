@@ -20,12 +20,14 @@
 import subprocess
 import sys
 import tempfile
+import time
 from collections.abc import Iterator
 
 import pytest
 import requests
 import urllib3
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 
 from webtests.pageobjects.main_page import MainPage
@@ -54,7 +56,16 @@ def driver() -> Iterator[webdriver.Remote]:
 
 @pytest.fixture(scope="session")
 def main_page(ooresults_server: subprocess.Popen, driver: webdriver.Remote) -> MainPage:
-    driver.get("https://admin:admin@localhost:8080")
+    # wait until webserver is responding
+    for i in range(10):
+        try:
+            driver.get("https://admin:admin@localhost:8080")
+            break
+        except WebDriverException:
+            time.sleep(1)
+    else:
+        driver.get("https://admin:admin@localhost:8080")
+
     assert "ooresults" in driver.title
     elem = driver.find_element(By.LINK_TEXT, "Administration")
     elem.click()

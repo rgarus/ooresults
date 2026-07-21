@@ -24,12 +24,12 @@ def background(message) -> str:
 
 <div id="si1.div" class="${background(message)}">
     <div style="height: 37vh;" class="vertical-center">
-        <p class="s2">${message["lastName"]}, ${message["firstName"]}</p>
+        <p id="si1.line_1" class="s2">${message["lastName"]}, ${message["firstName"]}</p>
     </div>
     <div style="height: 26vh;" class="vertical-center">
-        <p class="s1">${message["controlCard"]}, ${message.get("class", "")}</p>
+        <p id="si1.line_2" class="s1">${message["controlCard"]}, ${message.get("class", "")}</p>
     </div>
     <div style="height: 37vh;" class="vertical-center">
-        <p class="s2">${format(message.get("status", ResultStatus.INACTIVE), message.get("time", 0))}</p>
+        <p id="si1.line_3" class="s2">${format(message.get("status", ResultStatus.INACTIVE), message.get("time", 0))}</p>
     </div>
 </div>
