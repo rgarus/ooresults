@@ -6,6 +6,7 @@
 ## series_tab_content: str
 ## competitors_tab_content: str
 ## clubs_tab_content: str
+## reader_tab_content: str
 
 
 <!-- Tab links -->
@@ -18,7 +19,7 @@
   <button id="tab.series" class="tablinks" onclick="ser_update(); openTab(event, 'Series')">Series</button>
   <button id="tab.competitors" class="tablinks" onclick="comp_update(); openTab(event, 'Competitors')">Competitors</button>
   <button id="tab.clubs" class="tablinks" onclick="clb_update(); openTab(event, 'Clubs')">Clubs</button>
-  <button id="tab.reader" disabled class="tablinks" onclick="evnt_mySIReader()">SI Reader ...</button>
+  <button id="tab.reader" disabled class="tablinks" onclick="read_update(); openTab(event, 'Reader')">SI Reader</button>
 </div>
 
 <!-- The Modal -->
@@ -75,6 +76,8 @@ ${competitors_tab_content | n}
 <!-- Clubs tab content -->
 ${clubs_tab_content | n}
 
+<!-- Reader tab content -->
+${reader_tab_content | n}
 
 <script>
     var event_id = null;

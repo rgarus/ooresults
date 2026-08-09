@@ -1,0 +1,163 @@
+<!-- Tab content -->
+<div id="Reader" class="tabcontent">
+    <div id="read.reader" class="data">
+    </div>
+</div>
+
+
+<div class="modal" id="si2.tlsErrorDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <span class="close" onclick="closeErrorDialog()">&times;</span>
+        <p>TLS handshake error, try to open <a id="si2.tlsErrorLink" target="_blank"></a></p>
+        <button type="button" class="btn cancel" onclick="closeErrorDialog()">Close</button>
+    </div>
+</div>
+
+
+<script>
+    var status = 'offline';
+
+    var ws = null;
+    var tm = null;
+    var tp = null;
+
+    // workaround to detect lost websocket connection in the browser
+    // see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
+    function ping() {
+        ws.send('__ping__');
+        tm = setTimeout(function() {nopong()}, 10000);
+    }
+    function pong() {
+        clearTimeout(tm);
+        tp = setTimeout(function() {ping()}, 15000);
+    }
+    function nopong() {
+        ws.close();
+    }
+
+    function send_event() {
+        if (ws !== null) {
+            ws.send(JSON.stringify({"event_id": event_id}));
+        }
+    }
+
+    function read_update() {
+        if (ws !== null) {
+            send_event();
+        } else {
+            var xhr = new XMLHttpRequest();
+            xhr.onerror = function() {
+                window.alert("Network error");
+            };
+            xhr.open("POST", "reader/token", true);
+            xhr.send("");
+        }
+    }
+
+    function send_token(token) {
+        if (ws !== null) {
+            ws.send(JSON.stringify({"token": token}));
+            tp = setTimeout(function() {ping()}, 10000);
+        }
+    }
+
+    function get_and_send_token() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState === 4 && this.status === 200) {
+                token = JSON.parse(this.responseText).token;
+                send_token(token);
+                if (document.getElementById("tab.reader").classList.contains("active")) {
+                    send_event();
+                }
+            }
+            if (this.readyState === 4 && this.status === 409) {
+                send_token("");
+            }
+            if (this.readyState === 4 && this.status === 500) {
+                send_token("");
+            }
+        };
+        xhr.onerror = function() {
+            send_token("");
+        };
+        xhr.open("POST", "reader/token", true);
+        xhr.send("");
+    }
+
+    var ws_uri;
+    if (window.location.protocol === "https:") {
+        ws_uri = "wss:";
+    } else {
+        ws_uri = "ws:";
+    }
+    ws_uri += "//" + window.location.hostname + ":8081/si2";
+
+    function statusMessage() {
+        var text = '';
+
+        switch (status) {
+            case 'unauthorized':
+                text = 'Authorization error';
+                break;
+            case 'error':
+                text = 'Error';
+                break;
+            case 'offline':
+                text = 'Offline';
+                break;
+        }
+        document.getElementById('read.reader').innerHTML = '<p class="s2" style="color: red;">' + text + '</p>';
+    }
+
+    function closeErrorDialog() {
+        document.getElementById('si2.tlsErrorDialog').style.display='none';
+        start(ws_uri);
+    }
+
+    function start(websocketServerLocation){
+        ws = new WebSocket(websocketServerLocation);
+        ws.onopen = function(event) {
+            get_and_send_token();
+        };
+        ws.onclose = function(event) {
+            ws = null;
+            clearTimeout(tm);
+            clearTimeout(tp);
+
+            if (event.code === 1015) {
+                statusMessage();
+                var uri = window.location.protocol + "//" + window.location.hostname + ":8081";
+                document.getElementById('si2.tlsErrorLink').href = uri;
+                document.getElementById('si2.tlsErrorLink').text = uri;
+                document.getElementById('si2.tlsErrorDialog').style.display='block';
+            } else {
+                if (event.code === 1011 && event.reason === "__unauthorized___") {
+                    status = 'unauthorized';
+                } else if (event.code === 1007) {
+                    status = "error";
+                } else {
+                    status = 'offline';
+                }
+                statusMessage();
+                // Try to reconnect in 5 seconds
+                setTimeout(function(){start(websocketServerLocation)}, 5000);
+            };
+        };
+        ws.onmessage = function(event) {
+            var msg = event.data;
+            if (msg === '__pong__') {
+                pong();
+                return;
+            }
+            var elem = document.getElementById('read.reader');
+            elem.innerHTML = msg;
+            window.scrollTo(0, 100000);
+        };
+
+
+    }
+
+    start(ws_uri);
+</script>

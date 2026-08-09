@@ -23,7 +23,6 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from webtests.pageobjects.classes import ClassPage
@@ -32,7 +31,7 @@ from webtests.pageobjects.competitors import CompetitorPage
 from webtests.pageobjects.courses import CoursePage
 from webtests.pageobjects.entries import EntryPage
 from webtests.pageobjects.events import EventPage
-from webtests.pageobjects.si_reader import SiReaderPage
+from webtests.pageobjects.reader import ReaderPage
 from webtests.pageobjects.tabs import Tabs
 
 
@@ -109,15 +108,15 @@ class MainPage:
             self.tabs.select(text="Clubs")
         return ClubPage(driver=self.driver)
 
-    def goto_si_reader(self, event: Optional[str] = None) -> SiReaderPage:
-        if event:
-            self.goto_events().select_event(name=event)
-        number_of_windows = len(self.driver.window_handles)
-        self.tabs.select(text="SI Reader ...")
-        WebDriverWait(self.driver, 10).until(
-            EC.number_of_windows_to_be(number_of_windows + 1)
-        )
-        self.driver.switch_to.window(self.driver.window_handles[-1])
-        return SiReaderPage(
-            driver=self.driver, handle=self.driver.current_window_handle
-        )
+    def goto_reader(self, event: Optional[str] = None) -> ReaderPage:
+        if not (
+            self.tabs.tab(text="SI Reader").is_selected()
+            and (
+                event is None
+                or ReaderPage(driver=self.driver).get_event_name() == event
+            )
+        ):
+            if event:
+                self.goto_events().select_event(name=event)
+            self.tabs.select(text="SI Reader")
+        return ReaderPage(driver=self.driver)

@@ -56,8 +56,6 @@ _si__si1_data = t("si/si1_data.html")
 _si__si1_error = t("si/si1_error.html")
 _si__si1_results = t("si/si1_results.html")
 _si__si1_page = t("si/si1_page.html")
-_si__si2_data = t("si/si2_data.html")
-_si__si2_page = t("si/si2_page.html")
 _add_class = t("add_class.html")
 _add_club = t("add_club.html")
 _add_competitor = t("add_competitor.html")
@@ -83,6 +81,8 @@ _entries_table = t("entries_table.html")
 _events_tab_content = t("events_tab_content.html")
 _events_table = t("events_table.html")
 _main = t("main.html")
+_reader_tab_content = t("reader_tab_content.html")
+_reader_table = t("reader_table.html")
 _results_tab_content = t("results_tab_content.html")
 _results_table = t("results_table.html")
 _root = t("root.html")
@@ -93,8 +93,8 @@ _series_table = t("series_table.html")
 _unauthorized = t("unauthorized.html")
 
 
-def si1_page(event_id: Optional[int], key: Optional[str], view: int) -> str:
-    return _si__si1_page.render(event_id=event_id, key=key, view=view)
+def si1_page(event: Optional[EventType], view: int) -> str:
+    return _si__si1_page.render(event=event, view=view)
 
 
 def si1_data(message: dict) -> str:
@@ -110,21 +110,6 @@ def si1_results(
     class_results: list[tuple[ClassInfoType, list[RankedEntryType]]],
 ) -> str:
     return _si__si1_results.render(event=event, class_results=class_results)
-
-
-def si2_page(event_id: Optional[int], key: Optional[str]) -> str:
-    return _si__si2_page.render(event_id=event_id, key=key)
-
-
-def si2_data(
-    status: str,
-    stream_status: Optional[Status],
-    event: EventType,
-    messages: list[dict],
-) -> str:
-    return _si__si2_data.render(
-        status=status, stream_status=stream_status, event=event, messages=messages
-    )
 
 
 def classes_table(event: Optional[EventType], classes: list[ClassInfoType]) -> str:
@@ -219,6 +204,17 @@ def add_event(event: Optional[EventType]) -> str:
     return _add_event.render(event=event)
 
 
+def reader_table(
+    status: Optional[str],
+    stream_status: Optional[Status],
+    event: EventType,
+    messages: list[dict],
+) -> str:
+    return _reader_table.render(
+        status=status, stream_status=stream_status, event=event, messages=messages
+    )
+
+
 def results_table(
     event: EventType,
     class_results: list[tuple[ClassInfoType, list[RankedEntryType]]],
@@ -269,7 +265,7 @@ def main(events: list[EventType]) -> str:
     )
     clubs_table = _clubs_table.render(clubs=[])
     clubs_tab = _clubs_tab_content.render(clubs_table=clubs_table)
-
+    reader_tab = _reader_tab_content.render()
     page = _main.render(
         events_tab_content=events_tab,
         entries_tab_content=entries_tab,
@@ -279,5 +275,6 @@ def main(events: list[EventType]) -> str:
         series_tab_content=series_tab,
         competitors_tab_content=competitors_tab,
         clubs_tab_content=clubs_tab,
+        reader_tab_content=reader_tab,
     )
     return _base.render(page=page)

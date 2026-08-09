@@ -1,0 +1,25 @@
+{
+    "title": "reader",
+    "anyOf": [
+        {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            },
+            "required": ["token"],
+            "additionalProperties": false
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event_id": {
+                    "type": ["str", "null"]
+                }
+            },
+            "required": ["event_id"],
+            "additionalProperties": false
+        }
+    ]
+}

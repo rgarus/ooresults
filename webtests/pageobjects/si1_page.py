@@ -50,3 +50,9 @@ class Si1Page:
 
     def get_line_3(self) -> str:
         return self.driver.find_element(By.ID, "si1.line_3").text
+
+    def get_event_name(self) -> str:
+        return self.driver.find_element(By.ID, "si1.name").text
+
+    def get_event_date(self) -> str:
+        return self.driver.find_element(By.ID, "si1.date").text

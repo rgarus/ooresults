@@ -17,9 +17,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import Optional
+
 import bottle
 
 from ooresults import model
+from ooresults.otypes.event_type import EventType
 from ooresults.utils import render
 
 
@@ -32,8 +35,7 @@ Handler for the si1 routes.
 
 @bottle.get("/si1")
 def get_si1() -> str:
-    event_id = None
-    key = None
+    event: Optional[EventType] = None
     view = 0
 
     data = bottle.request.params
@@ -41,12 +43,11 @@ def get_si1() -> str:
         view = int(data.view)
 
     try:
-        for event in model.events.get_events():
-            if event.key:
-                event_id = event.id
-                key = event.key
+        for e in model.events.get_events():
+            if e.key:
+                event = e
                 break
     except Exception:
         pass
 
-    return render.si1_page(event_id=event_id, key=key, view=view)
+    return render.si1_page(event=event, view=view)

@@ -36,11 +36,11 @@ import ooresults.handler.courses
 import ooresults.handler.demo_reader
 import ooresults.handler.entries
 import ooresults.handler.events
+import ooresults.handler.reader
 import ooresults.handler.results
 import ooresults.handler.root
 import ooresults.handler.series
 import ooresults.handler.si1
-import ooresults.handler.si2
 from ooresults import configuration
 from ooresults import model
 from ooresults.repo.sqlite_repo import SqliteRepo

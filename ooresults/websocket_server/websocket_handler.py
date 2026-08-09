@@ -28,10 +28,12 @@ import logging
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from typing import Optional
 
 import tzlocal
 import websockets.exceptions
 from websockets.asyncio.server import ServerConnection
+from websockets.frames import CloseCode
 
 from ooresults import model
 from ooresults.otypes import result_type
@@ -41,14 +43,20 @@ from ooresults.otypes.result_type import SpStatus
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.utils import render
 from ooresults.websocket_server import streaming_status
+from ooresults.websocket_server.credentials import credentials
+
+
+class MessageError(Exception):
+    def __init__(self, code: CloseCode, reason: str = "") -> None:
+        super().__init__()
+        self.code = code
+        self.reason = reason
 
 
 @dataclasses.dataclass
 class ConnectionParameter:
-    event_id: int
-    event_key: str
-    key_valid: bool
-    show_result: bool
+    event_id: Optional[int] = None
+    show_result: bool = False
 
 
 class WebSocketHandler:
@@ -56,7 +64,7 @@ class WebSocketHandler:
         self.demo_reader = demo_reader
         self.import_stream = import_stream
         self.connections: dict[ServerConnection, ConnectionParameter] = {}
-        self.messages = []
+        self.messages: defaultdict[int, list] = defaultdict(list)
         self.cardreader_status: dict[int, str] = {}
         self.executor = ThreadPoolExecutor(max_workers=2)
         self.update_result = asyncio.Event()
@@ -74,7 +82,7 @@ class WebSocketHandler:
         # result
         #
 
-    async def send_new_result(self):
+    async def send_new_result(self) -> None:
         while True:
             try:
                 await asyncio.wait_for(self.update_result.wait(), timeout=60)
@@ -85,7 +93,7 @@ class WebSocketHandler:
             try:
                 d: defaultdict[int, list[ServerConnection]] = defaultdict(list)
                 for conn, v in self.connections.items():
-                    if conn.request.path == "/si1" and v.key_valid and v.show_result:
+                    if conn.request.path == "/si1" and v.show_result:
                         d[v.event_id].append(conn)
 
                 for event_id, connections in d.items():
@@ -134,21 +142,18 @@ class WebSocketHandler:
                 logging.exception(e)
 
     async def update_event(self, event: EventType) -> None:
-        # update connections
         for conn, value in self.connections.items():
             if event.id == value.event_id:
-                value.key_valid = event.key == value.event_key
-
-                if conn.request.path == "/si2":
+                if conn.request.path in ("/si1", "/si2"):
                     await self.send(conn=conn, event=copy.deepcopy(event), message={})
 
     async def send_to_all(self, event: EventType, message: dict) -> None:
-        connections = [c for c, v in self.connections.items() if event.id == v.event_id]
-        for conn in connections:
-            await self.send(conn=conn, event=copy.deepcopy(event), message=message)
+        for conn, value in self.connections.items():
+            if event.id == value.event_id:
+                await self.send(conn=conn, event=copy.deepcopy(event), message=message)
 
     async def send(
-        self, conn: ServerConnection, event: EventType, message: dict
+        self, conn: ServerConnection, event: Optional[EventType], message: dict
     ) -> None:
         status = (
             self.cardreader_status[event.id]
@@ -158,11 +163,11 @@ class WebSocketHandler:
         if conn.request.path == "/si2":
             stream_status = streaming_status.status.get(id=event.id)
             print("stream_status:", stream_status)
-            data = render.si2_data(
+            data = render.reader_table(
                 status=status,
                 stream_status=stream_status,
                 event=event,
-                messages=self.messages,
+                messages=self.messages.get(event.id, []),
             )
         else:
             if status != "cardRead":
@@ -173,11 +178,22 @@ class WebSocketHandler:
                 data = render.si1_data(message=message)
             else:
                 data = ""
-                # Cardreader status cardRead does not switch back to readerConnected.
-                # Send readerConnected if no data exist.
+                # Cardreader status cardRead does not switch back to
+                # readerConnected. Send readerConnected if no data exist.
                 if status == "cardRead":
                     status = "readerConnected"
-            data = json.dumps({"status": status, "data": str(data)})
+
+            if event:
+                data = json.dumps(
+                    {
+                        "status": status,
+                        "name": event.name,
+                        "date": event.date.isoformat(),
+                        "data": str(data),
+                    }
+                )
+            else:
+                data = json.dumps({"status": status, "data": str(data)})
         try:
             await conn.send(str(data))
         except websockets.exceptions.ConnectionClosed:
@@ -223,117 +239,116 @@ class WebSocketHandler:
                 await websocket.close()
                 logging.info(f"WebSocket closed, {addr}")
 
-        elif websocket.request.path == "/demo":
-            event = None
+        elif websocket.request.path == "/demo" and self.demo_reader:
+            event: Optional[EventType] = None
             try:
-                if self.demo_reader:
-                    async for message in websocket:
-                        # workaround to detect lost websocket connection in the browser
-                        # see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
-                        if message == "__ping__":
-                            await websocket.send("__pong__")
-                        else:
-                            print("WEBSOCKET RECEIVED", websocket, message)
+                async for message in websocket:
+                    # workaround to detect lost websocket connection in the browser
+                    # see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
+                    if message == "__ping__":
+                        await websocket.send("__pong__")
+                    else:
+                        print("WEBSOCKET RECEIVED", websocket, message)
 
-                            item = json.loads(message)
-                            #
-                            # item = {
-                            #     'key': 4711,
-                            #     'code': ['Check', 'Start', '', '', '', '', '', '', '', '', 'Finish'],
-                            #     'time': ['10:11:12', '', '', '', '', '', '', '', '', '', '10:23:23'],
-                            #     'card': '1111',
-                            # }
-                            #
+                        item = json.loads(message)
+                        #
+                        # item = {
+                        #     'key': 4711,
+                        #     'code': ['Check', 'Start', '', '', '', '', '', '', '', '', 'Finish'],
+                        #     'time': ['10:11:12', '', '', '', '', '', '', '', '', '', '10:23:23'],
+                        #     'card': '1111',
+                        # }
+                        #
 
-                            d = result_type.CardReaderMessage(
-                                entry_type="cardRead",
-                                entry_time=datetime.datetime.now(),
-                                control_card=item.get("card", None),
-                                result=None,
+                        d = result_type.CardReaderMessage(
+                            entry_type="cardRead",
+                            entry_time=datetime.datetime.now(),
+                            control_card=item.get("card", None),
+                            result=None,
+                        )
+
+                        # add the event date to the times entered on the webpage
+                        events = await asyncio.get_event_loop().run_in_executor(
+                            executor=self.executor, func=model.events.get_events
+                        )
+                        date_of_event = datetime.date.today()
+                        for e in events:
+                            if e.key == item.get("key", None):
+                                date_of_event = e.date
+                                break
+
+                        def parse_time(value: str) -> datetime.datetime:
+                            return datetime.datetime.combine(
+                                date=date_of_event,
+                                time=datetime.datetime.strptime(
+                                    value, "%H:%M:%S"
+                                ).time(),
+                                tzinfo=tzlocal.get_localzone(),
                             )
 
-                            # add the event date to the times entered on the webpage
-                            events = await asyncio.get_event_loop().run_in_executor(
-                                executor=self.executor, func=model.events.get_events
-                            )
-                            date_of_event = datetime.date.today()
-                            for e in events:
-                                if e.key == item.get("key", None):
-                                    date_of_event = e.date
-                                    break
+                        result = result_type.PersonRaceResult(
+                            status=ResultStatus.FINISHED
+                        )
+                        _code = item["code"]
+                        _time = item["time"]
+                        if _code[0] == "Check" and _time[0] != "":
+                            result.punched_check_time = parse_time(_time[0])
+                        if _code[1] == "Start" and _time[1] != "":
+                            result.punched_start_time = parse_time(_time[1])
+                            result.si_punched_start_time = parse_time(_time[1])
+                        if _code[-1] == "Finish" and _time[-1] != "":
+                            result.punched_finish_time = parse_time(_time[-1])
+                            result.si_punched_finish_time = parse_time(_time[-1])
 
-                            def parse_time(value: str) -> datetime.datetime:
-                                return datetime.datetime.combine(
-                                    date=date_of_event,
-                                    time=datetime.datetime.strptime(
-                                        value, "%H:%M:%S"
-                                    ).time(),
-                                    tzinfo=tzlocal.get_localzone(),
-                                )
-
-                            result = result_type.PersonRaceResult(
-                                status=ResultStatus.FINISHED
-                            )
-                            _code = item["code"]
-                            _time = item["time"]
-                            if _code[0] == "Check" and _time[0] != "":
-                                result.punched_check_time = parse_time(_time[0])
-                            if _code[1] == "Start" and _time[1] != "":
-                                result.punched_start_time = parse_time(_time[1])
-                                result.si_punched_start_time = parse_time(_time[1])
-                            if _code[-1] == "Finish" and _time[-1] != "":
-                                result.punched_finish_time = parse_time(_time[-1])
-                                result.si_punched_finish_time = parse_time(_time[-1])
-
-                            result.start_time = result.punched_start_time
-                            result.finish_time = result.punched_finish_time
-                            for i in range(2, 10):
-                                if _code[i] != "" and _time[i] != "":
-                                    result.split_times.append(
-                                        result_type.SplitTime(
-                                            control_code=_code[i],
-                                            punch_time=parse_time(_time[i]),
-                                            si_punch_time=parse_time(_time[i]),
-                                            status=SpStatus.ADDITIONAL,
-                                        )
+                        result.start_time = result.punched_start_time
+                        result.finish_time = result.punched_finish_time
+                        for i in range(2, 10):
+                            if _code[i] != "" and _time[i] != "":
+                                result.split_times.append(
+                                    result_type.SplitTime(
+                                        control_code=_code[i],
+                                        punch_time=parse_time(_time[i]),
+                                        si_punch_time=parse_time(_time[i]),
+                                        status=SpStatus.ADDITIONAL,
                                     )
-                            d.result = result
-
-                            try:
-                                (
-                                    status,
-                                    event,
-                                    res,
-                                ) = await asyncio.get_event_loop().run_in_executor(
-                                    executor=self.executor,
-                                    func=functools.partial(
-                                        model.results.store_cardreader_result,
-                                        event_key=item["key"],
-                                        item=d,
-                                    ),
                                 )
-                            except EventNotFoundError as e:
-                                raise RuntimeError(str(e))
+                        d.result = result
 
-                            self.cardreader_status[event.id] = status
-
-                            if "entryTime" in res:
-                                res["entryTime"] = res["entryTime"].strftime("%H:%M:%S")
-
-                            if status == "cardRead":
-                                self.messages.append(res.copy())
-                            await self.send_to_all(
-                                event=copy.deepcopy(event), message=res.copy()
+                        try:
+                            (
+                                status,
+                                event,
+                                res,
+                            ) = await asyncio.get_event_loop().run_in_executor(
+                                executor=self.executor,
+                                func=functools.partial(
+                                    model.results.store_cardreader_result,
+                                    event_key=item["key"],
+                                    item=d,
+                                ),
                             )
+                        except EventNotFoundError as e:
+                            raise RuntimeError(str(e))
 
-                            res["readerStatus"] = status
-                            res["event"] = event.name
-                            if "status" in res:
-                                res["status"] = res["status"].name
-                            print(res)
+                        self.cardreader_status[event.id] = status
 
-                            if status == "cardRead":
-                                self.update_result.set()
+                        if "entryTime" in res:
+                            res["entryTime"] = res["entryTime"].strftime("%H:%M:%S")
+
+                        if status == "cardRead":
+                            self.messages[event.id].append(res.copy())
+                        await self.send_to_all(
+                            event=copy.deepcopy(event), message=res.copy()
+                        )
+
+                        res["readerStatus"] = status
+                        res["event"] = event.name
+                        if "status" in res:
+                            res["status"] = res["status"].name
+                        print(res)
+
+                        if status == "cardRead":
+                            self.update_result.set()
 
             except websockets.exceptions.ConnectionClosed:
                 pass
@@ -390,7 +405,7 @@ class WebSocketHandler:
                         res["entryTime"] = res["entryTime"].strftime("%H:%M:%S")
 
                     if status == "cardRead":
-                        self.messages.append(res.copy())
+                        self.messages[event.id].append(res.copy())
                     await self.send_to_all(
                         event=copy.deepcopy(event), message=res.copy()
                     )
@@ -418,41 +433,98 @@ class WebSocketHandler:
                         del self.cardreader_status[event.id]
                     await self.send_to_all(event=copy.deepcopy(event), message={})
 
-        else:
-            try:
-                if websocket.request.path in ("/si1", "/si2"):
-                    data = await websocket.recv()
-                    event_id, event_key, results = data.split(",")
-                    print(f">>>>>> websocket, id: {event_id}, key: {event_key}, {addr}")
+        elif websocket.request.path in ("/si1", "/si2"):
 
-                    # check event key
-                    events = await asyncio.get_event_loop().run_in_executor(
-                        executor=self.executor, func=model.events.get_events
+            async def _timeout_auth() -> None:
+                try:
+                    await asyncio.sleep(5)
+                    await websocket.close(
+                        code=CloseCode.INTERNAL_ERROR, reason="__unauthorized___"
                     )
-                    for e in events:
-                        if str(e.id) == event_id and e.key == event_key:
-                            self.connections[websocket] = ConnectionParameter(
-                                event_id=e.id,
-                                event_key=e.key,
-                                key_valid=True,
-                                show_result=results == "true",
+                except asyncio.CancelledError:
+                    pass
+
+            close_code = CloseCode.NORMAL_CLOSURE
+            close_reason = ""
+            timeout_auth = asyncio.create_task(coro=_timeout_auth())
+            try:
+                authorized = False
+                async for value in websocket:
+                    # workaround to detect lost websocket connection in the browser
+                    # see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
+                    if value == "__ping__":
+                        await websocket.send("__pong__")
+                    else:
+                        logging.info(f"Websocket received, {addr}, {str(value)}")
+                        message = json.loads(value)
+
+                        if "token" in message:
+                            timeout_auth.cancel()
+                            if credentials.check_token(token=message["token"]):
+                                authorized = True
+                            else:
+                                raise MessageError(
+                                    code=CloseCode.INTERNAL_ERROR,
+                                    reason="__unauthorized___",
+                                )
+
+                        elif not authorized:
+                            raise MessageError(
+                                code=CloseCode.INTERNAL_ERROR,
+                                reason="__unauthorized___",
                             )
-                            await self.send(conn=websocket, event=e, message={})
-                            if websocket.request.path == "/si1":
-                                self.update_result.set()
-                            async for message in websocket:
-                                # workaround to detect lost websocket connection in the browser
-                                # see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
-                                if message == "__ping__":
-                                    await websocket.send("__pong__")
-                                else:
-                                    print(f"WEBSOCKET RECEIVED, {addr}, {message}")
-                                    break
-                    await websocket.send("__no_access__")
+
+                        elif websocket.request.path == "/si1" and "event_id" in message:
+                            self.connections[websocket] = ConnectionParameter()
+                            event_id = message["event_id"]
+                            results = message["view"] == 0
+                            self.connections[websocket].event_id = event_id
+                            self.connections[websocket].show_result = results
+
+                            try:
+                                event = await asyncio.get_event_loop().run_in_executor(
+                                    executor=self.executor,
+                                    func=functools.partial(
+                                        model.events.get_event, id=event_id
+                                    ),
+                                )
+                            except EventNotFoundError:
+                                event = None
+
+                            await self.send(conn=websocket, event=event, message={})
+                            self.update_result.set()
+
+                        elif websocket.request.path == "/si2" and "event_id" in message:
+                            self.connections[websocket] = ConnectionParameter()
+                            event_id = int(message["event_id"])
+                            self.connections[websocket].event_id = event_id
+                            # check event
+                            events = await asyncio.get_event_loop().run_in_executor(
+                                executor=self.executor, func=model.events.get_events
+                            )
+                            events = [event for event in events if event.id == event_id]
+                            if events:
+                                await self.send(
+                                    conn=websocket, event=events[0], message={}
+                                )
+
+                        else:
+                            raise MessageError(
+                                code=CloseCode.INVALID_DATA,
+                            )
+
             except websockets.exceptions.ConnectionClosed:
                 pass
+            except json.JSONDecodeError:
+                close_code = CloseCode.INVALID_DATA
+            except KeyError:
+                close_code = CloseCode.INVALID_DATA
+            except MessageError as e:
+                close_code = e.code
+                close_reason = e.reason
             finally:
+                timeout_auth.cancel()
                 if websocket in self.connections:
                     del self.connections[websocket]
-                await websocket.close()
-                logging.info(f"WebSocket closed, {addr}")
+                await websocket.close(code=close_code, reason=close_reason)
+                logging.info(f"WebSocket closed, {addr}, {close_code}, {close_reason}")

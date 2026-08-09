@@ -23,27 +23,21 @@ from selenium.webdriver.common.by import By
 from webtests.pageobjects.table import Table
 
 
-class SiReaderPage:
-    def __init__(self, driver: webdriver.Remote, handle: str) -> None:
+class ReaderPage:
+    def __init__(self, driver: webdriver.Remote) -> None:
         self.driver = driver
-        self.handle = handle
-        self.table = SiReaderTable(driver=driver)
-
-    def close(self) -> None:
-        self.driver.switch_to.window(self.handle)
-        self.driver.close()
-        self.driver.switch_to.window(self.driver.window_handles[0])
+        self.table = ReaderTable(driver=driver)
 
     def get_event_name(self) -> str:
-        return self.driver.find_element(By.ID, "si2.event_name").text
+        return self.driver.find_element(By.ID, "read.event_name").text
 
     def get_event_date(self) -> str:
-        return self.driver.find_element(By.ID, "si2.event_date").text
+        return self.driver.find_element(By.ID, "read.event_date").text
 
     def get_reader_status(self) -> str:
-        return self.driver.find_element(By.ID, "si2.reader_status").text
+        return self.driver.find_element(By.ID, "read.reader_status").text
 
 
-class SiReaderTable(Table):
+class ReaderTable(Table):
     def __init__(self, driver: webdriver.Remote) -> None:
-        super().__init__(driver=driver, xpath="//table[@id='si2.messages']")
+        super().__init__(driver=driver, xpath="//table[@id='read.messages']")

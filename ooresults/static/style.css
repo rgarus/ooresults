@@ -134,3 +134,9 @@ th.h1 {
 label[disabled] {
   opacity: 0.4;
 }
+
+.bgr {background-color: #ff7070;}
+.bgy {background-color: #ffff00;}
+.bgg {background-color: #70ff70;}
+.s1 {font-size: 1.5em;}
+.s2 {font-size: 2.5em;}

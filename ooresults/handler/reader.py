@@ -17,31 +17,22 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import json
+
 import bottle
 
-from ooresults import model
-from ooresults.utils import render
+from ooresults.websocket_server.credentials import credentials
 
 
 """
-Handler for the si2 routes.
+Handler for the reader routes.
 
-/si2
+/reader/token
 """
 
 
-@bottle.get("/si2")
-def get_si2() -> str:
-    event_id = None
-    key = None
-    data = bottle.request.params
-
-    try:
-        for event in model.events.get_events():
-            if str(event.id) == data.id:
-                event_id = event.id
-                key = event.key
-    except Exception:
-        pass
-
-    return render.si2_page(event_id=event_id, key=key)
+@bottle.post("/reader/token")
+def post_token() -> str:
+    """Create and return token."""
+    token = credentials.create_token()
+    return json.dumps({"token": token})

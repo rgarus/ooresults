@@ -17,46 +17,52 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional
+from datetime import date
 
 import pytest
 
+from ooresults.otypes.event_type import EventType
 from ooresults.utils import render
 from tests.templates.conftest import Html
 
 
-@pytest.mark.parametrize(
-    "event_id, value",
-    [
-        (None, ""),
-        (2, "2"),
-    ],
-)
-def test_event_id(event_id: Optional[int], value: str) -> None:
-    html = Html(text=render.si1_page(event_id=event_id, key=None, view=0))
+@pytest.fixture()
+def event() -> EventType:
+    return EventType(
+        id=3,
+        name="Test-Lauf 1",
+        date=date(
+            year=2023,
+            month=12,
+            day=29,
+        ),
+        key=None,
+        publish=False,
+        series=None,
+        fields=[],
+    )
+
+
+def test_event_is_none() -> None:
+    html = Html(text=render.si1_page(event=None, view=0))
 
     elem = html.find(path="body/script")
     assert elem is not None and elem.text is not None
     script = [line.strip() for line in elem.text.splitlines()]
-    assert f'var event_id = "{value}";' in script
+    assert "var eventId = null;" in script
+    assert 'var eventName = "";' in script
+    assert 'var eventDate = "";' in script
 
 
-@pytest.mark.parametrize(
-    "key, value",
-    [
-        (None, ""),
-        ("", ""),
-        ("abc", "abc"),
-        ("<&>", "<&>"),
-    ],
-)
-def test_key(key: Optional[str], value: str) -> None:
-    html = Html(text=render.si1_page(event_id=None, key=key, view=0))
+def test_event_is_not_none(event: EventType) -> None:
+    html = Html(text=render.si1_page(event=event, view=0))
 
     elem = html.find(path="body/script")
     assert elem is not None and elem.text is not None
     script = [line.strip() for line in elem.text.splitlines()]
-    assert f'var key = "{value}";' in script
+    assert f"var eventId = {event.id};" in script
+    assert f'var eventName = "{event.name}";' in script
+    assert f'var eventDate = "{event.date.isoformat()}";' in script
 
 
 @pytest.mark.parametrize(
@@ -66,8 +72,8 @@ def test_key(key: Optional[str], value: str) -> None:
         (1, "1"),
     ],
 )
-def test_view(view: int, value: str) -> None:
-    html = Html(text=render.si1_page(event_id=None, key=None, view=view))
+def test_view(event: EventType, view: int, value: str) -> None:
+    html = Html(text=render.si1_page(event=event, view=view))
 
     elem = html.find(path="body/script")
     assert elem is not None and elem.text is not None

@@ -1,5 +1,4 @@
-## event_id: Optional[int]
-## key: Optional[str]
+## event: Optional[EventType]
 ## view: int
 
 
@@ -11,15 +10,13 @@
         <link rel="stylesheet" href="mystatic/style.css"/>
         <link rel="stylesheet" href="mystatic/style-tab.css"/>
         <style>
-            .bgr {background-color: #ff7070;}
-            .bgy {background-color: #ffff00;}
-            .bgg {background-color: #70ff70;}
             .s1 {font-size: 1.5em;}
             .s2 {font-size: 2.5em;}
             .vertical-center {
                 display: flex;
                 align-items: center;
                 padding-left: 4%;
+            }
         </style>
     </head>
     <body style="margin: 0">
@@ -35,16 +32,75 @@
         </div>
 
         <script>
-            var event_id = "${event_id}";
-            var key = "${key | f, n}";
+            var eventId = ${event.id if event is not None else "null"};
+            var eventName = "${event.name if event is not None else ''}";
+            var eventDate = "${event.date.isoformat() if event is not None else ''}";
             var view = ${view};  // 0: both, 1: only reader
+
+            var status = 'offline';
+            var ws = null;
+            var tm = null;
+            var tp = null;
+
+            // workaround to detect lost websocket connection in the browser
+            // see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
+            function ping() {
+                ws.send('__ping__');
+                tm = setTimeout(function() {nopong()}, 10000);
+            }
+            function pong() {
+                clearTimeout(tm);
+                tp = setTimeout(function() {ping()}, 15000);
+            }
+            function nopong() {
+                status = 'offline';
+                message();
+                ws.close();
+            }
+
+            function send_event() {
+                if (ws !== null) {
+                    ws.send(JSON.stringify({"event_id": eventId, "view": view}));
+                }
+            }
+
+            function send_token(token) {
+                if (ws !== null) {
+                    ws.send(JSON.stringify({"token": token}));
+                    tp = setTimeout(function() {ping()}, 10000);
+                }
+            }
+
+            function get_and_send_token() {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState === 4 && this.status === 200) {
+                        token = JSON.parse(this.responseText).token;
+                        send_token(token);
+                        send_event();
+                        status = 'online';
+                        message();
+                    }
+                    if (this.readyState === 4 && this.status === 409) {
+                        send_token("");
+                    }
+                    if (this.readyState === 4 && this.status === 500) {
+                        send_token("");
+                    }
+                };
+                xhr.onerror = function() {
+                    send_token("");
+                };
+                xhr.open("POST", "reader/token", true);
+                xhr.send("");
+            }
 
             var ws_uri;
             if (window.location.protocol === "https:") {
                 ws_uri = "wss:";
             } else {
                 ws_uri = "ws:";
-            };
+            }
             ws_uri += "//" + window.location.hostname + ":8081" + window.location.pathname;
 
             /* Function to open fullscreen mode */
@@ -52,10 +108,9 @@
                 if (document.documentElement.requestFullscreen) {
                     document.documentElement.requestFullscreen();
                 }
-            };
+            }
 
             var timer = null;
-            var status = 'offline';
             var data = '';
             var resultData = null;
             var newResultReceived = false;
@@ -70,8 +125,12 @@
                         text = 'Offline';
                         color = 'red';
                         break;
-                    case 'noAccess':
-                        text = 'No access rights';
+                    case 'unauthorized':
+                        text = 'Authorization error';
+                        color = 'red';
+                        break;
+                    case 'error':
+                        text = 'Error';
                         color = 'red';
                         break;
                     case 'online':
@@ -92,24 +151,44 @@
                     case 'cardInserted':
                         text = 'Reading card ' + data + ' ...';
                         break;
+                    case 'eventNotFound':
+                        if (eventId === null) {
+                            text = 'No event found';
+                        } else {
+                            text = 'Event deleted';
+                        }
+                        color = 'red';
+                        break;
 
-                };
+                }
                 clearTimeout(autoscrollTimer);
 
-                if (resultData && (status == 'readerConnected' || status == 'cardRemoved')) {
+                if (resultData && (status === 'readerConnected' || status === 'cardRemoved')) {
                     showResult(resultData);
                     autoscroll();
                 } else {
                     showMessage(text, color);
                 }
-            };
+            }
 
             function showMessage(text, color) {
                 newResultReceived = true;
                 document.getElementById('page').innerHTML =
                     '<p style="text-align: right; margin: 10px"><button onclick="openFullscreen();">' + window.wakeStatus + '</button></p>' +
+                    '<div style="padding-left: 4%;">' +
+                    '<table style="text-align: left">' +
+                    '<tr>' +
+                    '<th style="padding-right: 10px">Event name:</th>' +
+                    '<td id="si1.name">' + eventName + '</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<th style="padding-right: 10px">Event date:</th>' +
+                    '<td id="si1.date">' + eventDate + '</td>' +
+                    '</tr>' +
+                    '</table>' +
+                    '</div>' +
                     '<p id="si1.message" class="s2" style="padding-left: 4%; color: ' + color + '">' + text + '</p>';
-            };
+            }
 
             function showResult(resultData) {
                 if (newResultReceived) {
@@ -118,7 +197,7 @@
                         '<p style="text-align: right; margin: 10px"><button onclick="openFullscreen();">' + window.wakeStatus + '</button></p>' +
                         '<div style="padding-left: 4%; padding-bottom: 24px">' + resultData + '</div>';
                 }
-            };
+            }
 
             function closeErrorDialog() {
                 document.getElementById('si1.tlsErrorDialog').style.display='none';
@@ -126,50 +205,45 @@
             };
 
             function start(websocketServerLocation) {
-                var ws = new WebSocket(websocketServerLocation);
-                var tm = null;
-                var tp = null;
-                var elem = document.getElementById('page')
-
+                ws = new WebSocket(websocketServerLocation);
                 ws.onopen = function(event) {
-                    ws.send(event_id + ',' + key + ',' + (view == 0).toString());
-                    status = 'online';
-                    message();
-                    tp = setTimeout(function() {ping()}, 10000);
+                    get_and_send_token();
+
                 };
                 ws.onclose = function(event) {
                     ws = null;
                     clearTimeout(tm);
                     clearTimeout(tp);
 
-                    if (event.code == 1015) {
+                    if (event.code === 1015) {
                         message();
                         var uri = window.location.protocol + "//" + window.location.hostname + ":8081";
                         document.getElementById('si1.tlsErrorLink').href = uri;
                         document.getElementById('si1.tlsErrorLink').text = uri;
-                        document.getElementById('si1.tlsErrorDialog').style.display='block';
-                    } else if (status != 'noAccess') {
-                        status = 'offline';
+                        document.getElementById('si1.tlsErrorDialog').style.display = 'block';
+                    } else if (event.code === 1011 && event.reason === "__unauthorized___") {
+                        status = 'unauthorized';
+                        message();
+                    } else {
+                        if (event.code === 1007) {
+                            status = "error";
+                        } else {
+                            status = 'offline';
+                        }
                         message();
                         // Try to reconnect in 5 seconds
                         setTimeout(function() {start(websocketServerLocation)}, 5000);
                     }
-                };
+                }
                 ws.onmessage = function(event) {
                     var msg = event.data;
-                    if (msg == '__pong__') {
+                    if (msg === '__pong__') {
                         pong();
                         return;
                     }
-                    if (msg == '__no_access__') {
-                        ws.close();
-                        status = 'noAccess';
-                        message();
-                        return;
-                    }
-                    const obj = JSON.parse(event.data)
-                    if (obj.status == 'result') {
-                        if (view == 0) {
+                    const obj = JSON.parse(msg)
+                    if (obj.status === 'result') {
+                        if (view === 0) {
                             var firstResult = !resultData;
                             resultData = obj.data;
                             newResultReceived = true;
@@ -189,26 +263,16 @@
                     } else if (obj.status != null) {
                         status = obj.status;
                         data = obj.data;
+                        if ("name" in obj) {
+                            eventName = obj.name;
+                            eventDate = obj.date;
+                        } else {
+                            status = "eventNotFound"
+                        }
                         message();
                     }
                 };
-
-                // workaround to detect lost websocket connection in the browser
-                // see https://stackoverflow.com/questions/26971026/handling-connection-loss-with-websockets
-                function ping() {
-                    ws.send('__ping__');
-                    tm = setTimeout(function() {nopong()}, 10000);
-                };
-                function pong() {
-                    clearTimeout(tm);
-                    tp = setTimeout(function() {ping()}, 15000);
-                };
-                function nopong() {
-                    status = 'offline';
-                    message();
-                    ws.close();
-                };
-            };
+            }
 
             start(ws_uri);
 
@@ -220,8 +284,8 @@
                     autoscrollTimer = setTimeout(function() {window.scrollBy(0, 2); autoscroll()}, 25);
                 } else {
                     autoscrollTimer = setTimeout(function() {window.scrollTo(0, 0); autoscroll()}, 2000);
-                };
-            };
+                }
+            }
         </script>
 
         <script>
@@ -275,4 +339,3 @@
 
     </body>
 </html>
- 

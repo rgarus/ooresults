@@ -21,6 +21,21 @@ from ooresults.utils import render
 from tests.templates.conftest import Html
 
 
+def test_tab_buttons() -> None:
+    html = Html(text=render.main(events=[]))
+
+    assert len(html.findall(path=".//div[@id='tabs']/button")) == 9
+    assert len(html.findall(path=".//button[@id='tab.events']")) == 1
+    assert len(html.findall(path=".//button[@id='tab.entries']")) == 1
+    assert len(html.findall(path=".//button[@id='tab.classes']")) == 1
+    assert len(html.findall(path=".//button[@id='tab.courses']")) == 1
+    assert len(html.findall(path=".//button[@id='tab.results']")) == 1
+    assert len(html.findall(path=".//button[@id='tab.series']")) == 1
+    assert len(html.findall(path=".//button[@id='tab.competitors']")) == 1
+    assert len(html.findall(path=".//button[@id='tab.clubs']")) == 1
+    assert len(html.findall(path=".//button[@id='tab.reader']")) == 1
+
+
 def test_events_list_is_empty() -> None:
     html = Html(text=render.main(events=[]))
 
