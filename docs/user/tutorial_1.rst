@@ -34,7 +34,7 @@ in absteigender chronologischer Reihenfolge angezeigt.
 
 .. image:: images/login_3.png
 
-Die Änderung der Wettkampfdaten erfolgt über mehrere Registerblätter:
+Die Anzeige und Änderung der Wettkampfdaten erfolgt über mehrere Registerblätter:
 
 - Events (Wettkämpfe)
 - Entries (Teilnehmer)
@@ -44,11 +44,12 @@ Die Änderung der Wettkampfdaten erfolgt über mehrere Registerblätter:
 - Competitors (Wettkämpfer)
 - Clubs (Vereine)
 - Series (Serien)
+- SI Reader (gelesene SI-Cards)
 
 Die Daten der Registerblätter Events, Competitors, Clubs und Series sind wettkampfunabhängig
 und gelten für alle Wettkämpfe.
 
-Die Daten der Registerblätter Classes, Courses und Results sind wettkampfabhängig.
+Die Daten der Registerblätter Classes, Courses, Results und SI Reader sind wettkampfabhängig.
 Auf diese Registerblätter kann nur zugegriffen werden, wenn zuvor im Registerblatt Events ein Wettkampf selektiert wurde.
 Die angezeigten Daten beziehen sich dann auf diesen Wettkampf.
 

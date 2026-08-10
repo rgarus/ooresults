@@ -18,8 +18,6 @@ den er mit den von der SI-Card gelesenen Daten zum ooresults-server sendet.
 Der ooresults-server ordnet die Daten dem Wettkampf zu, dessen Schlüssel mit dem empfangenen Schlüssel übereinstimmt
 (oder verwirft die Daten, falls dieser Schlüssel bei keinem Wettkampf angegeben wurde).
 
-.. 2F2C7&KK?s
-
 .. warning::
 
    Der Schlüssel dient nicht nur der Zuordnung der Daten zu einem Wettkampf, sondern auch als Nachweis der Zugangsberechtigung
@@ -51,10 +49,13 @@ kann auch ein einfacher Schlüssel wie z.B "local" verwendet werden.
 Anzeige der gelesenen SI-Card Daten
 -----------------------------------
 
-1. Anklicken des Registerblatts "SI CardReader ..."
+1. Anklicken des Registerblatts "SI Reader"
 
-Es wird ein neuer Tab im Browser geöffnet, in dem alle gelesenen SI-Cards zum selektierten Wettkampf
-seit Serverstart angezeigt werden.
+Es werden alle gelesenen SI-Cards zum selektierten Wettkampf seit Serverstart angezeigt.
+
+.. note::
+
+   Das Registerblatt "SI Reader" kann nur geöffnet werden, wenn ein Wettkampf mit einem Key selektiert ist.
 
 Wird eine SI-Card gelesen, wird automatisch geprüft, ob die gelesene SI-Card Nummer eindeutig einem beim betreffenen Wettkampf
 registriertem Läufer zugeordnet werden kann.
@@ -88,19 +89,19 @@ Dabei bedeuten:
 
   Die Webseite hat keine Verbindung zum ooresults-server.
    
-- Card reader offline
+- Card reader status: Offline
 
   Es wurde noch keine Verbindung zu einem ooresults-reader hergestellt,
   der den Schlüssel des Wettkampfes verwendet.
    
-- Card reader disconnected
+- Card reader status: Disconnected
 
   Es wurde eine Verbindung zu einem ooresults-reader hergestellt,
   der den gleichen Wettkampfschlüssel verwendet.
   Es ist aber noch keine PortIdent-Auslesestation angeschlossen,
   oder die SPORTident-Auslesestation wurde vom ooresults-reader nicht erkannt.
 
-- Card reader connected
+- Card reader status: Connected
 
   Es wurde eine Verbindung zu einem ooresults-reader hergestellt,
   der den gleichen Wettkampfschlüssel verwendet,
@@ -108,7 +109,7 @@ Dabei bedeuten:
 
 .. note::
 
-   Nach einem Neustart des Servers ist das "SI CardReader" Fenster leer.
+   Nach einem Neustart des Servers ist die Tabelle des "SI CardReader" Fenster leer.
 
 Kann die gelesene SI-Card keinem Läufer zugeordnet werden, wird das Ergebnis als neuer Eintrag (ohne Läufernamen)
 auf der Seite "Entries" angezeigt:
@@ -117,8 +118,8 @@ auf der Seite "Entries" angezeigt:
 
 .. note::
 
-   Im Gegensatz zum "SI CardReader" Fenster wird das "Entries" Fenster nicht automatisch beim Einlesen einer SI-Card,
-   sondern erst nach Aufruf der "Reload" Funktion aktualisiert.
+   Im Gegensatz zur "SI CardReader" Liste wird die "Entries" Liste nicht automatisch beim Einlesen einer SI-Card,
+   sondern erst nach Aufruf der "Reload" Funktion (oder beim Wechsel von einem anderen Registerblatt) aktualisiert.
 
 
 
@@ -218,7 +219,7 @@ Verwendung des Selbsteinlesefensters
 ------------------------------------
 
 Die ooresults Software ist für ein selbstständiges Auslesen der SI-Card durch einen Läufer konzipiert,
-.d.h. der Läufer steckt seine SI-Card in die SPORTident-Auslesestation und bekommt
+d.h. der Läufer steckt seine SI-Card in die SPORTident-Auslesestation und bekommt
 sein Ergebnis auf einem (zusätzlichen) Bildschirm angezeigt (hierzu eignet sich auch ein SmartPhone).
 
 Kann die SI-Card keinem Läufer zugeordnet werden, erscheint der Hinweis, sich im Wettkampfzentrum zu melden.
