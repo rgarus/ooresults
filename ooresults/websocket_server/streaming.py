@@ -38,7 +38,7 @@ from ooresults.websocket_server import streaming_status
 
 
 class Streaming:
-    def __init__(self, loop: asyncio.AbstractEventLoop):
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self.loop = loop
         self.tasks: dict[int, asyncio.Task] = {}
         self.events: dict[int, EventType] = {}
@@ -52,7 +52,7 @@ class Streaming:
                 self.events[event.id] = e
                 self.tasks[event.id] = self.loop.create_task(coro=self.stream(event=e))
 
-    async def update_event(self, event: EventType):
+    async def update_event(self, event: EventType) -> None:
         if event.id in self.tasks:
             e = self.events[event.id]
             if (
@@ -80,7 +80,7 @@ class Streaming:
             uri = f"wss://{event.streaming_address}/import"
             headers = {
                 "Content-Type": "application/octet-stream",
-                "X-Event-Key": event.streaming_key,
+                "X-Event-Key": event.streaming_key if event.streaming_key else "",
                 "X-Suffix": ".json",
             }
 

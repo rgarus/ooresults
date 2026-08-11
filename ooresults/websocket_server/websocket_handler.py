@@ -27,8 +27,11 @@ import json
 import logging
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
+from typing import ParamSpec
+from typing import TypeVar
 
 import tzlocal
 import websockets.exceptions
@@ -59,12 +62,16 @@ class ConnectionParameter:
     show_result: bool = False
 
 
+_P = ParamSpec("_P")
+_R = TypeVar("_R")
+
+
 class WebSocketHandler:
     def __init__(self, demo_reader: bool = False, import_stream: bool = False):
         self.demo_reader = demo_reader
         self.import_stream = import_stream
         self.connections: dict[ServerConnection, ConnectionParameter] = {}
-        self.messages: defaultdict[int, list] = defaultdict(list)
+        self.messages: defaultdict[int, list[dict]] = defaultdict(list)
         self.cardreader_status: dict[int, str] = {}
         self.executor = ThreadPoolExecutor(max_workers=2)
         self.update_result = asyncio.Event()
@@ -82,6 +89,14 @@ class WebSocketHandler:
         # result
         #
 
+    async def to_thread(
+        self, func: Callable[_P, _R], /, *args: _P.args, **kwargs: _P.kwargs
+    ) -> _R:
+        """Replace asyncio.to_thread and use a ThreadPoolExecutor(2) instance."""
+        loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
+        func_call: Callable[[], _R] = functools.partial(func, *args, **kwargs)
+        return await loop.run_in_executor(self.executor, func_call)
+
     async def send_new_result(self) -> None:
         while True:
             try:
@@ -93,19 +108,13 @@ class WebSocketHandler:
             try:
                 d: defaultdict[int, list[ServerConnection]] = defaultdict(list)
                 for conn, v in self.connections.items():
-                    if conn.request.path == "/si1" and v.show_result:
+                    if v.event_id is not None and v.show_result:
                         d[v.event_id].append(conn)
 
                 for event_id, connections in d.items():
                     try:
-                        (
-                            event,
-                            class_results,
-                        ) = await asyncio.get_event_loop().run_in_executor(
-                            executor=self.executor,
-                            func=functools.partial(
-                                model.results.event_class_results, event_id=event_id
-                            ),
+                        event, class_results = await asyncio.to_thread(
+                            model.results.event_class_results, event_id=event_id
                         )
 
                         # display only finished entries
@@ -144,8 +153,7 @@ class WebSocketHandler:
     async def update_event(self, event: EventType) -> None:
         for conn, value in self.connections.items():
             if event.id == value.event_id:
-                if conn.request.path in ("/si1", "/si2"):
-                    await self.send(conn=conn, event=copy.deepcopy(event), message={})
+                await self.send(conn=conn, event=copy.deepcopy(event), message={})
 
     async def send_to_all(self, event: EventType, message: dict) -> None:
         for conn, value in self.connections.items():
@@ -153,14 +161,11 @@ class WebSocketHandler:
                 await self.send(conn=conn, event=copy.deepcopy(event), message=message)
 
     async def send(
-        self, conn: ServerConnection, event: Optional[EventType], message: dict
+        self, conn: ServerConnection, event: EventType, message: dict
     ) -> None:
-        status = (
-            self.cardreader_status[event.id]
-            if event and event.id in self.cardreader_status
-            else "readerOffline"
-        )
-        if conn.request.path == "/si2":
+        status = self.cardreader_status.get(event.id, "readerOffline")
+
+        if conn.request and conn.request.path == "/si2":
             stream_status = streaming_status.status.get(id=event.id)
             print("stream_status:", stream_status)
             data = render.reader_table(
@@ -183,23 +188,24 @@ class WebSocketHandler:
                 if status == "cardRead":
                     status = "readerConnected"
 
-            if event:
-                data = json.dumps(
-                    {
-                        "status": status,
-                        "name": event.name,
-                        "date": event.date.isoformat(),
-                        "data": str(data),
-                    }
-                )
-            else:
-                data = json.dumps({"status": status, "data": str(data)})
+            data = json.dumps(
+                {
+                    "status": status,
+                    "name": event.name,
+                    "date": event.date.isoformat(),
+                    "data": str(data),
+                }
+            )
         try:
             await conn.send(str(data))
         except websockets.exceptions.ConnectionClosed:
             pass
 
     async def handler(self, websocket: ServerConnection) -> None:
+        if websocket.request is None:
+            await websocket.close(code=CloseCode.ABNORMAL_CLOSURE)
+            return
+
         addr = f"addr: {websocket.remote_address}, path: {websocket.request.path}"
         logging.info(f"WebSocket connected, {addr}")
 
@@ -209,18 +215,17 @@ class WebSocketHandler:
                 if self.import_stream:
                     async for message in websocket:
                         t1 = time.time()
+                        if isinstance(message, str):
+                            raise MessageError(code=CloseCode.INVALID_DATA)
                         try:
                             data = bz2.decompress(message)
                         except Exception:
                             data = message
 
-                        await asyncio.get_event_loop().run_in_executor(
-                            executor=self.executor,
-                            func=functools.partial(
-                                model.entries.import_iof_result_list,
-                                event_key=event_key,
-                                content=data,
-                            ),
+                        await asyncio.to_thread(
+                            model.entries.import_iof_result_list,
+                            event_key=event_key,
+                            content=data,
                         )
                         await websocket.send(json.dumps({"result": "ok"}))
                         t2 = time.time()
@@ -268,9 +273,7 @@ class WebSocketHandler:
                         )
 
                         # add the event date to the times entered on the webpage
-                        events = await asyncio.get_event_loop().run_in_executor(
-                            executor=self.executor, func=model.events.get_events
-                        )
+                        events = await asyncio.to_thread(model.events.get_events)
                         date_of_event = datetime.date.today()
                         for e in events:
                             if e.key == item.get("key", None):
@@ -315,18 +318,12 @@ class WebSocketHandler:
                         d.result = result
 
                         try:
-                            (
-                                status,
-                                event,
-                                res,
-                            ) = await asyncio.get_event_loop().run_in_executor(
-                                executor=self.executor,
-                                func=functools.partial(
-                                    model.results.store_cardreader_result,
-                                    event_key=item["key"],
-                                    item=d,
-                                ),
+                            xxx = await asyncio.to_thread(
+                                model.results.store_cardreader_result,
+                                event_key=item["key"],
+                                item=d,
                             )
+                            status, event, res = xxx
                         except EventNotFoundError as e:
                             raise RuntimeError(str(e))
 
@@ -369,12 +366,14 @@ class WebSocketHandler:
                 print(f">>>>>> cardreader, key: {event_key}, {addr}")
                 async for message in websocket:
                     try:
-                        data = bz2.decompress(message)
+                        if isinstance(message, str):
+                            raise MessageError(code=CloseCode.INVALID_DATA)
+                        data = bz2.decompress(message).decode()
                     except Exception:
                         raise RuntimeError("Data not bz2 encoded")
 
                     try:
-                        item = json.loads(data.decode())
+                        item = json.loads(data)
                     except Exception:
                         raise RuntimeError("Data not json deserialisable")
 
@@ -384,18 +383,12 @@ class WebSocketHandler:
                         raise RuntimeError(str(e))
 
                     try:
-                        (
-                            status,
-                            event,
-                            res,
-                        ) = await asyncio.get_event_loop().run_in_executor(
-                            executor=self.executor,
-                            func=functools.partial(
-                                model.results.store_cardreader_result,
-                                event_key=event_key,
-                                item=item,
-                            ),
+                        xxx = await asyncio.to_thread(
+                            model.results.store_cardreader_result,
+                            event_key=event_key,
+                            item=item,
                         )
+                        status, event, res = xxx
                     except EventNotFoundError as e:
                         raise RuntimeError(str(e))
 
@@ -482,31 +475,32 @@ class WebSocketHandler:
                             self.connections[websocket].show_result = results
 
                             try:
-                                event = await asyncio.get_event_loop().run_in_executor(
-                                    executor=self.executor,
-                                    func=functools.partial(
-                                        model.events.get_event, id=event_id
-                                    ),
+                                event = await asyncio.to_thread(
+                                    model.events.get_event, id=event_id
                                 )
                             except EventNotFoundError:
                                 event = None
 
-                            await self.send(conn=websocket, event=event, message={})
-                            self.update_result.set()
+                            if event:
+                                await self.send(conn=websocket, event=event, message={})
+                                self.update_result.set()
+                            else:
+                                await websocket.send(
+                                    json.dumps({"status": "readerOffline", "data": ""})
+                                )
 
                         elif websocket.request.path == "/si2" and "event_id" in message:
                             self.connections[websocket] = ConnectionParameter()
                             event_id = int(message["event_id"])
                             self.connections[websocket].event_id = event_id
-                            # check event
-                            events = await asyncio.get_event_loop().run_in_executor(
-                                executor=self.executor, func=model.events.get_events
-                            )
-                            events = [event for event in events if event.id == event_id]
-                            if events:
-                                await self.send(
-                                    conn=websocket, event=events[0], message={}
+
+                            try:
+                                event = await asyncio.to_thread(
+                                    model.events.get_event, id=event_id
                                 )
+                                await self.send(conn=websocket, event=event, message={})
+                            except EventNotFoundError:
+                                pass
 
                         else:
                             raise MessageError(

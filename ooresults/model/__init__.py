@@ -17,8 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional
-
 from ooresults.repo.repo import Repo
 
 from . import classes
@@ -43,4 +41,4 @@ __all__ = [
 ]
 
 
-db: Optional[Repo] = None
+db: Repo = None  # type: ignore

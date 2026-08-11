@@ -22,6 +22,7 @@ import ssl
 import threading
 from typing import Optional
 
+from websockets.asyncio.server import Server
 from websockets.asyncio.server import serve
 
 from ooresults.otypes.event_type import EventType
@@ -38,9 +39,9 @@ class WebSocketServer(threading.Thread):
         port: int = 8081,
         ssl_cert=None,
         ssl_key=None,
-    ):
+    ) -> None:
         super().__init__()
-        self.server = None
+        self.server: Optional[Server] = None
         self.demo_reader = demo_reader
         self.import_stream = import_stream
         self.handler: Optional[WebSocketHandler] = None
@@ -51,7 +52,7 @@ class WebSocketServer(threading.Thread):
         self.ssl_key = ssl_key
         self.loop = asyncio.new_event_loop()
 
-    def run(self):
+    def run(self) -> None:
         if self.ssl_cert is None:
             ssl_context = None
         else:
@@ -72,16 +73,17 @@ class WebSocketServer(threading.Thread):
             self.loop.close()
 
     async def start_server(self, ssl_context: Optional[ssl.SSLContext] = None) -> None:
-        self.server = await serve(
-            handler=self.handler.handler,
-            host=self.host,
-            port=self.port,
-            ssl=ssl_context,
-        )
-        if ssl_context is None:
-            print(f"ws://{self.host}:{str(self.port)}")
-        else:
-            print(f"wss://{self.host}:{str(self.port)}")
+        if self.handler:
+            self.server = await serve(
+                handler=self.handler.handler,
+                host=self.host,
+                port=self.port,
+                ssl=ssl_context,
+            )
+            if ssl_context is None:
+                print(f"ws://{self.host}:{str(self.port)}")
+            else:
+                print(f"wss://{self.host}:{str(self.port)}")
 
     async def update_event(self, event: EventType) -> None:
         if self.handler:
@@ -91,5 +93,6 @@ class WebSocketServer(threading.Thread):
 
     def close(self) -> None:
         if self.loop:
-            self.server.close()
+            if self.server:
+                self.server.close()
             self.loop.call_soon_threadsafe(self.loop.stop)
