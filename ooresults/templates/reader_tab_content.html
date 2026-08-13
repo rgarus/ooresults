@@ -42,6 +42,11 @@
         }
     }
 
+    function set_read_table_header_top() {
+        h = document.getElementById('ttabs').offsetHeight;
+        document.getElementById('read.theader').style.top = h - 1;
+    }
+
     function read_update() {
         if (ws !== null) {
             send_event();
@@ -143,7 +148,7 @@
                 statusMessage();
                 // Try to reconnect in 5 seconds
                 setTimeout(function(){start(websocketServerLocation)}, 5000);
-            };
+            }
         };
         ws.onmessage = function(event) {
             var msg = event.data;
@@ -153,9 +158,11 @@
             }
             var elem = document.getElementById('read.reader');
             elem.innerHTML = msg;
-            window.scrollTo(0, 100000);
+            set_read_table_header_top();
+            if (document.getElementById("tab.reader").classList.contains("active")) {
+                window.scrollTo(0, 100000);
+            }
         };
-
 
     }
 

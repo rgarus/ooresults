@@ -10,16 +10,19 @@
 
 
 <!-- Tab links -->
-<div id="tabs" class="tab">
-  <button id="tab.events" class="tablinks active" onclick="evnt_update(); openTab(event, 'Events')">Events</button>
-  <button id="tab.entries" disabled class="tablinks" onclick="entr_update(); openTab(event, 'Entries')">Entries</button>
-  <button id="tab.classes" disabled class="tablinks" onclick="cls_update(); openTab(event, 'Classes')">Classes</button>
-  <button id="tab.courses" disabled class="tablinks" onclick="cou_update(); openTab(event, 'Courses')">Courses</button>
-  <button id="tab.results" disabled class="tablinks" onclick="res_update(); openTab(event, 'Results')">Results</button>
-  <button id="tab.series" class="tablinks" onclick="ser_update(); openTab(event, 'Series')">Series</button>
-  <button id="tab.competitors" class="tablinks" onclick="comp_update(); openTab(event, 'Competitors')">Competitors</button>
-  <button id="tab.clubs" class="tablinks" onclick="clb_update(); openTab(event, 'Clubs')">Clubs</button>
-  <button id="tab.reader" disabled class="tablinks" onclick="read_update(); openTab(event, 'Reader')">SI Reader</button>
+<div id="ttabs">
+  <div id="tabs" class="tab">
+    <button id="tab.events" class="tablinks active" onclick="evnt_update(); openTab(event, 'Events')">Events</button>
+    <button id="tab.entries" disabled class="tablinks" onclick="entr_update(); openTab(event, 'Entries')">Entries</button>
+    <button id="tab.classes" disabled class="tablinks" onclick="cls_update(); openTab(event, 'Classes')">Classes</button>
+    <button id="tab.courses" disabled class="tablinks" onclick="cou_update(); openTab(event, 'Courses')">Courses</button>
+    <button id="tab.results" disabled class="tablinks" onclick="res_update(); openTab(event, 'Results')">Results</button>
+    <button id="tab.series" class="tablinks" onclick="ser_update(); openTab(event, 'Series')">Series</button>
+    <button id="tab.competitors" class="tablinks" onclick="comp_update(); openTab(event, 'Competitors')">Competitors</button>
+    <button id="tab.clubs" class="tablinks" onclick="clb_update(); openTab(event, 'Clubs')">Clubs</button>
+    <button id="tab.reader" disabled class="tablinks" onclick="read_update(); openTab(event, 'Reader')">SI Reader</button>
+  </div>
+  <div id="ttabs-margin" style="height: 10px; background-color: Canvas" hidden></div>
 </div>
 
 <!-- The Modal -->
@@ -95,13 +98,25 @@ ${reader_tab_content | n}
         // Get all elements with class="tablinks" and remove the class "active"
         tablinks = document.getElementsByClassName("tablinks");
         for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
+            tablinks[i].classList.remove("active");
         }
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(tabName).style.display = "block";
-        evt.currentTarget.className += " active";
-    } 
+        evt.currentTarget.classList.add("active");
+
+        // Freeze tab area if tab Reader is selected
+        if (tabName === "Reader") {
+            document.getElementById("ttabs").classList.add("tabsticky");
+            document.getElementById("ttabs-margin").style.display='block'
+        } else {
+            document.getElementById("ttabs").classList.remove("tabsticky");
+            document.getElementById("ttabs-margin").style.display='none'
+        }
+
+        // Scroll to top
+        window.scrollTo(0, 0);
+    }
 </script>
 
 <script>

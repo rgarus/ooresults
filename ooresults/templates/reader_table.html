@@ -71,32 +71,32 @@ def missing(status: ResultStatus, missing_controls: List[str]) -> str:
 <p></p>
 
 <div>
-    <table id="read.messages" class="dt">
+    <table id="read.messages" class="dte">
         <thead>
-            <tr class="dt">
-                <th class="dt">Read</th>
-                <th class="dt">Control card</th>
-                <th class="dt">Status</th>
-                <th class="dt">Time</th>
-                <th class="dt">Name</th>
-                <th class="dt">Class</th>
-                <th class="dt">Missing controls</th>
+            <tr id="read.theader" class="dth">
+                <th class="dth">Read</th>
+                <th class="dth">Control card</th>
+                <th class="dth">Status</th>
+                <th class="dth">Time</th>
+                <th class="dth">Name</th>
+                <th class="dth">Class</th>
+                <th class="dth">Missing controls</th>
             </tr>
         </thead>
         <tbody>
         % for result in messages:
             % if event and event.id == result.get("eventId", "-2"):
-                <tr class="dt" style="background-color: ${color(result.get("status"))}">
-                    <td class="dt">${result.get("entryTime", "")}</td>
-                    <td class="dt" style="text-align:right">${format_card(result.get("controlCard"))}</td>
-                    <td class="dt">${MAP_STATUS[result.get("status")]}</td>
-                    <td class="dt" style="text-align:right">${format(result.get("time", 0))}</td>
+                <tr class="rdt" style="background-color: ${color(result.get("status"))}">
+                    <td class="dte">${result.get("entryTime", "")}</td>
+                    <td class="dte" style="text-align:right">${format_card(result.get("controlCard"))}</td>
+                    <td class="dte">${MAP_STATUS[result.get("status")]}</td>
+                    <td class="dte" style="text-align:right">${format(result.get("time", 0))}</td>
                     % if result.get("status") in (ResultStatus.OK, ResultStatus.MISSING_PUNCH, ResultStatus.DID_NOT_FINISH, ResultStatus.OVER_TIME):
-                        <td class="dt">${result.get("lastName", "")}, ${result.get("firstName", "")}</td>
-                        <td class="dt">${result.get("class", "")}</td>
-                        <td class="dt">${missing(result.get("status"), result.get("missingControls", []))}</td>
+                        <td class="dte">${result.get("lastName", "")}, ${result.get("firstName", "")}</td>
+                        <td class="dte">${result.get("class", "")}</td>
+                        <td class="dte">${missing(result.get("status"), result.get("missingControls", []))}</td>
                     % else:
-                        <td class="dt" colspan="3">${result.get("error", "")}</td>
+                        <td class="dte" colspan="3">${result.get("error", "")}</td>
                     % endif
                 </tr>
             % endif

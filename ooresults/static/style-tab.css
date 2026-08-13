@@ -5,6 +5,11 @@
   background-color: Canvas;
 }
 
+.tabsticky {
+  position: sticky;
+  top: 0;
+}
+
 /* Style the buttons that are used to open the tab content */
 .tab button {
   background-color: inherit;
