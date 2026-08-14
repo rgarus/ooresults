@@ -153,119 +153,117 @@ t = {
 
 <p/>
 
-<div>
-    <table class="dte" id="entr.table" onclick="entr_highlight(event)" ondblclick="entr_highlight(event)" onmousedown="table_mousedown(event)">
-        <thead>
-            <tr id="entr.theader" class="dth" style="vertical-align: top;">
-                % if view == "results":
-                    <th class="dth">Rank</th>
-                    <th class="dth">Name</th>
-                    <th class="dth">Year</th>
-                    <th class="dth">Chip</th>
-                    <th class="dth">Club</th>
-                    % if "factor" in columns:
-                        <th class="dth">Handicap</th>
-                    % endif
-                    <th class="dth">Run time</th>
-                    % if "score" in columns:
-                        <th class="dth">Sc. controls</th>
-                    % elif "penalties_controls" in columns:
-                        <th class="dth">P. controls</th>
-                    % endif
-                    % if "score" in columns:
-                        <th class="dth">Sc. overtime</th>
-                    % elif "penalties_overtime" in columns:
-                        <th class="dth">P. overtime</th>
-                    % endif
-                    % if "score" in columns:
-                        <th class="dth">Total score</th>
-                    % else:
-                        <th class="dth">Total time</th>
-                    % endif
-                % else:
-                    <th class="dth">Rank</th>
-                    <th class="dth">First name</th>
-                    <th class="dth">Last name</th>
-                    <th class="dth">Gender</th>
-                    <th class="dth">Year</th>
-                    <th class="dth">Chip</th>
-                    % if view != "clubs":
-                        <th class="dth">Club</th>
-                    % endif
-                    % if view != "classes":
-                        <th class="dth">Class</th>
-                    % endif
-                    % if event is not None:
-                        % for field in event.fields:
-                            <th class="dth">${field}</th>
-                        % endfor
-                    % endif
-                    <th class="dth">Start time</th>
-                    <th class="dth">Run time</th>
-                    <th class="dth">Status</th>
+<table class="dte" id="entr.table" onclick="entr_highlight(event)" ondblclick="entr_highlight(event)" onmousedown="table_mousedown(event)">
+    <thead>
+        <tr id="entr.theader" class="dth" style="vertical-align: top;">
+            % if view == "results":
+                <th class="dth">Rank</th>
+                <th class="dth">Name</th>
+                <th class="dth">Year</th>
+                <th class="dth">Chip</th>
+                <th class="dth">Club</th>
+                % if "factor" in columns:
+                    <th class="dth">Handicap</th>
                 % endif
-            </tr>
-        </thead>
-        <tbody>
-            % for group_name, ranked_entries in view_entries_list:
-                % if ranked_entries:
-                    <tr class="dte h1">
-                        <th class="dte h1" colspan="99">${group_name if group_name is not None else t[view]}&nbsp;&nbsp;(${len(ranked_entries)})</th>
-                    </tr>
-
-                    % for ranked_entry in ranked_entries:
-                        <%
-                        rank = ranked_entry.rank
-                        entry = ranked_entry.entry
-                        %>
-                        <tr class="dte" data-id="${entry.id}" data-assigned=${"true" if entry.last_name else "false"}>
-                            % if view == "results":
-                                <td class="dte">${format_rank_results(rank, entry.not_competing)}</td>
-                                % if entry.last_name:
-                                    <td class="dte">${entry.last_name}, ${entry.first_name}</td>
-                                % else:
-                                    <td class="dte"></td>
-                                % endif
-                                <td class="dte" style="text-align:right;">${entry.year}</td>
-                                <td class="dte" style="text-align:right;">${format_card(entry.chip)}</td>
-                                <td class="dte">${format_club(entry.club_name)}</td>
-                                % if "factor" in columns:
-                                    <td class="dte" style="text-align:right">${format_factor(entry)}</td>
-                                % endif
-                                <td class="dte" style="text-align:right">${format_running_time(entry=entry, results=True)}</td>
-                                % if "score" in columns or "penalties_controls" in columns:
-                                    <td class="dte" style="text-align:right">${format_score_or_penalties_controls(entry=entry)}</td>
-                                % endif
-                                % if "score" in columns or "penalties_overtime" in columns:
-                                    <td class="dte" style="text-align:right">${format_score_or_penalties_overtime(entry=entry)}</td>
-                                % endif
-                                <td class="dte" style="text-align:right">${format_score_or_time_total(entry=entry)}</td>
-                            % else:
-                                <td class="dte" style="text-align: right;">${format_rank(rank, entry.not_competing)}</td>
-                                <td class="dte">${entry.first_name}</td>
-                                <td class="dte">${entry.last_name}</td>
-                                <td class="dte">${entry.gender}</td>
-                                <td class="dte">${entry.year}</td>
-                                <td class="dte" style="text-align:right;">${format_card(entry.chip)}</td>
-                                % if view != "clubs":
-                                    <td class="dte">${entry.club_name}</td>
-                                % endif
-                                % if view != "classes":
-                                    <td class="dte">${entry.class_name}</td>
-                                % endif
-                                % if event is not None:
-                                    % for i in range(len(event.fields)):
-                                        <td class="dte">${entry.fields.get(i, "")}</td>
-                                    % endfor
-                                % endif
-                                <td class="dte" style="text-align:right;">${format_start_time(entry=entry)}</td>
-                                <td class="dte" style="text-align:right;">${format_running_time(entry=entry, results=False)}</td>
-                                <td class="dte">${MAP_STATUS[entry.result.status]}</td>
-                            % endif
-                        </tr>
+                <th class="dth">Run time</th>
+                % if "score" in columns:
+                    <th class="dth">Sc. controls</th>
+                % elif "penalties_controls" in columns:
+                    <th class="dth">P. controls</th>
+                % endif
+                % if "score" in columns:
+                    <th class="dth">Sc. overtime</th>
+                % elif "penalties_overtime" in columns:
+                    <th class="dth">P. overtime</th>
+                % endif
+                % if "score" in columns:
+                    <th class="dth">Total score</th>
+                % else:
+                    <th class="dth">Total time</th>
+                % endif
+            % else:
+                <th class="dth">Rank</th>
+                <th class="dth">First name</th>
+                <th class="dth">Last name</th>
+                <th class="dth">Gender</th>
+                <th class="dth">Year</th>
+                <th class="dth">Chip</th>
+                % if view != "clubs":
+                    <th class="dth">Club</th>
+                % endif
+                % if view != "classes":
+                    <th class="dth">Class</th>
+                % endif
+                % if event is not None:
+                    % for field in event.fields:
+                        <th class="dth">${field}</th>
                     % endfor
                 % endif
-            % endfor
-        </tbody>
-    </table>
-</div>
+                <th class="dth">Start time</th>
+                <th class="dth">Run time</th>
+                <th class="dth">Status</th>
+            % endif
+        </tr>
+    </thead>
+    <tbody>
+        % for group_name, ranked_entries in view_entries_list:
+            % if ranked_entries:
+                <tr class="dte h1">
+                    <th class="dte h1" colspan="99">${group_name if group_name is not None else t[view]}&nbsp;&nbsp;(${len(ranked_entries)})</th>
+                </tr>
+
+                % for ranked_entry in ranked_entries:
+                    <%
+                    rank = ranked_entry.rank
+                    entry = ranked_entry.entry
+                    %>
+                    <tr class="dte" data-id="${entry.id}" data-assigned=${"true" if entry.last_name else "false"}>
+                        % if view == "results":
+                            <td class="dte">${format_rank_results(rank, entry.not_competing)}</td>
+                            % if entry.last_name:
+                                <td class="dte">${entry.last_name}, ${entry.first_name}</td>
+                            % else:
+                                <td class="dte"></td>
+                            % endif
+                            <td class="dte" style="text-align:right;">${entry.year}</td>
+                            <td class="dte" style="text-align:right;">${format_card(entry.chip)}</td>
+                            <td class="dte">${format_club(entry.club_name)}</td>
+                            % if "factor" in columns:
+                                <td class="dte" style="text-align:right">${format_factor(entry)}</td>
+                            % endif
+                            <td class="dte" style="text-align:right">${format_running_time(entry=entry, results=True)}</td>
+                            % if "score" in columns or "penalties_controls" in columns:
+                                <td class="dte" style="text-align:right">${format_score_or_penalties_controls(entry=entry)}</td>
+                            % endif
+                            % if "score" in columns or "penalties_overtime" in columns:
+                                <td class="dte" style="text-align:right">${format_score_or_penalties_overtime(entry=entry)}</td>
+                            % endif
+                            <td class="dte" style="text-align:right">${format_score_or_time_total(entry=entry)}</td>
+                        % else:
+                            <td class="dte" style="text-align: right;">${format_rank(rank, entry.not_competing)}</td>
+                            <td class="dte">${entry.first_name}</td>
+                            <td class="dte">${entry.last_name}</td>
+                            <td class="dte">${entry.gender}</td>
+                            <td class="dte">${entry.year}</td>
+                            <td class="dte" style="text-align:right;">${format_card(entry.chip)}</td>
+                            % if view != "clubs":
+                                <td class="dte">${entry.club_name}</td>
+                            % endif
+                            % if view != "classes":
+                                <td class="dte">${entry.class_name}</td>
+                            % endif
+                            % if event is not None:
+                                % for i in range(len(event.fields)):
+                                    <td class="dte">${entry.fields.get(i, "")}</td>
+                                % endfor
+                            % endif
+                            <td class="dte" style="text-align:right;">${format_start_time(entry=entry)}</td>
+                            <td class="dte" style="text-align:right;">${format_running_time(entry=entry, results=False)}</td>
+                            <td class="dte">${MAP_STATUS[entry.result.status]}</td>
+                        % endif
+                    </tr>
+                % endfor
+            % endif
+        % endfor
+    </tbody>
+</table>

@@ -122,7 +122,7 @@ def test_class_results_list_is_empty(event: EventType) -> None:
     assert html.find(path=".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
     assert html.find(path=".//div[@id='res.event']//tr[2]//td").text == "2023-12-29"
 
-    table = html.find(path=".//div[@id='res.result']/table")
+    table = html.find(path=".//table[@id='res.table']")
     assert [child.tag for child in table] == []
 
 
@@ -136,7 +136,7 @@ def test_class_results_list_with_one_class_but_without_results(
     assert html.find(path=".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
     assert html.find(path=".//div[@id='res.event']//tr[2]//td").text == "2023-12-29"
 
-    table = html.find(path=".//div[@id='res.result']/table")
+    table = html.find(path=".//table[@id='res.table']")
     assert [child.tag for child in table] == []
 
 
@@ -149,7 +149,7 @@ def test_class_results_list_with_one_class_and_with_results(
     assert html.find(path=".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
     assert html.find(path=".//div[@id='res.event']//tr[2]//td").text == "2023-12-29"
 
-    table = html.find(path=".//div[@id='res.result']/table")
+    table = html.find(path=".//table[@id='res.table']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # headers
@@ -188,7 +188,7 @@ def test_rank_is_defined(
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1, rank=3)])]
     html = Html(text=render.results_table(event=event, class_results=class_results))
 
-    elem = html.find(path=".//div[@id='res.result']/table/tbody[1]/tr[1]/td[1]")
+    elem = html.find(path=".//table[@id='res.table']/tbody[1]/tr[1]/td[1]")
     assert elem.text == "3"
 
 
@@ -199,7 +199,7 @@ def test_entry_is_not_competing(
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = Html(text=render.results_table(event=event, class_results=class_results))
 
-    elem = html.find(path=".//div[@id='res.result']/table/tbody[1]/tr[1]/td[1]")
+    elem = html.find(path=".//table[@id='res.table']/tbody[1]/tr[1]/td[1]")
     assert elem.text == "NC"
 
 
@@ -211,7 +211,7 @@ def test_club_is_defined(
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = Html(text=render.results_table(event=event, class_results=class_results))
 
-    elem = html.find(path=".//div[@id='res.result']/table/tbody[1]/tr[1]/td[3]")
+    elem = html.find(path=".//table[@id='res.table']/tbody[1]/tr[1]/td[3]")
     assert elem.text == "OL Bundestag"
 
 
@@ -224,7 +224,7 @@ def test_status_is_inactive_with_start_time(
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = Html(text=render.results_table(event=event, class_results=class_results))
 
-    elem = html.find(path=".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
+    elem = html.find(path=".//table[@id='res.table']/tbody[1]/tr[1]/td[4]")
     assert elem.text == "Start at 12:38:59"
 
 
@@ -237,7 +237,7 @@ def test_status_is_ok(
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = Html(text=render.results_table(event=event, class_results=class_results))
 
-    elem = html.find(path=".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
+    elem = html.find(path=".//table[@id='res.table']/tbody[1]/tr[1]/td[4]")
     assert elem.text == "6:57"
 
 
@@ -266,7 +266,7 @@ def test_status_is_not_inactive_or_ok(
     class_results = [(class_info_1, [RankedEntryType(entry=entry_1)])]
     html = Html(text=render.results_table(event=event, class_results=class_results))
 
-    elem = html.find(path=".//div[@id='res.result']/table/tbody[1]/tr[1]/td[4]")
+    elem = html.find(path=".//table[@id='res.table']/tbody[1]/tr[1]/td[4]")
     assert elem.text == text
 
 
@@ -287,7 +287,7 @@ def test_class_results_list_with_two_classes_and_with_results(
     assert html.find(path=".//div[@id='res.event']//tr[1]//td").text == "Test-Lauf 1"
     assert html.find(path=".//div[@id='res.event']//tr[2]//td").text == "2023-12-29"
 
-    table = html.find(path=".//div[@id='res.result']/table")
+    table = html.find(path=".//table[@id='res.table']")
     assert [child.tag for child in table] == ["thead", "tbody", "thead", "tbody"]
 
     # headers
@@ -358,7 +358,7 @@ def test_class_results_list_with_two_classes_and_with_results(
 
 
 def check_header(html: Html, values: list[str]) -> None:
-    table = html.find(path=".//div[@id='res.result']/table")
+    table = html.find(path=".//table[@id='res.table']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # headers
@@ -375,7 +375,7 @@ def check_header(html: Html, values: list[str]) -> None:
 
 
 def check_row(html: Html, values: list[Optional[str]]) -> None:
-    table = html.find(path=".//div[@id='res.result']/table")
+    table = html.find(path=".//table[@id='res.table']")
     assert [child.tag for child in table] == ["thead", "tbody"]
 
     # headers

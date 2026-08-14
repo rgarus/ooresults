@@ -107,42 +107,40 @@ def missing(status: ResultStatus, missing_controls: List[str]) -> str:
 
 <p></p>
 
-<div>
-    <table id="read.status" style="text-align: left">
-        % if status is None or status == "readerOffline":
-            <tr style="color:red;">
-                <th style="padding-right: 10px">Card reader status:</th>
-                <td id="read.reader_status">Offline</td>
-            </tr>
-        % elif status in ["readerConnected", "cardRead", "cardRemoved"]:
-            <tr style="color:green;">
-                <th style="padding-right: 10px">Card reader status:</th>
-                <td id="read.reader_status">Connected</td>
-            </tr>
-        % elif status == "readerDisconnected":
-            <tr style="color:red;">
-                <th style="padding-right: 10px">Card reader status:</th>
-                <td id="read.reader_status">Disconnected</td>
-            </tr>
-        % elif status == "cardInserted":
-            <tr style="color:green;">
-                <th style="padding-right: 10px">Card reader status:</th>
-                <td id="read.reader_status">Reading card</td>
-            </tr>
-        % endif
+<table id="read.status" style="text-align: left">
+    % if status is None or status == "readerOffline":
+        <tr style="color:red;">
+            <th style="padding-right: 10px">Card reader status:</th>
+            <td id="read.reader_status">Offline</td>
+        </tr>
+    % elif status in ["readerConnected", "cardRead", "cardRemoved"]:
+        <tr style="color:green;">
+            <th style="padding-right: 10px">Card reader status:</th>
+            <td id="read.reader_status">Connected</td>
+        </tr>
+    % elif status == "readerDisconnected":
+        <tr style="color:red;">
+            <th style="padding-right: 10px">Card reader status:</th>
+            <td id="read.reader_status">Disconnected</td>
+        </tr>
+    % elif status == "cardInserted":
+        <tr style="color:green;">
+            <th style="padding-right: 10px">Card reader status:</th>
+            <td id="read.reader_status">Reading card</td>
+        </tr>
+    % endif
 
-        % if stream_status is not None:
-            % if streaming_status_ok(stream_status):
-                <tr style="color:green;">
-                    <th style="padding-right: 10px">Stream status:</th>
-                    <td>${STREAMING_STATUS[stream_status]}</td>
-                </tr>
-            % else:
-                <tr style="color:red;">
-                    <th style="padding-right: 10px">Stream status:</th>
-                    <td>${STREAMING_STATUS[stream_status]}</td>
-                </tr>
-            % endif
+    % if stream_status is not None:
+        % if streaming_status_ok(stream_status):
+            <tr style="color:green;">
+                <th style="padding-right: 10px">Stream status:</th>
+                <td>${STREAMING_STATUS[stream_status]}</td>
+            </tr>
+        % else:
+            <tr style="color:red;">
+                <th style="padding-right: 10px">Stream status:</th>
+                <td>${STREAMING_STATUS[stream_status]}</td>
+            </tr>
         % endif
-    </table>
-</div>
+    % endif
+</table>

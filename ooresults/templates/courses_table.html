@@ -20,31 +20,28 @@
 <input id="cour.filter" oninput="filter_table('cou.table', 'tr', this.value)" placeholder="Filter (Alt+F) ...">
 <p/>
 
-<div>
-    <table class="dte" id="cou.table" onclick="cou_highlight(event)" ondblclick="cou_highlight(event)" onmousedown="table_mousedown(event)">
-        <thead>
-            <tr id="cour.theader" class="dth">
-                <th class="dth">Name</th>
-                <th class="dth">Length</th>
-                <th class="dth">Climb</th>
-                <th class="dth">Controls</th>
+<table class="dte" id="cou.table" onclick="cou_highlight(event)" ondblclick="cou_highlight(event)" onmousedown="table_mousedown(event)">
+    <thead>
+        <tr id="cour.theader" class="dth">
+            <th class="dth">Name</th>
+            <th class="dth">Length</th>
+            <th class="dth">Climb</th>
+            <th class="dth">Controls</th>
+        </tr>
+    </thead>
+    <tbody id="courses_tbody">
+        % if courses:
+            <tr class="dte h1">
+                <th class="dte h1" colspan="99">Courses&nbsp;&nbsp;(${len(courses)})</th>
             </tr>
-        </thead>
-        <tbody id="courses_tbody">
-            % if courses:
-                <tr class="dte h1">
-                    <th class="dte h1" colspan="99">Courses&nbsp;&nbsp;(${len(courses)})</th>
+            % for course in courses:
+                <tr class="dte" data-id="${course.id}">
+                    <td class="dte">${course.name}</td>
+                    <td class="dte" style="text-align:right">${round(course.length) if course.length is not None else ""}</td>
+                    <td class="dte" style="text-align:right">${round(course.climb) if course.climb is not None else ""}</td>
+                    <td class="dte">${" - ".join(course.controls)}</td>
                 </tr>
-                % for course in courses:
-                    <tr class="dte" data-id="${course.id}">
-                        <td class="dte">${course.name}</td>
-                        <td class="dte" style="text-align:right">${round(course.length) if course.length is not None else ""}</td>
-                        <td class="dte" style="text-align:right">${round(course.climb) if course.climb is not None else ""}</td>
-                        <td class="dte">${" - ".join(course.controls)}</td>
-                    </tr>
-                % endfor
-            % endif
-        </tbody>
-    </table>
-</div>
-
+            % endfor
+        % endif
+    </tbody>
+</table>

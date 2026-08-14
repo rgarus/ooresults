@@ -76,10 +76,7 @@ def voided_legs(ranked_results: List[RankedEntryType]) -> str:
     </table>
 </div>
 
-
-<div id="res.result">
-
-<table style="border-collapse: collapse">
+<table id="res.table" style="border-collapse: collapse">
 <%
     columns = build_columns(class_results=class_results)
 %>
@@ -159,5 +156,3 @@ def voided_legs(ranked_results: List[RankedEntryType]) -> str:
     % endif
 % endfor
 </table>
-</div>
-

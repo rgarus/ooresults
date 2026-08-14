@@ -99,7 +99,7 @@ def test_messages_list_is_empty_with_stream_status_is_none(event: EventType) -> 
     assert len(rows) == 0
 
     # status
-    table = html.find(path=".//div/table[@id='read.status']")
+    table = html.find(path=".//table[@id='read.status']")
     assert [child.tag for child in table] == ["tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
     assert [td.text for td in table.findall("./tr[1]/td")] == ["Connected"]
@@ -141,7 +141,7 @@ def test_messages_list_is_empty_with_stream_status_is_not_none(
     assert len(rows) == 0
 
     # status
-    table = html.find(path=".//div/table[@id='read.status']")
+    table = html.find(path=".//table[@id='read.status']")
     assert [child.tag for child in table] == ["tr", "tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
     assert [td.text for td in table.findall("./tr[1]/td")] == ["Connected"]
@@ -273,7 +273,7 @@ def test_messages_for_same_event_id_are_displayed(event: EventType) -> None:
     ]
 
     # status
-    table = html.find(path=".//div/table[@id='read.status']")
+    table = html.find(path=".//table[@id='read.status']")
     assert [child.tag for child in table] == ["tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
 
@@ -326,7 +326,7 @@ def test_messages_for_another_event_id_are_not_displayed(event: EventType) -> No
     assert len(rows) == 0
 
     # status
-    table = html.find(path=".//div/table[@id='read.status']")
+    table = html.find(path=".//table[@id='read.status']")
     assert [child.tag for child in table] == ["tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
 
@@ -375,7 +375,7 @@ def test_cardreader_status(
     assert len(rows) == 0
 
     # status
-    table = html.find(path=".//div/table[@id='read.status']")
+    table = html.find(path=".//table[@id='read.status']")
     assert [child.tag for child in table] == ["tr"]
     assert table[0].attrib["style"] == f"color:{color};"
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
@@ -424,7 +424,7 @@ def test_stream_status(event: EventType, status: Status, text: str, color: str) 
     assert len(rows) == 0
 
     # status
-    table = html.find(path=".//div/table[@id='read.status']")
+    table = html.find(path=".//table[@id='read.status']")
     assert [child.tag for child in table] == ["tr", "tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
     assert [td.text for td in table.findall("./tr[1]/td")] == ["Offline"]
@@ -505,7 +505,7 @@ def test_missing_controls_if_status_is_not_ok(
     ]
 
     # status
-    table = html.find(path=".//div/table[@id='read.status']")
+    table = html.find(path=".//table[@id='read.status']")
     assert [child.tag for child in table] == ["tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
 
@@ -578,7 +578,7 @@ def test_missing_controls_if_status_is_ok(
     ]
 
     # status
-    table = html.find(path=".//div/table[@id='read.status']")
+    table = html.find(path=".//table[@id='read.status']")
     assert [child.tag for child in table] == ["tr"]
     assert [th.text for th in table.findall("./tr[1]/th")] == ["Card reader status:"]
 
