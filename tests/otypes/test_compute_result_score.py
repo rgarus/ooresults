@@ -23,6 +23,7 @@ from datetime import timezone
 import pytest
 
 from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.handicap import Handicap
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
@@ -377,7 +378,7 @@ def test_compute_handicap_ok(
         controls=controls,
         class_params=class_params,
         year=year_of_birth,
-        gender="F" if female else "M",
+        sex=Sex.FEMALE if female else Sex.MALE,
     )
 
     assert result == PersonRaceResult(
@@ -422,7 +423,7 @@ def test_compute_handicap_mp(female: bool, year_of_birth: int) -> None:
         controls=controls,
         class_params=class_params,
         year=year_of_birth,
-        gender="F" if female else "M",
+        sex=Sex.FEMALE if female else Sex.MALE,
     )
 
     assert result == PersonRaceResult(

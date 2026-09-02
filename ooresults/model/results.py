@@ -177,7 +177,7 @@ def store_cardreader_result(
                         class_params=class_params,
                         start_time=entry.start.start_time,
                         year=int(entry.year) if entry.year is not None else None,
-                        gender=entry.gender,
+                        sex=entry.sex,
                     )
                     model.db.update_entry_result(
                         id=entry.id,

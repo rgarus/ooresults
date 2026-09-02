@@ -30,6 +30,7 @@ from ooresults.otypes.class_type import ClassType
 from ooresults.otypes.club_type import ClubType
 from ooresults.otypes.competitor_type import CompetitorBaseDataType
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.course_type import CourseType
 from ooresults.otypes.entry_type import EntryBaseDataType
 from ooresults.otypes.entry_type import EntryType
@@ -324,7 +325,7 @@ class Repo:
         first_name: str,
         last_name: str,
         club_id: Optional[int],
-        gender: str,
+        sex: Optional[Sex],
         year: Optional[int],
         chip: str,
     ) -> int:
@@ -342,7 +343,7 @@ class Repo:
         first_name: str,
         last_name: str,
         club_id: Optional[int],
-        gender: str,
+        sex: Optional[Sex],
         year: Optional[int],
         chip: str,
     ) -> None:

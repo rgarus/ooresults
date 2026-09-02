@@ -23,6 +23,7 @@ from typing import Optional
 
 import pytest
 
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
@@ -67,7 +68,7 @@ def test_entries_list_is_empty(event: EventType) -> None:
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -154,7 +155,7 @@ def test_entry_list_with_one_group(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -252,7 +253,7 @@ def test_entry_list_with_two_groups(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -356,7 +357,7 @@ def test_entry_list_with_three_groups(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -505,10 +506,10 @@ def test_last_name_is_defined(
     assert elem.text == "Derkel"
 
 
-def test_gender_is_unknown(
+def test_sex_is_unknown(
     event: EventType, ranked_entries: list[RankedEntryType]
 ) -> None:
-    ranked_entries[0].entry.gender = ""
+    ranked_entries[0].entry.sex = None
     html = Html(
         text=render.entries_table(
             event=event,
@@ -522,10 +523,8 @@ def test_gender_is_unknown(
     assert elem.text is None
 
 
-def test_gender_is_female(
-    event: EventType, ranked_entries: list[RankedEntryType]
-) -> None:
-    ranked_entries[0].entry.gender = "F"
+def test_sex_is_female(event: EventType, ranked_entries: list[RankedEntryType]) -> None:
+    ranked_entries[0].entry.sex = Sex.FEMALE
     html = Html(
         text=render.entries_table(
             event=event,
@@ -539,10 +538,8 @@ def test_gender_is_female(
     assert elem.text == "F"
 
 
-def test_gender_is_male(
-    event: EventType, ranked_entries: list[RankedEntryType]
-) -> None:
-    ranked_entries[0].entry.gender = "M"
+def test_sex_is_male(event: EventType, ranked_entries: list[RankedEntryType]) -> None:
+    ranked_entries[0].entry.sex = Sex.MALE
     html = Html(
         text=render.entries_table(
             event=event,
@@ -717,7 +714,7 @@ def test_entry_list_with_fields(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",

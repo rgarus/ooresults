@@ -45,11 +45,11 @@ chip_disabled = "disabled" if has_result else ""
                 <td><input id="ent_lastName" name="last_name" type="text" value="${entry.last_name if entry else ''}" oninput="mark_label(this)" required/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="ent_gender">Gender</label></th>
+                <th class="input-header"><label for="ent_sex">Sex</label></th>
                 <td>
-                    <select id="ent_gender" name="gender" oninput="mark_label(this)">
+                    <select id="ent_sex" name="sex" oninput="mark_label(this)">
                     % for g in ["", "F", "M"]:
-                        % if g == (entry.gender if entry and entry.gender else ""):
+                        % if g == (entry.sex.value if entry and entry.sex is not None else ""):
                             <option value="${g}" selected>${g}</option>
                         % else:
                             <option value="${g}">${g}</option>

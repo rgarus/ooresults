@@ -28,6 +28,7 @@ from ooresults.otypes import result_type
 from ooresults.otypes import start_type
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
@@ -113,7 +114,7 @@ def test_import_result_list() -> None:
             "class_": "Bahn A - Lang",
             "club": "OC Kanzleramt",
             "chip": "1234567",
-            "gender": "F",
+            "sex": Sex.FEMALE,
             "year": 1972,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -221,7 +222,7 @@ def test_import_result_list_not_competing() -> None:
             "class_": "Bahn A - Lang",
             "club": "OC Kanzleramt",
             "chip": "1234567",
-            "gender": "F",
+            "sex": Sex.FEMALE,
             "year": 1972,
             "not_competing": True,
             "result": result_type.PersonRaceResult(
@@ -335,7 +336,7 @@ def test_export_result_list() -> None:
                             club_id=1,
                             club_name="OC Kanzleramt",
                             chip="1234567",
-                            gender="F",
+                            sex=Sex.FEMALE,
                             year=1972,
                             not_competing=False,
                             result=result_type.PersonRaceResult(
@@ -447,7 +448,7 @@ def test_export_result_list_not_competing() -> None:
                             club_id=1,
                             club_name="OC Kanzleramt",
                             chip="1234567",
-                            gender="F",
+                            sex=Sex.FEMALE,
                             year=1972,
                             not_competing=True,
                             result=result_type.PersonRaceResult(
@@ -518,7 +519,7 @@ def test_import_result_list_with_start_time_but_not_finished() -> None:
             "class_": "Bahn A - Lang",
             "club": "OC Kanzleramt",
             "chip": "1234567",
-            "gender": "F",
+            "sex": Sex.FEMALE,
             "year": 1972,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -602,7 +603,7 @@ def test_export_result_list_with_start_time_but_not_started() -> None:
                             club_id=1,
                             club_name="OC Kanzleramt",
                             chip="1234567",
-                            gender="F",
+                            sex=Sex.FEMALE,
                             year=1972,
                             not_competing=False,
                             result=result_type.PersonRaceResult(
@@ -802,7 +803,7 @@ def test_import_result_list_classes() -> None:
             "class_": "Bahn A - Lang",
             "club": "",
             "chip": "",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -852,7 +853,7 @@ def test_import_result_list_classes() -> None:
             "class_": "Bahn A - Lang",
             "club": "",
             "chip": "",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -886,7 +887,7 @@ def test_import_result_list_classes() -> None:
             "class_": "Bahn B - Mittel",
             "club": "",
             "chip": "1234567",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -1276,7 +1277,7 @@ def test_import_result_list_with_unknown_punch_times() -> None:
             "class_": "Bahn A - Lang",
             "club": "OC Kanzleramt",
             "chip": "1234567",
-            "gender": "F",
+            "sex": Sex.FEMALE,
             "year": 1972,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -1421,7 +1422,7 @@ def test_export_result_list_with_unknown_punch_times() -> None:
                             club_id=1,
                             club_name="OC Kanzleramt",
                             chip="1234567",
-                            gender="F",
+                            sex=Sex.FEMALE,
                             year=1972,
                             not_competing=False,
                             result=result_type.PersonRaceResult(
@@ -1552,7 +1553,7 @@ def test_export_result_list_with_edited_punch_times() -> None:
                             club_id=1,
                             club_name="OC Kanzleramt",
                             chip="1234567",
-                            gender="F",
+                            sex=Sex.FEMALE,
                             year=1972,
                             not_competing=False,
                             result=result_type.PersonRaceResult(

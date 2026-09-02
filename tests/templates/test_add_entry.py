@@ -26,6 +26,7 @@ import pytest
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.club_type import ClubType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
@@ -131,14 +132,14 @@ def test_entry_is_none(classes: list[ClassInfoType], clubs: list[ClubType]) -> N
     input_last_name = html.find(path=".//input[@name='last_name']")
     assert input_last_name.attrib["value"] == ""
 
-    options_gender = html.findall(path=".//select[@name='gender']/option")
-    assert len(options_gender) == 3
-    assert options_gender[0].attrib == {"value": "", "selected": "selected"}
-    assert options_gender[0].text is None
-    assert options_gender[1].attrib == {"value": "F"}
-    assert options_gender[1].text == "F"
-    assert options_gender[2].attrib == {"value": "M"}
-    assert options_gender[2].text == "M"
+    options_sex = html.findall(path=".//select[@name='sex']/option")
+    assert len(options_sex) == 3
+    assert options_sex[0].attrib == {"value": "", "selected": "selected"}
+    assert options_sex[0].text is None
+    assert options_sex[1].attrib == {"value": "F"}
+    assert options_sex[1].text == "F"
+    assert options_sex[2].attrib == {"value": "M"}
+    assert options_sex[2].text == "M"
 
     input_year = html.find(path=".//input[@name='year']")
     assert input_year.attrib["value"] == ""
@@ -221,14 +222,14 @@ def test_entry_is_not_none(
     input_last_name = html.find(path=".//input[@name='last_name']")
     assert input_last_name.attrib["value"] == ""
 
-    options_gender = html.findall(path=".//select[@name='gender']/option")
-    assert len(options_gender) == 3
-    assert options_gender[0].attrib == {"value": "", "selected": "selected"}
-    assert options_gender[0].text is None
-    assert options_gender[1].attrib == {"value": "F"}
-    assert options_gender[1].text == "F"
-    assert options_gender[2].attrib == {"value": "M"}
-    assert options_gender[2].text == "M"
+    options_sex = html.findall(path=".//select[@name='sex']/option")
+    assert len(options_sex) == 3
+    assert options_sex[0].attrib == {"value": "", "selected": "selected"}
+    assert options_sex[0].text is None
+    assert options_sex[1].attrib == {"value": "F"}
+    assert options_sex[1].text == "F"
+    assert options_sex[2].attrib == {"value": "M"}
+    assert options_sex[2].text == "M"
 
     input_year = html.find(path=".//input[@name='year']")
     assert input_year.attrib["value"] == ""
@@ -344,12 +345,12 @@ def test_last_name_is_defined(
     assert input_last_name.attrib["value"] == "Merkel"
 
 
-def test_gender_is_unknown(
+def test_sex_is_unknown(
     entry: EntryType,
     classes: list[ClassInfoType],
     clubs: list[ClubType],
 ) -> None:
-    entry.gender = ""
+    entry.sex = None
     html = Html(
         text=render.add_entry(
             entry=entry,
@@ -360,22 +361,22 @@ def test_gender_is_unknown(
         )
     )
 
-    options_gender = html.findall(path=".//select[@name='gender']/option")
-    assert len(options_gender) == 3
-    assert options_gender[0].attrib == {"value": "", "selected": "selected"}
-    assert options_gender[0].text is None
-    assert options_gender[1].attrib == {"value": "F"}
-    assert options_gender[1].text == "F"
-    assert options_gender[2].attrib == {"value": "M"}
-    assert options_gender[2].text == "M"
+    options_sex = html.findall(path=".//select[@name='sex']/option")
+    assert len(options_sex) == 3
+    assert options_sex[0].attrib == {"value": "", "selected": "selected"}
+    assert options_sex[0].text is None
+    assert options_sex[1].attrib == {"value": "F"}
+    assert options_sex[1].text == "F"
+    assert options_sex[2].attrib == {"value": "M"}
+    assert options_sex[2].text == "M"
 
 
-def test_gender_is_female(
+def test_sex_is_female(
     entry: EntryType,
     classes: list[ClassInfoType],
     clubs: list[ClubType],
 ) -> None:
-    entry.gender = "F"
+    entry.sex = Sex.FEMALE
     html = Html(
         text=render.add_entry(
             entry=entry,
@@ -386,22 +387,22 @@ def test_gender_is_female(
         )
     )
 
-    options_gender = html.findall(path=".//select[@name='gender']/option")
-    assert len(options_gender) == 3
-    assert options_gender[0].attrib == {"value": ""}
-    assert options_gender[0].text is None
-    assert options_gender[1].attrib == {"value": "F", "selected": "selected"}
-    assert options_gender[1].text == "F"
-    assert options_gender[2].attrib == {"value": "M"}
-    assert options_gender[2].text == "M"
+    options_sex = html.findall(path=".//select[@name='sex']/option")
+    assert len(options_sex) == 3
+    assert options_sex[0].attrib == {"value": ""}
+    assert options_sex[0].text is None
+    assert options_sex[1].attrib == {"value": "F", "selected": "selected"}
+    assert options_sex[1].text == "F"
+    assert options_sex[2].attrib == {"value": "M"}
+    assert options_sex[2].text == "M"
 
 
-def test_gender_is_male(
+def test_sex_is_male(
     entry: EntryType,
     classes: list[ClassInfoType],
     clubs: list[ClubType],
 ) -> None:
-    entry.gender = "M"
+    entry.sex = Sex.MALE
     html = Html(
         text=render.add_entry(
             entry=entry,
@@ -412,14 +413,14 @@ def test_gender_is_male(
         )
     )
 
-    options_gender = html.findall(path=".//select[@name='gender']/option")
-    assert len(options_gender) == 3
-    assert options_gender[0].attrib == {"value": ""}
-    assert options_gender[0].text is None
-    assert options_gender[1].attrib == {"value": "F"}
-    assert options_gender[1].text == "F"
-    assert options_gender[2].attrib == {"value": "M", "selected": "selected"}
-    assert options_gender[2].text == "M"
+    options_sex = html.findall(path=".//select[@name='sex']/option")
+    assert len(options_sex) == 3
+    assert options_sex[0].attrib == {"value": ""}
+    assert options_sex[0].text is None
+    assert options_sex[1].attrib == {"value": "F"}
+    assert options_sex[1].text == "F"
+    assert options_sex[2].attrib == {"value": "M", "selected": "selected"}
+    assert options_sex[2].text == "M"
 
 
 def test_year_is_defined(

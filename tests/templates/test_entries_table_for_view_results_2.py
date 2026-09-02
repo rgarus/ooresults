@@ -25,6 +25,7 @@ import pytest
 
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
@@ -648,7 +649,7 @@ def test_score_and_handicap_defined_and_status_is_ok(
     class_info_1.params.otype = "score"
     class_info_1.params.apply_handicap_rule = True
     entry_1.year = 1960
-    entry_1.gender = "F"
+    entry_1.sex = Sex.FEMALE
     entry_1.result.extensions = {"factor": 0.4567}
     entry_1.result.status = ResultStatus.OK
     results_list = [RankedEntryType(entry=entry_1)]
@@ -713,7 +714,7 @@ def test_score_and_handicap_defined_but_status_is_not_ok(
     class_info_1.params.otype = "score"
     class_info_1.params.apply_handicap_rule = True
     entry_1.year = 1960
-    entry_1.gender = "F"
+    entry_1.sex = Sex.FEMALE
     entry_1.result.extensions = {"factor": 0.4567}
     results_list = [RankedEntryType(entry=entry_1)]
     html = Html(
@@ -778,7 +779,7 @@ def test_class_results_list_no_score_all_columns(
     class_info_1.params.penalty_overtime = 30
     class_info_1.params.apply_handicap_rule = True
     entry_1.year = 1960
-    entry_1.gender = "F"
+    entry_1.sex = Sex.FEMALE
     entry_1.result.extensions = {"factor": 0.4567}
     results_list = [RankedEntryType(entry=entry_1)]
     html = Html(
@@ -840,7 +841,7 @@ def test_no_score_and_handicap_defined_and_status_is_ok(
     entry_1: EntryType,
 ) -> None:
     class_info_1.params.apply_handicap_rule = True
-    entry_1.gender = "F"
+    entry_1.sex = Sex.FEMALE
     entry_1.result.extensions = {"factor": 0.4567}
     entry_1.result.status = ResultStatus.OK
     results_list = [RankedEntryType(entry=entry_1)]
@@ -950,14 +951,14 @@ def test_no_score_and_handicap_defined_and_status_is_not_ok(
         None,
     ]
 
-    def test_no_score_with_handicap_with_year_and_gender_defined(
+    def test_no_score_with_handicap_with_year_and_sex_defined(
         event: EventType,
         class_info_1: ClassInfoType,
         entry_1: EntryType,
     ) -> None:
         class_info_1.params.apply_handicap_rule = True
         entry_1.year = 1960
-        entry_1.gender = "F"
+        entry_1.sex = Sex.FEMALE
         entry_1.result.extensions = {"factor": 0.4567}
         results_list = [RankedEntryType(entry=entry_1)]
         html = Html(

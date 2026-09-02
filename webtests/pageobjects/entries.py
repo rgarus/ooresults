@@ -55,7 +55,7 @@ class AddEntryDialog:
         self,
         first_name: str,
         last_name: str,
-        gender: str,
+        sex: str,
         year: str,
         chip: str,
         club_name: str,
@@ -69,7 +69,7 @@ class AddEntryDialog:
         p = self.driver
         assert first_name == TextControl(driver=p, id="ent_firstName").get_text()
         assert last_name == TextControl(driver=p, id="ent_lastName").get_text()
-        assert gender == ComboboxControl(driver=p, id="ent_gender").selected_text()
+        assert sex == ComboboxControl(driver=p, id="ent_sex").selected_text()
         assert year == NumberControl(driver=p, id="ent_year").get_text()
         assert chip == TextControl(driver=p, id="ent_chip").get_text()
         assert club_name == ComboboxControl(driver=p, id="ent_clubId").selected_text()
@@ -83,8 +83,8 @@ class AddEntryDialog:
         if result is not None:
             assert result == ComboboxControl(driver=p, id="ent_result").selected_text()
 
-    def get_gender_list(self) -> list[str]:
-        return ComboboxControl(driver=self.driver, id="ent_gender").values()
+    def get_sex_list(self) -> list[str]:
+        return ComboboxControl(driver=self.driver, id="ent_sex").values()
 
     def get_club_list(self) -> list[str]:
         return ComboboxControl(driver=self.driver, id="ent_clubId").values()
@@ -102,7 +102,7 @@ class AddEntryDialog:
         self,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
-        gender: Optional[str] = None,
+        sex: Optional[str] = None,
         year: Optional[str] = None,
         chip: Optional[str] = None,
         club_name: Optional[str] = None,
@@ -118,8 +118,8 @@ class AddEntryDialog:
             TextControl(driver=p, id="ent_firstName").set_text(text=first_name)
         if last_name is not None:
             TextControl(driver=p, id="ent_lastName").set_text(text=last_name)
-        if gender is not None:
-            ComboboxControl(driver=p, id="ent_gender").select_by_text(text=gender)
+        if sex is not None:
+            ComboboxControl(driver=p, id="ent_sex").select_by_text(text=sex)
         if year is not None:
             NumberControl(driver=p, id="ent_year").set_text(text=year)
         if chip is not None:

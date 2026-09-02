@@ -34,7 +34,7 @@ def competitor(main_page: MainPage, delete_competitors: None) -> None:
     dialog.enter_values(
         first_name="Annalena",
         last_name="Baerbock",
-        gender="F",
+        sex="F",
         year="1980",
         chip="7379879",
         club="",

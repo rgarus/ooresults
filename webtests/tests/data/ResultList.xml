@@ -147,9 +147,9 @@
       </Organisation>
       <Result>
         <StartTime>2023-01-15T10:20:01+01:00</StartTime>
-        <FinishTime>2023-01-15T10:36:12+01:00</FinishTime>
-        <Time>971</Time>
-        <TimeBehind>170</TimeBehind>
+        <FinishTime>2023-01-15T10:35:54+01:00</FinishTime>
+        <Time>953</Time>
+        <TimeBehind>152</TimeBehind>
         <Position>2</Position>
         <Status>OK</Status>
         <SplitTime>

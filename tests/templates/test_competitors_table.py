@@ -20,6 +20,7 @@
 import pytest
 
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.utils import render
 from tests.templates.conftest import Html
 
@@ -31,7 +32,7 @@ def competitors() -> list[CompetitorType]:
             id=112,
             first_name="Barbara",
             last_name="Merkel",
-            gender=None,
+            sex=None,
             year=None,
             chip=None,
             club_id=None,
@@ -41,7 +42,7 @@ def competitors() -> list[CompetitorType]:
             id=113,
             first_name="Angela",
             last_name="Merkel",
-            gender=None,
+            sex=None,
             year=None,
             chip=None,
             club_id=None,
@@ -51,7 +52,7 @@ def competitors() -> list[CompetitorType]:
             id=114,
             first_name="Manfred",
             last_name="Merkel",
-            gender=None,
+            sex=None,
             year=None,
             chip=None,
             club_id=None,
@@ -71,7 +72,7 @@ def test_competitor_list_is_empty() -> None:
     assert [h.text for h in headers] == [
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -94,7 +95,7 @@ def test_competitor_list_is_not_empty(competitors: list[CompetitorType]) -> None
     assert [h.text for h in headers] == [
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -143,8 +144,8 @@ def test_competitor_list_is_not_empty(competitors: list[CompetitorType]) -> None
     ]
 
 
-def test_gender_is_unknown(competitors: list[CompetitorType]) -> None:
-    competitors[0].gender = ""
+def test_sex_is_unknown(competitors: list[CompetitorType]) -> None:
+    competitors[0].sex = None
     html = Html(
         text=render.competitors_table(
             view="competitors", view_comp_list=[("Competitors", competitors)]
@@ -155,8 +156,8 @@ def test_gender_is_unknown(competitors: list[CompetitorType]) -> None:
     assert elem.text is None
 
 
-def test_gender_is_female(competitors: list[CompetitorType]) -> None:
-    competitors[0].gender = "F"
+def test_sex_is_female(competitors: list[CompetitorType]) -> None:
+    competitors[0].sex = Sex.FEMALE
     html = Html(
         text=render.competitors_table(
             view="competitors", view_comp_list=[("Competitors", competitors)]
@@ -167,8 +168,8 @@ def test_gender_is_female(competitors: list[CompetitorType]) -> None:
     assert elem.text == "F"
 
 
-def test_gender_is_male(competitors: list[CompetitorType]) -> None:
-    competitors[0].gender = "M"
+def test_sex_is_male(competitors: list[CompetitorType]) -> None:
+    competitors[0].sex = Sex.MALE
     html = Html(
         text=render.competitors_table(
             view="competitors", view_comp_list=[("Competitors", competitors)]

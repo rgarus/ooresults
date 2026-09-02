@@ -12,7 +12,7 @@
                 <tr class="dt">
                     <th class="dt">First name</th>
                     <th class="dt">Last name</th>
-                    <th class="dt">Gender</th>
+                    <th class="dt">Sex</th>
                     <th class="dt">Year</th>
                     <th class="dt">Chip</th>
                     <th class="dt">Club</th>
@@ -23,7 +23,7 @@
                 <tr class="dt" data-id="${competitor.id}">
                     <td class="dt">${competitor.first_name}</td>
                     <td class="dt">${competitor.last_name}</td>
-                    <td class="dt">${competitor.gender}</td>
+                    <td class="dt">${competitor.sex.value if competitor.sex is not None else ""}</td>
                     <td class="dt">${competitor.year}</td>
                     <td class="dt" style="text-align:right">${competitor.chip}</td>
                     <td class="dt">${competitor.club_name}</td>

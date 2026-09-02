@@ -55,7 +55,7 @@ Last name
    Nachname des Teilnehmers.
 
 
-Gender
+Sex
 
    Geschlecht des Teilnehmers (F = weiblich, M = männlich).
    
@@ -403,7 +403,7 @@ Last name
    Nachname des Wettkämpfers.
 
 
-Gender
+Sex
 
    Geschlecht des Wettkämpfers (F = weiblich, M = männlich).
    

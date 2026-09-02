@@ -25,6 +25,7 @@ import bottle
 
 from ooresults import model
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.plugins import iof_competitor_list
 from ooresults.repo.repo import CompetitorUsedError
 from ooresults.repo.repo import ConstraintError
@@ -79,7 +80,7 @@ def post_add() -> str | bottle.HTTPResponse:
                 first_name=data.first_name,
                 last_name=data.last_name,
                 club_id=int(data.club_id) if data.club_id != "" else None,
-                gender=data.gender,
+                sex=Sex(data.sex) if data.sex else None,
                 year=int(data.year) if data.year != "" else None,
                 chip=data.chip.strip(),
             )
@@ -89,7 +90,7 @@ def post_add() -> str | bottle.HTTPResponse:
                 first_name=data.first_name,
                 last_name=data.last_name,
                 club_id=int(data.club_id) if data.club_id != "" else None,
-                gender=data.gender,
+                sex=Sex(data.sex) if data.sex else None,
                 year=int(data.year) if data.year != "" else None,
                 chip=data.chip.strip(),
             )

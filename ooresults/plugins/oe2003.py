@@ -28,6 +28,7 @@ from unidecode import unidecode
 from ooresults.otypes import result_type
 from ooresults.otypes import start_type
 from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SpStatus
@@ -106,7 +107,7 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
 
             year = str(e.year) if e.year is not None else ""
 
-            gender = {None: "", "": "", "F": "W", "M": "M"}[e.gender]
+            sex = {None: "", Sex.FEMALE: "W", Sex.MALE: "M"}[e.sex]
             not_competing = "X" if e.not_competing else "0"
 
             start_time = ""
@@ -139,7 +140,7 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
                     cp1252(last_name),  # Nachname
                     cp1252(first_name),  # Vorname
                     year,  # Jg
-                    gender,  # G
+                    sex,  # G
                     "",  # Block
                     not_competing,  # AK
                     start_time,  # Start
@@ -203,10 +204,10 @@ def parse(content: bytes) -> list[dict[str, Any]]:
 
             for i, v in enumerate(values):
                 if v in ["Gender", "G", "S"]:
-                    column_nr["gender"] = i
+                    column_nr["sex"] = i
                     break
             else:
-                raise RuntimeError("Gender column not found")
+                raise RuntimeError("Sex column not found")
 
             for i, v in enumerate(values):
                 if v in ["Year", "Jg", "YB"]:
@@ -334,13 +335,13 @@ def parse(content: bytes) -> list[dict[str, Any]]:
                             r["year"] = int(item)
                     except Exception:
                         r["year"] = None
-                elif column == "gender":
+                elif column == "sex":
                     if item == "":
-                        r["gender"] = ""
+                        r["sex"] = None
                     elif item in ["f", "F", "w", "W", "d", "D"]:
-                        r["gender"] = "F"
+                        r["sex"] = Sex.FEMALE
                     else:
-                        r["gender"] = "M"
+                        r["sex"] = Sex.MALE
                 elif column == "AK":
                     r["not_competing"] = item == "X"
                 elif column == "text_1":
@@ -390,8 +391,8 @@ def parse(content: bytes) -> list[dict[str, Any]]:
                 result.status = ResultStatus.INACTIVE
 
             # SportSoftware use column "club", but OOnet use column "club1"
-            # In contrast to SportSoftware, OOnet does not write any gender information
-            if r["gender"] == "" and r["club1"] != "":
+            # In contrast to SportSoftware, OOnet does not write any sex information
+            if r["sex"] is None and r["club1"] != "":
                 r["club"] = r["club1"]
             # we remove club1 key, it is not needed outside this function
             del r["club1"]

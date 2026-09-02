@@ -29,6 +29,7 @@ from lxml.builder import ElementMaker
 from ooresults.otypes import result_type
 from ooresults.otypes import start_type
 from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import ResultStatus
@@ -140,8 +141,8 @@ def create_result_list(
                     GIVEN(entry.first_name),
                 ),
             )
-            if entry.gender:
-                person.set("sex", entry.gender)
+            if entry.sex:
+                person.set("sex", entry.sex.value)
             if entry.year is not None:
                 person.append(BIRTHDATE(str(entry.year) + "-01-01"))
             pr.append(person)
@@ -272,7 +273,7 @@ def parse_result_list(
                 "class_": class_,
                 "club": "",
                 "chip": "",
-                "gender": "",
+                "sex": None,
                 "year": None,
                 "not_competing": False,
                 "result": result_type.PersonRaceResult(),
@@ -280,7 +281,7 @@ def parse_result_list(
 
             e_person = pr.find("Person", namespaces=namespaces)
             if e_person.get("sex") is not None:
-                r["gender"] = e_person.get("sex")
+                r["sex"] = Sex(e_person.get("sex"))
             e_birthdate = pr.find("Person/BirthDate", namespaces=namespaces)
             if e_birthdate is not None:
                 r["year"] = int(e_birthdate.text[0:4])

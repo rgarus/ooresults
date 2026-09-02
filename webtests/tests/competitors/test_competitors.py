@@ -68,7 +68,7 @@ def test_if_competitor_page_is_selected_then_the_table_header_is_displayed(
     assert competitor_page.table.headers() == [
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -83,7 +83,7 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(
     dialog.enter_values(
         first_name="Christian",
         last_name="Lindner",
-        gender="M",
+        sex="M",
         year="1979",
         chip="7754987",
         club="",
@@ -94,7 +94,7 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender="M",
+        sex="M",
         year="1969",
         chip="7509749",
         club="",

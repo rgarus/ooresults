@@ -154,7 +154,7 @@ def competitor_1_id(db: SqliteRepo) -> int:
             first_name="Angela",
             last_name="Merkel",
             club_id=None,
-            gender="",
+            sex=None,
             year=None,
             chip="",
         )
@@ -196,7 +196,7 @@ def competitor_2_id(db: SqliteRepo) -> int:
             first_name="Claudia",
             last_name="Merkel",
             club_id=None,
-            gender="",
+            sex=None,
             year=None,
             chip="",
         )
@@ -238,7 +238,7 @@ def competitor_3_id(db: SqliteRepo) -> int:
             first_name="Birgit",
             last_name="Merkel",
             club_id=None,
-            gender="",
+            sex=None,
             year=None,
             chip="",
         )
@@ -280,7 +280,7 @@ def competitor_4_id(db: SqliteRepo) -> int:
             first_name="Birgit",
             last_name="Derkel",
             club_id=None,
-            gender="",
+            sex=None,
             year=None,
             chip="",
         )

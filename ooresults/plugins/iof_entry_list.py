@@ -24,6 +24,7 @@ from lxml import etree
 from lxml.builder import ElementMaker
 
 from ooresults.otypes import result_type
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.event_type import EventType
 
@@ -76,8 +77,8 @@ def create_entry_list(event: EventType, entries: list[EntryType]) -> bytes:
                 GIVEN(e.first_name),
             ),
         )
-        if e.gender:
-            person.set("sex", e.gender)
+        if e.sex:
+            person.set("sex", e.sex.value)
         if e.year is not None:
             person.append(BIRTHDATE(str(e.year) + "-01-01"))
         pe.append(person)
@@ -127,7 +128,7 @@ def parse_entry_list(content: bytes) -> tuple[dict, list[dict]]:
             "class_": "",
             "club": "",
             "chip": "",
-            "gender": "",
+            "sex": None,
             "year": None,
             "result": result_type.PersonRaceResult(),
         }
@@ -137,7 +138,7 @@ def parse_entry_list(content: bytes) -> tuple[dict, list[dict]]:
 
         e_person = pe.find("Person", namespaces=namespaces)
         if e_person.get("sex") is not None:
-            e["gender"] = e_person.get("sex")
+            e["sex"] = Sex(e_person.get("sex"))
         e_birthdate = pe.find("Person/BirthDate", namespaces=namespaces)
         if e_birthdate is not None:
             e["year"] = int(e_birthdate.text[0:4])

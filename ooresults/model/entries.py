@@ -29,6 +29,7 @@ from ooresults import model
 from ooresults.model import cached_result
 from ooresults.otypes import result_type
 from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryBaseDataType
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
@@ -86,7 +87,7 @@ def import_entries(
                 else:
                     club_id = model.db.add_club(c["club"])
 
-            gender = c["gender"] if "gender" in c else ""
+            sex = c["sex"] if "sex" in c else None
             year = c["year"] if "year" in c else None
             competitor = model.db.get_competitor_by_name(
                 first_name=c["first_name"],
@@ -94,16 +95,16 @@ def import_entries(
             )
             if competitor:
                 competitor_id = competitor.id
-                # update gender and year in competitor
-                gender = gender if gender != "" else competitor.gender
+                # update sex and year in competitor
+                sex = sex if sex is not None else competitor.sex
                 year = year if year is not None else competitor.year
-                if gender != competitor.gender or year != competitor.year:
+                if sex != competitor.sex or year != competitor.year:
                     model.db.update_competitor(
                         id=competitor.id,
                         first_name=competitor.first_name,
                         last_name=competitor.last_name,
                         club_id=competitor.club_id,
-                        gender=gender,
+                        sex=sex,
                         year=year,
                         chip=competitor.chip,
                     )
@@ -112,7 +113,7 @@ def import_entries(
                     first_name=c["first_name"],
                     last_name=c["last_name"],
                     club_id=club_id,
-                    gender=gender,
+                    sex=sex,
                     year=year,
                     chip=c["chip"] if "chip" in c else "",
                 )
@@ -131,7 +132,7 @@ def import_entries(
                     class_params=class_params,
                     start_time=c["result"].start_time,
                     year=year,
-                    gender=gender if gender != "" else None,
+                    sex=sex,
                 )
 
             entries_by_name = model.db.get_entries_by_name(
@@ -240,7 +241,7 @@ def add_or_update_entry(
     competitor_id: Optional[int],
     first_name: str,
     last_name: str,
-    gender: str,
+    sex: Optional[Sex],
     year: Optional[int],
     class_id: int,
     club_id: Optional[int],
@@ -267,8 +268,8 @@ def add_or_update_entry(
                     )
                     if com:
                         competitor_id = com.id
-                        if gender == "":
-                            gender = com.gender
+                        if sex is None:
+                            sex = com.sex
                         if year is None:
                             year = com.year
                         if chip == "":
@@ -280,7 +281,7 @@ def add_or_update_entry(
                             first_name=first_name,
                             last_name=last_name,
                             club_id=club_id,
-                            gender=gender,
+                            sex=sex,
                             year=year,
                             chip=chip,
                         )
@@ -294,7 +295,7 @@ def add_or_update_entry(
                     id=competitor.id,
                     first_name=first_name,
                     last_name=last_name,
-                    gender=gender,
+                    sex=sex,
                     year=year,
                     club_id=competitor.club_id,
                     chip=competitor.chip,
@@ -338,7 +339,7 @@ def add_or_update_entry(
                     id=competitor.id,
                     first_name=first_name,
                     last_name=last_name,
-                    gender=gender,
+                    sex=sex,
                     year=year,
                     club_id=competitor.club_id,
                     chip=competitor.chip,
@@ -400,7 +401,7 @@ def add_or_update_entry(
                 class_params=class_params,
                 start_time=start_time,
                 year=year,
-                gender=gender if gender != "" else None,
+                sex=sex,
             )
             model.db.update_entry_result(
                 id=id,
@@ -534,7 +535,7 @@ def edit_entry_result(
             class_params=class_params,
             start_time=entry.start.start_time,
             year=int(entry.year) if entry.year is not None else None,
-            gender=entry.gender,
+            sex=entry.sex,
         )
 
         # store result

@@ -23,6 +23,7 @@ from lxml import etree
 from lxml.builder import ElementMaker
 
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
@@ -59,8 +60,8 @@ def create_competitor_list(competitors: list[CompetitorType]) -> bytes:
                 GIVEN(c.first_name),
             ),
         )
-        if c.gender:
-            person.set("sex", c.gender)
+        if c.sex:
+            person.set("sex", c.sex.value)
         if c.year is not None:
             person.append(BIRTHDATE(str(c.year) + "-01-01"))
         competitor.append(person)
@@ -97,7 +98,7 @@ def parse_competitor_list(content: bytes) -> list[dict]:
             "last_name": "",
             "club": "",
             "chip": "",
-            "gender": "",
+            "sex": None,
             "year": None,
         }
 
@@ -106,7 +107,7 @@ def parse_competitor_list(content: bytes) -> list[dict]:
 
         e_person = c.find("Person", namespaces=namespaces)
         if e_person.get("sex") is not None:
-            r["gender"] = e_person.get("sex")
+            r["sex"] = Sex(e_person.get("sex"))
         e_birthdate = c.find("Person/BirthDate", namespaces=namespaces)
         if e_birthdate is not None:
             r["year"] = int(e_birthdate.text[0:4])

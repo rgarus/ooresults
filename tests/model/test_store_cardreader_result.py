@@ -25,6 +25,7 @@ import pytest
 
 from ooresults import model
 from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import CardReaderMessage
 from ooresults.otypes.result_type import PersonRaceResult
@@ -112,7 +113,7 @@ def competitor_1_id(db: SqliteRepo) -> int:
             first_name="Robert",
             last_name="Lewandowski",
             club_id=None,
-            gender="",
+            sex=None,
             year=None,
             chip="",
         )
@@ -125,7 +126,7 @@ def competitor_2_id(db: SqliteRepo) -> int:
             first_name="Jogi",
             last_name="Löw",
             club_id=None,
-            gender="M",
+            sex=Sex.MALE,
             year=None,
             chip="",
         )
@@ -138,7 +139,7 @@ def competitor_3_id(db: SqliteRepo) -> int:
             first_name="Angela",
             last_name="Merkel",
             club_id=None,
-            gender="F",
+            sex=Sex.FEMALE,
             year=1957,
             chip="1234567",
         )
@@ -926,7 +927,7 @@ def test_store_as_new_entry_if_another_result_exists(
         competitor_id=None,
         first_name=None,
         last_name=None,
-        gender=None,
+        sex=None,
         year=None,
         class_id=None,
         class_name=None,
@@ -1121,7 +1122,7 @@ def test_store_as_new_entry_if_cardnumber_is_unknown(
         competitor_id=None,
         first_name=None,
         last_name=None,
-        gender=None,
+        sex=None,
         year=None,
         class_id=None,
         class_name=None,
@@ -1245,7 +1246,7 @@ def test_store_as_new_entry_if_cardnumber_exist_several_times(
         competitor_id=None,
         first_name=None,
         last_name=None,
-        gender=None,
+        sex=None,
         year=None,
         class_id=None,
         class_name=None,
@@ -1444,7 +1445,7 @@ def test_store_as_new_entry_if_cardnumber_is_unique_with_another_result(
         competitor_id=None,
         first_name=None,
         last_name=None,
-        gender=None,
+        sex=None,
         year=None,
         class_id=None,
         class_name=None,

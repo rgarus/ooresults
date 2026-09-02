@@ -17,11 +17,11 @@
                 <td><input id="com_lastName" name="last_name" type="text" value="${competitor.last_name if competitor else ''}" required oninput="mark_label(this)"/></td>
             </tr>
             <tr>
-                <th class="input-header"><label for="com_gender">Gender</label></th>
+                <th class="input-header"><label for="com_sex">Sex</label></th>
                 <td>
-                    <select id="com_gender" name="gender" oninput="mark_label(this)">
+                    <select id="com_sex" name="sex" oninput="mark_label(this)">
                     % for value in ["", "F", "M"]:
-                        % if value == (competitor.gender if competitor and competitor.gender else ""):
+                        % if value == (competitor.sex.value if competitor and competitor.sex is not None else ""):
                             <option value="${value}" selected>${value}</option>
                         % else:
                             <option value="${value}">${value}</option>

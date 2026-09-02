@@ -38,7 +38,7 @@ def test_if_an_entry_is_added_with_required_data_then_an_additional_entry_is_dis
     dialog.check_values(
         first_name="",
         last_name="",
-        gender="",
+        sex="",
         year="",
         chip="",
         club_name="",
@@ -87,7 +87,7 @@ def test_if_adding_an_entry_is_cancelled_then_no_additional_entry_is_displayed(
     dialog.enter_values(
         first_name="Annalena",
         last_name="Baerbock",
-        gender="F",
+        sex="F",
         year="1980",
         chip="7379879",
         club_name="",
@@ -114,7 +114,7 @@ def test_if_an_entry_is_added_with_all_data_then_an_additional_entry_is_displaye
     dialog.check_values(
         first_name="",
         last_name="",
-        gender="",
+        sex="",
         year="",
         chip="",
         club_name="",
@@ -126,7 +126,7 @@ def test_if_an_entry_is_added_with_all_data_then_an_additional_entry_is_displaye
     dialog.enter_values(
         first_name="Annalena",
         last_name="Baerbock",
-        gender="F",
+        sex="F",
         year="1980",
         chip="7379879",
         club_name="",
@@ -262,9 +262,9 @@ def test_if_an_already_registered_competitor_is_added_with_not_competing_false_t
     ]
 
 
-@pytest.mark.parametrize("gender", ["", "F", "M"])
-def test_if_an_entry_is_added_you_can_choose_between_gender_unknown_and_female_and_male(
-    gender: str,
+@pytest.mark.parametrize("sex", ["", "F", "M"])
+def test_if_an_entry_is_added_you_can_choose_between_sex_unknown_or_female_or_male(
+    sex: str,
     main_page: MainPage,
     event: str,
     add_classes: str,
@@ -272,12 +272,12 @@ def test_if_an_entry_is_added_you_can_choose_between_gender_unknown_and_female_a
 ) -> None:
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.add()
-    assert dialog.get_gender_list() == ["", "F", "M"]
+    assert dialog.get_sex_list() == ["", "F", "M"]
 
     dialog.enter_values(
         first_name="Annalena",
         last_name="Baerbock",
-        gender=gender,
+        sex=sex,
         class_name="Bahn A - Frauen",
     )
     dialog.submit()
@@ -293,7 +293,7 @@ def test_if_an_entry_is_added_you_can_choose_between_gender_unknown_and_female_a
         "",
         "Annalena",
         "Baerbock",
-        gender,
+        sex,
         "",
         "",
         "",
@@ -370,7 +370,7 @@ def test_if_several_entries_are_added_then_the_added_entries_are_displayed(
     dialog.enter_values(
         first_name="Olaf",
         last_name="Scholz",
-        gender="M",
+        sex="M",
         year="1958",
         chip="7579050",
         club_name="",
@@ -385,7 +385,7 @@ def test_if_several_entries_are_added_then_the_added_entries_are_displayed(
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender="M",
+        sex="M",
         year="1969",
         chip="7509749",
         club_name="",

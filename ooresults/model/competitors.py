@@ -17,10 +17,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import Optional
+
 from ooresults import model
 from ooresults.model import cached_result
 from ooresults.otypes.competitor_type import CompetitorBaseDataType
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.repo.repo import TransactionMode
 
 
@@ -34,26 +37,41 @@ def get_competitor(id: int) -> CompetitorType:
         return model.db.get_competitor(id=id)
 
 
-def add_competitor(first_name, last_name, club_id, gender, year, chip):
+def add_competitor(
+    first_name: str,
+    last_name: str,
+    club_id: Optional[int],
+    sex: Optional[Sex],
+    year: Optional[int],
+    chip: str,
+) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.add_competitor(
             first_name=first_name,
             last_name=last_name,
             club_id=club_id,
-            gender=gender,
+            sex=sex,
             year=year,
             chip=chip,
         )
 
 
-def update_competitor(id, first_name, last_name, club_id, gender, year, chip):
+def update_competitor(
+    id: int,
+    first_name: str,
+    last_name: str,
+    club_id: Optional[int],
+    sex: Optional[Sex],
+    year: Optional[int],
+    chip: str,
+) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.update_competitor(
             id=id,
             first_name=first_name,
             last_name=last_name,
             club_id=club_id,
-            gender=gender,
+            sex=sex,
             year=year,
             chip=chip,
         )
@@ -84,9 +102,9 @@ def import_competitors(competitors: list[dict]) -> None:
                 last_name=c["last_name"],
             )
             if c_name:
-                gender = c_name.gender
-                if "gender" in c and c["gender"]:
-                    gender = c["gender"]
+                sex = c_name.sex
+                if "sex" in c and c["sex"]:
+                    sex = c["sex"]
                 year = c_name.year
                 if "year" in c and c["year"] is not None:
                     year = c["year"]
@@ -98,7 +116,7 @@ def import_competitors(competitors: list[dict]) -> None:
                     first_name=c_name.first_name,
                     last_name=c_name.last_name,
                     club_id=c_name.club_id if club_id is None else club_id,
-                    gender=gender,
+                    sex=sex,
                     year=year,
                     chip=chip,
                 )
@@ -109,8 +127,8 @@ def import_competitors(competitors: list[dict]) -> None:
                         first_name=c["first_name"],
                         last_name=c["last_name"],
                         club_id=club_id,
-                        gender=c["gender"] if "gender" in c else "",
-                        year=c["year"] if "year" in c else "",
+                        sex=c["sex"] if "sex" in c else None,
+                        year=c["year"] if "year" in c else None,
                         chip=c["chip"] if "chip" in c else "",
                     )
                 )

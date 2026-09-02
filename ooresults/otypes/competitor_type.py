@@ -18,14 +18,31 @@
 
 
 import dataclasses
+import enum
 from typing import Optional
+
+
+@enum.unique
+class Sex(enum.Enum):
+    """Sex according to IOF XML 3.0 attribute 'sex'.
+
+    FEMALE:
+        The person is female.
+
+    MALE:
+        The person is male.
+
+    """
+
+    FEMALE = "F"
+    MALE = "M"
 
 
 @dataclasses.dataclass
 class CompetitorBaseDataType:
     first_name: str
     last_name: str
-    gender: Optional[str]
+    sex: Optional[Sex]
     year: Optional[int]
     chip: Optional[str]
     club_id: Optional[int]
@@ -36,7 +53,7 @@ class CompetitorType:
     id: int
     first_name: str
     last_name: str
-    gender: Optional[str]
+    sex: Optional[Sex]
     year: Optional[int]
     chip: Optional[str]
     club_id: Optional[int]

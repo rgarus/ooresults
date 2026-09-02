@@ -30,7 +30,7 @@ def test_if_a_competitor_is_deleted_then_the_competitor_is_no_longer_displayed(
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender="M",
+        sex="M",
         year="1969",
         chip="7509749",
         club="",
@@ -70,7 +70,7 @@ def test_if_a_competitor_is_deleted_then_no_competitor_is_selected(
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender="M",
+        sex="M",
         year="1969",
         chip="7509749",
         club="",

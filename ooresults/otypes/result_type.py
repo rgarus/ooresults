@@ -31,6 +31,7 @@ import fastclasses_json
 
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_params import VoidedLeg
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.handicap import Handicap
 
 
@@ -221,7 +222,7 @@ class PersonRaceResult(fastclasses_json.JSONMixin):
         class_params: ClassParams,
         start_time: Optional[datetime] = None,
         year: Optional[int] = None,
-        gender: Optional[str] = None,
+        sex: Optional[Sex] = None,
     ) -> None:
         #
         # If list of controls is empty and result is not inactive. active or finished,
@@ -467,7 +468,7 @@ class PersonRaceResult(fastclasses_json.JSONMixin):
                     self.time -= run_time - t1
 
         # compute handicap factor
-        handicap_factor = Handicap.factor(female=gender == "F", age=age)
+        handicap_factor = Handicap.factor(female=sex == Sex.FEMALE, age=age)
         if class_params.apply_handicap_rule:
             self.extensions["factor"] = handicap_factor
 

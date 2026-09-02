@@ -106,7 +106,7 @@ def competitor_id(db: SqliteRepo) -> int:
             first_name="Angela",
             last_name="Merkel",
             club_id=None,
-            gender="",
+            sex=None,
             year=None,
             chip="",
         )

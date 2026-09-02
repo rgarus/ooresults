@@ -185,7 +185,7 @@ t = {
                 <th class="dth">Rank</th>
                 <th class="dth">First name</th>
                 <th class="dth">Last name</th>
-                <th class="dth">Gender</th>
+                <th class="dth">Sex</th>
                 <th class="dth">Year</th>
                 <th class="dth">Chip</th>
                 % if view != "clubs":
@@ -243,7 +243,7 @@ t = {
                             <td class="dte" style="text-align: right;">${format_rank(rank, entry.not_competing)}</td>
                             <td class="dte">${entry.first_name}</td>
                             <td class="dte">${entry.last_name}</td>
-                            <td class="dte">${entry.gender}</td>
+                            <td class="dte">${entry.sex.value if entry.sex is not None else ""}</td>
                             <td class="dte">${entry.year}</td>
                             <td class="dte" style="text-align:right;">${format_card(entry.chip)}</td>
                             % if view != "clubs":

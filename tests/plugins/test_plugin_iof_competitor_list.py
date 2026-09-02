@@ -18,6 +18,7 @@
 
 
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.plugins import iof_competitor_list
 
 
@@ -43,7 +44,7 @@ def test_import_name() -> None:
             "last_name": "Merkel",
             "club": "",
             "chip": "",
-            "gender": "",
+            "sex": None,
             "year": None,
         }
     ]
@@ -69,7 +70,7 @@ def test_export_name() -> None:
                 id=1,
                 first_name="Angela",
                 last_name="Merkel",
-                gender=None,
+                sex=None,
                 year=None,
                 chip=None,
                 club_id=None,
@@ -110,7 +111,7 @@ def test_import_full() -> None:
             "last_name": "Merkel",
             "club": "OC Kanzleramt",
             "chip": "1234567",
-            "gender": "F",
+            "sex": Sex.FEMALE,
             "year": 1972,
         }
     ]
@@ -141,7 +142,7 @@ def test_export_full() -> None:
                 id=1,
                 first_name="Angela",
                 last_name="Merkel",
-                gender="F",
+                sex=Sex.FEMALE,
                 year=1972,
                 chip="1234567",
                 club_id=2,

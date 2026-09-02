@@ -79,7 +79,7 @@ def test_if_entry_page_is_selected_then_the_table_header_is_displayed(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -98,7 +98,7 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(
     dialog.enter_values(
         first_name="Olaf",
         last_name="Scholz",
-        gender="M",
+        sex="M",
         year="1959",
         chip="7579050",
         club_name="",
@@ -113,7 +113,7 @@ def test_if_filter_is_set_then_only_matching_rows_are_displayed(
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender="M",
+        sex="M",
         year="1969",
         chip="7509749",
         club_name="",

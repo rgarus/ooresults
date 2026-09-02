@@ -22,6 +22,7 @@ from datetime import timezone
 
 from ooresults.otypes import result_type
 from ooresults.otypes import start_type
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SpStatus
 from ooresults.plugins.oe2003 import parse
@@ -55,7 +56,7 @@ def test_separator_comma() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -76,7 +77,7 @@ def test_separator_semicolon() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -97,7 +98,7 @@ def test_separator_tab() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -118,7 +119,7 @@ def test_quoted_data() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -139,7 +140,7 @@ def test_quote_within_quotes() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -160,7 +161,7 @@ def test_separator_within_quotes() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -181,7 +182,7 @@ def test_newline_within_quotes() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -202,7 +203,7 @@ def test_status_ok_and_defined_time() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(status=ResultStatus.OK, time=10),
@@ -221,7 +222,7 @@ def test_status_ok_but_no_time() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -242,7 +243,7 @@ def test_status_dns() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -263,7 +264,7 @@ def test_status_dnf() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -284,7 +285,7 @@ def test_status_mp() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -305,7 +306,7 @@ def test_status_disq() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -326,7 +327,7 @@ def test_status_over_time() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -337,7 +338,7 @@ def test_status_over_time() -> None:
     ]
 
 
-def test_gender_male() -> None:
+def test_sex_male() -> None:
     value = "c,v,n,,,,M,,,4,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
@@ -347,7 +348,7 @@ def test_gender_male() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "M",
+            "sex": Sex.MALE,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -358,7 +359,7 @@ def test_gender_male() -> None:
     ]
 
 
-def test_gender_female() -> None:
+def test_sex_female() -> None:
     value = "c,v,n,,,,F,,,4,,,"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
@@ -368,7 +369,7 @@ def test_gender_female() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "F",
+            "sex": Sex.FEMALE,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -389,7 +390,7 @@ def test_club_name() -> None:
             "class_": "",
             "club": "OC Green",
             "chip": "c",
-            "gender": "F",
+            "sex": Sex.FEMALE,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -401,8 +402,8 @@ def test_club_name() -> None:
 
 
 # orienteeringonline.net uses another column for the club name,
-# but in opposite to oe2003 is does not write gender data
-def test_club_name_if_no_gender_is_defined() -> None:
+# but in opposite to oe2003 is does not write sex data
+def test_club_name_if_no_sex_is_defined() -> None:
     value = "c,v,n,,,,,,,4,,OC Red,OC Green"
     content = bytes(",".join(header) + "\n" + value, encoding="utf-8")
     assert parse(content) == [
@@ -412,7 +413,7 @@ def test_club_name_if_no_gender_is_defined() -> None:
             "class_": "",
             "club": "OC Red",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -433,7 +434,7 @@ def test_year2() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": 2015,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -454,7 +455,7 @@ def test_year4() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": 1915,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -475,7 +476,7 @@ def test_not_competing_is_false() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -496,7 +497,7 @@ def test_not_competing_is_true() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": True,
             "result": result_type.PersonRaceResult(
@@ -517,7 +518,7 @@ def test_start_time() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -540,7 +541,7 @@ def test_relative_start_time_h_m_s() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -563,7 +564,7 @@ def test_relative_start_time_m_s() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -586,7 +587,7 @@ def test_finish_time() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -610,7 +611,7 @@ def test_relative_finish_time_h_m_s() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -634,7 +635,7 @@ def test_relative_finish_time_m_s() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -658,7 +659,7 @@ def test_start_and_finish_time() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -686,7 +687,7 @@ def test_start_time_and_status_mp() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -712,7 +713,7 @@ def test_start_time_and_status_dnf() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -738,7 +739,7 @@ def test_start_time_and_status_over_time() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -766,7 +767,7 @@ def test_split_time() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -792,7 +793,7 @@ def test_split_time_without_punch() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -820,7 +821,7 @@ def test_two_split_times() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -847,7 +848,7 @@ def test_split_times_with_closing_separator() -> None:
             "class_": "",
             "club": "",
             "chip": "c",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(
@@ -877,7 +878,7 @@ def test_import_several_lines() -> None:
             "class_": "",
             "club": "",
             "chip": "c1",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(status=ResultStatus.OK, time=11),
@@ -889,7 +890,7 @@ def test_import_several_lines() -> None:
             "class_": "",
             "club": "",
             "chip": "c2",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(status=ResultStatus.OK, time=12),
@@ -901,7 +902,7 @@ def test_import_several_lines() -> None:
             "class_": "",
             "club": "",
             "chip": "c3",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(status=ResultStatus.OK, time=13),
@@ -925,7 +926,7 @@ def test_do_not_import_special_names() -> None:
             "class_": "",
             "club": "",
             "chip": "c2",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "result": result_type.PersonRaceResult(status=ResultStatus.OK, time=12),
@@ -955,7 +956,7 @@ def test_import_extra_fields() -> None:
             "class_": "",
             "club": "",
             "chip": "c1",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "fields": {0: "A", 1: "B", 2: "C"},
@@ -968,7 +969,7 @@ def test_import_extra_fields() -> None:
             "class_": "",
             "club": "",
             "chip": "c2",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "fields": {0: "", 1: "X", 2: ""},
@@ -981,7 +982,7 @@ def test_import_extra_fields() -> None:
             "class_": "",
             "club": "",
             "chip": "c3",
-            "gender": "",
+            "sex": None,
             "year": None,
             "not_competing": False,
             "fields": {0: "", 1: "Y", 2: "Z"},

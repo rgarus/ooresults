@@ -30,6 +30,7 @@ import tzlocal
 import ooresults.pdf.result
 import ooresults.pdf.splittimes
 from ooresults import model
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.result_type import ResultStatus
@@ -367,7 +368,7 @@ def post_add() -> str | bottle.HTTPResponse:
             ),
             first_name=data.first_name,
             last_name=data.last_name,
-            gender=data.gender,
+            sex=Sex(data.sex) if data.sex else None,
             year=int(data.year) if data.year != "" else None,
             class_id=int(data.class_id),
             club_id=int(data.club_id) if data.club_id != "" else None,

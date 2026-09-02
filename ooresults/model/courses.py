@@ -161,7 +161,7 @@ def update_course(
                         class_params=class_.params,
                         start_time=entry.start.start_time,
                         year=entry.year,
-                        gender=entry.gender if entry.gender != "" else None,
+                        sex=entry.sex,
                     )
                     model.db.update_entry_result(
                         id=entry.id,

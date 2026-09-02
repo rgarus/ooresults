@@ -22,6 +22,7 @@ from datetime import timezone
 
 import pytest
 
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
@@ -64,7 +65,7 @@ def ranked_entry_full(event: EventType) -> RankedEntryType:
             competitor_id=123,
             first_name="Angela",
             last_name="Merkel",
-            gender="F",
+            sex=Sex.FEMALE,
             year=1957,
             class_id=15,
             class_name="Elite Women",
@@ -116,7 +117,7 @@ def test_entry_list_with_view_is_entries(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -194,7 +195,7 @@ def test_entry_list_with_view_is_classes(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -270,7 +271,7 @@ def test_entry_list_with_view_is_clubs(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Class",
@@ -412,7 +413,7 @@ def test_entry_list_with_view_is_states(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -490,7 +491,7 @@ def test_entry_list_with_view_is_competitors(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",

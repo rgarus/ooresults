@@ -14,6 +14,8 @@ Changed
 ^^^^^^^
 
 - Imported SI cards are no longer displayed in a separate web browser "SI Reader" window, but as part of the ooresults window. If you wish to view the imported SI cards in a separate web browser window, as before, you must open ooresults in two web browser windows.
+- The ‘Gender’ column in the participants and entries tables has been replaced by the ‘Sex’ column.
+- Minimum database schema version has been changed to 16.
 
 
 [0.4.9] - 2026-07-16

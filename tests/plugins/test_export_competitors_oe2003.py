@@ -21,6 +21,7 @@ import datetime
 
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
@@ -207,7 +208,7 @@ def test_year() -> None:
     assert content == bytes(header + "\r\n" + v1, encoding=encoding)
 
 
-def test_gender() -> None:
+def test_sex() -> None:
     content = oe2003.create(
         entries=[
             EntryType(
@@ -216,7 +217,7 @@ def test_gender() -> None:
                 competitor_id=1,
                 first_name="a",
                 last_name="b",
-                gender="F",
+                sex=Sex.FEMALE,
             ),
             EntryType(
                 id=2,
@@ -224,7 +225,7 @@ def test_gender() -> None:
                 competitor_id=2,
                 first_name="c",
                 last_name="d",
-                gender="M",
+                sex=Sex.MALE,
             ),
         ],
         class_list=[],

@@ -34,7 +34,7 @@ def test_if_an_entry_is_edited_then_the_changed_data_are_displayed(
     dialog.check_values(
         first_name="Annalena",
         last_name="Baerbock",
-        gender="F",
+        sex="F",
         year="1980",
         chip="7379879",
         club_name="",
@@ -46,7 +46,7 @@ def test_if_an_entry_is_edited_then_the_changed_data_are_displayed(
     dialog.enter_values(
         first_name="Anna Lena",
         last_name="Bärbock",
-        gender="",
+        sex="",
         year="1979",
         chip="1234567",
         club_name="",
@@ -87,7 +87,7 @@ def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
     dialog.check_values(
         first_name="Annalena",
         last_name="Baerbock",
-        gender="F",
+        sex="F",
         year="1980",
         chip="7379879",
         club_name="",
@@ -99,7 +99,7 @@ def test_if_a_row_is_double_clicked_the_edit_dialog_is_opened(
     dialog.enter_values(
         first_name="Anna Lena",
         last_name="Bärbock",
-        gender="",
+        sex="",
         year="1979",
         chip="1234567",
         club_name="",

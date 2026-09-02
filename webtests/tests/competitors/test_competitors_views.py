@@ -52,7 +52,7 @@ def test_if_view_is_competitors_then_group_by_competitors_sorted_by_name(
     assert competitor_page.table.headers() == [
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -123,7 +123,7 @@ def test_if_view_is_clubs_then_group_by_clubs_sorted_by_name(
     assert competitor_page.table.headers() == [
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
     ]

@@ -75,7 +75,7 @@ def entry(
     dialog.enter_values(
         first_name="Annalena",
         last_name="Baerbock",
-        gender="F",
+        sex="F",
         year="1980",
         chip="7379879",
         club_name="",

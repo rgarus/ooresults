@@ -29,7 +29,7 @@ t = {
         <tr id="comp.theader" class="dth">
             <th class="dth">First name</th>
             <th class="dth">Last name</th>
-            <th class="dth">Gender</th>
+            <th class="dth">Sex</th>
             <th class="dth">Year</th>
             <th class="dth">Chip</th>
             % if view != "clubs":
@@ -47,7 +47,7 @@ t = {
                     <tr class="dte" data-id="${competitor.id}">
                         <td class="dte">${competitor.first_name}</td>
                         <td class="dte">${competitor.last_name}</td>
-                        <td class="dte">${competitor.gender}</td>
+                        <td class="dte">${competitor.sex.value if competitor.sex is not None else ""}</td>
                         <td class="dte">${competitor.year if competitor.year is not None else ""}</td>
                         <td class="dte" style="text-align:right">${competitor.chip if competitor.chip else ""}</td>
                         % if view != "clubs":

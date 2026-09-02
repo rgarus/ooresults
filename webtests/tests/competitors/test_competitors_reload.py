@@ -30,7 +30,7 @@ def test_if_a_competitor_is_added_by_another_user_then_it_is_displayed_after_rel
             "id": "",
             "first_name": "Robert",
             "last_name": "Habeck",
-            "gender": "M",
+            "sex": "M",
             "year": "1969",
             "chip": "7509749",
             "club_id": "",

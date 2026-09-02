@@ -30,7 +30,7 @@ def test_if_a_competitor_is_added_with_required_data_then_an_additional_competit
     dialog.check_values(
         first_name="",
         last_name="",
-        gender="",
+        sex="",
         year="",
         chip="",
         club="",
@@ -38,7 +38,7 @@ def test_if_a_competitor_is_added_with_required_data_then_an_additional_competit
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender="",
+        sex="",
         year="",
         chip="",
         club="",
@@ -70,7 +70,7 @@ def test_if_adding_a_competitor_is_cancelled_then_no_additional_competitor_is_di
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender="M",
+        sex="M",
         year="1969",
         chip="7509749",
         club="",
@@ -90,7 +90,7 @@ def test_if_a_competitor_is_added_with_all_data_then_an_additional_competitor_is
     dialog.check_values(
         first_name="",
         last_name="",
-        gender="",
+        sex="",
         year="",
         chip="",
         club="",
@@ -98,7 +98,7 @@ def test_if_a_competitor_is_added_with_all_data_then_an_additional_competitor_is
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender="M",
+        sex="M",
         year="1969",
         chip="7509749",
         club="",
@@ -122,18 +122,18 @@ def test_if_a_competitor_is_added_with_all_data_then_an_additional_competitor_is
     ]
 
 
-@pytest.mark.parametrize("gender", ["", "F", "M"])
-def test_if_a_competitor_is_added_you_can_choose_between_gender_unknown_and_female_and_male(
-    gender: str, main_page: MainPage, delete_competitors: None
+@pytest.mark.parametrize("sex", ["", "F", "M"])
+def test_if_a_competitor_is_added_you_can_choose_between_sex_unknown_or_female_or_male(
+    sex: str, main_page: MainPage, delete_competitors: None
 ) -> None:
     competitor_page = main_page.goto_competitors()
     dialog = competitor_page.actions.add()
-    assert dialog.get_gender_list() == ["", "F", "M"]
+    assert dialog.get_sex_list() == ["", "F", "M"]
 
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender=gender,
+        sex=sex,
         year="",
         chip="",
         club="",
@@ -150,7 +150,7 @@ def test_if_a_competitor_is_added_you_can_choose_between_gender_unknown_and_fema
     assert competitor_page.table.row(i=2) == [
         "Robert",
         "Habeck",
-        gender,
+        sex,
         "",
         "",
         "",
@@ -168,7 +168,7 @@ def test_if_a_competitor_is_selected_and_a_new_competitor_is_added_then_no_compe
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender="M",
+        sex="M",
         year="1969",
         chip="7509749",
         club="",
@@ -185,7 +185,7 @@ def test_if_several_competitors_are_added_then_the_added_competitors_are_display
     dialog.enter_values(
         first_name="Christian",
         last_name="Lindner",
-        gender="M",
+        sex="M",
         year="1979",
         chip="7754987",
         club="",
@@ -196,7 +196,7 @@ def test_if_several_competitors_are_added_then_the_added_competitors_are_display
     dialog.enter_values(
         first_name="Robert",
         last_name="Habeck",
-        gender="M",
+        sex="M",
         year="1969",
         chip="7509749",
         club="",

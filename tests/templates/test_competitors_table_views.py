@@ -20,6 +20,7 @@
 import pytest
 
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.utils import render
 from tests.templates.conftest import Html
 
@@ -33,7 +34,7 @@ def competitor_1() -> CompetitorType:
         id=111,
         first_name="Angela",
         last_name="Merkel",
-        gender="F",
+        sex=Sex.FEMALE,
         year=1957,
         chip="87121314",
         club_id=415,
@@ -47,7 +48,7 @@ def competitor_2() -> CompetitorType:
         id=112,
         first_name="Barbara",
         last_name="Merkel",
-        gender=None,
+        sex=None,
         year=None,
         chip=None,
         club_id=None,
@@ -77,7 +78,7 @@ def test_competitor_list_with_view_is_competitors(
     assert [h.text for h in headers] == [
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -137,7 +138,7 @@ def test_competitor_list_with_view_is_clubs(
     assert [h.text for h in headers] == [
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
     ]

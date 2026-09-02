@@ -70,7 +70,7 @@ def test_if_view_is_entries_then_group_by_entries_sorted_by_name(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -159,7 +159,7 @@ def test_if_view_is_entries_then_group_by_entries_sorted_by_name(
         "OC Rot",
         "Bahn A - Männer",
         "10:20:01",
-        "16:11",
+        "15:53",
         "OK",
     ]
     with pytest.raises(StopIteration):
@@ -176,7 +176,7 @@ def test_if_view_is_classes_then_group_by_classes_sorted_by_name(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -261,7 +261,7 @@ def test_if_view_is_classes_then_group_by_classes_sorted_by_name(
         "7579050",
         "OC Rot",
         "10:20:01",
-        "16:11",
+        "15:53",
         "OK",
     ]
     with pytest.raises(StopIteration):
@@ -278,7 +278,7 @@ def test_if_view_is_clubs_then_group_by_clubs_sorted_by_name(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Class",
@@ -366,7 +366,7 @@ def test_if_view_is_clubs_then_group_by_clubs_sorted_by_name(
         "7579050",
         "Bahn A - Männer",
         "10:20:01",
-        "16:11",
+        "15:53",
         "OK",
     ]
     with pytest.raises(StopIteration):
@@ -430,7 +430,7 @@ def test_if_view_is_results_then_group_by_classes_sorted_by_rank(
         "7579050",
         "OC Rot",
         "",
-        "16:11",
+        "15:53",
     ]
     assert next(rows) == [
         "3",
@@ -464,7 +464,7 @@ def test_if_view_is_states_then_group_by_states_sorted_by_name(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -540,7 +540,7 @@ def test_if_view_is_states_then_group_by_states_sorted_by_name(
         "OC Rot",
         "Bahn A - Männer",
         "10:20:01",
-        "16:11",
+        "15:53",
         "OK",
     ]
     assert next(rows) == [
@@ -573,7 +573,7 @@ def test_if_view_is_competitors_then_group_by_competitors_sorted_by_name(
         "Rank",
         "First name",
         "Last name",
-        "Gender",
+        "Sex",
         "Year",
         "Chip",
         "Club",
@@ -677,7 +677,7 @@ def test_if_view_is_competitors_then_group_by_competitors_sorted_by_name(
         "OC Rot",
         "Bahn A - Männer",
         "10:20:01",
-        "16:11",
+        "15:53",
         "OK",
     ]
     with pytest.raises(StopIteration):

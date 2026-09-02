@@ -24,6 +24,7 @@ import pytest
 from ooresults import model
 from ooresults.otypes.club_type import ClubType
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.repo.sqlite_repo import SqliteRepo
 
 
@@ -49,7 +50,7 @@ def competitor_1_id(db: SqliteRepo, club_id: int) -> int:
             first_name="Jogi",
             last_name="Löw",
             club_id=None,
-            gender="M",
+            sex=Sex.MALE,
             year=None,
             chip="",
         )
@@ -62,7 +63,7 @@ def competitor_2_id(db: SqliteRepo, club_id: int) -> int:
             first_name="Angela",
             last_name="Merkel",
             club_id=club_id,
-            gender="F",
+            sex=Sex.FEMALE,
             year=1957,
             chip="1234567",
         )
@@ -74,7 +75,7 @@ def test_import_competitors(db: SqliteRepo) -> None:
             {
                 "first_name": "Angela",
                 "last_name": "Merkel",
-                "gender": "",
+                "sex": None,
                 "year": None,
                 "club": "OL Bundestag",
                 "chip": "",
@@ -82,7 +83,7 @@ def test_import_competitors(db: SqliteRepo) -> None:
             {
                 "first_name": "Jogi",
                 "last_name": "Löw",
-                "gender": "M",
+                "sex": Sex.MALE,
                 "year": 1960,
                 "club": "",
                 "chip": "1234",
@@ -108,7 +109,7 @@ def test_import_competitors(db: SqliteRepo) -> None:
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=1960,
         chip="1234",
     )
@@ -118,7 +119,7 @@ def test_import_competitors(db: SqliteRepo) -> None:
         last_name="Merkel",
         club_id=clubs[0].id,
         club_name=clubs[0].name,
-        gender="",
+        sex=None,
         year=None,
         chip="",
     )
@@ -132,7 +133,7 @@ def test_import_competitors_new_competitors_are_added(
             {
                 "first_name": "Birgit",
                 "last_name": "Merkel",
-                "gender": "F",
+                "sex": Sex.FEMALE,
                 "year": 1958,
                 "club": "OL Bundestag",
                 "chip": "4455",
@@ -159,7 +160,7 @@ def test_import_competitors_new_competitors_are_added(
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=None,
         chip="",
     )
@@ -169,7 +170,7 @@ def test_import_competitors_new_competitors_are_added(
         last_name="Merkel",
         club_id=club_id,
         club_name="OL Bundestag",
-        gender="F",
+        sex=Sex.FEMALE,
         year=1957,
         chip="1234567",
     )
@@ -179,7 +180,7 @@ def test_import_competitors_new_competitors_are_added(
         last_name="Merkel",
         club_id=club_id,
         club_name="OL Bundestag",
-        gender="F",
+        sex=Sex.FEMALE,
         year=1958,
         chip="4455",
     )
@@ -193,7 +194,7 @@ def test_import_competitors_imported_values_overwrite_existing_values(
             {
                 "first_name": "Angela",
                 "last_name": "Merkel",
-                "gender": "M",
+                "sex": Sex.MALE,
                 "year": 2001,
                 "club": "Team Angela",
                 "chip": "4455",
@@ -222,7 +223,7 @@ def test_import_competitors_imported_values_overwrite_existing_values(
         last_name="Merkel",
         club_id=clubs[1].id,
         club_name="Team Angela",
-        gender="M",
+        sex=Sex.MALE,
         year=2001,
         chip="4455",
     )
@@ -236,7 +237,7 @@ def test_import_competitors_missing_values_do_not_change_anything(
             {
                 "first_name": "Angela",
                 "last_name": "Merkel",
-                "gender": "",
+                "sex": "",
                 "year": None,
                 "club": "",
                 "chip": "",
@@ -260,7 +261,7 @@ def test_import_competitors_missing_values_do_not_change_anything(
         last_name="Merkel",
         club_id=club_id,
         club_name="OL Bundestag",
-        gender="F",
+        sex=Sex.FEMALE,
         year=1957,
         chip="1234567",
     )

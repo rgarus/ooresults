@@ -50,7 +50,7 @@ class AddCompetitorDialog:
         self,
         first_name: str,
         last_name: str,
-        gender: str,
+        sex: str,
         year: str,
         chip: str,
         club: str,
@@ -63,18 +63,15 @@ class AddCompetitorDialog:
         assert (
             last_name == TextControl(driver=self.driver, id="com_lastName").get_text()
         )
-        assert (
-            gender
-            == ComboboxControl(driver=self.driver, id="com_gender").selected_text()
-        )
+        assert sex == ComboboxControl(driver=self.driver, id="com_sex").selected_text()
         assert year == NumberControl(driver=self.driver, id="com_year").get_text()
         assert chip == TextControl(driver=self.driver, id="com_chip").get_text()
         assert (
             club == ComboboxControl(driver=self.driver, id="com_clubId").selected_text()
         )
 
-    def get_gender_list(self) -> list[str]:
-        return ComboboxControl(driver=self.driver, id="com_gender").values()
+    def get_sex_list(self) -> list[str]:
+        return ComboboxControl(driver=self.driver, id="com_sex").values()
 
     def get_club_list(self) -> list[str]:
         return ComboboxControl(driver=self.driver, id="com_clubId").values()
@@ -83,7 +80,7 @@ class AddCompetitorDialog:
         self,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
-        gender: Optional[str] = None,
+        sex: Optional[str] = None,
         year: Optional[str] = None,
         chip: Optional[str] = None,
         club: Optional[str] = None,
@@ -96,10 +93,8 @@ class AddCompetitorDialog:
             )
         if last_name is not None:
             TextControl(driver=self.driver, id="com_lastName").set_text(text=last_name)
-        if gender is not None:
-            ComboboxControl(driver=self.driver, id="com_gender").select_by_text(
-                text=gender
-            )
+        if sex is not None:
+            ComboboxControl(driver=self.driver, id="com_sex").select_by_text(text=sex)
         if year is not None:
             NumberControl(driver=self.driver, id="com_year").set_text(text=year)
         if chip is not None:

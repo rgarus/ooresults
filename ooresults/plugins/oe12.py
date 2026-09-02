@@ -23,6 +23,7 @@ import clevercsv as csv
 from unidecode import unidecode
 
 from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import ResultStatus
 
@@ -141,7 +142,7 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
 
             year = str(e.year) if e.year is not None else ""
 
-            gender = {None: "", "": "", "F": "F", "M": "M"}[e.gender]
+            sex = {None: None, Sex.FEMALE: "F", Sex.MALE: "M"}[e.sex]
             not_competing = "X" if e.not_competing else "0"
 
             start_time = ""
@@ -179,7 +180,7 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
                     cp1252(first_name),  # First name
                     "",  # Birthdate
                     year,  # YB
-                    gender,  # S
+                    sex,  # S
                     "",  # Block
                     not_competing,  # nc
                     start_time,  # Start

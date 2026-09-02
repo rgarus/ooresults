@@ -41,6 +41,7 @@ from ooresults import model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
@@ -98,7 +99,7 @@ def competitor_id(db: SqliteRepo) -> int:
             first_name="Robert",
             last_name="Lewandowski",
             club_id=None,
-            gender="",
+            sex=None,
             year=None,
             chip="",
         )
@@ -323,7 +324,7 @@ async def test_live_server_import_result_list_snapshot(
             last_name="Lewandowski",
             club_id=None,
             club_name=None,
-            gender="",
+            sex=None,
             year=None,
             chip="",
         ),
@@ -333,7 +334,7 @@ async def test_live_server_import_result_list_snapshot(
             last_name="Merkel",
             club_id=None,
             club_name=None,
-            gender="F",
+            sex=Sex.FEMALE,
             year=1972,
             chip="1234567",
         ),
@@ -373,7 +374,7 @@ async def test_live_server_import_result_list_snapshot(
             competitor_id=competitors[1].id,
             first_name="Angela",
             last_name="Merkel",
-            gender="F",
+            sex=Sex.FEMALE,
             year=1972,
             class_id=classes[0].id,
             class_name="Bahn A - Lang",
@@ -457,7 +458,7 @@ async def test_live_server_import_result_list_delta(
             last_name="Lewandowski",
             club_id=None,
             club_name=None,
-            gender="",
+            sex=None,
             year=None,
             chip="",
         ),
@@ -467,7 +468,7 @@ async def test_live_server_import_result_list_delta(
             last_name="Merkel",
             club_id=None,
             club_name=None,
-            gender="F",
+            sex=Sex.FEMALE,
             year=1972,
             chip="1234567",
         ),
@@ -507,7 +508,7 @@ async def test_live_server_import_result_list_delta(
             competitor_id=competitors[0].id,
             first_name="Robert",
             last_name="Lewandowski",
-            gender="",
+            sex=None,
             year=None,
             class_id=classes[1].id,
             class_name="Elite",
@@ -525,7 +526,7 @@ async def test_live_server_import_result_list_delta(
             competitor_id=competitors[1].id,
             first_name="Angela",
             last_name="Merkel",
-            gender="F",
+            sex=Sex.FEMALE,
             year=1972,
             class_id=classes[0].id,
             class_name="Bahn A - Lang",

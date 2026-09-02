@@ -20,6 +20,7 @@
 import pytest
 
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.utils import render
 from tests.templates.conftest import Html
 
@@ -31,7 +32,7 @@ def competitors() -> list[CompetitorType]:
             id=7,
             first_name="Angela",
             last_name="Merkel",
-            gender=None,
+            sex=None,
             year=None,
             chip=None,
             club_id=None,
@@ -41,7 +42,7 @@ def competitors() -> list[CompetitorType]:
             id=17,
             first_name="Birgit",
             last_name="Derkel",
-            gender=None,
+            sex=None,
             year=None,
             chip=None,
             club_id=None,
@@ -80,8 +81,8 @@ def test_competitor_list_is_not_empty(competitors: list[CompetitorType]) -> None
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_unknown(competitors: list[CompetitorType], row: int) -> None:
-    competitors[row - 1].gender = ""
+def test_sex_is_unknown(competitors: list[CompetitorType], row: int) -> None:
+    competitors[row - 1].sex = None
     html = Html(text=render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
@@ -90,8 +91,8 @@ def test_gender_is_unknown(competitors: list[CompetitorType], row: int) -> None:
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_female(competitors: list[CompetitorType], row: int) -> None:
-    competitors[row - 1].gender = "F"
+def test_sex_is_female(competitors: list[CompetitorType], row: int) -> None:
+    competitors[row - 1].sex = Sex.FEMALE
     html = Html(text=render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):
@@ -103,8 +104,8 @@ def test_gender_is_female(competitors: list[CompetitorType], row: int) -> None:
 
 
 @pytest.mark.parametrize("row", [1, 2])
-def test_gender_is_male(competitors: list[CompetitorType], row: int) -> None:
-    competitors[row - 1].gender = "M"
+def test_sex_is_male(competitors: list[CompetitorType], row: int) -> None:
+    competitors[row - 1].sex = Sex.MALE
     html = Html(text=render.add_entry_competitors(competitors=competitors))
 
     for i in (1, 2):

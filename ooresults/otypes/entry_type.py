@@ -21,6 +21,7 @@ import dataclasses
 from dataclasses import field
 from typing import Optional
 
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.start_type import PersonRaceStart
 
@@ -45,7 +46,7 @@ class EntryType:
     competitor_id: Optional[int]
     first_name: Optional[str]
     last_name: Optional[str]
-    gender: Optional[str] = None
+    sex: Optional[Sex] = None
     year: Optional[int] = None
     class_id: Optional[int] = None
     class_name: Optional[str] = None

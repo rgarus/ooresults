@@ -19,6 +19,7 @@
 
 import datetime
 
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import PersonRaceResult
@@ -65,7 +66,7 @@ def test_import_entry_list_with_one_entry() -> None:
             "class_": "Bahn A - Lang",
             "club": "OC Kanzleramt",
             "chip": "1234567",
-            "gender": "F",
+            "sex": Sex.FEMALE,
             "year": 1972,
             "result": PersonRaceResult(),
         },
@@ -117,7 +118,7 @@ def test_export_entry_list_with_one_entry() -> None:
                 competitor_id=1,
                 first_name="Angela",
                 last_name="Merkel",
-                gender="F",
+                sex=Sex.FEMALE,
                 year=1972,
                 class_id=1,
                 class_name="Bahn A - Lang",
@@ -236,7 +237,7 @@ def test_import_entry_list_with_several_entries() -> None:
             "class_": "Bahn A - Lang",
             "club": "",
             "chip": "",
-            "gender": "",
+            "sex": None,
             "year": None,
             "result": PersonRaceResult(),
         },
@@ -246,7 +247,7 @@ def test_import_entry_list_with_several_entries() -> None:
             "class_": "Bahn B - Mittel",
             "club": "",
             "chip": "1234567",
-            "gender": "",
+            "sex": None,
             "year": None,
             "result": PersonRaceResult(),
         },
@@ -256,7 +257,7 @@ def test_import_entry_list_with_several_entries() -> None:
             "class_": "Bahn A - Lang",
             "club": "",
             "chip": "",
-            "gender": "",
+            "sex": None,
             "year": None,
             "result": PersonRaceResult(),
         },

@@ -25,6 +25,7 @@ import pytest
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.competitor_type import CompetitorBaseDataType
 from ooresults.otypes.competitor_type import CompetitorType
+from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.start_type import PersonRaceStart
 from ooresults.repo import repo
@@ -94,7 +95,7 @@ def competitor_1_id(db: SqliteRepo, club_id: int) -> int:
             first_name="Jogi",
             last_name="Löw",
             club_id=None,
-            gender="M",
+            sex=Sex.MALE,
             year=None,
             chip="",
         )
@@ -107,7 +108,7 @@ def competitor_2_id(db: SqliteRepo, club_id: int) -> int:
             first_name="Angela",
             last_name="Merkel",
             club_id=club_id,
-            gender="F",
+            sex=Sex.FEMALE,
             year=1957,
             chip="1234567",
         )
@@ -125,7 +126,7 @@ def test_get_competitors_after_adding_one_competitor(
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=None,
         chip="",
     )
@@ -145,7 +146,7 @@ def test_get_competitors_after_adding_two_competitors(
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=None,
         chip="",
     )
@@ -155,7 +156,7 @@ def test_get_competitors_after_adding_two_competitors(
         last_name="Merkel",
         club_id=club_id,
         club_name="OL Bundestag",
-        gender="F",
+        sex=Sex.FEMALE,
         year=1957,
         chip="1234567",
     )
@@ -172,7 +173,7 @@ def test_get_first_added_competitor(
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=None,
         chip="",
     )
@@ -189,7 +190,7 @@ def test_get_last_added_competitor(
         last_name="Merkel",
         club_id=club_id,
         club_name="OL Bundestag",
-        gender="F",
+        sex=Sex.FEMALE,
         year=1957,
         chip="1234567",
     )
@@ -206,7 +207,7 @@ def test_get_competitor_by_name(
         last_name="Merkel",
         club_id=club_id,
         club_name="OL Bundestag",
-        gender="F",
+        sex=Sex.FEMALE,
         year=1957,
         chip="1234567",
     )
@@ -229,7 +230,7 @@ def test_update_first_added_competitor(
             first_name="Anton",
             last_name="Berkel",
             club_id=club_id,
-            gender="M",
+            sex=Sex.MALE,
             year=1958,
             chip="",
         )
@@ -244,7 +245,7 @@ def test_update_first_added_competitor(
         last_name="Berkel",
         club_id=club_id,
         club_name="OL Bundestag",
-        gender="M",
+        sex=Sex.MALE,
         year=1958,
         chip="",
     )
@@ -254,7 +255,7 @@ def test_update_first_added_competitor(
         last_name="Merkel",
         club_id=club_id,
         club_name="OL Bundestag",
-        gender="F",
+        sex=Sex.FEMALE,
         year=1957,
         chip="1234567",
     )
@@ -269,7 +270,7 @@ def test_update_last_added_competitor(
             first_name="Anton",
             last_name="Berkel",
             club_id=None,
-            gender="M",
+            sex=Sex.MALE,
             year=1958,
             chip="",
         )
@@ -284,7 +285,7 @@ def test_update_last_added_competitor(
         last_name="Berkel",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=1958,
         chip="",
     )
@@ -294,7 +295,7 @@ def test_update_last_added_competitor(
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=None,
         chip="",
     )
@@ -308,7 +309,7 @@ def test_add_competitor_with_same_first_name(
             first_name="Jogi",
             last_name="Berkel",
             club_id=None,
-            gender="M",
+            sex=Sex.MALE,
             year=1958,
             chip="",
         )
@@ -323,7 +324,7 @@ def test_add_competitor_with_same_first_name(
         last_name="Berkel",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=1958,
         chip="",
     )
@@ -333,7 +334,7 @@ def test_add_competitor_with_same_first_name(
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=None,
         chip="",
     )
@@ -347,7 +348,7 @@ def test_add_competitor_with_same_last_name(
             first_name="Norbert",
             last_name="Löw",
             club_id=None,
-            gender="M",
+            sex=Sex.MALE,
             year=1958,
             chip="",
         )
@@ -362,7 +363,7 @@ def test_add_competitor_with_same_last_name(
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=None,
         chip="",
     )
@@ -372,7 +373,7 @@ def test_add_competitor_with_same_last_name(
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=1958,
         chip="",
     )
@@ -392,7 +393,7 @@ def test_delete_first_added_competitor(
         last_name="Merkel",
         club_id=club_id,
         club_name="OL Bundestag",
-        gender="F",
+        sex=Sex.FEMALE,
         year=1957,
         chip="1234567",
     )
@@ -412,7 +413,7 @@ def test_delete_last_added_competitor(
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=None,
         chip="",
     )
@@ -427,7 +428,7 @@ def test_add_existing_name_raises_exception(
                 first_name="Jogi",
                 last_name="Löw",
                 club_id=None,
-                gender="M",
+                sex=Sex.MALE,
                 year=1958,
                 chip="",
             )
@@ -441,7 +442,7 @@ def test_add_many(db: SqliteRepo, club_id: int) -> None:
                     first_name="Angela",
                     last_name="Merkel",
                     club_id=club_id,
-                    gender="F",
+                    sex=Sex.FEMALE,
                     year=1957,
                     chip="123",
                 ),
@@ -449,7 +450,7 @@ def test_add_many(db: SqliteRepo, club_id: int) -> None:
                     first_name="Jogi",
                     last_name="Löw",
                     club_id=None,
-                    gender="M",
+                    sex=Sex.MALE,
                     year=None,
                     chip="456",
                 ),
@@ -464,7 +465,7 @@ def test_add_many(db: SqliteRepo, club_id: int) -> None:
             last_name="Löw",
             club_id=None,
             club_name=None,
-            gender="M",
+            sex=Sex.MALE,
             year=None,
             chip="456",
         ),
@@ -474,7 +475,7 @@ def test_add_many(db: SqliteRepo, club_id: int) -> None:
             last_name="Merkel",
             club_id=club_id,
             club_name="OL Bundestag",
-            gender="F",
+            sex=Sex.FEMALE,
             year=1957,
             chip="123",
         ),
@@ -492,7 +493,7 @@ def test_add_many_with_existing_name_raises_exception(
                         first_name="Angela",
                         last_name="Merkel",
                         club_id=None,
-                        gender="F",
+                        sex=Sex.FEMALE,
                         year=None,
                         chip="",
                     ),
@@ -500,7 +501,7 @@ def test_add_many_with_existing_name_raises_exception(
                         first_name="Jogi",
                         last_name="Löw",
                         club_id=None,
-                        gender="M",
+                        sex=Sex.MALE,
                         year=1958,
                         chip="",
                     ),
@@ -515,7 +516,7 @@ def test_add_many_with_existing_name_raises_exception(
             last_name="Löw",
             club_id=None,
             club_name=None,
-            gender="M",
+            sex=Sex.MALE,
             year=None,
             chip="",
         )
@@ -529,7 +530,7 @@ def test_add_with_not_existing_club_id_raises_exception(db: SqliteRepo) -> None:
                 first_name="Jogi",
                 last_name="Löw",
                 club_id=999,
-                gender="M",
+                sex=Sex.MALE,
                 year=1958,
                 chip="",
             )
@@ -545,7 +546,7 @@ def test_change_to_existing_name_raises_exception(
                 first_name="Angela",
                 last_name="Merkel",
                 club_id=None,
-                gender="F",
+                sex=Sex.FEMALE,
                 year=None,
                 chip="",
             )
@@ -561,7 +562,7 @@ def test_update_with_unknown_id_raises_exception(
                 first_name="Anton",
                 last_name="Berkel",
                 club_id=None,
-                gender="M",
+                sex=Sex.MALE,
                 year=1958,
                 chip="",
             )
@@ -581,7 +582,7 @@ def test_delete_competitor_with_unknown_id_do_not_change_anything(
         last_name="Löw",
         club_id=None,
         club_name=None,
-        gender="M",
+        sex=Sex.MALE,
         year=None,
         chip="",
     )
