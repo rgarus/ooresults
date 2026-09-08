@@ -20,6 +20,7 @@
 import pathlib
 import tempfile
 
+from webtests.controls.alert_window import AlertWindow
 from webtests.pageobjects.main_page import MainPage
 
 
@@ -80,3 +81,118 @@ def test_import_competitor(main_page: MainPage, delete_competitors: None) -> Non
         "7509749",
         "",
     ]
+
+
+def test_if_import_competitor_list_with_xml_errors_then_an_error_message_is_displayed(
+    main_page: MainPage, delete_competitors: None
+) -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Competitor>
+    <Person sex="M">
+      <Name>
+        <Family>Habeck</Family>
+        <Given>Robert</Given>
+      </Name>
+      <BirthDate>1969-01-01</BirthDate>
+    </Person>
+  </Competito>
+</CompetitorList>
+"""
+    competitor_page = main_page.goto_competitors()
+    dialog = competitor_page.actions.import_()
+    with tempfile.TemporaryDirectory() as td:
+        path = pathlib.Path(td) / "competitors.xml"
+        with open(path, mode="w") as f:
+            f.write(content)
+        dialog.import_file(path=path, error_dialog=True)
+
+    # check error message
+    alert = AlertWindow(driver=competitor_page.driver)
+    assert (
+        alert.get_text()
+        == "Opening and ending tag mismatch: "
+        + "Competitor line 3 and Competito, line 11, column 15 (<string>, line 11)"
+    )
+    alert.accept()
+    dialog.cancel()
+
+    # check number of rows
+    assert competitor_page.table.nr_of_rows() == 0
+
+
+def test_if_import_competitor_list_with_schema_errors_then_an_error_message_is_displayed(
+    main_page: MainPage, delete_competitors: None
+) -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Competitor>
+    <Person sex="M">
+      <Name>
+        <Family>Habeck</Family>
+        <Given>Robert</Given>
+      </Name>
+      <BirthDate>1969-012-01</BirthDate>
+    </Person>
+  </Competitor>
+</CompetitorList>
+"""
+    competitor_page = main_page.goto_competitors()
+    dialog = competitor_page.actions.import_()
+    with tempfile.TemporaryDirectory() as td:
+        path = pathlib.Path(td) / "competitors.xml"
+        with open(path, mode="w") as f:
+            f.write(content)
+        dialog.import_file(path=path, error_dialog=True)
+
+    # check error message
+    alert = AlertWindow(driver=competitor_page.driver)
+    assert (
+        alert.get_text()
+        == "<string>:9:0:ERROR:SCHEMASV:SCHEMAV_CVC_DATATYPE_VALID_1_2_1: "
+        + "Element '{http://www.orienteering.org/datastandard/3.0}BirthDate': "
+        + "'1969-012-01' is not a valid value of the atomic type 'xs:date'."
+    )
+    alert.accept()
+    dialog.cancel()
+
+    # check number of rows
+    assert competitor_page.table.nr_of_rows() == 0
+
+
+def test_if_import_competitor_list_but_root_tag_is_not_class_list_then_an_error_message_is_displayed(
+    main_page: MainPage, delete_competitors: None
+) -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+    <Name>Test for Entries</Name>
+    <StartTime>
+      <Date>2023-12-28</Date>
+    </StartTime>
+  </Event>
+</ResultList>
+"""
+    competitor_page = main_page.goto_competitors()
+    dialog = competitor_page.actions.import_()
+    with tempfile.TemporaryDirectory() as td:
+        path = pathlib.Path(td) / "competitors.xml"
+        with open(path, mode="w") as f:
+            f.write(content)
+        dialog.import_file(path=path, error_dialog=True)
+
+    # check error message
+    alert = AlertWindow(driver=competitor_page.driver)
+    assert (
+        alert.get_text()
+        == "Root element is {http://www.orienteering.org/datastandard/3.0}ResultList "
+        + "but should be CompetitorList"
+    )
+    alert.accept()
+    dialog.cancel()
+
+    # check number of rows
+    assert competitor_page.table.nr_of_rows() == 0
