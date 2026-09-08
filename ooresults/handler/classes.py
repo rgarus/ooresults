@@ -78,7 +78,7 @@ def post_import() -> str | bottle.HTTPResponse:
     except EventNotFoundError:
         return bottle.HTTPResponse(status=409, body="Event deleted")
     except Exception as e:
-        return bottle.HTTPResponse(status=409, body=str(e))
+        return bottle.HTTPResponse(status=400, body=str(e))
 
     return update(event_id)
 

@@ -205,15 +205,23 @@ class ImportEntryDialog:
         return RadioGroupControl(driver=self.driver, name="entr_import")
 
     @overload
-    def import_file(self, path: Path, info_dialog: Literal[False] = False) -> None:
+    def import_file(self, path: Path, info_or_error_dialog: None = None) -> None:
         pass
 
     @overload
-    def import_file(self, path: Path, info_dialog: Literal[True]) -> StatusDialog:
+    def import_file(self, path: Path, info_or_error_dialog: Literal["error"]) -> None:
+        pass
+
+    @overload
+    def import_file(
+        self, path: Path, info_or_error_dialog: Literal["info"]
+    ) -> StatusDialog:
         pass
 
     def import_file(
-        self, path: Path, info_dialog: bool = False
+        self,
+        path: Path,
+        info_or_error_dialog: Optional[Literal["info", "error"]] = None,
     ) -> Optional[StatusDialog]:
         file_id = self.FILE_ID[self.format().selected()]
         elem = self.driver.find_element(By.ID, file_id)
@@ -221,8 +229,12 @@ class ImportEntryDialog:
 
         elem = self.driver.find_element(By.ID, "entr.import.form")
         elem.find_element(By.XPATH, "button[text()='Import']").click()
-        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
-        if info_dialog:
+
+        if info_or_error_dialog != "error":
+            WebDriverWait(self.driver, 10).until(
+                EC.invisibility_of_element(element=elem)
+            )
+        if info_or_error_dialog == "info":
             return StatusDialog(driver=self.driver).wait()
         else:
             return None

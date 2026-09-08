@@ -17,6 +17,11 @@ Changed
 - The ‘Gender’ column in the participants and entries tables has been replaced by the ‘Sex’ column.
 - Minimum database schema version has been changed to 16.
 
+Fixed
+^^^^^
+
+- Display a meaningful error message if invalid "entries" or "results" data is imported.
+
 
 [0.4.9] - 2026-07-16
 --------------------

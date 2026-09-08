@@ -23,6 +23,7 @@ from collections.abc import Iterator
 
 import pytest
 
+from webtests.controls.alert_window import AlertWindow
 from webtests.pageobjects.main_page import MainPage
 
 
@@ -206,7 +207,7 @@ def test_if_a_competitor_is_contained_several_times_then_only_the_first_entry_is
         path = pathlib.Path(td) / "EntryList.xml"
         with open(path, mode="w") as f:
             f.write(content)
-        info_dialog = dialog.import_file(path=path, info_dialog=True)
+        info_dialog = dialog.import_file(path=path, info_or_error_dialog="info")
     assert info_dialog.get_text() == [
         "1 of 2 entries imported.",
         "Warning:",
@@ -234,3 +235,112 @@ def test_if_a_competitor_is_contained_several_times_then_only_the_first_entry_is
         "",
         "",
     ]
+
+
+def test_if_import_entry_list_with_xml_errors_then_an_error_message_is_displayed(
+    main_page: MainPage, event: str
+) -> None:
+    content = f"""\
+<?xml version='1.0' encoding='UTF-8'?>
+<EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+    <Name>{EVENT_NAME}</Name>
+    <StartTime>
+      <Date>{EVENT_DATE}</Date>
+    </StartTime>
+  </Even>
+</EntryList>
+"""
+    entry_page = main_page.goto_entries(event=event)
+    dialog = entry_page.actions.import_()
+    with tempfile.TemporaryDirectory() as td:
+        path = pathlib.Path(td) / "EntryList.xml"
+        with open(path, mode="w") as f:
+            f.write(content)
+        dialog.import_file(path=path, info_or_error_dialog="error")
+
+    # check error message
+    alert = AlertWindow(driver=entry_page.driver)
+    assert (
+        alert.get_text()
+        == "Opening and ending tag mismatch: "
+        + "Event line 3 and Even, line 8, column 10 (<string>, line 8)"
+    )
+    alert.accept()
+    dialog.cancel()
+
+    # check number of rows
+    assert entry_page.table.nr_of_rows() == 0
+
+
+def test_if_import_entry_list_with_schema_errors_then_an_error_message_is_displayed(
+    main_page: MainPage, event: str
+) -> None:
+    content = f"""\
+<?xml version='1.0' encoding='UTF-8'?>
+<EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+    <Name>{EVENT_NAME}</Name>
+    <StartTime>
+      <Date>"2023-123-28"</Date>
+    </StartTime>
+  </Event>
+</EntryList>
+"""
+    entry_page = main_page.goto_entries(event=event)
+    dialog = entry_page.actions.import_()
+    with tempfile.TemporaryDirectory() as td:
+        path = pathlib.Path(td) / "EntryList.xml"
+        with open(path, mode="w") as f:
+            f.write(content)
+        dialog.import_file(path=path, info_or_error_dialog="error")
+
+    # check error message
+    alert = AlertWindow(driver=entry_page.driver)
+    assert (
+        alert.get_text()
+        == "<string>:6:0:ERROR:SCHEMASV:SCHEMAV_CVC_DATATYPE_VALID_1_2_1: "
+        + "Element '{http://www.orienteering.org/datastandard/3.0}Date': "
+        + "'\"2023-123-28\"' is not a valid value of the atomic type 'xs:date'."
+    )
+    alert.accept()
+    dialog.cancel()
+
+    # check number of rows
+    assert entry_page.table.nr_of_rows() == 0
+
+
+def test_if_import_entry_list_but_root_tag_is_not_entry_list_then_an_error_message_is_displayed(
+    main_page: MainPage, event: str
+) -> None:
+    content = f"""\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+    <Name>{EVENT_NAME}</Name>
+    <StartTime>
+      <Date>{EVENT_DATE}</Date>
+    </StartTime>
+  </Event>
+</ResultList>
+"""
+    entry_page = main_page.goto_entries(event=event)
+    dialog = entry_page.actions.import_()
+    with tempfile.TemporaryDirectory() as td:
+        path = pathlib.Path(td) / "EntryList.xml"
+        with open(path, mode="w") as f:
+            f.write(content)
+        dialog.import_file(path=path, info_or_error_dialog="error")
+
+    # check error message
+    alert = AlertWindow(driver=entry_page.driver)
+    assert (
+        alert.get_text()
+        == "Root element is {http://www.orienteering.org/datastandard/3.0}ResultList "
+        + "but should be EntryList"
+    )
+    alert.accept()
+    dialog.cancel()
+
+    # check number of rows
+    assert entry_page.table.nr_of_rows() == 0

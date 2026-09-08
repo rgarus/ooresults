@@ -114,7 +114,7 @@ def post_import() -> str | bottle.HTTPResponse:
             model.competitors.import_competitors(competitors=competitors)
 
     except Exception as e:
-        return bottle.HTTPResponse(status=409, body=str(e))
+        return bottle.HTTPResponse(status=400, body=str(e))
 
     return update(view=data.view)
 

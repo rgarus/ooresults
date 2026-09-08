@@ -230,8 +230,12 @@ def post_import() -> str | bottle.HTTPResponse:
                 bottle.request.files.browse4.save(buffer)
                 entries = text.parse(content=buffer.getvalue())
         else:
-            return bottle.HTTPResponse(status=409, body="Internal server error")
+            return bottle.HTTPResponse(status=500, body="Internal server error")
 
+    except Exception as e:
+        return bottle.HTTPResponse(status=400, body=str(e))
+
+    try:
         # import only the first entry of the entries with same last and first name
         entries_1: list[dict] = []
         names_1: set[tuple[str, str]] = set()
