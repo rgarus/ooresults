@@ -23,6 +23,49 @@ Date
    Datum, an dem der Wettkampf stattfindet, z.B. 2022-03-31.
 
 
+Key
+
+   Definition eines Schlüssels. Der Schlüssel ist beim Aufbau der Verbindung zum ooresults-server anzugeben,
+   um den Wettkampf zu definieren, für den die empfangenen Daten bestimmt sind. Er wird sowohl von einem
+   ooresults-reader zur Übertragung von eingelesenen SICard Daten als auch von einem anderen ooresults-server
+   zur Übertragung von Live-Ergebnissen verwendet.
+   
+   .. warning::
+   
+      Der Schlüssel dient nicht nur der Zuordnung der Daten zu einem Wettkampf, sondern auch als Nachweis der Zugangsberechtigung
+      des Leseprogramms. Nur das Leseprogramm, das den Wettkampfschlüssel kennt, kann SI-Card Daten in der Datenbank speichern.
+      Der Schlüssel ist daher wie ein Passwort geheimzuhalten und sollte üblichen Passwortrichtlinien entsprechen.
+
+      
+Publish
+
+   Ist "Publish" eingeschaltet, können die Ergebnisses des Wettkampfes
+   ohne Angabe eines Passwortes vom ooresults-server gelesen werden.
+   
+   Derzeit können nur die Ergebnisdaten eines Wettkampfes veröffentlicht werden.
+   Ist "Publish" für mehrere Wettkämpfe aktiviert, wird der Wettkampf mit dem
+   aktuellsten Datum verwendet.
+
+
+Streaming address
+
+   Adresse eines ooresults-server, zu dem Ergebnisdaten des Wettkampfes
+   als IOF Interface Standard 3.0 ResultList übertragen werden sollen
+   (mit Angabe des Ports, aber ohne Angabe des Protokolls, z.B. „server.com:8081“).
+
+
+Streaming key
+
+   Key des Wettkampfes eines ooresults-server, zu dem die Ergebnisdaten gesendet werden sollen.
+
+
+Streaming enabled
+
+   Nur wenn eine "Streaming address" und ein "Streaming key" definiert sind
+   und "Streaming enabled" eingeschaltet ist, werden Daten zu einem anderen ooresults-server
+   gesendet.
+
+
 .. _entries:
 
 Entries

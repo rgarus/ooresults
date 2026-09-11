@@ -22,6 +22,7 @@ Existiert keine solche Datei wird sie mit folgendem Inhalt angelegt:
    ssl_cert =
    ssl_key =
    demo_reader = off
+   import_stream = off
 
    [Cardreader]
    host = 127.0.0.1
@@ -49,7 +50,7 @@ Es bedeuten:
 [Server]demo_reader
 
    Ist der Eintrag demo_reader on, kann unter der Adresse https://localhost:8080/demo
-   ein Seite aufgerufen werden, mit der das Auslesen einer SiCards simuliert werden kann,
+   eine Seite aufgerufen werden, mit der das Auslesen einer SiCard simuliert werden kann,
    siehe Abschnitt :ref:`demo_cardreader`.
 
    .. note::
@@ -57,6 +58,19 @@ Es bedeuten:
       Aus Sicherheitsgründen sollte demo_reader nur zum Kennenlernen der Software auf "on"
       und sonst auf "off" gesetzt werden.
 
+
+[Server]import_stream
+
+   Ist der Eintrag import_stream "on", können unter der Adresse "wss://<server>:8081/import"
+   IOF Interface Standard 3.0 ResultList Daten empfangen werden. Dies ist z.B. dann notwendig,
+   wenn der ooresults-server zum Veröffentlichen von Live-Egebnissen verwendet werden soll,
+   siehe Abschnitt :ref:`ooresults_live_server`.
+
+   .. note::
+
+      Aus Sicherheitsgründen sollte import_stream nur auf "on" gesetzt werden,
+      wenn Ergebnisdaten über das Streaming Interface empfangen werden sollen.
+      
 
 .. index:: ooresults-reader; Konfiguration
 
