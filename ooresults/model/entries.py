@@ -40,6 +40,7 @@ from ooresults.plugins import iof_result_list
 from ooresults.plugins.iof_result_list import ResultListStatus
 from ooresults.repo import repo
 from ooresults.repo.repo import TransactionMode
+from ooresults.utils.rental_cards import is_rental_card
 
 
 def import_entries(
@@ -283,13 +284,13 @@ def add_or_update_entry(
                             club_id=club_id,
                             sex=sex,
                             year=year,
-                            chip=chip,
+                            chip=chip if not is_rental_card(card_number=chip) else "",
                         )
 
                 competitor = model.db.get_competitor(id=competitor_id)
                 if competitor.club_id is None:
                     competitor.club_id = club_id
-                if competitor.chip == "":
+                if competitor.chip == "" and not is_rental_card(card_number=chip):
                     competitor.chip = chip
                 model.db.update_competitor(
                     id=competitor.id,
