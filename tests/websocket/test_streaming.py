@@ -19,6 +19,7 @@
 
 import asyncio
 import datetime
+from collections.abc import Iterator
 from typing import Any
 from unittest import mock
 
@@ -33,9 +34,17 @@ import ooresults.model
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.event_type import EventType
+from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.websocket_server import streaming
 from ooresults.websocket_server import streaming_status
 from ooresults.websocket_server.streaming_status import Status
+
+
+@pytest.fixture(autouse=True)
+def db() -> Iterator[None]:
+    ooresults.model.db = SqliteRepo(db=":memory:")
+    yield
+    ooresults.model.db.close()
 
 
 @pytest.fixture
@@ -82,7 +91,7 @@ class SleepAsyncMock(mock.AsyncMock):
             self.first = False
         else:
             self.event_continue.set()
-        await self.event_sync.wait()
+        await asyncio.wait_for(self.event_sync.wait(), timeout=10)
         self.event_sync.clear()
 
     async def _sleep(self, delay: float) -> None:
