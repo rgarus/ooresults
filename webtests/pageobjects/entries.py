@@ -35,6 +35,7 @@ from webtests.controls.number_control import NumberControl
 from webtests.controls.radiogroup_control import RadioGroupControl
 from webtests.controls.text_control import TextControl
 from webtests.pageobjects.actions import Actions
+from webtests.pageobjects.main import SelectCompetitorDialog
 from webtests.pageobjects.table import Table
 
 
@@ -138,6 +139,10 @@ class AddEntryDialog:
             ComboboxControl(driver=p, id="ent_status").select_by_text(text=status)
         if result is not None:
             ComboboxControl(driver=p, id="ent_result").select_by_text(text=result)
+
+    def select_competitor(self) -> SelectCompetitorDialog:
+        self.driver.find_element(By.ID, "entr.myBtnCompetitors").click()
+        return SelectCompetitorDialog(driver=self.driver)
 
     def submit(self, wait_until_closed: bool = True) -> None:
         elem = self.driver.find_element(By.ID, "entr.formAdd")

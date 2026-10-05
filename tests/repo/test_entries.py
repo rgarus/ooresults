@@ -34,6 +34,7 @@ from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.start_type import PersonRaceStart
+from ooresults.repo.repo import ConstraintError
 from ooresults.repo.sqlite_repo import SqliteRepo
 
 
@@ -76,10 +77,10 @@ def event_2_id(db: SqliteRepo) -> int:
 
 
 @pytest.fixture
-def class_1_id(db: SqliteRepo, event_2_id: int) -> int:
+def class_1_id(db: SqliteRepo, event_1_id: int) -> int:
     with db.transaction():
         return db.add_class(
-            event_id=event_2_id,
+            event_id=event_1_id,
             name="Class 1",
             short_name=None,
             course_id=None,
@@ -1081,3 +1082,159 @@ def test_add_entry_result(
             club_name="OL Bundestag",
         ),
     ]
+
+
+def test_delete_entry(
+    db: SqliteRepo, event_2_id: int, entry_2_id: int, entry_3_id: int
+) -> None:
+    with db.transaction():
+        entries_old = db.get_entries(event_id=event_2_id)
+        assert len(entries_old) == 2
+    with db.transaction():
+        db.delete_entry(id=entry_2_id)
+    with db.transaction():
+        entries_new = db.get_entries(event_id=event_2_id)
+        assert len(entries_new) == 1
+
+    data = [e for e in entries_old if e.id != entry_2_id]
+    assert entries_new == data
+
+
+def test_delete_entry_with_unknown_id_do_not_change_anything(
+    db: SqliteRepo, event_2_id: int, entry_2_id: int
+) -> None:
+    with db.transaction():
+        entries_old = db.get_entries(event_id=event_2_id)
+        assert len(entries_old) == 1
+    with db.transaction():
+        db.delete_entry(id=entry_2_id + 1)
+    with db.transaction():
+        entries_new = db.get_entries(event_id=event_2_id)
+        assert len(entries_new) == 1
+
+    assert entries_new == entries_old
+
+
+def test_delete_all_entries_for_an_event(
+    db: SqliteRepo,
+    event_1_id: int,
+    event_2_id: int,
+    entry_1_id: int,
+    entry_2_id: int,
+    entry_3_id: int,
+) -> None:
+    with db.transaction():
+        entries_1_old = db.get_entries(event_id=event_1_id)
+        entries_2_old = db.get_entries(event_id=event_2_id)
+        assert len(entries_1_old) == 1
+        assert len(entries_2_old) == 2
+    with db.transaction():
+        db.delete_entries(event_id=event_2_id)
+    with db.transaction():
+        entries_1_new = db.get_entries(event_id=event_1_id)
+        entries_2_new = db.get_entries(event_id=event_2_id)
+        assert len(entries_1_new) == 1
+        assert len(entries_2_new) == 0
+
+    assert entries_1_new == entries_1_old
+    assert entries_2_new == []
+
+
+@pytest.fixture
+def entries(
+    db: SqliteRepo,
+    event_1_id: int,
+    event_2_id: int,
+    competitor_1_id: int,
+    competitor_2_id: int,
+    class_1_id: int,
+    class_2_id: int,
+) -> None:
+    with db.transaction():
+        db.add_many_entries(
+            [
+                EntryBaseDataType(
+                    event_id=event_1_id,
+                    competitor_id=competitor_1_id,
+                    class_id=class_1_id,
+                ),
+                EntryBaseDataType(
+                    event_id=event_2_id,
+                    competitor_id=competitor_1_id,
+                    class_id=class_2_id,
+                ),
+                EntryBaseDataType(
+                    event_id=event_2_id,
+                    competitor_id=competitor_2_id,
+                    class_id=class_2_id,
+                ),
+            ]
+        )
+
+
+@pytest.mark.parametrize(
+    "old, new, number_of_items",
+    [
+        (3, 2, 0),
+        (1, 3, 2),
+        (2, 1, 1),
+    ],
+)
+def test_replace_competitor(
+    old: int,
+    new: int,
+    number_of_items: int,
+    db: SqliteRepo,
+    event_1_id: int,
+    event_2_id: int,
+    competitor_1_id: int,
+    competitor_2_id: int,
+    competitor_3_id: int,
+    entries: None,
+) -> None:
+    c_id = {1: competitor_1_id, 2: competitor_2_id, 3: competitor_3_id}
+    with db.transaction():
+        entries_old_1 = db.get_entries(event_id=event_1_id)
+        entries_old_2 = db.get_entries(event_id=event_2_id)
+        competitor = db.get_competitor(id=c_id[new])
+
+    with db.transaction():
+        assert number_of_items == db.replace_competitor(
+            id_old=c_id[old], id_new=c_id[new]
+        )
+
+    with db.transaction():
+        entries_new_1 = db.get_entries(event_id=event_1_id)
+        entries_new_2 = db.get_entries(event_id=event_2_id)
+
+    for entry in entries_old_1 + entries_old_2:
+        if entry.competitor_id == c_id[old]:
+            entry.competitor_id = competitor.id
+            entry.last_name = competitor.last_name
+            entry.first_name = competitor.first_name
+            entry.sex = competitor.sex
+            entry.year = competitor.year
+
+    entries_old_1.sort(key=lambda e: e.id)
+    entries_old_2.sort(key=lambda e: e.id)
+    entries_new_1.sort(key=lambda e: e.id)
+    entries_new_2.sort(key=lambda e: e.id)
+    assert entries_old_1 == entries_new_1
+    assert entries_old_2 == entries_new_2
+
+
+def test_replace_competitor_with_unknown_competitor_id_raises_exception(
+    db: SqliteRepo,
+    event_1_id: int,
+    event_2_id: int,
+    competitor_1_id: int,
+    competitor_2_id: int,
+    competitor_3_id: int,
+    entries: None,
+) -> None:
+    with pytest.raises(ConstraintError):
+        with db.transaction():
+            db.replace_competitor(
+                id_old=competitor_1_id,
+                id_new=competitor_1_id + competitor_2_id + competitor_3_id,
+            )

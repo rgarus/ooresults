@@ -456,7 +456,11 @@ def post_fill_edit_form() -> str | bottle.HTTPResponse:
 def post_fill_competitors_form() -> str | bottle.HTTPResponse:
     """Query data to fill competitor selection form."""
     competitors = model.competitors.get_competitors()
-    return render.add_entry_competitors(competitors=competitors)
+    return render.add_entry_competitors(
+        competitors=competitors,
+        click="entr_comp_save()",
+        dblclick="entry_comp_doubleclick(event)",
+    )
 
 
 @bottle.post("/entry/fill_result_form")

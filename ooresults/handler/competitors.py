@@ -40,7 +40,11 @@ Handler for the competitor routes.
 /competitor/export
 /competitor/add
 /competitor/fill_edit_form
+/competitor/fill_merge_form
 /competitor/delete
+/competitor/merge
+/competitor/choose_competitor_1
+/competitor/choose_competitor_2
 """
 
 
@@ -96,6 +100,23 @@ def post_add() -> str | bottle.HTTPResponse:
             )
     except ConstraintError as e:
         return bottle.HTTPResponse(status=409, body=str(e))
+    except KeyError:
+        return bottle.HTTPResponse(status=409, body="Competitor deleted")
+
+    return update(view=data.view)
+
+
+@bottle.post("/competitor/merge")
+def post_merge() -> str | bottle.HTTPResponse:
+    """Merge competitors."""
+    data = bottle.request.forms
+    try:
+        if data.direction == "1->2":
+            model.competitors.merge_competitor(id_old=data.id1, id_new=data.id2)
+        elif data.direction == "2->1":
+            model.competitors.merge_competitor(id_old=data.id2, id_new=data.id1)
+    except ConstraintError as e:
+        return bottle.HTTPResponse(status=409, body=str(e))
 
     return update(view=data.view)
 
@@ -145,10 +166,50 @@ def post_delete() -> str | bottle.HTTPResponse:
 def post_fill_edit_form() -> str | bottle.HTTPResponse:
     """Query data to fill add or edit form."""
     data = bottle.request.forms
-    if data.id == "":
-        competitor = None
-    else:
-        competitor = model.competitors.get_competitor(int(data.id))
+    try:
+        if data.id == "":
+            competitor = None
+        else:
+            competitor = model.competitors.get_competitor(int(data.id))
+    except KeyError:
+        return bottle.HTTPResponse(status=409, body="Competitor deleted")
 
     clubs = model.clubs.get_clubs()
     return render.add_competitor(competitor=competitor, clubs=clubs)
+
+
+@bottle.post("/competitor/fill_merge_form")
+def post_fill_merge_form() -> str | bottle.HTTPResponse:
+    """Render merge form."""
+    data = bottle.request.forms
+    try:
+        if data.id == "":
+            competitor = None
+        else:
+            competitor = model.competitors.get_competitor(int(data.id))
+    except KeyError:
+        return bottle.HTTPResponse(status=409, body="Competitor deleted")
+
+    return render.merge_competitors(competitor=competitor)
+
+
+@bottle.post("/competitor/choose_competitor_1")
+def post_choose_competitor_1() -> str | bottle.HTTPResponse:
+    """Query data to fill competitor selection form."""
+    competitors = model.competitors.get_competitors()
+    return render.add_entry_competitors(
+        competitors=competitors,
+        click="comp_choose_competitor('1')",
+        dblclick="comp_merge_dblclick(event, '1')",
+    )
+
+
+@bottle.post("/competitor/choose_competitor_2")
+def post_choose_competitor_2() -> str | bottle.HTTPResponse:
+    """Query data to fill competitor selection form."""
+    competitors = model.competitors.get_competitors()
+    return render.add_entry_competitors(
+        competitors=competitors,
+        click="comp_choose_competitor('2')",
+        dblclick="comp_merge_dblclick(event, '2')",
+    )

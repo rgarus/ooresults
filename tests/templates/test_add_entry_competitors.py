@@ -52,7 +52,13 @@ def competitors() -> list[CompetitorType]:
 
 
 def test_competitor_list_is_not_empty(competitors: list[CompetitorType]) -> None:
-    html = Html(text=render.add_entry_competitors(competitors=competitors))
+    html = Html(
+        text=render.add_entry_competitors(
+            competitors=competitors,
+            click="entr_comp_save()",
+            dblclick="entry_comp_doubleclick(event)",
+        )
+    )
 
     trs = html.findall(path=".//tbody/tr")
     assert len(trs) == 2
@@ -83,7 +89,13 @@ def test_competitor_list_is_not_empty(competitors: list[CompetitorType]) -> None
 @pytest.mark.parametrize("row", [1, 2])
 def test_sex_is_unknown(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].sex = None
-    html = Html(text=render.add_entry_competitors(competitors=competitors))
+    html = Html(
+        text=render.add_entry_competitors(
+            competitors=competitors,
+            click="entr_comp_save()",
+            dblclick="entry_comp_doubleclick(event)",
+        )
+    )
 
     for i in (1, 2):
         elem = html.find(path=f".//tbody/tr[{i}]/td[3]")
@@ -93,7 +105,13 @@ def test_sex_is_unknown(competitors: list[CompetitorType], row: int) -> None:
 @pytest.mark.parametrize("row", [1, 2])
 def test_sex_is_female(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].sex = Sex.FEMALE
-    html = Html(text=render.add_entry_competitors(competitors=competitors))
+    html = Html(
+        text=render.add_entry_competitors(
+            competitors=competitors,
+            click="entr_comp_save()",
+            dblclick="entry_comp_doubleclick(event)",
+        )
+    )
 
     for i in (1, 2):
         elem = html.find(path=f".//tbody/tr[{i}]/td[3]")
@@ -106,7 +124,13 @@ def test_sex_is_female(competitors: list[CompetitorType], row: int) -> None:
 @pytest.mark.parametrize("row", [1, 2])
 def test_sex_is_male(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].sex = Sex.MALE
-    html = Html(text=render.add_entry_competitors(competitors=competitors))
+    html = Html(
+        text=render.add_entry_competitors(
+            competitors=competitors,
+            click="entr_comp_save()",
+            dblclick="entry_comp_doubleclick(event)",
+        )
+    )
 
     for i in (1, 2):
         elem = html.find(path=f".//tbody/tr[{i}]/td[3]")
@@ -119,7 +143,13 @@ def test_sex_is_male(competitors: list[CompetitorType], row: int) -> None:
 @pytest.mark.parametrize("row", [1, 2])
 def test_year_is_defined(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].year = 1957
-    html = Html(text=render.add_entry_competitors(competitors=competitors))
+    html = Html(
+        text=render.add_entry_competitors(
+            competitors=competitors,
+            click="entr_comp_save()",
+            dblclick="entry_comp_doubleclick(event)",
+        )
+    )
 
     for i in (1, 2):
         elem = html.find(path=f".//tbody/tr[{i}]/td[4]")
@@ -132,7 +162,13 @@ def test_year_is_defined(competitors: list[CompetitorType], row: int) -> None:
 @pytest.mark.parametrize("row", [1, 2])
 def test_chip_is_defined(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].chip = "1234567"
-    html = Html(text=render.add_entry_competitors(competitors=competitors))
+    html = Html(
+        text=render.add_entry_competitors(
+            competitors=competitors,
+            click="entr_comp_save()",
+            dblclick="entry_comp_doubleclick(event)",
+        )
+    )
 
     for i in (1, 2):
         elem = html.find(path=f".//tbody/tr[{i}]/td[5]")
@@ -146,7 +182,13 @@ def test_chip_is_defined(competitors: list[CompetitorType], row: int) -> None:
 def test_club_is_defined(competitors: list[CompetitorType], row: int) -> None:
     competitors[row - 1].club_id = 2
     competitors[row - 1].club_name = "OL Bundestag"
-    html = Html(text=render.add_entry_competitors(competitors=competitors))
+    html = Html(
+        text=render.add_entry_competitors(
+            competitors=competitors,
+            click="entr_comp_save()",
+            dblclick="entry_comp_doubleclick(event)",
+        )
+    )
 
     for i in (1, 2):
         if i == row:

@@ -30,6 +30,7 @@ from webtests.controls.combobox_control import ComboboxControl
 from webtests.controls.number_control import NumberControl
 from webtests.controls.text_control import TextControl
 from webtests.pageobjects.actions import Actions
+from webtests.pageobjects.main import SelectCompetitorDialog
 from webtests.pageobjects.table import Table
 
 
@@ -161,6 +162,100 @@ class DeleteCompetitorDialog:
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
+class AssertMergeDialog:
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
+
+    def text(self) -> str:
+        return self.driver.find_element(By.ID, "comp.merge.assertText").text
+
+    def ok(self) -> None:
+        elem = self.driver.find_element(By.ID, "comp.formMergeAssert")
+        elem.find_element(By.XPATH, "button[text()='Ok']").click()
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
+
+    def cancel(self) -> None:
+        elem = self.driver.find_element(By.ID, "comp.formMergeAssert")
+        elem.find_element(By.XPATH, "button[text()='Cancel']").click()
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
+
+
+class MergeCompetitorDialog:
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
+
+    def choose_1(self) -> SelectCompetitorDialog:
+        self.driver.find_element(By.ID, "comp.merge.choose_1").click()
+        return SelectCompetitorDialog(driver=self.driver)
+
+    def choose_2(self) -> SelectCompetitorDialog:
+        self.driver.find_element(By.ID, "comp.merge.choose_2").click()
+        return SelectCompetitorDialog(driver=self.driver)
+
+    def merge_1to2(self) -> AssertMergeDialog:
+        self.driver.find_element(By.ID, "comp.merge.1to2").click()
+        return AssertMergeDialog(driver=self.driver)
+
+    def merge_1to2_is_enabled(self) -> bool:
+        return self.driver.find_element(By.ID, "comp.merge.1to2").is_enabled()
+
+    def merge_2to1(self) -> AssertMergeDialog:
+        self.driver.find_element(By.ID, "comp.merge.2to1").click()
+        return AssertMergeDialog(driver=self.driver)
+
+    def merge_2to1_is_enabled(self) -> bool:
+        return self.driver.find_element(By.ID, "comp.merge.2to1").is_enabled()
+
+    def cancel(self) -> None:
+        elem = self.driver.find_element(By.ID, "comp.formMerge")
+        elem.find_element(By.XPATH, ".//button[text()='Cancel']").click()
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
+
+    def check_competitor_1(
+        self,
+        first_name: str,
+        last_name: str,
+        sex: str,
+        year: str,
+        chip: str,
+        club: str,
+    ) -> None:
+        elem = self.driver.find_element(By.ID, "comp.merge.firstName1")
+        assert first_name == elem.text
+        elem = self.driver.find_element(By.ID, "comp.merge.lastName1")
+        assert last_name == elem.text
+        elem = self.driver.find_element(By.ID, "comp.merge.sex1")
+        assert sex == elem.text
+        elem = self.driver.find_element(By.ID, "comp.merge.year1")
+        assert year == elem.text
+        elem = self.driver.find_element(By.ID, "comp.merge.chip1")
+        assert chip == elem.text
+        elem = self.driver.find_element(By.ID, "comp.merge.club1")
+        assert club == elem.text
+
+    def check_competitor_2(
+        self,
+        first_name: str,
+        last_name: str,
+        sex: str,
+        year: str,
+        chip: str,
+        club: str,
+    ) -> None:
+        elem = self.driver.find_element(By.ID, "comp.merge.firstName2")
+        assert first_name == elem.text
+        elem = self.driver.find_element(By.ID, "comp.merge.lastName2")
+        assert last_name == elem.text
+        elem = self.driver.find_element(By.ID, "comp.merge.sex2")
+        assert sex == elem.text
+        elem = self.driver.find_element(By.ID, "comp.merge.year2")
+        assert year == elem.text
+        elem = self.driver.find_element(By.ID, "comp.merge.chip2")
+        assert chip == elem.text
+        elem = self.driver.find_element(By.ID, "comp.merge.club2")
+        assert club == elem.text
+
+
 class CompetitorPage:
     def __init__(self, driver: webdriver.Remote) -> None:
         self.driver = driver
@@ -218,6 +313,10 @@ class CompetitorActions(Actions):
     def delete(self) -> DeleteCompetitorDialog:
         self.action(text="Delete competitor").click()
         return DeleteCompetitorDialog(driver=self.driver)
+
+    def merge(self) -> MergeCompetitorDialog:
+        self.action(text="Merge competitors ...").click()
+        return MergeCompetitorDialog(driver=self.driver)
 
 
 class CompetitorTable(Table):

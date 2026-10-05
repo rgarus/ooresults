@@ -31,6 +31,7 @@ def test_if_competitor_page_is_displayed_then_all_actions_are_displayed(
         "Add competitor ...",
         "Edit competitor ...",
         "Delete competitor",
+        "Merge competitors ...",
     ]
 
 
@@ -44,6 +45,7 @@ def test_if_no_row_is_selected_then_some_actions_are_disabled(
     assert competitor_page.actions.action("Add competitor ...").is_enabled()
     assert competitor_page.actions.action("Edit competitor ...").is_disabled()
     assert competitor_page.actions.action("Delete competitor").is_disabled()
+    assert competitor_page.actions.action("Merge competitors ...").is_enabled()
 
 
 def test_if_a_row_is_selected_then_all_actions_are_enabled(
@@ -58,6 +60,7 @@ def test_if_a_row_is_selected_then_all_actions_are_enabled(
     assert competitor_page.actions.action("Add competitor ...").is_enabled()
     assert competitor_page.actions.action("Edit competitor ...").is_enabled()
     assert competitor_page.actions.action("Delete competitor").is_enabled()
+    assert competitor_page.actions.action("Merge competitors ...").is_enabled()
 
 
 def test_if_competitor_page_is_selected_then_the_table_header_is_displayed(

@@ -83,6 +83,7 @@ _events_table = t("events_table.html")
 _main = t("main.html")
 _reader_tab_content = t("reader_tab_content.html")
 _reader_table = t("reader_table.html")
+_merge_competitors = t("merge_competitors.html")
 _results_tab_content = t("results_tab_content.html")
 _results_table = t("results_table.html")
 _root = t("root.html")
@@ -139,6 +140,10 @@ def add_competitor(competitor: Optional[CompetitorType], clubs: list[ClubType]) 
     return _add_competitor.render(competitor=competitor, clubs=clubs)
 
 
+def merge_competitors(competitor: Optional[CompetitorType]) -> str:
+    return _merge_competitors.render(competitor=competitor)
+
+
 def courses_table(event: Optional[EventType], courses: list[CourseType]) -> str:
     return _courses_table.render(event=event, courses=courses)
 
@@ -174,8 +179,12 @@ def add_entry(
     )
 
 
-def add_entry_competitors(competitors: list[CompetitorType]) -> str:
-    return _add_entry_competitors.render(competitors=competitors)
+def add_entry_competitors(
+    competitors: list[CompetitorType], click: str, dblclick: str
+) -> str:
+    return _add_entry_competitors.render(
+        competitors=competitors, click=click, dblclick=dblclick
+    )
 
 
 def add_entry_result(entry: EntryType) -> str:

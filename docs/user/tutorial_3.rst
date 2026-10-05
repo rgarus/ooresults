@@ -38,12 +38,6 @@ und als Überschriften die im Feld "Series" angegebenen Texte verwendet.
 
    Es lässt sich derzeit pro Datenbank nur ein Gesamtergebnis berechnen.
    
-.. warning::
-
-   Die Teilnehmer werden durch ihren Vor- und Zunamen identifiziert.
-   Unterschiedliche Schreibweisen eines Teilnehmers in verschiedenen Wettkämpfen werden nicht automatisch erkannt,
-   z.B. bilden "Annalena Baerbock" und "Anna-Lena Baerbock" im Gesamtergebnis zwei Einträge.
-
 Die Berechnung des Gesamtergebnis wird im "Settings" Dialog festgelegt. Der "Settings" Dialog wird über
 die Funktion "Settings ..." geöffnet.
 
@@ -52,6 +46,26 @@ die Funktion "Settings ..." geöffnet.
 .. seealso::
 
    Eine Beschreibung der Felder befindet sich im Kapitel :ref:`settings`.
+
+
+Zusammenführen von Teilnehmern
+------------------------------
+
+Teilnehmer werden durch ihren Vor- und Zunamen identifiziert. Wurde z.B. "Annalena Baerbock"
+in einem anderen Wettkampf der Serie als "Annalena Bärbock" hinzugefügt, werden die Ergebnisse
+von "Annalena Baerbock" und "Annalena Bärbock" im Gesamtergebnis nicht zusammengefasst,
+sondern als Ergebnisse zweier verschiedener Teilnehmer angezeigt.
+
+Mit Hilfe der Funktion "Merge competitors ..." im Registerblatt "Competitors" können
+unterschiedliche Schreibweisen einer Person bereinigt werden. Bei einem Zusammenführen 
+der Läuferinnen "Annalena Bärbock" und "Annalena Baerbock" zu "Annalena Baerbock" wird
+der Name "Annalena Bärbock" in allen Wettkämpfen durch "Annalena Baerbock" ersetzt
+und anschliessend "Annalena Bärbock" aus der Competitors-Liste gelöscht.
+   
+.. warning::
+
+   Haben "Annalena Bärbock" und "Annalena Baerbock" unterschiedliches Geschlecht oder Geburtsjahr,
+   wird nicht nur in allen Wettkämpfen der Name, sondern auch Geschlecht und Geburtsjahr geändert.
 
 
 Veranstalterbonus

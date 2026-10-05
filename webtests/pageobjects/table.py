@@ -38,12 +38,14 @@ class Table:
         return len([row for row in rows if row.is_displayed()])
 
     def nr_of_columns(self) -> int:
-        return len(self._table().find_elements(By.XPATH, ".//thead//tr//th"))
+        columns = self._table().find_elements(By.XPATH, ".//thead//tr//th")
+        return len([columns for row in columns if row.is_displayed()])
 
     def headers(self) -> list[str]:
         headers = []
         for h in self._table().find_elements(By.XPATH, ".//thead//tr//th"):
-            headers.append(h.text)
+            if h.is_displayed():
+                headers.append(h.text)
         return headers
 
     def row(self, i: int) -> list[str]:
@@ -52,7 +54,8 @@ class Table:
 
         content = []
         for cell in rows[i - 1].find_elements(By.XPATH, ".//th | .//td"):
-            content.append(cell.text)
+            if cell.is_displayed():
+                content.append(cell.text)
         if content:
             return content
         else:

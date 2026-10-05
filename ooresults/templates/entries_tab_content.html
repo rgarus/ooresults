@@ -185,10 +185,6 @@
   </div> 
 
   <!-- The Modal -->
-  <div class="modal" id="entr.competitorsDialog">
-  </div>
-
-  <!-- The Modal -->
   <div class="modal" id="entr.deleteDialog">
     <!-- Modal content -->
     <div class="modal-content">
@@ -223,10 +219,13 @@
             if (entr_comp_selected) entr_comp_selected.className = '';
             entr_comp_selected = e.target.parentNode;
             entr_comp_selected.className = 'selected';
-            document.getElementById('entry.comp.add').disabled = false;
-            if (e.type == "dblclick") {
-                entr_comp_save();
-            }
+            document.getElementById('main.comp.add').disabled = false;
+        }
+    }
+
+    function entry_comp_doubleclick(e) {
+        if (e.target.tagName == "TD") {
+            entr_comp_save();
         }
     }
 
@@ -238,7 +237,7 @@
         document.getElementById('ent_year').value = entr_comp_selected.getElementsByTagName('TD')[3].innerHTML;
         document.getElementById('ent_chip').value = entr_comp_selected.getElementsByTagName('TD')[4].innerHTML;
         document.getElementById('ent_clubId').value = entr_comp_selected.getElementsByTagName('TD')[6].innerHTML;
-        document.getElementById('entr.competitorsDialog').style.display = 'none';
+        document.getElementById('main.competitorsDialog').style.display = 'none';
     }
 
     var entr_selected = document.getElementById('entr.table').getElementsByClassName('selected')[0];
@@ -305,9 +304,9 @@
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                document.getElementById('entr.competitorsDialog').innerHTML = this.responseText;
-                document.getElementById('entr.competitorsDialog').style.display='block';
-                document.getElementById('entr.comp.filter').focus()
+                document.getElementById('main.competitorsDialog').innerHTML = this.responseText;
+                document.getElementById('main.competitorsDialog').style.display='block';
+                document.getElementById('main.comp.filter').focus()
             }
             if (this.readyState == 4 && this.status == 409) {
                 window.alert(this.responseText);

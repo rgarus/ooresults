@@ -1,0 +1,67 @@
+## competitor: Optional[CompetitorType]
+
+
+<!-- Modal content -->
+<div class="modal-content">
+    <span class="close" onclick="document.getElementById('comp.mergeDialog').style.display='none'">&times;</span>
+    <form id="comp.formMerge" class="form-container" autocomplete="off" onsubmit="return false;">
+        <input id="comp.merge.id1" name="id1" type="text" value="${competitor.id if competitor else None}" hidden/>
+        <input id="comp.merge.id2" name="id2" type="text" hidden/>
+        <input id="comp.merge.direction" name="direction" type="text" hidden/>
+
+        <table id="comp.mergeFormTable" style="border-collapse: collapse">
+            <tr>
+                <td></td>
+                <th scope="col" class="merge" style="text-align: center; min-width: 10em;">Competitor 1</th>
+                <th scope="col" class="merge" style="text-align: center; min-width: 10em;">Competitor 2</th>
+            </tr>
+            <tr>
+                <td></td>
+                <td class="merge" style="text-align: center;"><button type="button" id="comp.merge.choose_1" onclick="comp_myCompetitors('competitor/choose_competitor_1')">Choose ...</button></td>
+                <td class="merge" style="text-align: center;"><button type="button" id="comp.merge.choose_2" onclick="comp_myCompetitors('competitor/choose_competitor_2')">Choose ...</button></td>
+            </tr>
+            <tr>
+                <th scope="row" class="merge">First name</th>
+                <td id="comp.merge.firstName1" class="merge">${competitor.first_name if competitor else ""}</td>
+                <td id="comp.merge.firstName2" class="merge"></td>
+            </tr>
+            <tr>
+                <th scope="row" class="merge">Last name</th>
+                <td id="comp.merge.lastName1" class="merge">${competitor.last_name if competitor else ""}</td>
+                <td id="comp.merge.lastName2" class="merge"></td>
+            </tr>
+            <tr>
+                <th scope="row" class="merge">Sex</th>
+                <td id="comp.merge.sex1" class="merge">${competitor.sex.value if competitor and competitor.sex is not None else ""}</td>
+                <td id="comp.merge.sex2" class="merge"></td>
+            </tr>
+            <tr>
+                <th scope="row" class="merge">Year</th>
+                <td id="comp.merge.year1" class="merge">${competitor.year if competitor else ""}</td>
+                <td id="comp.merge.year2" class="merge"></td>
+            </tr>
+            <tr>
+                <th scope="row" class="merge">Chip</th>
+                <td id="comp.merge.chip1" class="merge">${competitor.chip if competitor else ""}</td>
+                <td id="comp.merge.chip2" class="merge"></td>
+            </tr>
+            <tr>
+                <th scope="row" class="merge">Club</th>
+                <td id="comp.merge.club1" class="merge">${competitor.club_name if competitor else ""}</td>
+                <td id="comp.merge.club2" class="merge"></td>
+            </tr>
+            <tr>
+                <td colspan="3" nowrap style="padding-top: 20px;">
+                    <div style="float:left">
+                        <button id="comp.merge.1to2" onclick="comp_assertMerge('1', '2')" class="btn" disabled>Merge 1 --> 2</button>
+                        <button id="comp.merge.2to1" onclick="comp_assertMerge('2', '1')" class="btn" disabled>Merge 2 --> 1</button>
+                    </div>
+                    <div style="float:right">
+                        <button type="button" class="btn cancel" onclick="document.getElementById('comp.mergeDialog').style.display='none'">Cancel</button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+ 

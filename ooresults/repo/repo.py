@@ -507,6 +507,14 @@ class Repo:
         """
         raise NotImplementedError
 
+    def replace_competitor(self, id_old: int, id_new: int) -> int:
+        """Replace a competitor_id for all entry records in the 'entries' table.
+
+        Possible errors:
+        - Competitor does not exist
+        """
+        raise NotImplementedError
+
     def get_events(self) -> list[EventType]:
         """Read all entry records from the 'events' table."""
         raise NotImplementedError

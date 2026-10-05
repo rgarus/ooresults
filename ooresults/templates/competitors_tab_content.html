@@ -11,6 +11,7 @@
     <button id="comp.myBtnAdd" onclick="comp_myAdd()">Add competitor ...</button>
     <button id="comp.myBtnEdit" disabled onclick="comp_myEdit()">Edit competitor ...</button>
     <button id="comp.myBtnDelete" disabled onclick="comp_myDelete()">Delete competitor</button>
+    <button id="comp.myBtnMerge" onclick="comp_myMerge()">Merge competitors ...</button>
   </div>
 
   <div id=comp.data class="data">
@@ -20,6 +21,10 @@
   <!-- The Modal -->
   <div class="modal" id="comp.addDialog">
   </div> 
+
+  <!-- The Modal -->
+  <div class="modal" id="comp.mergeDialog">
+  </div>
 
   <!-- The Modal -->
   <div class="modal" id="comp.importDialog">
@@ -90,6 +95,22 @@
       </form>
     </div>
   </div>
+
+  <!-- The Modal -->
+  <div class="modal" id="comp.mergeAssertDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('comp.mergeAssertDialog').style.display='none'">&times;</span>
+      <form id="comp.formMergeAssert" class="form-container" onsubmit="comp_submitMerge(); return false;">
+        <p id="comp.merge.assertText">Should the competitor <span id="comp.assertMergeName1" style="color: red;"></span>
+            be removed, and every instance of that name (including sex and year of birth) in all events
+            be replaced with competitor <span id="comp.assertMergeName2" style="color: green;"></span>?
+        </p>
+        <button type="submit" class="btn">Ok</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('comp.mergeAssertDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
 </div>
 
 
@@ -100,6 +121,27 @@
     function comp_reload_view(self) {
         comp_view = self.value;
         comp_update();
+    }
+
+    function comp_merge_dblclick(e, nr) {
+        if (e.target.tagName == "TD") {
+            comp_choose_competitor(nr);
+        }
+    }
+
+    function comp_choose_competitor(nr) {
+        document.getElementById('comp.merge.id' + nr).value = entr_comp_selected.dataset.id;
+        document.getElementById('comp.merge.firstName' + nr).innerHTML = entr_comp_selected.getElementsByTagName('TD')[0].innerHTML;
+        document.getElementById('comp.merge.lastName' + nr).innerHTML = entr_comp_selected.getElementsByTagName('TD')[1].innerHTML;
+        document.getElementById('comp.merge.sex' + nr).innerHTML = entr_comp_selected.getElementsByTagName('TD')[2].innerHTML;
+        document.getElementById('comp.merge.year' + nr).innerHTML = entr_comp_selected.getElementsByTagName('TD')[3].innerHTML;
+        document.getElementById('comp.merge.chip' + nr).innerHTML = entr_comp_selected.getElementsByTagName('TD')[4].innerHTML;
+        document.getElementById('comp.merge.club' + nr).innerHTML = entr_comp_selected.getElementsByTagName('TD')[5].innerHTML;
+        const id1 = document.getElementById('comp.merge.id1').value;
+        const id2 = document.getElementById('comp.merge.id2').value;
+        document.getElementById('comp.merge.1to2').disabled = (id1 === "" || id2 === "" || id1 === id2);
+        document.getElementById('comp.merge.2to1').disabled = (id1 === "" || id2 === "" || id1 === id2);
+        document.getElementById('main.competitorsDialog').style.display = 'none';
     }
 
     function comp_highlight(e) {
@@ -136,6 +178,58 @@
         xhr.open("POST", "competitor/fill_edit_form", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         xhr.send("id=");
+    }
+
+    function comp_myMerge() {
+        var table = document.getElementById('comp.table');
+        var selected_id = "";
+        for (var i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].className === "selected") {
+                selected_id=table.rows[i].dataset.id;
+                break;
+            }
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById('comp.mergeDialog').innerHTML = this.responseText;
+                document.getElementById('comp.mergeDialog').style.display='block';
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
+        xhr.open("POST", "competitor/fill_merge_form", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.send("id=".concat(selected_id));
+    }
+
+    function comp_myCompetitors(address) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById('main.competitorsDialog').innerHTML = this.responseText;
+                document.getElementById('main.competitorsDialog').style.display='block';
+                document.getElementById('main.comp.filter').focus()
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText);
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
+        xhr.open("POST", address, true);
+        xhr.send("");
     }
 
     function comp_myDelete() {
@@ -209,6 +303,41 @@
             window.alert("Network error");
         };
         xhr.open("POST", "competitor/add", true);
+        xhr.send(data);
+    }
+
+    function comp_assertMerge(nr1, nr2) {
+        document.getElementById('comp.merge.direction').value = nr1 + "->" + nr2;
+        const lastName1 = document.getElementById('comp.merge.lastName' + nr1).innerHTML;
+        const firstName1 = document.getElementById('comp.merge.firstName' + nr1).innerHTML;
+        const lastName2 = document.getElementById('comp.merge.lastName' + nr2).innerHTML;
+        const firstName2 = document.getElementById('comp.merge.firstName' + nr2).innerHTML;
+        document.getElementById('comp.assertMergeName1').innerHTML = firstName1 + ' ' + lastName1;
+        document.getElementById('comp.assertMergeName2').innerHTML = firstName2 + ' ' + lastName2;
+        document.getElementById('comp.mergeAssertDialog').style.display='block';
+    }
+
+    function comp_submitMerge() {
+        var form = document.getElementById('comp.formMerge');
+        var data = new FormData(form);
+        data.append('view', comp_view);
+
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                comp_updateTable(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 409) {
+                window.alert(this.responseText)
+            }
+            if (this.readyState == 4 && this.status == 500) {
+                window.alert(this.responseText);
+            }
+        };
+        xhr.onerror = function() {
+            window.alert("Network error");
+        };
+        xhr.open("POST", "competitor/merge", true);
         xhr.send(data);
     }
 

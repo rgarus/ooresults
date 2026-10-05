@@ -137,3 +137,11 @@ def import_competitors(competitors: list[dict]) -> None:
             model.db.add_many_competitors(list_of_competitors=list_of_competitors)
 
     cached_result.clear_cache()
+
+
+def merge_competitor(id_old: int, id_new: int) -> None:
+    with model.db.transaction(mode=TransactionMode.IMMEDIATE):
+        model.db.replace_competitor(id_old=id_old, id_new=id_new)
+        model.db.delete_competitor(id=id_old)
+
+    cached_result.clear_cache()

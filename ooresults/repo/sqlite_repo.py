@@ -1209,6 +1209,16 @@ class SqliteRepo(Repo):
                 entries,
             )
 
+    def replace_competitor(self, id_old: int, id_new: int) -> int:
+        try:
+            cur = self.db.execute(
+                "UPDATE entries SET competitor_id=? WHERE competitor_id=?",
+                (id_new, id_old),
+            )
+            return cur.rowcount
+        except sqlite3.IntegrityError:
+            raise ConstraintError("Competitor does not exist")
+
     def get_events(self) -> list[EventType]:
         values = self.db.execute(
             """

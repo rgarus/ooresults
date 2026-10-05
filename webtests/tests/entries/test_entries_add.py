@@ -17,10 +17,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import pathlib
+
 import pytest
 
 from webtests.pageobjects.entries import StatusDialog
 from webtests.pageobjects.main_page import MainPage
+from webtests.pageobjects.table import RowIterator
 
 
 EVENT_NAME = "Test for Entries"
@@ -439,6 +442,124 @@ def test_if_several_entries_are_added_then_the_added_entries_are_displayed(
         "",
         "Bahn A - Männer",
         "11:00:03",
+        "",
+        "",
+    ]
+
+
+@pytest.fixture
+def competitor_data(main_page: MainPage, delete_entries_and_competitors: None) -> None:
+    competitor_list_path = (
+        pathlib.Path(__file__).parent.parent / "data" / "CompetitorList.xml"
+    )
+
+    competitor_page = main_page.goto_competitors()
+    dialog = competitor_page.actions.import_()
+    dialog.import_file(path=competitor_list_path)
+
+
+def test_if_a_competitor_is_selected_in_the_competitors_dialog_then_his_details_will_be_carried_over(
+    main_page: MainPage, event: str, add_classes: str, competitor_data: None
+) -> None:
+    entry_page = main_page.goto_entries(event=event)
+    dialog = entry_page.actions.add()
+    select_competitor_dialog = dialog.select_competitor()
+
+    assert select_competitor_dialog.table.headers() == [
+        "First name",
+        "Last name",
+        "Sex",
+        "Year",
+        "Chip",
+        "Club",
+    ]
+
+    rows = iter(RowIterator(table=select_competitor_dialog.table))
+    assert next(rows) == [
+        "Annalena",
+        "Baerbock",
+        "F",
+        "1980",
+        "7379879",
+        "OC Grün",
+    ]
+    assert next(rows) == [
+        "Marco",
+        "Buschmann",
+        "M",
+        "1977",
+        "7076815",
+        "OC Gelb",
+    ]
+    assert next(rows) == [
+        "Nancy",
+        "Faeser",
+        "F",
+        "1970",
+        "7040504",
+        "OC Rot",
+    ]
+    assert next(rows) == [
+        "Robert",
+        "Habeck",
+        "M",
+        "1969",
+        "7509749",
+        "OC Grün",
+    ]
+    assert next(rows) == [
+        "Christian",
+        "Lindner",
+        "M",
+        "1979",
+        "12345",
+        "OC Gelb",
+    ]
+    assert next(rows) == [
+        "Olaf",
+        "Scholz",
+        "M",
+        "1958",
+        "7579050",
+        "OC Rot",
+    ]
+    with pytest.raises(StopIteration):
+        next(rows)
+
+    select_competitor_dialog.select_competitor(first_name="Robert", last_name="Habeck")
+    select_competitor_dialog.save()
+
+    dialog.check_values(
+        first_name="Robert",
+        last_name="Habeck",
+        sex="M",
+        year="1969",
+        chip="7509749",
+        club_name="OC Grün",
+        class_name="Bahn A - Frauen",
+        not_competing=False,
+        start_time="",
+        status="",
+    )
+    dialog.submit()
+
+    # check number of rows
+    assert entry_page.table.nr_of_rows() == 2
+    assert entry_page.table.nr_of_columns() == 11
+
+    assert entry_page.table.row(i=1) == [
+        "Entries  (1)",
+    ]
+    assert entry_page.table.row(i=2) == [
+        "",
+        "Robert",
+        "Habeck",
+        "M",
+        "1969",
+        "7509749",
+        "OC Grün",
+        "Bahn A - Frauen",
+        "",
         "",
         "",
     ]

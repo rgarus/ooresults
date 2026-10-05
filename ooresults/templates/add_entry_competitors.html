@@ -1,13 +1,15 @@
 ## competitors: List[CompetitorType]
+## click: str
+## dblclick: str
 
 
 <!-- Modal content -->
 <div class="modal-content" style="margin: 3% 3%">
-    <span class="close" onclick="document.getElementById('entr.competitorsDialog').style.display='none'">&times;</span>
-    <input id="entr.comp.filter" oninput="w3.filterHTML('#competitors_tbody', 'tr', this.value)" placeholder="Filter ..."/>
+    <span class="close" onclick="document.getElementById('main.competitorsDialog').style.display='none'">&times;</span>
+    <input id="main.comp.filter" oninput="w3.filterHTML('#competitors_tbody', 'tr', this.value)" placeholder="Filter ..."/>
     <p/>
     <div style="display: block; height: 50%; overflow: auto">
-        <table class="dt" id="entry.comp.table" onclick="entr_comp_highlight(event)" ondblclick="entr_comp_highlight(event)" onmousedown="table_mousedown(event)" >
+        <table class="dt" id="main.comp.table" onclick="entr_comp_highlight(event)" ondblclick="${dblclick}" onmousedown="table_mousedown(event)" >
             <thead>
                 <tr class="dt">
                     <th class="dt">First name</th>
@@ -34,8 +36,6 @@
         </table>
     </div>
     <p></p>
-    <button id="entry.comp.add" class="btn" onclick="entr_comp_save()" disabled>Save</button>
-    <button class="btn cancel" onclick="document.getElementById('entr.competitorsDialog').style.display='none'">Cancel</button>
+    <button id="main.comp.add" class="btn" onclick="${click}" disabled>Save</button>
+    <button class="btn cancel" onclick="document.getElementById('main.competitorsDialog').style.display='none'">Cancel</button>
 </div>
-
-

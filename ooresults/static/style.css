@@ -18,6 +18,12 @@ tr.dth {
   background-color: Canvas
 }
 
+th.merge, td.merge {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 5px;
+}
+
 th.dth {
   border: 1px solid black;
   border-left: none;

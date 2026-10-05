@@ -9,6 +9,7 @@ Added
 ^^^^^
 
 - In addition to the status, the self-service check-in window (si1 window) also displays the name and date of the event.
+- Merging of competitors added.
 
 Changed
 ^^^^^^^
