@@ -706,7 +706,7 @@ class SqliteRepo(Repo):
         club_id: Optional[int],
         sex: Optional[Sex],
         year: Optional[int],
-        chip: str,
+        chip: Optional[str],
     ) -> int:
         try:
             cur = self.db.execute(
@@ -749,7 +749,7 @@ class SqliteRepo(Repo):
         club_id: Optional[int],
         sex: Optional[Sex],
         year: Optional[int],
-        chip: str,
+        chip: Optional[str],
     ) -> None:
         try:
             cur = self.db.execute(
@@ -1025,7 +1025,7 @@ class SqliteRepo(Repo):
         class_id: int,
         club_id: Optional[int],
         not_competing: bool,
-        chip: str,
+        chip: Optional[str],
         fields: dict[int, str],
         result: result_type.PersonRaceResult,
         start: start_type.PersonRaceStart,
@@ -1064,7 +1064,7 @@ class SqliteRepo(Repo):
     def add_entry_result(
         self,
         event_id: int,
-        chip: str,
+        chip: Optional[str],
         result: result_type.PersonRaceResult,
         start: start_type.PersonRaceStart,
     ) -> int:
@@ -1108,7 +1108,7 @@ class SqliteRepo(Repo):
         class_id: int,
         club_id: Optional[int],
         not_competing: bool,
-        chip: str,
+        chip: Optional[str],
         fields: dict[int, str],
         result: result_type.PersonRaceResult,
         start: start_type.PersonRaceStart,
@@ -1141,7 +1141,7 @@ class SqliteRepo(Repo):
     def update_entry_result(
         self,
         id: int,
-        chip: str,
+        chip: Optional[str],
         result: result_type.PersonRaceResult,
         start: start_type.PersonRaceStart,
     ) -> None:

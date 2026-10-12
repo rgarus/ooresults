@@ -46,7 +46,7 @@ def build_results(
         if class_entries:
             # sort the results
             class_entries.sort(
-                key=lambda e: e.last_name + "," + e.first_name,
+                key=lambda e: f"{e.last_name},{e.first_name}",
             )
             class_entries.sort(
                 key=lambda e: e.result.time if e.result.time is not None else 99999999
@@ -111,7 +111,7 @@ def build_results(
                     else:
                         rank = i + 1
 
-                    if class_info.params.otype != "score":
+                    if class_info.params.otype != "score" and winner_time is not None:
                         time_behind = e.result.time - winner_time
 
                 class_results.append(
@@ -147,12 +147,15 @@ def build_total_results(
             # compute points
             for e in ranked_entries:
                 entry = e.entry
+                if entry.last_name is None or entry.first_name is None:
+                    continue
 
                 points = None
                 if class_.params.otype != "score":
                     if e.rank is not None:
                         winner_time = ranked_entries[0].entry.result.time
-                        points = winner_time / e.entry.result.time
+                        if winner_time is not None and e.entry.result.time is not None:
+                            points = winner_time / e.entry.result.time
                     elif entry.result.status == ResultStatus.OK and entry.not_competing:
                         points = 0
                     elif entry.result.status in (
@@ -185,6 +188,9 @@ def build_total_results(
     # add organizer bonus
     for i, entries in enumerate(organizers):
         for entry in entries:
+            if entry.last_name is None or entry.first_name is None:
+                continue
+
             person_name = (entry.last_name, entry.first_name)
             for class_name, person_series_results in r.items():
                 if person_name in person_series_results:

@@ -21,6 +21,7 @@ import copy
 import datetime
 import enum
 import sqlite3
+from typing import Literal
 from typing import Optional
 
 import tzlocal
@@ -29,6 +30,7 @@ from ooresults import model
 from ooresults.model import cached_result
 from ooresults.otypes import result_type
 from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryBaseDataType
 from ooresults.otypes.entry_type import EntryType
@@ -46,7 +48,7 @@ from ooresults.utils.rental_cards import is_rental_card
 def import_entries(
     event_id: int,
     entries: list[dict],
-    event_key: str = None,
+    event_key: Optional[str] = None,
     clear_entries: bool = False,
 ) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
@@ -63,8 +65,7 @@ def import_entries(
         list_of_entries: list[EntryBaseDataType] = []
 
         for c in entries:
-            class_id = None
-            class_ = None
+            class_: Optional[ClassInfoType] = None
             for cla in model.db.get_classes(event_id=event_id):
                 if cla.name == c["class_"]:
                     class_id = cla.id
@@ -121,13 +122,17 @@ def import_entries(
 
             # update result
             if c["result"].has_punches():
-                try:
-                    course_id = class_["course_id"]
-                    class_params = class_["params"]
-                    controls = model.db.get_course(id=course_id).controls
-                except Exception:
-                    class_params = ClassParams()
-                    controls = []
+                controls = []
+                class_params = ClassParams()
+
+                if class_ is not None and (course_id := class_.course_id) is not None:
+                    try:
+                        controls = model.db.get_course(id=course_id).controls
+                        class_params = class_.params
+                    except Exception:
+                        controls = []
+                        class_params = ClassParams()
+
                 c["result"].compute_result(
                     controls=controls,
                     class_params=class_params,
@@ -247,7 +252,7 @@ def add_or_update_entry(
     class_id: int,
     club_id: Optional[int],
     not_competing: bool,
-    chip: str,
+    chip: Optional[str],
     fields: dict[int, str],
     status: ResultStatus,
     start_time: Optional[datetime.datetime],
@@ -255,7 +260,7 @@ def add_or_update_entry(
 ) -> tuple[int, bool]:
     """Add a new entry to an event or update an existing entry of an event."""
     #
-    # result_id == -1: remove result from entry (store as pseudy result)
+    # result_id == -1: remove result from entry (store as pseudo result)
     #
 
     nc_changed = False
@@ -335,16 +340,17 @@ def add_or_update_entry(
                             start=PersonRaceStart(),
                         )
 
-                competitor = model.db.get_competitor(id=entry.competitor_id)
-                model.db.update_competitor(
-                    id=competitor.id,
-                    first_name=first_name,
-                    last_name=last_name,
-                    sex=sex,
-                    year=year,
-                    club_id=competitor.club_id,
-                    chip=competitor.chip,
-                )
+                if entry.competitor_id is not None:
+                    competitor = model.db.get_competitor(id=entry.competitor_id)
+                    model.db.update_competitor(
+                        id=competitor.id,
+                        first_name=first_name,
+                        last_name=last_name,
+                        sex=sex,
+                        year=year,
+                        club_id=competitor.club_id,
+                        chip=competitor.chip,
+                    )
 
                 r = copy.deepcopy(entry.result)
                 r.status = status
@@ -388,14 +394,16 @@ def add_or_update_entry(
                 result.status = status
 
             # compute new result
+            controls = []
+            class_params = ClassParams()
             try:
                 class_ = model.db.get_class(id=class_id)
-                course_id = class_.course_id
-                class_params = class_.params
-                controls = model.db.get_course(id=course_id).controls
+                if (course_id := class_.course_id) is not None:
+                    controls = model.db.get_course(id=course_id).controls
+                    class_params = class_.params
             except KeyError:
-                class_params = ClassParams()
                 controls = []
+                class_params = ClassParams()
 
             result.compute_result(
                 controls=controls,
@@ -460,7 +468,7 @@ def edit_entry_result(
     event_id: int,
     command: str,
     control: str,
-    selected_row: int | str,
+    selected_row: Literal["START", "FINISH"] | int,
     punch_time: Optional[datetime.time],
 ) -> EntryType:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
@@ -522,14 +530,17 @@ def edit_entry_result(
                     )
 
         # compute new result
+        controls = []
+        class_params = ClassParams()
         try:
-            class_ = model.db.get_class(id=entry.class_id)
-            course_id = class_.course_id
-            class_params = class_.params
-            controls = model.db.get_course(id=course_id).controls
+            if (class_id := entry.class_id) is not None:
+                class_ = model.db.get_class(id=class_id)
+                if (course_id := class_.course_id) is not None:
+                    controls = model.db.get_course(id=course_id).controls
+                    class_params = class_.params
         except KeyError:
-            class_params = ClassParams()
             controls = []
+            class_params = ClassParams()
 
         result.compute_result(
             controls=controls,

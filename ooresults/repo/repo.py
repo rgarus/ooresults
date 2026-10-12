@@ -327,7 +327,7 @@ class Repo:
         club_id: Optional[int],
         sex: Optional[Sex],
         year: Optional[int],
-        chip: str,
+        chip: Optional[str],
     ) -> int:
         """Insert a competitor record into the 'competitors' table.
 
@@ -345,12 +345,13 @@ class Repo:
         club_id: Optional[int],
         sex: Optional[Sex],
         year: Optional[int],
-        chip: str,
+        chip: Optional[str],
     ) -> None:
         """Change a competitor record in the 'competitors' table.
 
         Possible errors:
         - Competitor already exists
+        - Competitor does not exist
         - Club does not exist
         """
         raise NotImplementedError
@@ -413,7 +414,7 @@ class Repo:
         class_id: int,
         club_id: Optional[int],
         not_competing: bool,
-        chip: str,
+        chip: Optional[str],
         fields: dict[int, str],
         result: result_type.PersonRaceResult,
         start: start_type.PersonRaceStart,
@@ -431,7 +432,7 @@ class Repo:
     def add_entry_result(
         self,
         event_id: int,
-        chip: str,
+        chip: Optional[str],
         result: result_type.PersonRaceResult,
         start: start_type.PersonRaceStart,
     ) -> int:
@@ -448,7 +449,7 @@ class Repo:
         class_id: int,
         club_id: Optional[int],
         not_competing: bool,
-        chip: str,
+        chip: Optional[str],
         fields: dict[int, str],
         result: result_type.PersonRaceResult,
         start: start_type.PersonRaceStart,
@@ -468,7 +469,7 @@ class Repo:
     def update_entry_result(
         self,
         id: int,
-        chip: str,
+        chip: Optional[str],
         result: result_type.PersonRaceResult,
         start: start_type.PersonRaceStart,
     ) -> None:

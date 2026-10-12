@@ -568,6 +568,22 @@ def test_update_with_unknown_id_raises_exception(
             )
 
 
+def test_update_with_not_existing_club_id_raises_exception(
+    db: SqliteRepo, competitor_1_id: int
+) -> None:
+    with pytest.raises(repo.ConstraintError):
+        with db.transaction():
+            db.update_competitor(
+                id=competitor_1_id,
+                first_name="Jogi",
+                last_name="Löw",
+                club_id=999,
+                sex=Sex.MALE,
+                year=1958,
+                chip="",
+            )
+
+
 def test_delete_competitor_with_unknown_id_do_not_change_anything(
     db: SqliteRepo, competitor_1_id: int
 ) -> None:

@@ -27,11 +27,22 @@ from ooresults.repo.repo import TransactionMode
 
 
 def get_courses(event_id: int) -> list[CourseType]:
+    """Get all courses of an event.
+
+    Possible errors:
+    - Event does not exist
+    """
     with model.db.transaction():
         return model.db.get_courses(event_id=event_id)
 
 
 def get_course(id: int) -> CourseType:
+    """Get course.
+
+    Possible errors:
+    - Event does not exist
+    - Course does not exist
+    """
     with model.db.transaction():
         return model.db.get_course(id=id)
 
@@ -115,6 +126,12 @@ def add_course(
     climb: Optional[float],
     controls: list[str],
 ) -> None:
+    """Add a new course.
+
+    Possible errors:
+    - Course already exists
+    - Event does not exist
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.add_course(
             event_id=event_id,
@@ -133,6 +150,13 @@ def update_course(
     climb: Optional[float],
     controls: list[str],
 ) -> None:
+    """Update course and recompute entry results.
+
+    Possible errors:
+    - Course already exists
+    - Event does not exist
+    - Course does not exist
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         # update course data
         try:
@@ -175,10 +199,26 @@ def update_course(
 
 
 def delete_courses(event_id: int) -> None:
+    """Delete all courses of an event.
+
+    The function is executed without error if the event does not exist
+    (for example if the event has already been deleted).
+
+    Possible errors:
+    - One of the courses is used by a class
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.delete_courses(event_id=event_id)
 
 
 def delete_course(id: int) -> None:
+    """Delete a course.
+
+    The function is executed without error if the course does not exist
+    (for example if the course has already been deleted).
+
+    Possible errors:
+    - Course used by a class
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.delete_course(id=id)

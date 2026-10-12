@@ -19,7 +19,6 @@
 
 import json
 import pathlib
-from typing import Optional
 
 import iso8601
 import jsonschema
@@ -43,7 +42,7 @@ from ooresults.repo.repo import TransactionMode
 from ooresults.websocket_server.websocket_server import WebSocketServer
 
 
-websocket_server: Optional[WebSocketServer] = None
+websocket_server: WebSocketServer = None  # type: ignore
 
 
 data_path = (
@@ -114,6 +113,8 @@ def store_cardreader_result(
 
         if item.entry_type == "cardRead":
             result = item.result
+            if result is None:
+                raise RuntimeError("Command cardRead contains no result")
 
             entries = model.db.get_entries(event_id=event.id)
             entries_control_card = [e for e in entries if e.chip == item.control_card]
@@ -144,10 +145,10 @@ def store_cardreader_result(
                     break
             else:
                 # check if result is already read out
-                unassigned_entry = None
+                unassigned_entry_with_same_punches = None
                 for entry in unassigned_entries:
                     if entry.result.same_si_punches(other=result):
-                        unassigned_entry = entry
+                        unassigned_entry_with_same_punches = entry
                         break
 
                 # result can be assigned to an entry if
@@ -159,15 +160,18 @@ def store_cardreader_result(
                     and (
                         len(unassigned_entries) == 0
                         or len(unassigned_entries) == 1
-                        and unassigned_entries[0].result.same_si_punches(other=result)
+                        and unassigned_entry_with_same_punches is not None
                     )
                 ):
                     entry = assigned_entries[0]
+                    class_params = ClassParams()
+                    controls = []
                     try:
-                        class_ = model.db.get_class(id=entry.class_id)
-                        course_id = class_.course_id
-                        class_params = class_.params
-                        controls = model.db.get_course(id=course_id).controls
+                        if (class_id := entry.class_id) is not None:
+                            class_ = model.db.get_class(id=class_id)
+                            if (course_id := class_.course_id) is not None:
+                                controls = model.db.get_course(id=course_id).controls
+                                class_params = class_.params
                     except KeyError:
                         class_params = ClassParams()
                         controls = []
@@ -201,13 +205,13 @@ def store_cardreader_result(
                     cached_result.clear_cache(event_id=event.id, entry_id=entry.id)
 
                     # if there is an unassigned entry with the same result, delete it
-                    if unassigned_entries == [unassigned_entry]:
-                        model.db.delete_entry(id=unassigned_entry.id)
+                    if unassigned_entry_with_same_punches is not None:
+                        model.db.delete_entry(id=unassigned_entry_with_same_punches.id)
 
                 else:
                     # create a new unassigned entry
                     result.compute_result(controls=[], class_params=ClassParams())
-                    if unassigned_entry is None:
+                    if unassigned_entry_with_same_punches is None:
                         model.db.add_entry_result(
                             event_id=event.id,
                             chip=item.control_card,
@@ -315,7 +319,7 @@ def create_event_list(events: list[EventType]) -> list[EventType]:
     # filter list
     e_list = [e for e in events if e.series is not None]
     # sort list
-    e_list.sort(key=lambda e: e.series)
+    e_list.sort(key=lambda e: e.series)  # type: ignore
     e_list.sort(key=lambda e: e.date)
     return e_list
 

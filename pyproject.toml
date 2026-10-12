@@ -138,6 +138,7 @@ follow_untyped_imports = true
 follow_imports = "silent"
 packages = [
     "ooresults.handler",
+    "ooresults.model",
     "ooresults.pdf",
     "ooresults.otypes",
     "ooresults.repo",

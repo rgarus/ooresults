@@ -19,6 +19,9 @@
 
 import pathlib
 import tempfile
+from typing import Optional
+
+import pytest
 
 from ooresults.utils import rental_cards
 
@@ -81,29 +84,38 @@ def test_read_directory_as_rental_cards_file() -> None:
         assert rental_cards._rental_cards == []
 
 
-def test_is_a_rental_card() -> None:
-    rental_cards._rental_cards = ["123", "456", "789"]
-
-    assert rental_cards.is_rental_card(card_number="123") is True
-    assert rental_cards.is_rental_card(card_number="456") is True
-    assert rental_cards.is_rental_card(card_number="789") is True
-
-
-def test_is_not_a_rental_card() -> None:
-    rental_cards._rental_cards = ["123", "456", "789"]
-
-    assert rental_cards.is_rental_card(card_number="234") is False
-
-
-def test_format_a_rental_card() -> None:
-    rental_cards._rental_cards = ["123", "456", "789"]
-
-    assert rental_cards.format_card(card_number="123") == "RC (123)"
-    assert rental_cards.format_card(card_number="456") == "RC (456)"
-    assert rental_cards.format_card(card_number="789") == "RC (789)"
+@pytest.mark.parametrize(
+    "card_number, result",
+    [
+        ("123", True),
+        ("456", True),
+        ("789", True),
+        (None, False),
+        ("", False),
+        ("234", False),
+    ],
+)
+def test_is_a_rental_card(card_number: Optional[str], result: bool) -> None:
+    try:
+        rental_cards._rental_cards = ["123", "456", "789"]
+        assert rental_cards.is_rental_card(card_number=card_number) is result
+    finally:
+        rental_cards._rental_cards = []
 
 
-def test_format_not_a_rental_card() -> None:
-    rental_cards._rental_cards = ["123", "456", "789"]
-
-    assert rental_cards.format_card(card_number="234") == "234"
+@pytest.mark.parametrize(
+    "card_number, result",
+    [
+        ("123", "RC (123)"),
+        ("456", "RC (456)"),
+        ("789", "RC (789)"),
+        ("", ""),
+        ("234", "234"),
+    ],
+)
+def test_format_a_rental_card(card_number: str, result: str) -> None:
+    try:
+        rental_cards._rental_cards = ["123", "456", "789"]
+        assert rental_cards.format_card(card_number=card_number) == result
+    finally:
+        rental_cards._rental_cards = []

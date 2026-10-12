@@ -18,6 +18,7 @@
 
 
 import pathlib
+from typing import Optional
 
 
 _rental_cards: list[str] = []
@@ -36,8 +37,11 @@ def read_rental_cards(path: pathlib.Path) -> None:
         print(f"  {str(e)}")
 
 
-def is_rental_card(card_number: str) -> bool:
-    return card_number in _rental_cards
+def is_rental_card(card_number: Optional[str]) -> bool:
+    if card_number is not None:
+        return card_number in _rental_cards
+    else:
+        return False
 
 
 def format_card(card_number: str) -> str:

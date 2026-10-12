@@ -28,11 +28,22 @@ from ooresults.repo.repo import TransactionMode
 
 
 def get_classes(event_id: int) -> list[ClassInfoType]:
+    """Get all classes of an event.
+
+    Possible errors:
+    - Event does not exist
+    """
     with model.db.transaction():
         return model.db.get_classes(event_id=event_id)
 
 
 def get_class(id: int) -> ClassType:
+    """Get class.
+
+    Possible errors:
+    - Event does not exist
+    - Class does not exist
+    """
     with model.db.transaction():
         return model.db.get_class(id=id)
 
@@ -74,6 +85,13 @@ def add_class(
     course_id: Optional[int],
     params: ClassParams,
 ) -> None:
+    """Add a new class.
+
+    Possible errors:
+    - Class already exists
+    - Event does not exist
+    - Course does not exist
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.add_class(
             event_id=event_id,
@@ -92,6 +110,14 @@ def update_class(
     course_id: Optional[int],
     params: ClassParams,
 ) -> None:
+    """Update class and recompute entry results.
+
+    Possible errors:
+    - Class already exists
+    - Event does not exist
+    - Class does not exist
+    - Course does not exist
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         # update class data
         try:
@@ -108,10 +134,10 @@ def update_class(
             raise
 
         # update results of the entries belonging to the modified class
-        try:
+        if course_id is not None:
             class_params = params
             controls = model.db.get_course(id=course_id).controls
-        except Exception:
+        else:
             class_params = ClassParams()
             controls = []
 
@@ -136,10 +162,26 @@ def update_class(
 
 
 def delete_classes(event_id: int) -> None:
+    """Delete all classes of an event.
+
+    The function is executed without error if the event does not exist
+    (for example if the event has already been deleted).
+
+    Possible errors:
+    - One of the classes is used by an entry
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.delete_classes(event_id=event_id)
 
 
 def delete_class(id: int) -> None:
+    """Delete a class.
+
+    The function is executed without error if the class does not exist
+    (for example if the class has already been deleted).
+
+    Possible errors:
+    - Class used by an entry
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.delete_class(id=id)

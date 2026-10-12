@@ -22,6 +22,7 @@ import io
 import itertools
 import json
 from collections import defaultdict
+from typing import Literal
 from typing import Optional
 
 import bottle
@@ -497,6 +498,7 @@ def post_split_times() -> str | bottle.HTTPResponse:
 @bottle.post("/entry/editPunch")
 def post_edit_punch() -> str | bottle.HTTPResponse:
     """Change split times."""
+    selected_row: Literal["START", "FINISH"] | int
     data = bottle.request.forms
     event_id = int(data.event_id) if data.event_id != "" else -1
     entry_id = int(data.entry_id) if data.entry_id != "" else -1

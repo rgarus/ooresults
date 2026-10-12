@@ -23,13 +23,20 @@ import typing
 from collections import OrderedDict
 from collections.abc import Callable
 from typing import Optional
+from typing import TypeAlias
 
 from ooresults import model
+from ooresults.otypes.class_type import ClassInfoType
+from ooresults.otypes.entry_type import RankedEntryType
+from ooresults.otypes.event_type import EventType
+
+
+ClassResultsType: TypeAlias = tuple[ClassInfoType, list[RankedEntryType]]
 
 
 @dataclasses.dataclass
 class Data:
-    content = None
+    content: Optional[tuple[EventType, list[ClassResultsType]]] = None
     lock: threading.Lock = threading.Lock()
     valid: bool = True
 
@@ -41,7 +48,7 @@ cache: typing.OrderedDict[int, Data] = OrderedDict()
 callbacks: set[Callable[[Optional[int]], None]] = set()
 
 
-def get_cached_data(event_id: int):
+def get_cached_data(event_id: int) -> tuple[EventType, list[ClassResultsType]]:
     with lock:
         cached_data = cache.get(event_id, None)
 

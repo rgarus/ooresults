@@ -28,11 +28,17 @@ from ooresults.repo.repo import TransactionMode
 
 
 def get_competitors() -> list[CompetitorType]:
+    """Get all competitors."""
     with model.db.transaction():
         return model.db.get_competitors()
 
 
 def get_competitor(id: int) -> CompetitorType:
+    """Get competitor.
+
+    Possible errors:
+    - Competitor does not exist
+    """
     with model.db.transaction():
         return model.db.get_competitor(id=id)
 
@@ -45,6 +51,12 @@ def add_competitor(
     year: Optional[int],
     chip: str,
 ) -> None:
+    """Add a new competitor.
+
+    Possible errors:
+    - Competitor already exists
+    - Club does not exist
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.add_competitor(
             first_name=first_name,
@@ -65,6 +77,13 @@ def update_competitor(
     year: Optional[int],
     chip: str,
 ) -> None:
+    """Update competitor.
+
+    Possible errors:
+    - Competitor already exists
+    - Competitor does not exist
+    - Club does not exist
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.update_competitor(
             id=id,
@@ -80,6 +99,14 @@ def update_competitor(
 
 
 def delete_competitor(id: int) -> None:
+    """Delete a competitor.
+
+    The function is executed without error if the competitor does not exist
+    (for example if the competitor has already been deleted).
+
+    Possible errors:
+    - Competitor used by an entry
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.delete_competitor(id=id)
 
@@ -140,6 +167,14 @@ def import_competitors(competitors: list[dict]) -> None:
 
 
 def merge_competitor(id_old: int, id_new: int) -> None:
+    """Merge two competitors.
+
+    In all entries of all events, replace all occurrences of competitor with old_id
+    by competitor with new_id, and delete competitor with old_id.
+
+    Possible errors:
+    - Competitor does not exist
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         model.db.replace_competitor(id_old=id_old, id_new=id_new)
         model.db.delete_competitor(id=id_old)
