@@ -24,6 +24,7 @@ from lxml.builder import ElementMaker
 
 from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.otypes.competitor_type import Sex
+from ooresults.plugins.import_types.competitor_dict import CompetitorDict
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
@@ -78,22 +79,21 @@ def create_competitor_list(competitors: list[CompetitorType]) -> bytes:
     )
 
 
-def parse_competitor_list(content: bytes) -> list[dict]:
-    namespaces = {"": IOF_NAMESPACE}
+def parse_competitor_list(content: bytes) -> list[CompetitorDict]:
+    NS = {"": IOF_NAMESPACE}
 
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
     if not root.tag == "{" + IOF_NAMESPACE + "}CompetitorList":
-        raise RuntimeError(f"Root element is {root.tag} but should be CompetitorList")
+        raise RuntimeError(
+            f"Root element is {str(root.tag)} but should be CompetitorList"
+        )
 
-    result = []
-    competitors = root.findall("Competitor", namespaces=namespaces)
+    result: list[CompetitorDict] = []
+    competitors = root.findall("Competitor", namespaces=NS)
     for c in competitors:
-        print(c.tag)
-        for i in c:
-            print(i.tag)
-        r = {
+        r: CompetitorDict = {
             "first_name": "",
             "last_name": "",
             "club": "",
@@ -102,21 +102,29 @@ def parse_competitor_list(content: bytes) -> list[dict]:
             "year": None,
         }
 
-        r["last_name"] = c.find("Person/Name/Family", namespaces=namespaces).text
-        r["first_name"] = c.find("Person/Name/Given", namespaces=namespaces).text
+        e_family = c.find("Person/Name/Family", namespaces=NS)
+        if e_family is not None and (text := e_family.text):
+            r["last_name"] = text
+        else:
+            raise RuntimeError("Person/Name/Family missing or empty")
+        e_given = c.find("Person/Name/Given", namespaces=NS)
+        if e_given is not None and (text := e_given.text):
+            r["first_name"] = text
+        else:
+            raise RuntimeError("Person/Name/Given missing or empty")
 
-        e_person = c.find("Person", namespaces=namespaces)
-        if e_person.get("sex") is not None:
-            r["sex"] = Sex(e_person.get("sex"))
-        e_birthdate = c.find("Person/BirthDate", namespaces=namespaces)
-        if e_birthdate is not None:
-            r["year"] = int(e_birthdate.text[0:4])
-        e_organization = c.find("Organisation/Name", namespaces=namespaces)
-        if e_organization is not None:
-            r["club"] = e_organization.text
-        e_controlcard = c.find("ControlCard", namespaces=namespaces)
-        if e_controlcard is not None:
-            r["chip"] = e_controlcard.text
+        e_person = c.find("Person", namespaces=NS)
+        if e_person is not None and (sex := e_person.get("sex")):
+            r["sex"] = Sex(sex)
+        e_birthdate = c.find("Person/BirthDate", namespaces=NS)
+        if e_birthdate is not None and (text := e_birthdate.text):
+            r["year"] = int(text[0:4])
+        e_organization = c.find("Organisation/Name", namespaces=NS)
+        if e_organization is not None and (text := e_organization.text):
+            r["club"] = text
+        e_controlcard = c.find("ControlCard", namespaces=NS)
+        if e_controlcard is not None and (text := e_controlcard.text):
+            r["chip"] = text
 
         result.append(r)
 

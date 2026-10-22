@@ -26,6 +26,9 @@ from lxml.builder import ElementMaker
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.course_type import CourseType
 from ooresults.otypes.event_type import EventType
+from ooresults.plugins.import_types.course_dict import ClassCourseAssignmentDict
+from ooresults.plugins.import_types.course_dict import CourseDict
+from ooresults.plugins.import_types.event_dict import EventDict
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
@@ -109,62 +112,74 @@ def create_course_data(
     )
 
 
-def parse_course_data(content: bytes) -> tuple[dict, list[dict], list[dict]]:
-    # Event: Dict of {'name': str, 'date': Optional[str]}
-    # Course: Dict of {'name': str, 'length': Optional[float], 'climb': Optional[float], 'controls': List[str]}
-    # ClassCourseAssignment: Dict of {'class_name': str, 'course_name': Optional[str]}
-
-    namespaces = {"": IOF_NAMESPACE}
+def parse_course_data(
+    content: bytes,
+) -> tuple[EventDict, list[CourseDict], list[ClassCourseAssignmentDict]]:
+    NS = {"": IOF_NAMESPACE}
 
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
     if not root.tag == "{" + IOF_NAMESPACE + "}CourseData":
-        raise RuntimeError(f"Root element is {root.tag} but should be CourseData")
+        raise RuntimeError(f"Root element is {str(root.tag)} but should be CourseData")
 
-    event = {}
-    event["name"] = root.find("Event/Name", namespaces=namespaces).text
-    date = root.find("Event/StartTime/Date", namespaces=namespaces)
-    if date is not None:
-        event["date"] = iso8601.parse_date(date.text).date()
+    event = EventDict(name="", date=None)
+    name = root.find("Event/Name", namespaces=NS)
+    if name is not None and (text := name.text):
+        event["name"] = text
+    else:
+        raise RuntimeError("Event/Name missing or empty")
 
-    race_course_data_list = root.findall("RaceCourseData", namespaces=namespaces)
+    date = root.find("Event/StartTime/Date", namespaces=NS)
+    if date is not None and (text := date.text):
+        event["date"] = iso8601.parse_date(text).date()
 
-    course_list = race_course_data_list[0].findall("Course", namespaces=namespaces)
-    courses = []
+    courses: list[CourseDict] = []
+    race_course_data_list = root.findall("RaceCourseData", namespaces=NS)
+
+    course_list = race_course_data_list[0].findall("Course", namespaces=NS)
     for course in course_list:
-        c = {"name": "", "length": None, "climb": None, "controls": []}
-        c["name"] = course.find("Name", namespaces=namespaces).text
+        c = CourseDict(name="", length=None, climb=None, controls=[])
 
-        length = course.find("Length", namespaces=namespaces)
-        if length is not None:
-            c["length"] = float(length.text)
-        climb = course.find("Climb", namespaces=namespaces)
-        if climb is not None:
-            c["climb"] = float(climb.text)
+        name = course.find("Name", namespaces=NS)
+        if name is not None and (text := name.text):
+            c["name"] = text
+        else:
+            raise RuntimeError("Course/Name missing or empty")
 
-        course_control_list = course.findall("CourseControl", namespaces=namespaces)
+        length = course.find("Length", namespaces=NS)
+        if length is not None and (text := length.text):
+            c["length"] = float(text)
+        climb = course.find("Climb", namespaces=NS)
+        if climb is not None and (text := climb.text):
+            c["climb"] = float(text)
+
+        course_control_list = course.findall("CourseControl", namespaces=NS)
         for course_control in course_control_list:
             control_type = course_control.get("type", default="Control")
             if control_type == "Control":
-                control_list = course_control.findall("Control", namespaces=namespaces)
-                c["controls"].append(control_list[0].text)
+                control_list = course_control.findall("Control", namespaces=NS)
+                if control_list and (text := control_list[0].text) is not None:
+                    c["controls"].append(text)
 
         courses.append(c)
 
+    class_course_assignments: list[ClassCourseAssignmentDict] = []
     class_course_assignment_list = race_course_data_list[0].findall(
-        "ClassCourseAssignment", namespaces=namespaces
+        "ClassCourseAssignment", namespaces=NS
     )
-    class_course_assignments = []
     for assignment in class_course_assignment_list:
-        a = {
-            "class_name": "",
-            "course_name": None,
-        }
-        a["class_name"] = assignment.find("ClassName", namespaces=namespaces).text
-        course_name = assignment.find("CourseName", namespaces=namespaces)
-        if course_name is not None:
-            a["course_name"] = course_name.text
+        a = ClassCourseAssignmentDict(class_name="", course_name=None)
+
+        class_name = assignment.find("ClassName", namespaces=NS)
+        if class_name is not None and (text := class_name.text):
+            a["class_name"] = text
+        else:
+            raise RuntimeError("ClassName missing or empty")
+
+        course_name = assignment.find("CourseName", namespaces=NS)
+        if course_name is not None and (text := course_name.text):
+            a["course_name"] = text
 
         class_course_assignments.append(a)
 

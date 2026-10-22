@@ -23,6 +23,7 @@ from lxml import etree
 from lxml.builder import ElementMaker
 
 from ooresults.otypes.class_type import ClassInfoType
+from ooresults.plugins.import_types.class_dict import ClassDict
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
@@ -62,30 +63,33 @@ def create_class_list(classes: list[ClassInfoType]) -> bytes:
     )
 
 
-def parse_class_list(content: bytes) -> list[dict]:
-    # Class: Dict of {'name': str, 'short_name': Optional[str]}
-
-    namespaces = {"": IOF_NAMESPACE}
+def parse_class_list(content: bytes) -> list[ClassDict]:
+    NS = {"": IOF_NAMESPACE}
 
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
     if not root.tag == "{" + IOF_NAMESPACE + "}ClassList":
-        raise RuntimeError(f"Root element is {root.tag} but should be ClassList")
+        raise RuntimeError(f"Root element is {str(root.tag)} but should be ClassList")
 
-    classes = []
-    class_list = root.findall("Class", namespaces=namespaces)
+    classes: list[ClassDict] = []
+    class_list = root.findall("Class", namespaces=NS)
 
     for class_ in class_list:
-        c = {
+        c: ClassDict = {
             "name": "",
             "short_name": None,
         }
-        c["name"] = class_.find("Name", namespaces=namespaces).text
 
-        short_name = class_.find("ShortName", namespaces=namespaces)
-        if short_name is not None:
-            c["short_name"] = short_name.text
+        name = class_.find("Name", namespaces=NS)
+        if name is not None and (text := name.text):
+            c["name"] = text
+        else:
+            raise RuntimeError("Class/Name missing or empty")
+
+        short_name = class_.find("ShortName", namespaces=NS)
+        if short_name is not None and (text := short_name.text):
+            c["short_name"] = text
 
         classes.append(c)
 

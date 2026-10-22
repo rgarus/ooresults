@@ -34,6 +34,8 @@ from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SpStatus
+from ooresults.plugins.import_types.entry_dict import EntryDict
+from ooresults.plugins.import_types.event_dict import EventDict
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
@@ -133,6 +135,11 @@ def create_result_list(
         for ranked_result in ranked_results:
             entry = ranked_result.entry
             result = entry.result
+
+            # do not export pseudo entries without name
+            # (used to store not already assigned sportident results)
+            if entry.last_name is None or entry.first_name is None:
+                continue
 
             pr = PERSONRESULT()
             person = PERSON(
@@ -242,34 +249,42 @@ SPSTATUS_MAP = {
 
 def parse_result_list(
     content: bytes,
-) -> tuple[dict, list[dict], Optional[ResultListStatus]]:
-    namespaces = {"": IOF_NAMESPACE}
+) -> tuple[EventDict, list[EntryDict], Optional[ResultListStatus]]:
+    NS = {"": IOF_NAMESPACE}
 
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
     if not root.tag == "{" + IOF_NAMESPACE + "}ResultList":
-        raise RuntimeError(f"Root element is {root.tag} but should be ResultList")
+        raise RuntimeError(f"Root element is {str(root.tag)} but should be ResultList")
 
     result_list_status = root.attrib.get("status", None)
     if result_list_status is not None:
         result_list_status = ResultListStatus(result_list_status)
 
-    event = {}
-    event["name"] = root.find("Event/Name", namespaces=namespaces).text
-    date = root.find("Event/StartTime/Date", namespaces=namespaces)
-    if date is not None:
-        event["date"] = iso8601.parse_date(date.text).date()
+    event = EventDict(name="", date=None)
+    name = root.find("Event/Name", namespaces=NS)
+    if name is not None and (text := name.text):
+        event["name"] = text
+    else:
+        raise RuntimeError("Event/Name missing or empty")
+
+    date = root.find("Event/StartTime/Date", namespaces=NS)
+    if date is not None and (text := date.text):
+        event["date"] = iso8601.parse_date(text).date()
 
     result = []
-    class_result_list = root.findall("ClassResult", namespaces=namespaces)
+    class_result_list = root.findall("ClassResult", namespaces=NS)
     for c in class_result_list:
-        class_ = c.find("Class/Name", namespaces=namespaces).text
-        person_result_list = c.findall("PersonResult", namespaces=namespaces)
+        c_class = c.find("Class/Name", namespaces=NS)
+        if c_class is None or not (class_ := c_class.text):
+            raise RuntimeError("Class/Name is missing or empty")
+
+        person_result_list = c.findall("PersonResult", namespaces=NS)
         for pr in person_result_list:
-            r = {
-                "first_name": pr.find("Person/Name/Given", namespaces=namespaces).text,
-                "last_name": pr.find("Person/Name/Family", namespaces=namespaces).text,
+            r: EntryDict = {
+                "first_name": "",
+                "last_name": "",
                 "class_": class_,
                 "club": "",
                 "chip": "",
@@ -279,68 +294,87 @@ def parse_result_list(
                 "result": result_type.PersonRaceResult(),
             }
 
-            e_person = pr.find("Person", namespaces=namespaces)
-            if e_person.get("sex") is not None:
-                r["sex"] = Sex(e_person.get("sex"))
-            e_birthdate = pr.find("Person/BirthDate", namespaces=namespaces)
-            if e_birthdate is not None:
-                r["year"] = int(e_birthdate.text[0:4])
+            e_family = pr.find("Person/Name/Family", namespaces=NS)
+            if e_family is not None and (text := e_family.text):
+                r["last_name"] = text
+            else:
+                raise RuntimeError("Person/Name/Family missing or empty")
+            e_given = pr.find("Person/Name/Given", namespaces=NS)
+            if e_given is not None and (text := e_given.text):
+                r["first_name"] = text
+            else:
+                raise RuntimeError("Person/Name/Given missing or empty")
 
-            e_organization = pr.find("Organisation/Name", namespaces=namespaces)
-            if e_organization is not None:
-                r["club"] = e_organization.text
+            e_person = pr.find("Person", namespaces=NS)
+            if e_person is not None and (sex := e_person.get("sex")):
+                r["sex"] = Sex(sex)
+            e_birthdate = pr.find("Person/BirthDate", namespaces=NS)
+            if e_birthdate is not None and (text := e_birthdate.text):
+                r["year"] = int(text[0:4])
+            e_organization = pr.find("Organisation/Name", namespaces=NS)
+            if e_organization is not None and (text := e_organization.text):
+                r["club"] = text
 
-            e_result = pr.find("Result", namespaces=namespaces)
-            e_controlcard = e_result.find("ControlCard", namespaces=namespaces)
-            if e_controlcard is not None:
-                r["chip"] = e_controlcard.text
+            e_result = pr.find("Result", namespaces=NS)
+            if e_result is not None:
+                e_controlcard = e_result.find("ControlCard", namespaces=NS)
+                if e_controlcard is not None and (text := e_controlcard.text):
+                    r["chip"] = text
 
-            e_status = e_result.find("Status", namespaces=namespaces)
-            r["result"].status = STATUS_MAP[e_status.text]
-            if e_status.text == "NotCompeting":
-                r["not_competing"] = True
-
-            e_start_time = e_result.find("StartTime", namespaces=namespaces)
-            if e_start_time is not None:
-                if r["result"].status in [
-                    ResultStatus.INACTIVE,
-                    ResultStatus.ACTIVE,
-                    ResultStatus.DID_NOT_START,
-                ]:
-                    r["start"] = start_type.PersonRaceStart(
-                        start_time=iso8601.parse_date(e_start_time.text)
-                    )
+                e_status = e_result.find("Status", namespaces=NS)
+                if e_status is not None and (text := e_status.text):
+                    r["result"].status = STATUS_MAP[text]
+                    if text == "NotCompeting":
+                        r["not_competing"] = True
                 else:
-                    r["result"].start_time = iso8601.parse_date(e_start_time.text)
-                    r["result"].punched_start_time = r["result"].start_time
-                    r["result"].si_punched_start_time = r["result"].start_time
-            e_finish_time = e_result.find("FinishTime", namespaces=namespaces)
-            if e_finish_time is not None:
-                r["result"].finish_time = iso8601.parse_date(e_finish_time.text)
-                r["result"].punched_finish_time = r["result"].finish_time
-                r["result"].si_punched_finish_time = r["result"].finish_time
-            e_time = e_result.find("Time", namespaces=namespaces)
-            if e_time is not None:
-                r["result"].time = int(e_time.text)
+                    raise RuntimeError("Result/Status is missing or empty")
 
-            e_split_time_list = e_result.findall("SplitTime", namespaces=namespaces)
-            for e_split_time in e_split_time_list:
-                split_time = result_type.SplitTime(
-                    control_code=e_split_time.find(
-                        "ControlCode", namespaces=namespaces
-                    ).text,
-                    status=SPSTATUS_MAP[e_split_time.get("status", "OK")],
-                )
-                e_time = e_split_time.find("Time", namespaces=namespaces)
-                if e_time is not None:
-                    split_time.time = int(e_time.text)
-                    if r["result"].start_time:
-                        t = r["result"].start_time + timedelta(seconds=split_time.time)
-                        split_time.punch_time = t
-                        split_time.si_punch_time = t
-                elif split_time.status == SpStatus.OK:
-                    split_time.punch_time = result_type.SplitTime.NO_TIME
-                r["result"].split_times.append(split_time)
+                e_start_time = e_result.find("StartTime", namespaces=NS)
+                if e_start_time is not None and (text := e_start_time.text):
+                    if r["result"].status in [
+                        ResultStatus.INACTIVE,
+                        ResultStatus.ACTIVE,
+                        ResultStatus.DID_NOT_START,
+                    ]:
+                        r["start"] = start_type.PersonRaceStart(
+                            start_time=iso8601.parse_date(text)
+                        )
+                    else:
+                        r["result"].start_time = iso8601.parse_date(text)
+                        r["result"].punched_start_time = r["result"].start_time
+                        r["result"].si_punched_start_time = r["result"].start_time
+
+                e_finish_time = e_result.find("FinishTime", namespaces=NS)
+                if e_finish_time is not None and (text := e_finish_time.text):
+                    r["result"].finish_time = iso8601.parse_date(text)
+                    r["result"].punched_finish_time = r["result"].finish_time
+                    r["result"].si_punched_finish_time = r["result"].finish_time
+                e_time = e_result.find("Time", namespaces=NS)
+                if e_time is not None and (text := e_time.text):
+                    r["result"].time = int(text)
+
+                e_split_time_list = e_result.findall("SplitTime", namespaces=NS)
+                for e_split_time in e_split_time_list:
+                    e_control_code = e_split_time.find("ControlCode", namespaces=NS)
+                    if e_control_code is not None and (text := e_control_code.text):
+                        split_time = result_type.SplitTime(
+                            control_code=text,
+                            status=SPSTATUS_MAP[e_split_time.get("status", "OK")],
+                        )
+                        e_time = e_split_time.find("Time", namespaces=NS)
+                        if e_time is not None and (text := e_time.text):
+                            split_time.time = int(text)
+                            if r["result"].start_time:
+                                t = r["result"].start_time + timedelta(
+                                    seconds=split_time.time
+                                )
+                                split_time.punch_time = t
+                                split_time.si_punch_time = t
+                        elif split_time.status == SpStatus.OK:
+                            split_time.punch_time = result_type.SplitTime.NO_TIME
+                        r["result"].split_times.append(split_time)
+                    else:
+                        raise RuntimeError("SplitTime/ControlCode is missing or empty")
 
             result.append(r)
 

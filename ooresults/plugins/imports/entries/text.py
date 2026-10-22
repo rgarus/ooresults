@@ -17,12 +17,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Any
-
 from ooresults.otypes import result_type
+from ooresults.plugins.import_types.entry_dict import EntryDict
 
 
-def parse(content: bytes) -> list[dict[str, Any]]:
+def parse(content: bytes) -> list[EntryDict]:
     try:
         decoded_content = content.decode(encoding="utf-8")
     except Exception:
@@ -39,14 +38,13 @@ def parse(content: bytes) -> list[dict[str, Any]]:
     #  1  Hugo Peter Wolf                              Individuals/No club             28:29
     #  1  Olaf Scholz                                  OC Rot                          28:29
 
-    results = []
+    results: list[EntryDict] = []
     for line in decoded_content.split("\n"):
         if line != "":
             if line[0] != " ":
                 class_ = line.strip()
             else:
-                r: dict[str, Any] = {}
-                r["class_"] = class_
+                r: EntryDict = {"class_": class_}
 
                 a, _, b = line[4:].strip().partition("  ")
                 r["first_name"], _, r["last_name"] = a.rpartition(" ")

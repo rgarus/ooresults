@@ -161,13 +161,15 @@ def entry_1(
 def test_import_class_data_update_existing_class(
     event_id: int, class_1_id: int, course_1_id: int
 ) -> None:
-    classes = [
-        {
-            "name": "Elite Men",
-            "short_name": "E-M",
-        },
-    ]
-    model.classes.import_classes(event_id=event_id, classes=classes)
+    model.classes.import_classes(
+        event_id=event_id,
+        classes=[
+            {
+                "name": "Elite Men",
+                "short_name": "E-M",
+            },
+        ],
+    )
 
     cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 1
@@ -187,12 +189,14 @@ def test_import_class_data_update_existing_class(
 def test_import_class_data_without_short_name_does_not_change_existing_short_name(
     event_id: int, class_1_id: int, course_1_id: int
 ) -> None:
-    classes = [
-        {
-            "name": "Elite Men",
-        },
-    ]
-    model.classes.import_classes(event_id=event_id, classes=classes)
+    model.classes.import_classes(
+        event_id=event_id,
+        classes=[
+            {
+                "name": "Elite Men",
+            },
+        ],
+    )
 
     cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 1
@@ -212,13 +216,15 @@ def test_import_class_data_without_short_name_does_not_change_existing_short_nam
 def test_import_class_data_add_not_existing_class(
     event_id: int, class_1_id: int, course_1_id: int
 ) -> None:
-    classes = [
-        {
-            "name": "Elite",
-            "short_name": "E",
-        },
-    ]
-    model.classes.import_classes(event_id=event_id, classes=classes)
+    model.classes.import_classes(
+        event_id=event_id,
+        classes=[
+            {
+                "name": "Elite",
+                "short_name": "E",
+            },
+        ],
+    )
 
     cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 2
@@ -251,20 +257,22 @@ def test_import_class_data_add_not_existing_class(
 def test_import_class_data_update_or_add_class(
     event_id: int, class_1_id: int, course_1_id: int
 ) -> None:
-    classes = [
-        {
-            "name": "Beginners",
-        },
-        {
-            "name": "Elite Men",
-            "short_name": "E Men",
-        },
-        {
-            "name": "Elite Women",
-            "short_name": "E Women",
-        },
-    ]
-    model.classes.import_classes(event_id=event_id, classes=classes)
+    model.classes.import_classes(
+        event_id=event_id,
+        classes=[
+            {
+                "name": "Beginners",
+            },
+            {
+                "name": "Elite Men",
+                "short_name": "E Men",
+            },
+            {
+                "name": "Elite Women",
+                "short_name": "E Women",
+            },
+        ],
+    )
 
     cl = model.classes.get_classes(event_id=event_id)
     assert len(cl) == 3

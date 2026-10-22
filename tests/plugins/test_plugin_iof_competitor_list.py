@@ -17,6 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import pytest
+
 from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.otypes.competitor_type import Sex
 from ooresults.plugins import iof_competitor_list
@@ -48,6 +50,76 @@ def test_import_name() -> None:
             "year": None,
         }
     ]
+
+
+def test_import_if_family_name_is_missing_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Competitor>
+    <Person>
+      <Name>
+        <Given>Angela</Given>
+      </Name>
+    </Person>
+  </Competitor>
+</CompetitorList>
+"""
+    with pytest.raises(RuntimeError, match="<string>:6:0:ERROR:SCHEMASV"):
+        iof_competitor_list.parse_competitor_list(bytes(content, encoding="utf-8"))
+
+
+def test_import_if_family_name_is_empty_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Competitor>
+    <Person>
+      <Name>
+        <Family></Family>
+        <Given>Angela</Given>
+      </Name>
+    </Person>
+  </Competitor>
+</CompetitorList>
+"""
+    with pytest.raises(RuntimeError, match="Person/Name/Family missing or empty"):
+        iof_competitor_list.parse_competitor_list(bytes(content, encoding="utf-8"))
+
+
+def test_import_if_given_name_is_missing_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Competitor>
+    <Person>
+      <Name>
+        <Family>Merkel</Family>
+      </Name>
+    </Person>
+  </Competitor>
+</CompetitorList>
+"""
+    with pytest.raises(RuntimeError, match="<string>:5:0:ERROR:SCHEMASV"):
+        iof_competitor_list.parse_competitor_list(bytes(content, encoding="utf-8"))
+
+
+def test_import_if_given_name_is_empty_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CompetitorList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Competitor>
+    <Person>
+      <Name>
+        <Family>Merkel</Family>
+        <Given></Given>
+      </Name>
+    </Person>
+  </Competitor>
+</CompetitorList>
+"""
+    with pytest.raises(RuntimeError, match="Person/Name/Given missing or empty"):
+        iof_competitor_list.parse_competitor_list(bytes(content, encoding="utf-8"))
 
 
 def test_export_name() -> None:

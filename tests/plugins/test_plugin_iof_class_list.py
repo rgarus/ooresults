@@ -17,9 +17,35 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import pytest
+
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.plugins import iof_class_list
+
+
+def test_import_if_class_name_is_missing_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ClassList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Class></Class>
+</ClassList>
+"""
+    with pytest.raises(RuntimeError, match="<string>:3:0:ERROR:SCHEMASV"):
+        iof_class_list.parse_class_list(bytes(content, encoding="utf-8"))
+
+
+def test_import_if_class_name_is_empty_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ClassList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Class>
+      <Name></Name>
+  </Class>
+</ClassList>
+"""
+    with pytest.raises(RuntimeError, match="Class/Name missing or empty"):
+        iof_class_list.parse_class_list(bytes(content, encoding="utf-8"))
 
 
 def test_import_class_list() -> None:

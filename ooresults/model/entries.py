@@ -39,6 +39,7 @@ from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SplitTime
 from ooresults.otypes.start_type import PersonRaceStart
 from ooresults.plugins import iof_result_list
+from ooresults.plugins.import_types.entry_dict import EntryDict
 from ooresults.plugins.iof_result_list import ResultListStatus
 from ooresults.repo import repo
 from ooresults.repo.repo import TransactionMode
@@ -47,7 +48,7 @@ from ooresults.utils.rental_cards import is_rental_card
 
 def import_entries(
     event_id: int,
-    entries: list[dict],
+    entries: list[EntryDict],
     event_key: Optional[str] = None,
     clear_entries: bool = False,
 ) -> None:

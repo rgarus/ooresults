@@ -24,6 +24,7 @@ from ooresults.model import cached_result
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.class_type import ClassType
+from ooresults.plugins.import_types.class_dict import ClassDict
 from ooresults.repo.repo import TransactionMode
 
 
@@ -48,7 +49,7 @@ def get_class(id: int) -> ClassType:
         return model.db.get_class(id=id)
 
 
-def import_classes(event_id: int, classes: list[dict]) -> None:
+def import_classes(event_id: int, classes: list[ClassDict]) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         existing_classes = model.db.get_classes(event_id=event_id)
         for c in classes:

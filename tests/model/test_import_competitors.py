@@ -237,7 +237,7 @@ def test_import_competitors_missing_values_do_not_change_anything(
             {
                 "first_name": "Angela",
                 "last_name": "Merkel",
-                "sex": "",
+                "sex": None,
                 "year": None,
                 "club": "",
                 "chip": "",

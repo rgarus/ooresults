@@ -27,6 +27,8 @@ from ooresults.otypes import result_type
 from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.event_type import EventType
+from ooresults.plugins.import_types.entry_dict import EntryDict
+from ooresults.plugins.import_types.event_dict import EventDict
 
 
 schema_file = pathlib.Path(__file__).parent.parent / "schema" / "IOF.xsd"
@@ -67,7 +69,7 @@ def create_entry_list(event: EventType, entries: list[EntryType]) -> bytes:
     for e in entries:
         # do not export pseudo entries without name
         # (used to store not already assigned sportident results)
-        if e.last_name is None:
+        if e.last_name is None or e.first_name is None:
             continue
 
         pe = PERSONENTRY()
@@ -104,25 +106,30 @@ def create_entry_list(event: EventType, entries: list[EntryType]) -> bytes:
     )
 
 
-def parse_entry_list(content: bytes) -> tuple[dict, list[dict]]:
-    namespaces = {"": IOF_NAMESPACE}
+def parse_entry_list(content: bytes) -> tuple[EventDict, list[EntryDict]]:
+    NS = {"": IOF_NAMESPACE}
 
     root = etree.XML(content)
     if not xml_schema.validate(root):
         raise RuntimeError(xml_schema.error_log.last_error)
     if not root.tag == "{" + IOF_NAMESPACE + "}EntryList":
-        raise RuntimeError(f"Root element is {root.tag} but should be EntryList")
+        raise RuntimeError(f"Root element is {str(root.tag)} but should be EntryList")
 
-    event = {}
-    event["name"] = root.find("Event/Name", namespaces=namespaces).text
-    date = root.find("Event/StartTime/Date", namespaces=namespaces)
-    if date is not None:
-        event["date"] = iso8601.parse_date(date.text).date()
+    event = EventDict(name="", date=None)
+    name = root.find("Event/Name", namespaces=NS)
+    if name is not None and (text := name.text):
+        event["name"] = text
+    else:
+        raise RuntimeError("Event/Name missing or empty")
+
+    date = root.find("Event/StartTime/Date", namespaces=NS)
+    if date is not None and (text := date.text):
+        event["date"] = iso8601.parse_date(text).date()
 
     entries = []
-    person_entry_list = root.findall("PersonEntry", namespaces=namespaces)
+    person_entry_list = root.findall("PersonEntry", namespaces=NS)
     for pe in person_entry_list:
-        e = {
+        e: EntryDict = {
             "first_name": "",
             "last_name": "",
             "class_": "",
@@ -133,26 +140,32 @@ def parse_entry_list(content: bytes) -> tuple[dict, list[dict]]:
             "result": result_type.PersonRaceResult(),
         }
 
-        e["last_name"] = pe.find("Person/Name/Family", namespaces=namespaces).text
-        e["first_name"] = pe.find("Person/Name/Given", namespaces=namespaces).text
+        e_family = pe.find("Person/Name/Family", namespaces=NS)
+        if e_family is not None and (text := e_family.text):
+            e["last_name"] = text
+        else:
+            raise RuntimeError("Person/Name/Family missing or empty")
+        e_given = pe.find("Person/Name/Given", namespaces=NS)
+        if e_given is not None and (text := e_given.text):
+            e["first_name"] = text
+        else:
+            raise RuntimeError("Person/Name/Given missing or empty")
 
-        e_person = pe.find("Person", namespaces=namespaces)
-        if e_person.get("sex") is not None:
-            e["sex"] = Sex(e_person.get("sex"))
-        e_birthdate = pe.find("Person/BirthDate", namespaces=namespaces)
-        if e_birthdate is not None:
-            e["year"] = int(e_birthdate.text[0:4])
-
-        e_organization = pe.find("Organisation/Name", namespaces=namespaces)
-        if e_organization is not None:
-            e["club"] = e_organization.text
-
-        e_controlcard = pe.find("ControlCard", namespaces=namespaces)
-        if e_controlcard is not None:
-            e["chip"] = e_controlcard.text
-        e_class = pe.find("Class/Name", namespaces=namespaces)
-        if e_class is not None:
-            e["class_"] = e_class.text
+        e_person = pe.find("Person", namespaces=NS)
+        if e_person is not None and (sex := e_person.get("sex")):
+            e["sex"] = Sex(sex)
+        e_birthdate = pe.find("Person/BirthDate", namespaces=NS)
+        if e_birthdate is not None and (text := e_birthdate.text):
+            e["year"] = int(text[0:4])
+        e_organization = pe.find("Organisation/Name", namespaces=NS)
+        if e_organization is not None and (text := e_organization.text):
+            e["club"] = text
+        e_controlcard = pe.find("ControlCard", namespaces=NS)
+        if e_controlcard is not None and (text := e_controlcard.text):
+            e["chip"] = text
+        e_class = pe.find("Class/Name", namespaces=NS)
+        if e_class is not None and (text := e_class.text):
+            e["class_"] = text
 
         entries.append(e)
 

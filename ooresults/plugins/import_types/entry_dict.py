@@ -1,0 +1,39 @@
+# Copyright (C) 2022 Rainer Garus
+#
+# This file is part of the ooresults Python package, a software to
+# compute results of orienteering events.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+from typing import Optional
+from typing import TypedDict
+
+from ooresults.otypes import result_type
+from ooresults.otypes import start_type
+from ooresults.otypes.competitor_type import Sex
+
+
+class EntryDict(TypedDict, total=False):
+    first_name: str
+    last_name: str
+    class_: str
+    club: str
+    chip: str
+    sex: Optional[Sex]
+    year: Optional[int]
+    not_competing: bool
+    fields: dict[int, str]
+    result: result_type.PersonRaceResult
+    start: start_type.PersonRaceStart

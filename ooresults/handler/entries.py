@@ -39,6 +39,7 @@ from ooresults.plugins import iof_entry_list
 from ooresults.plugins import iof_result_list
 from ooresults.plugins import oe12
 from ooresults.plugins import oe2003
+from ooresults.plugins.import_types.entry_dict import EntryDict
 from ooresults.plugins.imports.entries import text
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.repo import EventNotFoundError
@@ -238,7 +239,7 @@ def post_import() -> str | bottle.HTTPResponse:
 
     try:
         # import only the first entry of the entries with same last and first name
-        entries_1: list[dict] = []
+        entries_1: list[EntryDict] = []
         names_1: set[tuple[str, str]] = set()
         names_2: set[tuple[str, str]] = set()
         for e in entries:

@@ -784,7 +784,7 @@ def test_if_competitor_has_no_entry_then_add_all_entries_of_import_list(
                 "sex": None,
                 "year": None,
                 "class_": "Class 1",
-                "club": None,
+                "club": "",
                 "chip": "445533",
                 "result": result_type.PersonRaceResult(
                     status=ResultStatus.DID_NOT_START

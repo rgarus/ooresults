@@ -23,6 +23,8 @@ from ooresults import model
 from ooresults.model import cached_result
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.course_type import CourseType
+from ooresults.plugins.import_types.course_dict import ClassCourseAssignmentDict
+from ooresults.plugins.import_types.course_dict import CourseDict
 from ooresults.repo.repo import TransactionMode
 
 
@@ -48,7 +50,9 @@ def get_course(id: int) -> CourseType:
 
 
 def import_courses(
-    event_id: int, courses: list[dict], class_course: list[dict]
+    event_id: int,
+    courses: list[CourseDict],
+    class_course: list[ClassCourseAssignmentDict],
 ) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         existing_courses = model.db.get_courses(event_id=event_id)

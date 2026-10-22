@@ -162,15 +162,18 @@ def entry_1(
 def test_import_course_data_with_climb_update_existing_course(
     event_id: int, course_1_id: int
 ) -> None:
-    courses = [
-        {
-            "name": "Bahn A",
-            "length": 4800,
-            "climb": 120,
-            "controls": ["101", "102"],
-        },
-    ]
-    model.courses.import_courses(event_id=event_id, courses=courses, class_course=[])
+    model.courses.import_courses(
+        event_id=event_id,
+        courses=[
+            {
+                "name": "Bahn A",
+                "length": 4800,
+                "climb": 120,
+                "controls": ["101", "102"],
+            },
+        ],
+        class_course=[],
+    )
 
     co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 1
@@ -187,15 +190,18 @@ def test_import_course_data_with_climb_update_existing_course(
 def test_import_course_data_without_climb_update_existing_course(
     event_id: int, course_1_id: int
 ) -> None:
-    courses = [
-        {
-            "name": "Bahn A",
-            "length": None,
-            "climb": None,
-            "controls": ["101", "102"],
-        },
-    ]
-    model.courses.import_courses(event_id=event_id, courses=courses, class_course=[])
+    model.courses.import_courses(
+        event_id=event_id,
+        courses=[
+            {
+                "name": "Bahn A",
+                "length": None,
+                "climb": None,
+                "controls": ["101", "102"],
+            },
+        ],
+        class_course=[],
+    )
 
     co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 1
@@ -212,15 +218,18 @@ def test_import_course_data_without_climb_update_existing_course(
 def test_import_course_data_add_not_existing_course(
     event_id: int, course_1_id: int
 ) -> None:
-    courses = [
-        {
-            "name": "Bahn B",
-            "length": 4800,
-            "climb": 120,
-            "controls": ["104"],
-        },
-    ]
-    model.courses.import_courses(event_id=event_id, courses=courses, class_course=[])
+    model.courses.import_courses(
+        event_id=event_id,
+        courses=[
+            {
+                "name": "Bahn B",
+                "length": 4800,
+                "climb": 120,
+                "controls": ["104"],
+            },
+        ],
+        class_course=[],
+    )
 
     co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 2
@@ -247,27 +256,30 @@ def test_import_course_data_add_not_existing_course(
 def test_import_course_data_update_or_add_courses(
     event_id: int, course_1_id: int
 ) -> None:
-    courses: list[dict] = [
-        {
-            "name": "Bahn A",
-            "length": 4800,
-            "climb": None,
-            "controls": ["101", "102"],
-        },
-        {
-            "name": "Bahn B",
-            "length": 3900,
-            "climb": 120,
-            "controls": ["201", "102"],
-        },
-        {
-            "name": "Bahn C",
-            "length": None,
-            "climb": None,
-            "controls": [],
-        },
-    ]
-    model.courses.import_courses(event_id=event_id, courses=courses, class_course=[])
+    model.courses.import_courses(
+        event_id=event_id,
+        courses=[
+            {
+                "name": "Bahn A",
+                "length": 4800,
+                "climb": None,
+                "controls": ["101", "102"],
+            },
+            {
+                "name": "Bahn B",
+                "length": 3900,
+                "climb": 120,
+                "controls": ["201", "102"],
+            },
+            {
+                "name": "Bahn C",
+                "length": None,
+                "climb": None,
+                "controls": [],
+            },
+        ],
+        class_course=[],
+    )
 
     co = model.courses.get_courses(event_id=event_id)
     assert len(co) == 3
@@ -304,14 +316,15 @@ def test_import_course_data_update_or_add_courses(
 def test_import_course_data_add_not_existing_class(
     event_id: int, class_1_id: int, course_1_id: int
 ) -> None:
-    class_course = [
-        {
-            "class_name": "Beginners",
-            "course_name": None,
-        }
-    ]
     model.courses.import_courses(
-        event_id=event_id, courses=[], class_course=class_course
+        event_id=event_id,
+        courses=[],
+        class_course=[
+            {
+                "class_name": "Beginners",
+                "course_name": None,
+            }
+        ],
     )
 
     co = model.courses.get_courses(event_id=event_id)
@@ -356,22 +369,22 @@ def test_import_course_data_add_not_existing_class(
 def test_import_course_data_update_class_course_assignment(
     event_id: int, class_1_id: int, class_2_id: int, course_1_id: int
 ) -> None:
-    courses = [
-        {
-            "name": "Bahn B",
-            "length": 3900,
-            "climb": 120,
-            "controls": ["201", "102"],
-        },
-    ]
-    class_course = [
-        {
-            "class_name": "Elite Men",
-            "course_name": "Bahn B",
-        }
-    ]
     model.courses.import_courses(
-        event_id=event_id, courses=courses, class_course=class_course
+        event_id=event_id,
+        courses=[
+            {
+                "name": "Bahn B",
+                "length": 3900,
+                "climb": 120,
+                "controls": ["201", "102"],
+            },
+        ],
+        class_course=[
+            {
+                "class_name": "Elite Men",
+                "course_name": "Bahn B",
+            }
+        ],
     )
 
     co = model.courses.get_courses(event_id=event_id)
@@ -425,14 +438,15 @@ def test_import_course_data_update_class_course_assignment(
 def test_import_course_data_remove_class_course_assigment(
     event_id: int, class_1_id: int, course_1_id: int
 ) -> None:
-    class_course = [
-        {
-            "class_name": "Elite Men",
-            "course_name": None,
-        }
-    ]
     model.courses.import_courses(
-        event_id=event_id, courses=[], class_course=class_course
+        event_id=event_id,
+        courses=[],
+        class_course=[
+            {
+                "class_name": "Elite Men",
+                "course_name": None,
+            }
+        ],
     )
 
     co = model.courses.get_courses(event_id=event_id)
@@ -466,40 +480,40 @@ def test_import_course_data_remove_class_course_assigment(
 def test_import_course_data_update_or_add_class_course_assigments(
     event_id: int, course_1_id: int, class_1_id: int, class_2_id: int
 ) -> None:
-    courses: list[dict] = [
-        {
-            "name": "Bahn A",
-            "length": 4800,
-            "climb": 120,
-            "controls": ["101", "102"],
-        },
-        {
-            "name": "Bahn B",
-            "length": None,
-            "climb": None,
-            "controls": ["104"],
-        },
-    ]
-    class_course: list[dict] = [
-        {
-            "class_name": "Elite Men",
-            "course_name": "Bahn B",
-        },
-        {
-            "class_name": "Elite Women",
-            "course_name": "Bahn A",
-        },
-        {
-            "class_name": "Beginners",
-            "course_name": None,
-        },
-        {
-            "class_name": "Elite",
-            "course_name": "Bahn B",
-        },
-    ]
     model.courses.import_courses(
-        event_id=event_id, courses=courses, class_course=class_course
+        event_id=event_id,
+        courses=[
+            {
+                "name": "Bahn A",
+                "length": 4800,
+                "climb": 120,
+                "controls": ["101", "102"],
+            },
+            {
+                "name": "Bahn B",
+                "length": None,
+                "climb": None,
+                "controls": ["104"],
+            },
+        ],
+        class_course=[
+            {
+                "class_name": "Elite Men",
+                "course_name": "Bahn B",
+            },
+            {
+                "class_name": "Elite Women",
+                "course_name": "Bahn A",
+            },
+            {
+                "class_name": "Beginners",
+                "course_name": None,
+            },
+            {
+                "class_name": "Elite",
+                "course_name": "Bahn B",
+            },
+        ],
     )
 
     co = model.courses.get_courses(event_id=event_id)

@@ -20,7 +20,6 @@
 import io
 from datetime import datetime
 from datetime import timedelta
-from typing import Any
 
 import clevercsv as csv
 from unidecode import unidecode
@@ -32,6 +31,7 @@ from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SpStatus
+from ooresults.plugins.import_types.entry_dict import EntryDict
 
 
 def cp1252(value: str) -> str:
@@ -162,9 +162,9 @@ def create(entries: list[EntryType], class_list: list[ClassInfoType]) -> bytes:
     return content.encode(encoding="windows-1252")
 
 
-def parse(content: bytes) -> list[dict[str, Any]]:
+def parse(content: bytes) -> list[EntryDict]:
     column_nr: dict[str, int] = {}
-    parsed_result: list[dict[str, Any]] = []
+    parsed_result: list[EntryDict] = []
 
     try:
         decoded_content = content.decode(encoding="utf-8")
@@ -172,6 +172,9 @@ def parse(content: bytes) -> list[dict[str, Any]]:
         decoded_content = content.decode(encoding="windows-1252")
 
     dialect = csv.Sniffer().sniff(decoded_content, delimiters=",;\t")
+    if dialect is None:
+        raise RuntimeError("Delimiter not recognized")
+
     for values in csv.reader(io.StringIO(decoded_content), dialect=dialect):
         if column_nr == {}:
             for i, v in enumerate(values):
@@ -285,10 +288,11 @@ def parse(content: bytes) -> list[dict[str, Any]]:
                     column_nr["split_time"] = i
                     break
         else:
-            r: dict[str, Any] = {}
+            r: EntryDict = {}
             start = start_type.PersonRaceStart()
             result = result_type.PersonRaceResult()
-            fields = {}
+            fields: dict[int, str] = {}
+            club1 = ""
 
             for column, nr in column_nr.items():
                 item = values[nr].strip()
@@ -325,6 +329,18 @@ def parse(content: bytes) -> list[dict[str, Any]]:
                         result.time = t
                     except Exception:
                         pass
+                elif column == "first_name":
+                    r["first_name"] = item
+                elif column == "last_name":
+                    r["last_name"] = item
+                elif column == "class_":
+                    r["class_"] = item
+                elif column == "chip":
+                    r["chip"] = item
+                elif column == "club":
+                    r["club"] = item
+                elif column == "club1":
+                    club1 = item
                 elif column == "year":
                     try:
                         if int(item) <= 25:
@@ -375,8 +391,6 @@ def parse(content: bytes) -> list[dict[str, Any]]:
                                 status=status,
                             )
                         )
-                else:
-                    r[column] = item
 
             # add extra fields
             if fields:
@@ -392,10 +406,8 @@ def parse(content: bytes) -> list[dict[str, Any]]:
 
             # SportSoftware use column "club", but OOnet use column "club1"
             # In contrast to SportSoftware, OOnet does not write any sex information
-            if r["sex"] is None and r["club1"] != "":
-                r["club"] = r["club1"]
-            # we remove club1 key, it is not needed outside this function
-            del r["club1"]
+            if r["sex"] is None and club1 != "":
+                r["club"] = club1
 
             # store start time as start punch time only if finish time is defined
             # or status is missing punch, did not finished or over time

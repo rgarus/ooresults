@@ -19,6 +19,8 @@
 
 import datetime
 
+import pytest
+
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.course_type import CourseType
@@ -197,6 +199,104 @@ def test_import_course_data_with_class_assignment() -> None:
             "course_name": None,
         },
     ]
+
+
+def test_import_course_data_if_event_name_is_missing_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event/>
+  <RaceCourseData/>
+</CourseData>
+"""
+    with pytest.raises(RuntimeError, match="<string>:3:0:ERROR:SCHEMASV"):
+        iof_course_data.parse_course_data(bytes(content, encoding="utf-8"))
+
+
+def test_import_course_data_if_event_name_is_empty_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+      <Name/>
+  </Event>
+  <RaceCourseData/>
+</CourseData>
+"""
+    with pytest.raises(RuntimeError, match="Event/Name missing or empty"):
+        iof_course_data.parse_course_data(bytes(content, encoding="utf-8"))
+
+
+def test_import_course_data_if_course_name_is_missing_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+  </Event>
+  <RaceCourseData>
+    <Course/>
+  </RaceCourseData>
+</CourseData>
+"""
+    with pytest.raises(RuntimeError, match="<string>:7:0:ERROR:SCHEMASV"):
+        iof_course_data.parse_course_data(bytes(content, encoding="utf-8"))
+
+
+def test_import_course_data_if_course_name_is_empty_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+  </Event>
+  <RaceCourseData>
+    <Course>
+      <Name/>
+      <CourseControl type="Start">
+        <Control>S1</Control>
+      </CourseControl>
+      <CourseControl type="Finish">
+        <Control>F1</Control>
+      </CourseControl>
+    </Course>
+  </RaceCourseData></CourseData>
+"""
+    with pytest.raises(RuntimeError, match="Course/Name missing or empty"):
+        iof_course_data.parse_course_data(bytes(content, encoding="utf-8"))
+
+
+def test_import_course_data_if_class_name_is_missing_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+  </Event>
+  <RaceCourseData>
+    <ClassCourseAssignment/>
+  </RaceCourseData>
+</CourseData>
+"""
+    with pytest.raises(RuntimeError, match="<string>:7:0:ERROR:SCHEMASV"):
+        iof_course_data.parse_course_data(bytes(content, encoding="utf-8"))
+
+
+def test_import_course_data_if_class_name_is_empty_then_raise_exception() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<CourseData xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+  </Event>
+  <RaceCourseData>
+    <ClassCourseAssignment>
+      <ClassName/>
+    </ClassCourseAssignment>
+  </RaceCourseData></CourseData>
+"""
+    with pytest.raises(RuntimeError, match="ClassName missing or empty"):
+        iof_course_data.parse_course_data(bytes(content, encoding="utf-8"))
 
 
 def test_export_course_data() -> None:

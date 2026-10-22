@@ -24,6 +24,7 @@ from ooresults.model import cached_result
 from ooresults.otypes.competitor_type import CompetitorBaseDataType
 from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.otypes.competitor_type import Sex
+from ooresults.plugins.import_types.competitor_dict import CompetitorDict
 from ooresults.repo.repo import TransactionMode
 
 
@@ -111,12 +112,12 @@ def delete_competitor(id: int) -> None:
         model.db.delete_competitor(id=id)
 
 
-def import_competitors(competitors: list[dict]) -> None:
+def import_competitors(competitors: list[CompetitorDict]) -> None:
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         list_of_competitors = []
         for c in competitors:
             club_id = None
-            if c["club"]:
+            if "club" in c and c["club"]:
                 for clb in model.db.get_clubs():
                     if clb.name == c["club"]:
                         club_id = clb.id
