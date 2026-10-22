@@ -138,14 +138,7 @@ allow_redefinition = true
 follow_untyped_imports = true
 follow_imports = "silent"
 packages = [
-    "ooresults.handler",
-    "ooresults.model",
-    "ooresults.pdf",
-    "ooresults.plugins",
-    "ooresults.otypes",
-    "ooresults.repo",
-    "ooresults.websocket_server",
-    "ooresults.utils",
+    "ooresults",
     "tests",
     "webtests",
 ]

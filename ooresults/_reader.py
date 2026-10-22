@@ -23,10 +23,11 @@ import configparser
 import datetime
 import json
 import pathlib
-import queue
 import ssl
 import threading
 import time
+from queue import Queue
+from typing import Any
 from typing import Literal
 from typing import Optional
 from typing import TypeAlias
@@ -67,9 +68,9 @@ class WebSocketClient(threading.Thread):
         host: str = "localhost",
         port: int = 8081,
         key: str = "",
-        ssl_cert="cert/cert.pem",
+        ssl_cert: Optional[str] = "cert/cert.pem",
         ssl_verify: bool = True,
-    ):
+    ) -> None:
         super().__init__()
         self.daemon = True
         self.host = host
@@ -77,20 +78,20 @@ class WebSocketClient(threading.Thread):
         self.key = key
         self.ssl_cert = ssl_cert
         self.ssl_verify = ssl_verify
-        self.ws = None
+        self.ws: Optional[websocket.WebSocketApp] = None
         self.opened = False
-        self.queue = queue.Queue()
+        self.queue: Queue[str | bytes] = Queue()
         self.entry_type: EntryType = "readerDisconnected"
         self.entry_time = datetime.datetime.now()
         self.card: Optional[str] = None
 
-    def run(self):
+    def run(self) -> None:
         headers = {
             "Content-Type": "application/octet-stream",
             "X-Event-Key": self.key,
             "X-Suffix": ".json",
         }
-        sslopt = {"cert_reqs": ssl.CERT_REQUIRED}
+        sslopt: dict[str, Any] = {"cert_reqs": ssl.CERT_REQUIRED}
 
         if not self.ssl_verify:
             # disable ssl verification: sslopt = {'cert_reqs': ssl.CERT_NONE}
@@ -138,7 +139,7 @@ class WebSocketClient(threading.Thread):
         return self.receive(timeout=timeout)
 
     def send(self, data: bytes) -> None:
-        if self.opened:
+        if self.ws is not None and self.opened:
             self.ws.send(data, opcode=2)
         else:
             print("Not connected to server - could not send data")
@@ -153,12 +154,12 @@ class WebSocketClient(threading.Thread):
         while not self.queue.empty():
             self.queue.get()
 
-    def on_close(self, wsapp, close_status_code, close_msg):
+    def on_close(self, wsapp, close_status_code, close_msg) -> None:
         if self.opened:
             print("Connection closed")
         self.opened = False
 
-    def on_open(self, wsapp):
+    def on_open(self, wsapp) -> None:
         if not self.opened:
             print("Connection established")
             self.opened = True
@@ -171,10 +172,10 @@ class WebSocketClient(threading.Thread):
             data = bz2.compress(json.dumps(item).encode())
             self.send(data=data)
 
-    def on_message(self, wsapp, message):
+    def on_message(self, wsapp, message) -> None:
         self.queue.put(message)
 
-    def on_error(self, wsapp, message):
+    def on_error(self, wsapp, message) -> None:
         print(message)
 
 
@@ -185,12 +186,14 @@ class Cardreader:
     with open(data_path) as f:
         schema_cardreader_log = json.loads(f.read())
 
-    def __init__(self, webSocketClient: WebSocketClient, serial_number: str = ""):
+    def __init__(
+        self, webSocketClient: WebSocketClient, serial_number: Optional[str] = ""
+    ) -> None:
         self.webSocketClient = webSocketClient
         self.serial_number = serial_number
 
-    def convert(self, card_type: str, card_data: dict) -> dict:
-        item = {
+    def convert(self, card_type: Optional[str], card_data: dict) -> dict:
+        item: dict[str, Any] = {
             "entryType": "cardRead",
             "entryTime": datetime.datetime.now().astimezone().isoformat(),
             "cardType": card_type,
@@ -469,3 +472,5 @@ def main() -> Optional[int]:
 
     except KeyboardInterrupt:
         pass
+
+    return None

@@ -159,10 +159,12 @@ def main() -> Optional[int]:
     try:
         model.db = SqliteRepo(db=str(database))
     except (RuntimeError, sqlite3.Error):
-        exc_type, exc_value, _ = sys.exc_info()
+        exc_type: type[BaseException]
+        exc_value: BaseException
+
+        exc_type, exc_value, _ = sys.exc_info()  # type: ignore
         logging.error(f"{exc_type.__module__}.{exc_type.__name__}: {exc_value}")
         print(f"{exc_type.__module__}.{exc_type.__name__}: {exc_value}")
-        return 2
 
     if config.demo_reader:
         bottle.route("/demo")(ooresults.handler.demo_reader.get_update)
@@ -199,3 +201,5 @@ def main() -> Optional[int]:
     # Suppress ResourceWarning message:
     # ResourceWarning: unclosed database in <sqlite3.Connection object at ...>
     warnings.filterwarnings("ignore", category=ResourceWarning)
+
+    return None
