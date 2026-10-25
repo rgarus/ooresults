@@ -50,9 +50,6 @@ from ooresults.utils import rental_cards
 from ooresults.websocket_server.websocket_server import WebSocketServer
 
 
-bottle.debug(False)
-
-
 @bottle.route("/login", method="GET")
 def login():
     try:
@@ -72,14 +69,6 @@ def server_static(filepath):
     return bottle.static_file(filepath, root=pathlib.Path(__file__).parent / "static")
 
 
-def unauthorized() -> bottle.HTTPResponse:
-    return bottle.HTTPResponse(
-        status=401,
-        headers={"WWW-Authenticate": 'Basic realm="Authentication required"'},
-        body=render.unauthorized(),
-    )
-
-
 @bottle.hook("after_request")
 def after_request():
     logging.info(
@@ -91,15 +80,22 @@ def my_plugin(callback):
     def wrapper(*args, **kwargs):
         path = bottle.request.environ["PATH_INFO"]
         if path not in ("/", "/favicon.ico") and not path.startswith("/mystatic/"):
-            auth = bottle.request.environ.get("HTTP_AUTHORIZATION", None)
-            if auth is not None:
-                auth = re.sub("^Basic ", "", auth)
-                auth = base64.b64decode(auth.encode("ascii")).decode("utf8")
-                username, password = auth.split(":")
-                if not Users.check(username=username, password=password):
-                    return unauthorized()
-            else:
-                return unauthorized()
+            try:
+                auth = bottle.request.environ.get("HTTP_AUTHORIZATION", None)
+                if auth is not None:
+                    auth = re.sub("^Basic ", "", auth)
+                    auth = base64.b64decode(auth.encode("ascii")).decode("utf8")
+                    username, password = auth.split(":", 1)
+                    if not Users.check(username=username, password=password):
+                        raise PermissionError
+                else:
+                    raise PermissionError
+            except Exception:
+                headers = {"WWW-Authenticate": 'Basic realm="Authentication required"'}
+                return bottle.HTTPResponse(
+                    status=401, headers=headers, body=render.unauthorized()
+                )
+
         try:
             return callback(*args, **kwargs)
         except bottle.MultipartError as e:
@@ -191,7 +187,7 @@ def main() -> Optional[int]:
         server="cheroot",
         host="0.0.0.0",
         port=8080,
-        debug=True,
+        debug=False,
         certfile=config.ssl_cert,
         keyfile=config.ssl_key,
     )
