@@ -399,6 +399,163 @@ async def test_live_server_import_result_list_snapshot(
 
 
 @pytest.mark.asyncio
+async def test_live_server_import_result_list_with_multiple_starts_snapshot(
+    event_id: int,
+    websocket_server: WebSocketServer,
+) -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" status="Snapshot">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+    <StartTime>
+      <Date>2020-02-09</Date>
+    </StartTime>
+  </Event>
+  <ClassResult>
+    <Class>
+      <Name>Bahn A - Lang</Name>
+    </Class>
+    <PersonResult>
+      <Person sex="F">
+        <Name>
+          <Family>Merkel</Family>
+          <Given>Angela</Given>
+        </Name>
+        <BirthDate>1972-01-01</BirthDate>
+      </Person>
+      <Result>
+        <StartTime>2020-02-09T10:00:00+01:00</StartTime>
+        <FinishTime>2020-02-09T10:33:21+01:00</FinishTime>
+        <Time>2001</Time>
+        <Status>OK</Status>
+        <ControlCard punchingSystem="SI">1234567</ControlCard>
+      </Result>
+    </PersonResult>
+    <PersonResult>
+      <Person sex="F">
+        <Name>
+          <Family>Merkel</Family>
+          <Given>Angela</Given>
+        </Name>
+        <BirthDate>1972-01-01</BirthDate>
+      </Person>
+      <Result>
+        <StartTime>2020-02-09T10:45:00+01:00</StartTime>
+        <FinishTime>2020-02-09T11:14:57+01:00</FinishTime>
+        <Time>1797</Time>
+        <Status>OK</Status>
+        <ControlCard punchingSystem="SI">1234567</ControlCard>
+      </Result>
+    </PersonResult>
+  </ClassResult>
+</ResultList>
+"""
+    s1 = datetime.datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+    f1 = datetime.datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
+    s2 = datetime.datetime(2020, 2, 9, 10, 45, 0, tzinfo=timezone(timedelta(hours=1)))
+    f2 = datetime.datetime(2020, 2, 9, 11, 14, 57, tzinfo=timezone(timedelta(hours=1)))
+
+    async with connect(
+        uri="ws://localhost:8081/import",
+        additional_headers={"X-Event-Key": "local"},
+    ) as client:
+        # send a compressed IOF ResultList
+        await client.send(bz2.compress(content.encode()))
+        response = await client.recv()
+        response = json.loads(response)
+        jsonschema.validate(instance=response, schema=schema_streaming_result)
+        assert response == {"result": "ok"}
+
+    competitors = model.competitors.get_competitors()
+    assert competitors == [
+        CompetitorType(
+            id=competitors[0].id,
+            first_name="Angela",
+            last_name="Merkel",
+            club_id=None,
+            club_name=None,
+            sex=Sex.FEMALE,
+            year=1972,
+            chip="1234567",
+        ),
+    ]
+
+    classes = model.classes.get_classes(event_id=event_id)
+    assert classes == [
+        ClassInfoType(
+            id=classes[0].id,
+            name="Bahn A - Lang",
+            short_name=None,
+            course_id=None,
+            course_name=None,
+            course_length=None,
+            course_climb=None,
+            number_of_controls=None,
+            params=ClassParams(),
+        ),
+    ]
+
+    entries = model.entries.get_entries(event_id=event_id)
+    assert entries == [
+        EntryType(
+            id=entries[0].id,
+            event_id=event_id,
+            competitor_id=competitors[0].id,
+            first_name="Angela",
+            last_name="Merkel",
+            sex=Sex.FEMALE,
+            year=1972,
+            class_id=classes[0].id,
+            class_name="Bahn A - Lang",
+            not_competing=False,
+            chip="1234567",
+            fields={},
+            result=PersonRaceResult(
+                start_time=s1,
+                finish_time=f1,
+                punched_start_time=s1,
+                punched_finish_time=f1,
+                si_punched_start_time=s1,
+                si_punched_finish_time=f1,
+                status=ResultStatus.OK,
+                time=2001,
+            ),
+            start=PersonRaceStart(),
+            club_id=None,
+            club_name=None,
+        ),
+        EntryType(
+            id=entries[1].id,
+            event_id=event_id,
+            competitor_id=competitors[0].id,
+            first_name="Angela",
+            last_name="Merkel",
+            sex=Sex.FEMALE,
+            year=1972,
+            class_id=classes[0].id,
+            class_name="Bahn A - Lang",
+            not_competing=False,
+            chip="1234567",
+            fields={},
+            result=PersonRaceResult(
+                start_time=s2,
+                finish_time=f2,
+                punched_start_time=s2,
+                punched_finish_time=f2,
+                si_punched_start_time=s2,
+                si_punched_finish_time=f2,
+                status=ResultStatus.OK,
+                time=1797,
+            ),
+            start=PersonRaceStart(),
+            club_id=None,
+            club_name=None,
+        ),
+    ]
+
+
+@pytest.mark.asyncio
 async def test_live_server_import_result_list_delta(
     event_id: int,
     entry_id: int,
