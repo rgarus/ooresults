@@ -22,6 +22,7 @@ from typing import Optional
 
 from fpdf.recorder import FPDFRecorder
 
+from ooresults.otypes.class_type import ORGANIZER_CLASS_NAMES
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.event_type import EventType
@@ -160,8 +161,12 @@ def create_pdf(
         pdf.set_font(style="")
 
     first_class = True
-    for class_, ranked_results in results:
-        standard = class_.params.otype == "standard"
+    for class_info, ranked_results in results:
+        # do not print organizer entries
+        if class_info.name in ORGANIZER_CLASS_NAMES:
+            continue
+
+        standard = class_info.params.otype == "standard"
 
         # filter results - use only finished entries
         ranked_results = [
@@ -191,7 +196,7 @@ def create_pdf(
                 pdf.ln()
 
         pdf.set_font(family="Carlito", style="B", size=8)
-        pdf.cell(text=class_.name)
+        pdf.cell(text=class_info.name)
 
         # print possible voided legs
         if ranked_results and ranked_results[0].entry.result is not None:
@@ -200,7 +205,7 @@ def create_pdf(
                 pdf.cell(text=f'(Voided legs: {", ".join(voided_legs)})')
 
         # course data
-        course_data = pdf.course_data(class_)
+        course_data = pdf.course_data(class_info=class_info)
         if course_data:
             pdf.set_x(x=max(pdf.get_x() + 12, 67))
             pdf.cell(text=course_data)

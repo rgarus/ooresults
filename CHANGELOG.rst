@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Fixed
+^^^^^
+
+- A bug has been fixed that prevented entries with the class names “Organizer” or "Organizers" (which are used for build series results) from appearing in the “Entries” table.
+
+
 [0.4.10] - 2026-10-07
 ---------------------
 

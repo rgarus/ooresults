@@ -23,6 +23,9 @@ from typing import Optional
 from ooresults.otypes.class_params import ClassParams
 
 
+ORGANIZER_CLASS_NAMES = ["Organizer", "Organizers"]
+
+
 @dataclasses.dataclass
 class ClassType:
     id: int

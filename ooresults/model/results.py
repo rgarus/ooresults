@@ -29,6 +29,7 @@ from ooresults.model import cached_result
 from ooresults.model.build_results import PersonSeriesResult
 from ooresults.otypes import result_type
 from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ORGANIZER_CLASS_NAMES
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
@@ -344,7 +345,7 @@ def build_series_result() -> (
             )
             list_of_results.append(class_results)
             organizers.append(
-                [e for e in entries if e.class_name in ["Organizer", "Organizers"]]
+                [e for e in entries if e.class_name in ORGANIZER_CLASS_NAMES]
             )
 
     ranked_classes = build_results.build_total_results(

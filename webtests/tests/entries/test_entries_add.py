@@ -307,7 +307,9 @@ def test_if_an_entry_is_added_you_can_choose_between_sex_unknown_or_female_or_ma
     ]
 
 
-@pytest.mark.parametrize("class_name", ["Bahn A - Frauen", "Bahn A - Männer"])
+@pytest.mark.parametrize(
+    "class_name", ["Bahn A - Frauen", "Bahn A - Männer", "Organizer"]
+)
 def test_if_an_entry_is_added_you_can_choose_between_all_defined_classes(
     class_name: str,
     main_page: MainPage,
@@ -317,7 +319,11 @@ def test_if_an_entry_is_added_you_can_choose_between_all_defined_classes(
 ) -> None:
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.add()
-    assert dialog.get_class_list() == ["Bahn A - Frauen", "Bahn A - Männer"]
+    assert dialog.get_class_list() == [
+        "Bahn A - Frauen",
+        "Bahn A - Männer",
+        "Organizer",
+    ]
 
     dialog.enter_values(
         first_name="Annalena",

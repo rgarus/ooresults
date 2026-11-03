@@ -21,6 +21,7 @@ from collections.abc import Iterator
 
 import pytest
 
+from ooresults.otypes.class_type import ORGANIZER_CLASS_NAMES
 from webtests.pageobjects.main_page import MainPage
 
 
@@ -54,6 +55,11 @@ def add_classes(main_page: MainPage, event: str) -> None:
     dialog.submit()
     dialog = class_page.actions.add()
     dialog.enter_values(name="Bahn A - Männer")
+    dialog.submit()
+
+    assert "Organizer" in ORGANIZER_CLASS_NAMES
+    dialog = class_page.actions.add()
+    dialog.enter_values(name="Organizer")
     dialog.submit()
 
 

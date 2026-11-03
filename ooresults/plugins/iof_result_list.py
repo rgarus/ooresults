@@ -28,6 +28,7 @@ from lxml.builder import ElementMaker
 
 from ooresults.otypes import result_type
 from ooresults.otypes import start_type
+from ooresults.otypes.class_type import ORGANIZER_CLASS_NAMES
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import RankedEntryType
@@ -113,22 +114,30 @@ def create_result_list(
     e_event.append(STARTTIME(DATE(event.date.isoformat())))
     root.append(e_event)
 
-    for class_, ranked_results in class_results:
+    for class_info, ranked_results in class_results:
+        # do not export organizer entries
+        if class_info.name in ORGANIZER_CLASS_NAMES:
+            continue
+
+        # do not export classes without entries
         if not ranked_results:
             continue
 
         cr = CLASSRESULT()
-        cr.append(CLASS(NAME(class_.name)))
+        cr.append(CLASS(NAME(class_info.name)))
 
         co = COURSE()
-        if class_.course_name:
-            co.append(NAME(class_.course_name))
-        if class_.course_length is not None:
-            co.append(LENGTH(str(round(class_.course_length))))
-        if class_.course_climb is not None:
-            co.append(CLIMB(str(round(class_.course_climb))))
-        if class_.number_of_controls is not None and class_.number_of_controls > 0:
-            co.append(NUMBEROFCONTROLS(str(class_.number_of_controls)))
+        if class_info.course_name:
+            co.append(NAME(class_info.course_name))
+        if class_info.course_length is not None:
+            co.append(LENGTH(str(round(class_info.course_length))))
+        if class_info.course_climb is not None:
+            co.append(CLIMB(str(round(class_info.course_climb))))
+        if (
+            class_info.number_of_controls is not None
+            and class_info.number_of_controls > 0
+        ):
+            co.append(NUMBEROFCONTROLS(str(class_info.number_of_controls)))
         if len(co):
             cr.append(co)
 

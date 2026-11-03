@@ -21,6 +21,7 @@ from decimal import Decimal
 from typing import Optional
 
 from ooresults.otypes import series_type
+from ooresults.otypes.class_type import ORGANIZER_CLASS_NAMES
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.entry_type import RankedEntryType
@@ -36,9 +37,6 @@ def build_results(
 ) -> list[tuple[ClassInfoType, list[RankedEntryType]]]:
     all_results = []
     for class_info in class_infos:
-        if class_info.name in ["Organizer", "Organizers"]:
-            continue
-
         class_results: list[RankedEntryType] = []
 
         # filter results belonging to this class
@@ -138,11 +136,11 @@ def build_total_results(
 
     r: dict[str, dict[tuple[str, str], PersonSeriesResult]] = {}
     for i, class_results in enumerate(list_of_results):
-        for class_, ranked_entries in class_results:
-            if class_.name in ["Organizer", "Organizers"]:
+        for class_info, ranked_entries in class_results:
+            if class_info.name in ORGANIZER_CLASS_NAMES:
                 continue
-            if class_.name not in r:
-                r[class_.name] = {}
+            if class_info.name not in r:
+                r[class_info.name] = {}
 
             # compute points
             for e in ranked_entries:
@@ -151,7 +149,7 @@ def build_total_results(
                     continue
 
                 points = None
-                if class_.params.otype != "score":
+                if class_info.params.otype != "score":
                     if e.rank is not None:
                         winner_time = ranked_entries[0].entry.result.time
                         if winner_time is not None and e.entry.result.time is not None:
@@ -168,8 +166,8 @@ def build_total_results(
 
                 if points is not None:
                     person_name = (entry.last_name, entry.first_name)
-                    if person_name not in r[class_.name]:
-                        r[class_.name][person_name] = PersonSeriesResult(
+                    if person_name not in r[class_info.name]:
+                        r[class_info.name][person_name] = PersonSeriesResult(
                             last_name=entry.last_name,
                             first_name=entry.first_name,
                             year=entry.year,
@@ -182,8 +180,8 @@ def build_total_results(
                     p = Decimal(settings.maximum_points * points).quantize(q)
                     # Only use one (the best) result of a person if he/she
                     # has started several times in a class at an event.
-                    if i not in r[class_.name][person_name].races:
-                        r[class_.name][person_name].races[i] = Points(points=p)
+                    if i not in r[class_info.name][person_name].races:
+                        r[class_info.name][person_name].races[i] = Points(points=p)
 
     # add organizer bonus
     for i, entries in enumerate(organizers):

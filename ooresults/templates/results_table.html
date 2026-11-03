@@ -5,6 +5,7 @@
 <%!
 from typing import List
 
+from ooresults.otypes.class_type import ORGANIZER_CLASS_NAMES
 from ooresults.otypes.entry_type import RankedEntryType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.utils.globals import build_columns
@@ -81,10 +82,10 @@ def voided_legs(ranked_results: List[RankedEntryType]) -> str:
     columns = build_columns(class_results=class_results)
 %>
 
-% for class_, ranked_results in class_results:
-    % if ranked_results:
+% for class_info, ranked_results in class_results:
+    % if ranked_results and class_info.name not in ORGANIZER_CLASS_NAMES:
     <thead>
-        <tr><th colspan="4" style="text-align:left;padding-top:3em"><h3>${class_.name}${voided_legs(ranked_results)}</h3></th></tr>
+        <tr><th colspan="4" style="text-align:left;padding-top:3em"><h3>${class_info.name}${voided_legs(ranked_results)}</h3></th></tr>
         <tr class="dt">
             <th class="dt">Rank</th>
             <th class="dt">Name</th>
@@ -95,7 +96,7 @@ def voided_legs(ranked_results: List[RankedEntryType]) -> str:
                 % if "factor" in columns:
                     <th class="dt">Handicap</th>
                 % endif
-                % if class_.params.otype == "score":
+                % if class_info.params.otype == "score":
                     <th class="dt">Run time</th>
                     <th class="dt">Score controls</th>
                     <th class="dt">Score overtime</th>
@@ -129,7 +130,7 @@ def voided_legs(ranked_results: List[RankedEntryType]) -> str:
                 % if "factor" in columns:
                     <td class="dt" style="text-align:right">${"{:1.4f}".format(result.extensions.get("factor", 1))}</td>
                 % endif
-                % if class_.params.otype == "score":
+                % if class_info.params.otype == "score":
                      <td class="dt" style="text-align:right">${format_time(result.time, result.status)}</td>
                      <td class="dt" style="text-align:right">${format_points(result.extensions.get("score_controls", None), result.status)}</td>
                      <td class="dt" style="text-align:right">${format_points(result.extensions.get("score_overtime", None), result.status)}</td>
