@@ -70,7 +70,37 @@ Es bedeuten:
 
       Aus Sicherheitsgründen sollte import_stream nur auf "on" gesetzt werden,
       wenn Ergebnisdaten über das Streaming Interface empfangen werden sollen.
-      
+
+
+.. index:: ooresults-server; Upload
+
+[Upload]url, [Upload]token und [Upload]name
+
+   Der optionale Abschnitt [Upload] ermöglicht es, die Ergebnisse eines Wettkampfes
+   mit einem Klick an einen anderen Server zu senden, z.B. an die Webseite einer Laufserie:
+
+   .. code-block::
+
+      [Upload]
+      url = https://www.old-oc-muenchen.de/cup_import.php
+      token = <geheimer Schlüssel>
+      name = Munich O-Cup
+
+   Ist url gesetzt, erscheint im Tab Entries der Button "Upload to <name> ...".
+   Er sendet die Ergebnisse des ausgewählten Wettkampfes als
+   IOF Interface Standard 3.0 ResultList (wie Export "IOF Interface Standard 3.0 Result List")
+   per HTTP POST an url. Der token wird im Header "X-Upload-Token" mitgesendet.
+   Fehlt name, wird der Rechnername aus url angezeigt.
+
+   Der empfangende Server antwortet mit einem JSON-Objekt, z.B.
+   ``{"ok": true, "message": "52 Ergebnisse empfangen", "review_url": "https://..."}``.
+   message wird angezeigt, review_url (optional) als Link zur Prüfung der Daten.
+
+   .. note::
+
+      url muss mit https:// beginnen, damit der token nicht unverschlüsselt übertragen wird
+      (Ausnahme: localhost). Weiterleitungen (z.B. von http:// auf https://) werden nicht verfolgt.
+
 
 .. index:: ooresults-reader; Konfiguration
 

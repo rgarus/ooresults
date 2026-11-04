@@ -253,13 +253,15 @@ def root(results_table: Optional[str]) -> str:
     return _root.render(results_table=results_table)
 
 
-def main(events: list[EventType]) -> str:
+def main(events: list[EventType], upload_name: Optional[str] = None) -> str:
     events_table = _events_table.render(events=events)
     events_tab = _events_tab_content.render(events_table=events_table)
     entries_table = _entries_table.render(
         event=None, view="entries", view_entries_list=[], columns=set()
     )
-    entries_tab = _entries_tab_content.render(entries_table=entries_table)
+    entries_tab = _entries_tab_content.render(
+        entries_table=entries_table, upload_name=upload_name
+    )
     classes_table = _classes_table.render(event=None, classes=[])
     classes_tab = _classes_tab_content.render(classes_table=classes_table)
     courses_table = _courses_table.render(event=None, courses=[])
