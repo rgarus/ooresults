@@ -44,6 +44,7 @@ from ooresults.plugins.imports.entries import text
 from ooresults.repo.repo import ConstraintError
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.utils import render
+from ooresults.utils import result_upload
 from ooresults.utils.globals import build_columns
 
 
@@ -53,6 +54,7 @@ Handler for the entry routes.
 /entry/update
 /entry/import
 /entry/export
+/entry/upload
 /entry/print
 /entry/add
 /entry/fill_edit_form
@@ -296,6 +298,36 @@ def post_export() -> bytes | bottle.HTTPResponse:
         return bottle.HTTPResponse(status=409, body="Event deleted")
 
     return content
+
+
+@bottle.post("/entry/upload")
+def post_upload() -> str | bottle.HTTPResponse:
+    """Upload the results as IOF 3.0 ResultList to the configured server."""
+    target = result_upload.target
+    if target is None:
+        return bottle.HTTPResponse(
+            status=409, body="Upload is not configured (section [Upload] in config.ini)"
+        )
+
+    data = bottle.request.forms
+    try:
+        event_id = int(data.event_id)
+    except ValueError:
+        return bottle.HTTPResponse(status=409, body="No event selected")
+    try:
+        event, class_results = model.results.event_class_results(event_id=event_id)
+    except EventNotFoundError:
+        return bottle.HTTPResponse(status=409, body="Event deleted")
+
+    content = iof_result_list.create_result_list(event, class_results)
+    answer = result_upload.upload(content=content, target=target)
+    return json.dumps(
+        {
+            "ok": answer.ok,
+            "message": answer.message,
+            "review_url": answer.review_url,
+        }
+    )
 
 
 @bottle.post("/entry/print")

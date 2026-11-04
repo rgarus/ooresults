@@ -47,6 +47,7 @@ from ooresults.repo.sqlite_repo import SqliteRepo
 from ooresults.user import Users
 from ooresults.utils import render
 from ooresults.utils import rental_cards
+from ooresults.utils import result_upload
 from ooresults.websocket_server.websocket_server import WebSocketServer
 
 
@@ -61,7 +62,11 @@ def login():
 
 @bottle.route("/admin", method="GET")
 def admin():
-    return render.main(events=model.events.get_events())
+    target = result_upload.target
+    return render.main(
+        events=model.events.get_events(),
+        upload_name=target.name if target is not None else None,
+    )
 
 
 @bottle.route("/mystatic/<filepath:path>")
@@ -151,6 +156,10 @@ def main() -> Optional[int]:
         return 2
 
     rental_cards.read_rental_cards(path=main_path / "rental_cards.txt")
+
+    result_upload.target = config.upload
+    if config.upload is not None:
+        logging.info(f"Upload of results to {config.upload.url} enabled")
 
     try:
         model.db = SqliteRepo(db=str(database))
