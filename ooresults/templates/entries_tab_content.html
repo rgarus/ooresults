@@ -1,4 +1,5 @@
 ## entries_table: str
+## upload_name: Optional[str]
 
 
 <!-- Tab content -->
@@ -8,6 +9,9 @@
     <button id="entr.myBtnReload" onclick="entr_update()">Reload</button>
     <button id="entr.myBtnImport" onclick="entr_myImport()">Import ...</button>
     <button id="entr.myBtnExport" onclick="entr_myExport()">Export ...</button>
+    % if upload_name:
+      <button id="entr.myBtnUpload" onclick="entr_myUpload()">Upload to ${upload_name} ...</button>
+    % endif
     <button id="entr.myBtnPrint" onclick="entr_myPrint()">Print ...</button>
     <button id="entr.myBtnAdd" onclick="entr_myAdd()">Add entry ...</button>
     <button id="entr.myBtnEdit" disabled onclick="entr_myEdit()">Edit entry ...</button>
@@ -143,6 +147,21 @@
       </form>
     </div>
   </div>
+
+  % if upload_name:
+  <!-- The Modal -->
+  <div class="modal" id="entr.uploadDialog">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('entr.uploadDialog').style.display='none'">&times;</span>
+      <form id="entr.upload.form" class="form-container" onsubmit="entr_submitUpload(); return false;">
+        <p>Confirm: Upload the results of the event <b id="entr.uploadEventName"></b> to ${upload_name}?</p>
+        <button id="entr.uploadSubmit" type="submit" class="btn">Upload</button>
+        <button type="button" class="btn cancel" onclick="document.getElementById('entr.uploadDialog').style.display='none'">Cancel</button>
+      </form>
+    </div>
+  </div>
+  % endif
 
   <!-- The Modal -->
   <div class="modal" id="entr.printDialog">
@@ -472,6 +491,66 @@
             filename = "entries.csv";
             mimetype = "text/csv";
         }
+        xhr.send(data);
+    }
+
+    function entr_myUpload() {
+        if (window.event_id == null) {
+            window.alert("Please select an event first");
+            return;
+        }
+        const name = document.getElementById('entr.event_name');
+        document.getElementById('entr.uploadEventName').textContent = name ? name.textContent : '';
+        document.getElementById('entr.uploadDialog').style.display = 'block';
+    }
+
+    function entr_showUploadAnswer(obj) {
+        // the answer comes from the remote server: insert only as text
+        const content = document.getElementById('statusDialogContent');
+        content.textContent = '';
+        const p = document.createElement('p');
+        p.textContent = (obj.ok ? 'Upload successful: ' : 'Upload failed: ') + obj.message;
+        content.appendChild(p);
+        if (obj.review_url) {
+            const a = document.createElement('a');
+            a.href = obj.review_url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = 'Open review page';
+            const p2 = document.createElement('p');
+            p2.appendChild(a);
+            content.appendChild(p2);
+        }
+        document.getElementById('statusDialog').style.display = 'block';
+    }
+
+    function entr_submitUpload() {
+        const button = document.getElementById('entr.uploadSubmit');
+        button.disabled = true;
+        button.textContent = 'Uploading ...';
+        function done() {
+            button.disabled = false;
+            button.textContent = 'Upload';
+        }
+        var data = new FormData();
+        data.append('event_id', window.event_id);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status != 0) {
+                done();
+                if (this.status == 200) {
+                    document.getElementById('entr.uploadDialog').style.display = 'none';
+                    entr_showUploadAnswer(JSON.parse(this.responseText));
+                } else {
+                    window.alert(this.responseText);
+                }
+            }
+        };
+        xhr.onerror = function() {
+            done();
+            window.alert("Network error");
+        };
+        xhr.open("POST", "entry/upload", true);
         xhr.send(data);
     }
 

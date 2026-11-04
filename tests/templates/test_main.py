@@ -46,3 +46,19 @@ def test_events_list_is_empty() -> None:
     assert len(html.findall(path=".//div[@id='cour.actions']")) == 1
     assert len(html.findall(path=".//div[@id='comp.actions']")) == 1
     assert len(html.findall(path=".//div[@id='club.actions']")) == 1
+
+
+def test_upload_button_is_hidden_if_upload_is_not_configured() -> None:
+    html = Html(text=render.main(events=[]))
+
+    html.find_not(path=".//button[@id='entr.myBtnUpload']")
+    html.find_not(path=".//div[@id='entr.uploadDialog']")
+
+
+def test_upload_button_is_shown_if_upload_is_configured() -> None:
+    html = Html(text=render.main(events=[], upload_name="Munich <O-Cup>"))
+
+    button = html.find(path=".//div[@id='entr.actions']/button[@id='entr.myBtnUpload']")
+    assert button.text == "Upload to Munich <O-Cup> ..."
+    assert button.attrib["onclick"] == "entr_myUpload()"
+    html.find(path=".//div[@id='entr.uploadDialog']//form[@id='entr.upload.form']")
