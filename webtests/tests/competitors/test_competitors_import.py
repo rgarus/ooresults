@@ -54,7 +54,7 @@ def test_import_competitor(main_page: MainPage, delete_competitors: None) -> Non
     dialog = competitor_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "competitors.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path)
 
@@ -104,7 +104,7 @@ def test_if_import_competitor_list_with_xml_errors_then_an_error_message_is_disp
     dialog = competitor_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "competitors.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path, error_dialog=True)
 
@@ -143,7 +143,7 @@ def test_if_import_competitor_list_with_schema_errors_then_an_error_message_is_d
     dialog = competitor_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "competitors.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path, error_dialog=True)
 
@@ -180,7 +180,7 @@ def test_if_import_competitor_list_but_root_tag_is_not_class_list_then_an_error_
     dialog = competitor_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "competitors.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path, error_dialog=True)
 

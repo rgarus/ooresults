@@ -21,6 +21,8 @@ import asyncio
 import bz2
 import datetime
 import json
+import pathlib
+import sys
 import tempfile
 import threading
 from collections.abc import AsyncGenerator
@@ -54,8 +56,9 @@ EVENT_DATE = "2023-12-29"
 
 @pytest.fixture
 def db() -> Iterator[SqliteRepo]:
-    with tempfile.NamedTemporaryFile() as db_file:
-        model.db = SqliteRepo(db=db_file.name)
+    with tempfile.TemporaryDirectory() as temp_dir:
+        database = pathlib.Path(temp_dir) / "ooresults.sqlite"
+        model.db = SqliteRepo(db=str(database))
         yield model.db
         model.db.close()
 
@@ -106,6 +109,7 @@ class WebSocketServer(threading.Thread):
         self.barrier.wait()
 
     def close(self) -> None:
+        self.handler.executor.shutdown()
         if self.loop and self.server:
             self.server.close()
             future = asyncio.run_coroutine_threadsafe(
@@ -125,6 +129,7 @@ def websocket_server() -> Iterator[WebSocketServer]:
     websocket_server.close()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_if_token_is_invalid_then_the_websocket_is_closed(
     event_id: int,
@@ -141,6 +146,7 @@ async def test_if_token_is_invalid_then_the_websocket_is_closed(
         assert excinfo.value.rcvd.reason == "__unauthorized___"
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_if_event_not_found_then_status_message_contains_no_event_information(
     event_id: int,
@@ -156,6 +162,7 @@ async def test_if_event_not_found_then_status_message_contains_no_event_informat
         await si1_client.close()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_reader_status_received_if_event_found(
     event_id: int,
@@ -176,6 +183,7 @@ async def test_reader_status_received_if_event_found(
         await si1_client.close()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_cardreader_event_key_not_found(
     event_id: int,
@@ -199,6 +207,7 @@ async def test_cardreader_event_key_not_found(
             await reader.recv()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_cardreader_event_key_found_and_reader_disconnected(
     event_id: int,
@@ -311,6 +320,7 @@ async def si1_clients(
             await c.close()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_cardreader_reader_connected(
     event_id: int,
@@ -342,6 +352,7 @@ async def test_cardreader_reader_connected(
         }
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_cardreader_reader_disconnected(
     event_id: int,
@@ -373,6 +384,7 @@ async def test_cardreader_reader_disconnected(
         }
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_cardreader_card_inserted(
     event_id: int,
@@ -406,6 +418,7 @@ async def test_cardreader_card_inserted(
         }
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_cardreader_card_removed(
     event_id: int,
@@ -437,6 +450,7 @@ async def test_cardreader_card_removed(
         }
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_cardreader_card_read(
     db: SqliteRepo,

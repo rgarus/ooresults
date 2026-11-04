@@ -17,6 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import pathlib
 import subprocess
 import sys
 import tempfile
@@ -45,6 +46,17 @@ def ooresults_server() -> Iterator[subprocess.Popen]:
         yield p
         p.kill()
         p.wait(timeout=10)
+
+        # In Windows, the database file continues to be accessed for a short time
+        # after the ooresults server process has terminated. This prevents the
+        # temporary directory from being deleted. We wait until the database file
+        # can be deleted.
+        for i in range(10):
+            try:
+                (pathlib.Path(d_name) / "ooresults.sqlite").unlink()
+                break
+            except OSError:
+                time.sleep(1)
 
 
 @pytest.fixture(scope="session")

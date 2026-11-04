@@ -113,7 +113,7 @@ def test_import_entries(main_page: MainPage, event: str) -> None:
     dialog = entry_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "EntryList.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path)
 
@@ -205,7 +205,7 @@ def test_if_a_competitor_is_contained_several_times_then_only_the_first_entry_is
     dialog = entry_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "EntryList.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         info_dialog = dialog.import_file(path=path, info_or_error_dialog="info")
     assert info_dialog.get_text() == [
@@ -255,7 +255,7 @@ def test_if_import_entry_list_with_xml_errors_then_an_error_message_is_displayed
     dialog = entry_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "EntryList.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path, info_or_error_dialog="error")
 
@@ -291,7 +291,7 @@ def test_if_import_entry_list_with_schema_errors_then_an_error_message_is_displa
     dialog = entry_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "EntryList.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path, info_or_error_dialog="error")
 
@@ -328,7 +328,7 @@ def test_if_import_entry_list_but_root_tag_is_not_entry_list_then_an_error_messa
     dialog = entry_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "EntryList.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path, info_or_error_dialog="error")
 

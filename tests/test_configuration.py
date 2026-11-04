@@ -18,6 +18,7 @@
 
 
 import pathlib
+import re
 import tempfile
 from unittest.mock import patch
 
@@ -145,7 +146,7 @@ def test_configuration_exception_if_cert_files_defined_but_not_found() -> None:
             with patch.object(pathlib.Path, "home", my_home):
                 with pytest.raises(
                     expected_exception=FileNotFoundError,
-                    match=f"Certificate file '{ssl_cert}' not found",
+                    match=f"Certificate file '{re.escape(str(ssl_cert))}' not found",
                 ):
                     configuration.Config(path=temp)
 

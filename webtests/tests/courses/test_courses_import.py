@@ -84,7 +84,7 @@ def test_import_courses(main_page: MainPage, event: str, delete_courses: None) -
     dialog = course_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "CourseData.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path)
 
@@ -127,7 +127,7 @@ def test_if_import_course_data_with_xml_errors_then_an_error_message_is_displaye
     dialog = course_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "CourseData.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path, error_dialog=True)
 
@@ -163,7 +163,7 @@ def test_if_import_course_data_with_schema_errors_then_an_error_message_is_displ
     dialog = course_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "CourseData.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path, error_dialog=True)
 
@@ -201,7 +201,7 @@ def test_if_import_course_data_but_root_tag_is_not_class_list_then_an_error_mess
     dialog = course_page.actions.import_()
     with tempfile.TemporaryDirectory() as td:
         path = pathlib.Path(td) / "CourseData.xml"
-        with open(path, mode="w") as f:
+        with open(path, mode="w", encoding="utf8") as f:
             f.write(content)
         dialog.import_file(path=path, error_dialog=True)
 

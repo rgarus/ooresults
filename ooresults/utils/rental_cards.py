@@ -28,7 +28,7 @@ def read_rental_cards(path: pathlib.Path) -> None:
     global _rental_cards
 
     try:
-        with open(path) as f:
+        with open(path, encoding="utf8") as f:
             _rental_cards = f.read().split()
     except FileNotFoundError:
         print(f"No rental cards read, file {path} not found")
