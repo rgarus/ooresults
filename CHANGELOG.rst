@@ -5,10 +5,15 @@ Changelog
 [Unreleased]
 ------------
 
+Added
+^^^^^
+
+- The "createTime" attribute has been added to the root node of the exported IOF 3.0 files.
+
 Fixed
 ^^^^^
 
-- A bug has been fixed that prevented entries with the class names “Organizer” or "Organizers" (which are used for build series results) from appearing in the “Entries” table.
+- A bug has been fixed that prevented entries with the class names "Organizer" or "Organizers" (which are used for build series results) from appearing in the "Entries" table.
 
 
 [0.4.10] - 2026-10-07
@@ -23,7 +28,7 @@ Added
 Changed
 ^^^^^^^
 
-- Read SI cards are no longer displayed in a separate web browser window named “SI Reader,” but rather as part of the ooresults window. If you want to view the read SI cards in a separate web browser window as before, you must open ooresults in two web browser windows.
+- Read SI cards are no longer displayed in a separate web browser window named "SI Reader", but rather as part of the ooresults window. If you want to view the read SI cards in a separate web browser window as before, you must open ooresults in two web browser windows.
 - The "Gender" column in the participants and entries tables has been replaced by the "Sex" column.
 - Minimum database schema version has been changed to 16.
 
@@ -40,15 +45,15 @@ Added
 ^^^^^
 
 - Show a progress bar while waiting for a PDF file to be generated.
-- On the “Entries” tab, the data views are expanded to include “Results”.
-- On the “Entries” tab, the current ranking is displayed in all data views.
+- On the "Entries" tab, the data views are expanded to include "Results".
+- On the "Entries" tab, the current ranking is displayed in all data views.
 - On the "Entries" tab, the option to print results and split times has been added.
 - Display of competitor data grouped by "Competitors" and "Clubs" added.
 
 Changed
 ^^^^^^^
 
-- Python package pyOpenSSL replaced by cryptography. To avoid any potential dependency conflicts during the upgrade process, uninstall pyOpenSSL before upgrading to ooresults version 0.4.9 or later using the command “python -m pip uninstall pyopenssl”.
+- Python package pyOpenSSL replaced by cryptography. To avoid any potential dependency conflicts during the upgrade process, uninstall pyOpenSSL before upgrading to ooresults version 0.4.9 or later using the command "python -m pip uninstall pyopenssl".
 
 
 [0.4.8] - 2026-04-26
@@ -57,7 +62,7 @@ Changed
 Added
 ^^^^^
 
-- On the “Events", “Entries”, “Classes”, “Courses”, "Competitors”, and "Clubs" tabs, the keyboard shortcut “ALT+F” has been added to scroll to the top of the page, set the input focus to the table filter, and clear the table filter's contents.
+- On the "Events", "Entries", "Classes", "Courses", "Competitors", and "Clubs" tabs, the keyboard shortcut "ALT+F" has been added to scroll to the top of the page, set the input focus to the table filter, and clear the table filter's contents.
 
 Changed
 ^^^^^^^
@@ -67,7 +72,7 @@ Changed
 Fixed
 ^^^^^
 
-- Fixed an internal error that occurred during result calculation when an entry had the status “OK” but did not contain a runtime value.
+- Fixed an internal error that occurred during result calculation when an entry had the status "OK" but did not contain a runtime value.
 
 
 [0.4.7] - 2026-03-11
@@ -91,7 +96,7 @@ Changed
 ^^^^^^^
 
 - WSGI framework web.py has been replaced by bottle to support current Python versions.
-- The dialog for selecting competitors in the “Add Entry” dialog is opened with the focus on the search filter.
+- The dialog for selecting competitors in the "Add Entry" dialog is opened with the focus on the search filter.
 
 Fixed
 ^^^^^

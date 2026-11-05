@@ -17,11 +17,35 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import pytest
+from datetime import datetime
+from pathlib import Path
 
+import pytest
+from lxml import etree
+
+import ooresults
 from ooresults.otypes.competitor_type import CompetitorType
 from ooresults.otypes.competitor_type import Sex
 from ooresults.plugins import iof_competitor_list
+
+
+schema_file = Path(ooresults.__file__).parent / "schema" / "IOF.xsd"
+xml_schema = etree.XMLSchema(etree.parse(str(schema_file)))
+
+
+def check_document(document: bytes, content: str, t1: datetime, t2: datetime) -> None:
+    assert xml_schema.validate(etree.XML(document))
+    root_1 = etree.XML(document)
+    root_2 = etree.XML(content.encode(encoding="utf8"))
+
+    create_time = root_1.attrib.pop("createTime", None)
+    t1 = t1.replace(microsecond=t1.microsecond // 1000 * 1000)
+    t2 = t2.replace(microsecond=t2.microsecond // 1000 * 1000)
+    assert create_time is not None and t1 <= datetime.fromisoformat(create_time) <= t2
+
+    text_1 = etree.tostring(root_1, encoding="UTF-8", xml_declaration=True)
+    text_2 = etree.tostring(root_2, encoding="UTF-8", xml_declaration=True)
+    assert text_1 == text_2
 
 
 def test_import_name() -> None:
@@ -136,6 +160,7 @@ def test_export_name() -> None:
   </Competitor>
 </CompetitorList>
 """
+    t1 = datetime.now()
     document = iof_competitor_list.create_competitor_list(
         [
             CompetitorType(
@@ -150,7 +175,8 @@ def test_export_name() -> None:
             ),
         ]
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 def test_import_full() -> None:
@@ -208,6 +234,7 @@ def test_export_full() -> None:
   </Competitor>
 </CompetitorList>
 """
+    t1 = datetime.now()
     document = iof_competitor_list.create_competitor_list(
         [
             CompetitorType(
@@ -222,4 +249,5 @@ def test_export_full() -> None:
             )
         ]
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)

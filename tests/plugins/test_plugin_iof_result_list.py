@@ -21,9 +21,12 @@ from datetime import date
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+from pathlib import Path
 
 import pytest
+from lxml import etree
 
+import ooresults
 from ooresults.otypes import result_type
 from ooresults.otypes import start_type
 from ooresults.otypes.class_params import ClassParams
@@ -36,6 +39,25 @@ from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SpStatus
 from ooresults.plugins import iof_result_list
 from ooresults.plugins.iof_result_list import ResultListStatus
+
+
+schema_file = Path(ooresults.__file__).parent / "schema" / "IOF.xsd"
+xml_schema = etree.XMLSchema(etree.parse(str(schema_file)))
+
+
+def check_document(document: bytes, content: str, t1: datetime, t2: datetime) -> None:
+    assert xml_schema.validate(etree.XML(document))
+    root_1 = etree.XML(document)
+    root_2 = etree.XML(content.encode(encoding="utf8"))
+
+    create_time = root_1.attrib.pop("createTime", None)
+    t1 = t1.replace(microsecond=t1.microsecond // 1000 * 1000)
+    t2 = t2.replace(microsecond=t2.microsecond // 1000 * 1000)
+    assert create_time is not None and t1 <= datetime.fromisoformat(create_time) <= t2
+
+    text_1 = etree.tostring(root_1, encoding="UTF-8", xml_declaration=True)
+    text_2 = etree.tostring(root_2, encoding="UTF-8", xml_declaration=True)
+    assert text_1 == text_2
 
 
 def test_import_result_list() -> None:
@@ -300,6 +322,7 @@ def test_export_result_list() -> None:
     s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
+    t1 = datetime.now()
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -370,7 +393,8 @@ def test_export_result_list() -> None:
             ),
         ],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 def test_export_result_list_not_competing() -> None:
@@ -412,6 +436,7 @@ def test_export_result_list_not_competing() -> None:
     s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
+    t1 = datetime.now()
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -465,7 +490,8 @@ def test_export_result_list_not_competing() -> None:
             ),
         ],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 def test_import_result_list_with_start_time_but_not_finished() -> None:
@@ -567,6 +593,7 @@ def test_export_result_list_with_start_time_but_not_started() -> None:
 """
     s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
 
+    t1 = datetime.now()
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -620,7 +647,8 @@ def test_export_result_list_with_start_time_but_not_started() -> None:
             ),
         ],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 def test_import_result_list_without_class_result() -> None:
@@ -658,6 +686,7 @@ def test_export_result_list_without_class_result() -> None:
   </Event>
 </ResultList>
 """
+    t1 = datetime.now()
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -670,7 +699,81 @@ def test_export_result_list_without_class_result() -> None:
         ),
         [],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
+
+
+def test_export_result_list_with_organizer_class_name() -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+    <StartTime>
+      <Date>2020-02-09</Date>
+    </StartTime>
+  </Event>
+</ResultList>
+"""
+    s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
+    f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
+
+    t1 = datetime.now()
+    document = iof_result_list.create_result_list(
+        EventType(
+            id=1,
+            name="1. O-Cup 2020",
+            date=date(year=2020, month=2, day=9),
+            key=None,
+            publish=False,
+            series=None,
+            fields=[],
+        ),
+        [
+            (
+                ClassInfoType(
+                    id=1,
+                    name="Organizer",
+                    short_name=None,
+                    course_id=None,
+                    course_name=None,
+                    course_length=None,
+                    course_climb=None,
+                    number_of_controls=None,
+                    params=ClassParams(),
+                ),
+                [
+                    RankedEntryType(
+                        entry=EntryType(
+                            id=1,
+                            event_id=1,
+                            competitor_id=1,
+                            first_name="Angela",
+                            last_name="Merkel",
+                            class_id=1,
+                            class_name="Organizer",
+                            club_id=1,
+                            club_name="OC Kanzleramt",
+                            chip="1234567",
+                            sex=Sex.FEMALE,
+                            year=1972,
+                            not_competing=True,
+                            result=result_type.PersonRaceResult(
+                                start_time=s,
+                                finish_time=f,
+                                status=ResultStatus.OK,
+                                time=2001,
+                            ),
+                        ),
+                        rank=None,
+                        time_behind=None,
+                    ),
+                ],
+            ),
+        ],
+    )
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 def test_import_result_list_classes() -> None:
@@ -1041,6 +1144,7 @@ def test_export_result_list_classes() -> None:
   </ClassResult>
 </ResultList>
 """
+    t1 = datetime.now()
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -1201,7 +1305,8 @@ def test_export_result_list_classes() -> None:
             ),
         ],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 def test_import_result_list_with_unknown_punch_times() -> None:
@@ -1386,6 +1491,7 @@ def test_export_result_list_with_unknown_punch_times() -> None:
     s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
+    t1 = datetime.now()
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -1456,7 +1562,8 @@ def test_export_result_list_with_unknown_punch_times() -> None:
             ),
         ],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 def test_export_result_list_with_edited_punch_times() -> None:
@@ -1517,6 +1624,7 @@ def test_export_result_list_with_edited_punch_times() -> None:
     s = datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
+    t1 = datetime.now()
     document = iof_result_list.create_result_list(
         EventType(
             id=1,
@@ -1607,7 +1715,8 @@ def test_export_result_list_with_edited_punch_times() -> None:
             ),
         ],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 @pytest.mark.parametrize(
@@ -1669,6 +1778,7 @@ def test_export_result_list_with_status_comp(
 """
     content = content.replace("{attr}", status_xml)
 
+    t1 = datetime.now()
     document = iof_result_list.create_result_list(
         event=EventType(
             id=1,
@@ -1682,4 +1792,5 @@ def test_export_result_list_with_status_comp(
         class_results=[],
         status=status,
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)

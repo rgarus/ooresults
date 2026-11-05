@@ -17,6 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import datetime
 import pathlib
 
 import iso8601
@@ -58,6 +59,7 @@ def create_entry_list(event: EventType, entries: list[EntryType]) -> bytes:
 
     root = ENTRYLIST(
         iofVersion="3.0",
+        createTime=datetime.datetime.now().isoformat(timespec="milliseconds"),
         creator="ooresults (https://pypi.org/project/ooresults)",
     )
 
