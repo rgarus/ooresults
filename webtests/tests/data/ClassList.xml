@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ClassList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
+  <Class>
+    <Name>Bahn A - Frauen</Name>
+    <ShortName>Frauen</ShortName>
+  </Class>
+  <Class>
+    <Name>Bahn A - Männer</Name>
+    <ShortName>Männer</ShortName>
+  </Class>
+  <Class>
+    <Name>Organizer</Name>
+  </Class>
+</ClassList>

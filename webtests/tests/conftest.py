@@ -60,8 +60,25 @@ def ooresults_server() -> Iterator[subprocess.Popen]:
 
 
 @pytest.fixture(scope="session")
-def driver() -> Iterator[webdriver.Remote]:
-    driver: webdriver.Remote = webdriver.Firefox()
+def download_dir() -> Iterator[pathlib.Path]:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        yield pathlib.Path(temp_dir)
+
+
+@pytest.fixture(scope="session")
+def driver(download_dir: pathlib.Path) -> Iterator[webdriver.Remote]:
+    options = webdriver.FirefoxOptions()
+    options.set_preference("browser.download.folderList", 2)
+    options.set_preference("browser.helperApps.alwaysAsk.force", False)
+    options.set_preference("browser.download.manager.showWhenStarting", False)
+    options.set_preference("browser.download.manager.showAlertOnComplete", False)
+    options.set_preference("browser.download.dir", str(download_dir))
+    options.set_preference("pdfjs.disabled", True)
+    options.set_preference(
+        "browser.helperApps.neverAsk.saveToDisk",
+        "application/pdf,application/xml,text/csv",
+    )
+    driver: webdriver.Remote = webdriver.Firefox(options=options)
     yield driver
     driver.quit()
 

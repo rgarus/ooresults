@@ -210,6 +210,27 @@ class ExportClassDialog:
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
+    def export(self, download_dir: Path) -> bytes:
+        # delete all files in download_dir
+        for path in download_dir.iterdir():
+            if path.is_file() or path.is_symlink():
+                path.unlink(missing_ok=True)
+
+        # export file
+        elem = self.driver.find_element(By.ID, "cls.export.form")
+        elem.find_element(By.XPATH, "button[text()='Export']").click()
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
+
+        # read content of exported file
+        f = download_dir / "ClassList.xml"
+        try:
+            if f.exists() and f.stat().st_size > 0:
+                return f.read_bytes()
+            else:
+                raise RuntimeError(f"{f.name} not found or empty")
+        finally:
+            f.unlink(missing_ok=True)
+
 
 class DeleteClassDialog:
     def __init__(self, driver: webdriver.Remote) -> None:
