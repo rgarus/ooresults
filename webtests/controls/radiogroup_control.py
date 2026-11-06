@@ -34,7 +34,7 @@ class RadioGroupControl:
                 if button.is_enabled():
                     if not button.is_selected():
                         button.click()
-                        break
+                    break
                 else:
                     raise RuntimeError("RadioButton is disabled")
         else:

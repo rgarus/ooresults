@@ -255,6 +255,46 @@ class ExportEntryDialog:
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
 
 
+class PrintEntryDialog:
+    RESULTS: Final = "Results"
+    SPLIT_TIMES: Final = "Split times"
+
+    FILENAME = {RESULTS: "result.pdf", SPLIT_TIMES: "splittimes.pdf"}
+
+    def __init__(self, driver: webdriver.Remote) -> None:
+        self.driver = driver
+
+    def cancel(self) -> None:
+        elem = self.driver.find_element(By.ID, "entr.print.form")
+        elem.find_element(By.XPATH, "button[text()='Cancel']").click()
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
+
+    def print(self) -> RadioGroupControl:
+        return RadioGroupControl(driver=self.driver, name="entr_print")
+
+    def create_pdf(self, download_dir: Path) -> bytes:
+        # delete all files in download_dir
+        for path in download_dir.iterdir():
+            if path.is_file() or path.is_symlink():
+                path.unlink(missing_ok=True)
+
+        # create pdf file
+        selected = self.print().selected()
+        elem = self.driver.find_element(By.ID, "entr.print.form")
+        elem.find_element(By.XPATH, "button[text()='Create PDF']").click()
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
+
+        # read content of created pdf file
+        f = download_dir / self.FILENAME[selected]
+        try:
+            if f.exists() and f.stat().st_size > 0:
+                return f.read_bytes()
+            else:
+                raise RuntimeError(f"{f.name} not found or empty")
+        finally:
+            f.unlink(missing_ok=True)
+
+
 class DeleteEntryDialog:
     def __init__(self, driver: webdriver.Remote) -> None:
         self.driver = driver
@@ -331,6 +371,10 @@ class EntryActions(Actions):
     def export(self) -> ExportEntryDialog:
         self.action(text="Export ...").click()
         return ExportEntryDialog(driver=self.driver)
+
+    def print(self) -> PrintEntryDialog:
+        self.action(text="Print ...").click()
+        return PrintEntryDialog(driver=self.driver)
 
     def add(self) -> AddEntryDialog:
         self.action(text="Add entry ...").click()
