@@ -102,21 +102,6 @@ def client(main_page: MainPage, event: str) -> Iterator[WebSocketClient]:
             websocket_client.wsapp.close()
 
 
-def test_if_page_is_opened_then_event_name_and_event_date_are_displayed(
-    main_page: MainPage, event: str
-) -> None:
-    wait = main_page.wait(timeout=10)
-
-    si1_page = Si1Page(driver=main_page.driver)
-    si1_page.open()
-    try:
-        # check event name and date
-        wait.until(lambda _: si1_page.get_event_name() == EVENT_NAME)
-        wait.until(lambda _: si1_page.get_event_date() == EVENT_DATE)
-    finally:
-        si1_page.close()
-
-
 def test_if_reader_client_is_not_connected_then_reader_status_is_offline(
     main_page: MainPage, event: str
 ) -> None:
@@ -127,6 +112,9 @@ def test_if_reader_client_is_not_connected_then_reader_status_is_offline(
     try:
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Card reader offline")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
     finally:
         si1_page.close()
 
@@ -166,6 +154,9 @@ def test_if_reader_client_is_stopped_then_reader_status_is_offline(
             client.wsapp.close()
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Card reader offline")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
 
     finally:
         si1_page.close()
@@ -199,6 +190,9 @@ def test_if_a_si_reader_unit_is_not_found_then_reader_status_is_disconnected(
 
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Card reader disconnected")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
     finally:
         si1_page.close()
 
@@ -228,6 +222,9 @@ def test_if_a_si_reader_unit_is_found_then_reader_status_is_connected(
 
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Card reader connected")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
     finally:
         si1_page.close()
 
@@ -259,6 +256,9 @@ def test_if_a_si_card_is_inserted_then_reader_status_is_card_reading(
 
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Reading card 7509749 ...")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
     finally:
         si1_page.close()
 
@@ -288,6 +288,9 @@ def test_if_a_si_card_is_removed_then_reader_status_is_connected(
 
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Card reader connected")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
     finally:
         si1_page.close()
 
