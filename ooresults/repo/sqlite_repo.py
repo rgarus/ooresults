@@ -200,7 +200,11 @@ class SqliteRepo(Repo):
             raise OperationalError(str(e))
 
     def commit(self) -> None:
-        self.db.commit()
+        try:
+            self.db.commit()
+        except sqlite3.OperationalError as e:
+            self.db.rollback()
+            raise OperationalError(str(e))
 
     def rollback(self) -> None:
         self.db.rollback()
