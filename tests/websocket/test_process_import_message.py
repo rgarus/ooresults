@@ -17,6 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import bz2
 import datetime
 from collections.abc import Iterator
 from datetime import timedelta
@@ -33,7 +34,10 @@ from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.start_type import PersonRaceStart
+from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.sqlite_repo import SqliteRepo
+from ooresults.websocket_server.websocket_handler import FileTooLargeError
+from ooresults.websocket_server.websocket_handler import WebSocketHandler
 
 
 @pytest.fixture
@@ -97,7 +101,9 @@ def entry_id(db: SqliteRepo, event_id: int, class_id: int, competitor_id: int) -
         )
 
 
+@pytest.mark.parametrize("compress", [False, True])
 def test_import_iof_result_list_snapshot(
+    compress: bool,
     event_id: int,
     entry_id: int,
 ) -> None:
@@ -157,9 +163,14 @@ def test_import_iof_result_list_snapshot(
     s = datetime.datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime.datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    model.entries.import_iof_result_list(
+    if compress:
+        message = bz2.compress(content.encode())
+    else:
+        message = content.encode()
+
+    WebSocketHandler().process_import_message(
         event_key="local",
-        content=content.encode(),
+        message=message,
     )
 
     competitors = model.competitors.get_competitors()
@@ -282,7 +293,9 @@ def test_import_iof_result_list_snapshot(
     ]
 
 
+@pytest.mark.parametrize("compress", [False, True])
 def test_import_iof_result_list_delta(
+    compress: bool,
     event_id: int,
     entry_id: int,
 ) -> None:
@@ -321,9 +334,14 @@ def test_import_iof_result_list_delta(
     s = datetime.datetime(2020, 2, 9, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
     f = datetime.datetime(2020, 2, 9, 10, 33, 21, tzinfo=timezone(timedelta(hours=1)))
 
-    model.entries.import_iof_result_list(
+    if compress:
+        message = bz2.compress(content.encode())
+    else:
+        message = content.encode()
+
+    WebSocketHandler().process_import_message(
         event_key="local",
-        content=content.encode(),
+        message=message,
     )
 
     competitors = model.competitors.get_competitors()
@@ -424,3 +442,34 @@ def test_import_iof_result_list_delta(
             club_name=None,
         ),
     ]
+
+
+def test_if_event_not_found_then_an_event_not_found_error_is_raised(
+    event_id: int,
+) -> None:
+    content = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" status="Snapshot">
+  <Event>
+    <Name>1. O-Cup 2020</Name>
+    <StartTime>
+      <Date>2020-02-09</Date>
+    </StartTime>
+  </Event>
+</ResultList
+"""
+    with pytest.raises(EventNotFoundError):
+        WebSocketHandler().process_import_message(
+            event_key="12345",
+            message=content.encode(),
+        )
+
+
+def test_if_decompressed_message_is_too_large_then_an_error_is_raised(
+    event_id: int,
+) -> None:
+    with pytest.raises(FileTooLargeError):
+        WebSocketHandler().process_import_message(
+            event_key="local",
+            message=bz2.compress(10_000_001 * b"0"),
+        )

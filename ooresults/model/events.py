@@ -24,6 +24,7 @@ from typing import Optional
 from ooresults import model
 from ooresults.model import cached_result
 from ooresults.otypes.event_type import EventType
+from ooresults.repo.repo import EventNotFoundError
 from ooresults.repo.repo import TransactionMode
 
 
@@ -37,6 +38,14 @@ def get_events() -> list[EventType]:
 def get_event(id: int) -> EventType:
     with model.db.transaction():
         return model.db.get_event(id=id)
+
+
+def get_event_by_event_key(event_key: str) -> EventType:
+    with model.db.transaction():
+        for e in model.db.get_events():
+            if event_key != "" and e.key == event_key:
+                return e
+        raise EventNotFoundError(f'Event for key "{event_key}" not found')
 
 
 def add_event(
