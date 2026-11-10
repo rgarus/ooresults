@@ -37,7 +37,7 @@ ClassResultsType: TypeAlias = tuple[ClassInfoType, list[RankedEntryType]]
 @dataclasses.dataclass
 class Data:
     content: Optional[tuple[EventType, list[ClassResultsType]]] = None
-    lock: threading.Lock = threading.Lock()
+    lock: threading.Lock = dataclasses.field(default_factory=threading.Lock)
     valid: bool = True
 
 
