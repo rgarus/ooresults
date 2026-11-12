@@ -70,6 +70,7 @@ def driver(download_dir: pathlib.Path) -> Iterator[webdriver.Remote]:
     options = webdriver.FirefoxOptions()
     options.set_preference("browser.download.folderList", 2)
     options.set_preference("browser.helperApps.alwaysAsk.force", False)
+    options.set_preference("browser.download.alwaysOpenPanel", False)
     options.set_preference("browser.download.manager.showWhenStarting", False)
     options.set_preference("browser.download.manager.showAlertOnComplete", False)
     options.set_preference("browser.download.dir", str(download_dir))
