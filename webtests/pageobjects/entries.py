@@ -246,6 +246,20 @@ class ImportEntryDialog:
 
 
 class ExportEntryDialog:
+    ENTRY_LIST: Final = "IOF Interface Standard 3.0 Entry List"
+    RESULT_LIST: Final = "IOF Interface Standard 3.0 Result List"
+    SPLITSBROWSER: Final = "Result List for Splitsbrowser"
+    OE2003_CSV: Final = "OE2003 csv"
+    OE12_CSV: Final = "OE12 csv"
+
+    FILENAME = {
+        ENTRY_LIST: "EntryList.xml",
+        RESULT_LIST: "ResultList.xml",
+        SPLITSBROWSER: "Splitsbrowser-ResultList.xml",
+        OE2003_CSV: "entries.csv",
+        OE12_CSV: "entries.csv",
+    }
+
     def __init__(self, driver: webdriver.Remote) -> None:
         self.driver = driver
 
@@ -253,6 +267,31 @@ class ExportEntryDialog:
         elem = self.driver.find_element(By.ID, "entr.export.form")
         elem.find_element(By.XPATH, "button[text()='Cancel']").click()
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
+
+    def format(self) -> RadioGroupControl:
+        return RadioGroupControl(driver=self.driver, name="entr_export")
+
+    def export(self, download_dir: Path) -> bytes:
+        # delete all files in download_dir
+        for path in download_dir.iterdir():
+            if path.is_file() or path.is_symlink():
+                path.unlink(missing_ok=True)
+
+        # export file
+        selected = self.format().selected()
+        elem = self.driver.find_element(By.ID, "entr.export.form")
+        elem.find_element(By.XPATH, "button[text()='Export']").click()
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element(element=elem))
+
+        # read content of exported file
+        f = download_dir / self.FILENAME[selected]
+        try:
+            if f.exists() and f.stat().st_size > 0:
+                return f.read_bytes()
+            else:
+                raise RuntimeError(f"{f.name} not found or empty")
+        finally:
+            f.unlink(missing_ok=True)
 
 
 class PrintEntryDialog:

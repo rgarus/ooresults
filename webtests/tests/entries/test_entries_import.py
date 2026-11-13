@@ -20,11 +20,13 @@
 import pathlib
 import tempfile
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 
 from webtests.controls.alert_window import AlertWindow
 from webtests.pageobjects.main_page import MainPage
+from webtests.pageobjects.table import RowIterator
 
 
 EVENT_NAME = "Test for Entries"
@@ -49,7 +51,7 @@ def event(main_page: MainPage, delete_all: None) -> Iterator[str]:
     main_page.goto_events().delete_events()
 
 
-def test_import_entries(main_page: MainPage, event: str) -> None:
+def test_import_entries_from_iof_entry_list(main_page: MainPage, event: str) -> None:
     content = f"""\
 <?xml version='1.0' encoding='UTF-8'?>
 <EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0">
@@ -344,3 +346,100 @@ def test_if_import_entry_list_but_root_tag_is_not_entry_list_then_an_error_messa
 
     # check number of rows
     assert entry_page.table.nr_of_rows() == 0
+
+
+def test_import_entries_from_oonet_csv_list(main_page: MainPage, event: str) -> None:
+    path = Path(__file__).parent.parent / "data" / "Export_OONet.txt"
+    entry_page = main_page.goto_entries(event=event)
+    dialog = entry_page.actions.import_()
+    dialog.format().select(text=dialog.OE2003_CSV)
+    dialog.import_file(path=path)
+
+    # check number of rows
+    assert entry_page.table.nr_of_rows() == 7
+    assert entry_page.table.nr_of_columns() == 11
+
+    rows = iter(RowIterator(table=entry_page.table))
+    assert next(rows) == [
+        "Entries  (6)",
+    ]
+    assert next(rows) == [
+        "",
+        "Annalena",
+        "Baerbock",
+        "",
+        "1980",
+        "7379879",
+        "OC Grün",
+        "Bahn A - Frauen",
+        "",
+        "",
+        "",
+    ]
+    assert next(rows) == [
+        "",
+        "Marco",
+        "Buschmann",
+        "",
+        "1977",
+        "7076815",
+        "OC Gelb",
+        "Bahn A - Männer",
+        "",
+        "",
+        "",
+    ]
+    assert next(rows) == [
+        "",
+        "Nancy",
+        "Faeser",
+        "",
+        "1970",
+        "7040504",
+        "OC Rot",
+        "Bahn A - Frauen",
+        "",
+        "",
+        "",
+    ]
+    assert next(rows) == [
+        "",
+        "Robert",
+        "Habeck",
+        "",
+        "1969",
+        "7509749",
+        "OC Grün",
+        "Bahn A - Männer",
+        "",
+        "",
+        "",
+    ]
+    assert next(rows) == [
+        "",
+        "Christian",
+        "Lindner",
+        "",
+        "1979",
+        "7754987",
+        "OC Gelb",
+        "Bahn A - Männer",
+        "",
+        "",
+        "",
+    ]
+    assert next(rows) == [
+        "",
+        "Olaf",
+        "Scholz",
+        "",
+        "1958",
+        "7579050",
+        "OC Rot",
+        "Bahn A - Männer",
+        "",
+        "",
+        "",
+    ]
+    with pytest.raises(StopIteration):
+        next(rows)
