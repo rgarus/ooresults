@@ -14,6 +14,8 @@ Fixed
 ^^^^^
 
 - A bug has been fixed that prevented entries with the class names "Organizer" or "Organizers" (which are used for build series results) from appearing in the "Entries" table.
+- Previously, the entry results were not recalculated after importing IOF 3.0 CourseData. This is now done.
+- Several stability and security issues have been resolved.
 
 
 [0.4.10] - 2026-10-07

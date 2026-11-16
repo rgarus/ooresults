@@ -224,21 +224,21 @@ class PersonRaceResult(fastclasses_json.JSONMixin):
         year: Optional[int] = None,
         sex: Optional[Sex] = None,
     ) -> None:
-        #
-        # If list of controls is empty and result is not inactive. active or finished,
-        # no compution is done. In all other cases a new result is computed, but:
-        #
-        # - if old status is disqualified the new status is disqualified
-        # - if old status is overtime the new status is overtime
-        # - if olf status is didnotfinish and computed result is not ok the new status is didnotfinish
-        # - if old status is inactive and no controls are punched the new status is inactive
-        # - if old status is didnotstart and no controls are punched the new status is didnotstart
-        # - if list of controls is empty and type is standard or net the new status is finished
-        # - if list of controls is empty and type is score the new status is ok
-        #
+        """Compute the result (time including penalties and credits, status).
 
-        # if list of controls is empty and result is not inactive or finished,
-        # no compution is done
+        If list of controls is empty and result is not inactive. active or finished,
+        no computation is done. In all other cases a new result is computed, but:
+
+        - if old status is disqualified the new status is disqualified
+        - if old status is overtime the new status is overtime
+        - if olf status is didnotfinish and computed result is not ok the new status is didnotfinish
+        - if old status is inactive and no controls are punched the new status is inactive
+        - if old status is didnotstart and no controls are punched the new status is didnotstart
+        - if list of controls is empty and type is standard or net the new status is finished
+        - if list of controls is empty and type is score the new status is ok
+        """
+        # if list of controls is empty and result is not inactive, active or finished,
+        # no computation is done
         if controls == [] and self.status not in [
             ResultStatus.INACTIVE,
             ResultStatus.ACTIVE,
