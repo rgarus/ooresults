@@ -19,9 +19,14 @@
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.color import Color
 
 
 class Si1Page:
+    GREEN = Color.from_string("#70ff70")
+    YELLOW = Color.from_string("#ffff00")
+    RED = Color.from_string("#ff7070")
+
     def __init__(self, driver: webdriver.Remote) -> None:
         self.driver = driver
         self.handle = ""
@@ -56,3 +61,7 @@ class Si1Page:
 
     def get_event_date(self) -> str:
         return self.driver.find_element(By.ID, "si1.date").text
+
+    def get_background_color(self) -> Color:
+        elem = self.driver.find_element(By.ID, "si1.div")
+        return Color.from_string(elem.value_of_css_property("background-color"))

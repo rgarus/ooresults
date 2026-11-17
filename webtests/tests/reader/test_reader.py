@@ -21,13 +21,10 @@ import bz2
 import datetime
 import json
 import pathlib
-from collections.abc import Iterator
 
 import jsonschema
-import pytest
 
 import ooresults
-from webtests.pageobjects.entries import ImportEntryDialog
 from webtests.pageobjects.main_page import MainPage
 from webtests.pageobjects.webclient import WebSocketClient
 
@@ -42,63 +39,6 @@ with open(data_path) as file:
 EVENT_NAME = "Test for Entries"
 EVENT_DATE = "2023-01-23"
 KEY = "local"
-
-
-@pytest.fixture(scope="module")
-def delete_all(main_page: MainPage) -> None:
-    main_page.goto_events().delete_events()
-    main_page.goto_competitors().delete_competitors()
-    main_page.goto_clubs().delete_clubs()
-
-
-@pytest.fixture(scope="module")
-def event(main_page: MainPage, delete_all: None) -> Iterator[str]:
-    event_page = main_page.goto_events()
-    dialog = event_page.actions.add()
-    dialog.enter_values(name=EVENT_NAME, date=EVENT_DATE, key=KEY)
-    dialog.submit()
-    event_page.select_event(name=EVENT_NAME)
-    yield EVENT_NAME
-    main_page.goto_events().delete_events()
-
-
-@pytest.fixture(scope="module")
-def result_data(main_page: MainPage, event: str) -> None:
-    result_list_path = pathlib.Path(__file__).parent.parent / "data" / "ResultList.xml"
-
-    entry_page = main_page.goto_entries(event=event)
-    dialog = entry_page.actions.import_()
-    dialog.format().select(text=ImportEntryDialog.RESULT_LIST)
-    assert dialog.format().selected() == ImportEntryDialog.RESULT_LIST
-    dialog.import_file(path=result_list_path)
-
-
-@pytest.fixture()
-def client(main_page: MainPage, event: str) -> Iterator[WebSocketClient]:
-    websocket_client = WebSocketClient(key=KEY)
-    try:
-        websocket_client.start()
-        main_page.wait(timeout=10).until(lambda _: websocket_client.opened)
-
-        # send status
-        item = {
-            "entryType": "readerDisconnected",
-            "entryTime": datetime.datetime.now().astimezone().isoformat(),
-        }
-        jsonschema.validate(instance=item, schema=schema_cardreader_log)
-        websocket_client.send(bz2.compress(json.dumps(item).encode()))
-
-        # receive and check answer
-        result = websocket_client.receive(timeout=10)
-        assert len(result) == 3
-        assert result["readerStatus"] == "readerDisconnected"
-        assert result["event"] == event
-        assert result["eventId"] > 0
-        yield websocket_client
-    finally:
-        websocket_client.reconnect = False
-        if websocket_client.wsapp:
-            websocket_client.wsapp.close()
 
 
 def test_if_reader_client_is_not_connected_then_reader_status_is_offline(
