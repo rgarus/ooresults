@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+[Unreleased]
+------------
+
+Fixed
+^^^^^
+
+- The ooresults server is no longer started if the database cannot be opened or updated.
+
+
 [0.4.11] - 2026-11-17
 ---------------------
 

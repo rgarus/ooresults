@@ -160,6 +160,8 @@ def main() -> Optional[int]:
         exc_type, exc_value, _ = sys.exc_info()  # type: ignore
         logging.error(f"{exc_type.__module__}.{exc_type.__name__}: {exc_value}")
         print(f"{exc_type.__module__}.{exc_type.__name__}: {exc_value}")
+        print(f"Database {str(database)} could not be opened, server not started")
+        return 3
 
     if config.demo_reader:
         bottle.route("/demo")(ooresults.handler.demo_reader.get_update)
