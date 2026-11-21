@@ -30,45 +30,44 @@ VERSION = 16
 
 
 def update_tables(db: sqlite3.Connection) -> None:
-    db.execute("BEGIN EXCLUSIVE TRANSACTION")
+    try:
+        db.execute("BEGIN EXCLUSIVE TRANSACTION")
 
-    cur = db.execute("SELECT value FROM version")
-    c = cur.fetchone()
-    if not c:
-        raise RuntimeError("DB error - table version is empty")
+        cur = db.execute("SELECT value FROM version")
+        c = cur.fetchone()
+        if not c:
+            raise RuntimeError("DB error - table 'version' is empty")
 
-    else:
-        version = c["value"]
-        logging.info(f"DB version is {version}")
-
-        if version > VERSION:
-            raise RuntimeError(
-                f"DB version to high - version = {version}, but must be at most {VERSION}"
-            )
-
-        elif version < VERSION:
-            db.rollback()
+        else:
+            version = c["value"]
+            logging.info(f"DB version is {version}")
 
             if version <= 11:
                 raise RuntimeError(
-                    f"DB version to low - version = {version}, but must be at least 12"
+                    f"DB version too low - version = {version}, but must be at least 12"
                 )
-            if version <= 12:
-                logging.info("Update DB to version 13 ...")
-                update_013.update(db=db)
+            if version > VERSION:
+                raise RuntimeError(
+                    f"DB version too high - version = {version}, but must be at most {VERSION}"
+                )
+    finally:
+        db.rollback()
 
-            if version <= 13:
-                logging.info("Update DB to version 14 ...")
-                update_014.update(db=db)
+    if version < VERSION:
+        if version <= 12:
+            logging.info("Update DB to version 13 ...")
+            update_013.update(db=db)
 
-            if version <= 14:
-                logging.info("Update DB to version 15 ...")
-                update_015.update(db=db)
+        if version <= 13:
+            logging.info("Update DB to version 14 ...")
+            update_014.update(db=db)
 
-            if version <= 15:
-                logging.info("Update DB to version 16 ...")
-                update_016.update(db=db)
+        if version <= 14:
+            logging.info("Update DB to version 15 ...")
+            update_015.update(db=db)
 
-            logging.info(f"DB updated to version {VERSION}")
-        else:
-            db.rollback()
+        if version <= 15:
+            logging.info("Update DB to version 16 ...")
+            update_016.update(db=db)
+
+        logging.info(f"DB updated to version {VERSION}")

@@ -22,6 +22,7 @@ import bz2
 import datetime
 import json
 import pathlib
+import sys
 import tempfile
 import threading
 from collections.abc import Iterator
@@ -61,8 +62,9 @@ with open(data_path) as file:
 
 @pytest.fixture
 def db() -> Iterator[SqliteRepo]:
-    with tempfile.NamedTemporaryFile() as db_file:
-        model.db = SqliteRepo(db=db_file.name)
+    with tempfile.TemporaryDirectory() as temp_dir:
+        database = pathlib.Path(temp_dir) / "ooresults.sqlite"
+        model.db = SqliteRepo(db=str(database))
         yield model.db
         model.db.close()
 
@@ -154,6 +156,7 @@ class WebSocketServer(threading.Thread):
         self.barrier.wait()
 
     def close(self) -> None:
+        self.handler.executor.shutdown()
         if self.loop and self.server:
             self.server.close()
             future = asyncio.run_coroutine_threadsafe(
@@ -173,6 +176,7 @@ def websocket_server() -> Iterator[WebSocketServer]:
     websocket_server.close()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_live_server_event_key_not_found(
     event_id: int,
@@ -205,6 +209,7 @@ async def test_live_server_event_key_not_found(
             await client.recv()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_live_server_event_key_found_but_parse_error_in_result_list(
     event_id: int,
@@ -236,6 +241,7 @@ async def test_live_server_event_key_found_but_parse_error_in_result_list(
             await client.recv()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_live_server_event_key_found(
     event_id: int,
@@ -264,6 +270,7 @@ async def test_live_server_event_key_found(
         assert response == {"result": "ok"}
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_live_server_import_result_list_snapshot(
     event_id: int,
@@ -398,6 +405,7 @@ async def test_live_server_import_result_list_snapshot(
     ]
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_live_server_import_result_list_with_multiple_starts_snapshot(
     event_id: int,
@@ -555,6 +563,7 @@ async def test_live_server_import_result_list_with_multiple_starts_snapshot(
     ]
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.asyncio
 async def test_live_server_import_result_list_delta(
     event_id: int,

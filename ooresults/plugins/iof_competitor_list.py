@@ -17,6 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import datetime
 import pathlib
 
 from lxml import etree
@@ -50,6 +51,7 @@ def create_competitor_list(competitors: list[CompetitorType]) -> bytes:
 
     root = COMPETITORLIST(
         iofVersion="3.0",
+        createTime=datetime.datetime.now().isoformat(timespec="milliseconds"),
         creator="ooresults (https://pypi.org/project/ooresults)",
     )
 

@@ -64,14 +64,20 @@ def event(main_page: MainPage, delete_all: None) -> Iterator[str]:
 
 
 @pytest.fixture(scope="module")
-def result_data(main_page: MainPage, event: str) -> None:
-    result_list_path = pathlib.Path(__file__).parent.parent / "data" / "ResultList.xml"
-
+def entry_data(main_page: MainPage, event: str) -> None:
+    entry_list_path = pathlib.Path(__file__).parent.parent / "data" / "EntryList.xml"
     entry_page = main_page.goto_entries(event=event)
     dialog = entry_page.actions.import_()
-    dialog.format().select(text=ImportEntryDialog.RESULT_LIST)
-    assert dialog.format().selected() == ImportEntryDialog.RESULT_LIST
-    dialog.import_file(path=result_list_path)
+    dialog.format().select(text=ImportEntryDialog.ENTRY_LIST)
+    dialog.import_file(path=entry_list_path)
+
+
+@pytest.fixture(scope="module")
+def course_data(main_page: MainPage, event: str) -> None:
+    course_data_path = pathlib.Path(__file__).parent.parent / "data" / "CourseData.xml"
+    course_page = main_page.goto_courses(event=event)
+    dialog = course_page.actions.import_()
+    dialog.import_file(path=course_data_path)
 
 
 @pytest.fixture()
@@ -102,21 +108,6 @@ def client(main_page: MainPage, event: str) -> Iterator[WebSocketClient]:
             websocket_client.wsapp.close()
 
 
-def test_if_page_is_opened_then_event_name_and_event_date_are_displayed(
-    main_page: MainPage, event: str
-) -> None:
-    wait = main_page.wait(timeout=10)
-
-    si1_page = Si1Page(driver=main_page.driver)
-    si1_page.open()
-    try:
-        # check event name and date
-        wait.until(lambda _: si1_page.get_event_name() == EVENT_NAME)
-        wait.until(lambda _: si1_page.get_event_date() == EVENT_DATE)
-    finally:
-        si1_page.close()
-
-
 def test_if_reader_client_is_not_connected_then_reader_status_is_offline(
     main_page: MainPage, event: str
 ) -> None:
@@ -127,6 +118,9 @@ def test_if_reader_client_is_not_connected_then_reader_status_is_offline(
     try:
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Card reader offline")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
     finally:
         si1_page.close()
 
@@ -166,6 +160,9 @@ def test_if_reader_client_is_stopped_then_reader_status_is_offline(
             client.wsapp.close()
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Card reader offline")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
 
     finally:
         si1_page.close()
@@ -199,6 +196,9 @@ def test_if_a_si_reader_unit_is_not_found_then_reader_status_is_disconnected(
 
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Card reader disconnected")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
     finally:
         si1_page.close()
 
@@ -228,6 +228,9 @@ def test_if_a_si_reader_unit_is_found_then_reader_status_is_connected(
 
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Card reader connected")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
     finally:
         si1_page.close()
 
@@ -259,6 +262,9 @@ def test_if_a_si_card_is_inserted_then_reader_status_is_card_reading(
 
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Reading card 7509749 ...")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
     finally:
         si1_page.close()
 
@@ -288,12 +294,19 @@ def test_if_a_si_card_is_removed_then_reader_status_is_connected(
 
         # check status displayed at si reader page
         wait.until(lambda _: si1_page.get_message() == "Card reader connected")
+        # check event name and date
+        assert si1_page.get_event_name() == EVENT_NAME
+        assert si1_page.get_event_date() == EVENT_DATE
     finally:
         si1_page.close()
 
 
-def test_if_a_si_card_is_read_then_result_is_displayed(
-    client: WebSocketClient, main_page: MainPage, event: str
+def test_if_a_si_card_is_read_but_not_assigned_to_an_entry_then_an_unassigned_result_is_displayed(
+    client: WebSocketClient,
+    main_page: MainPage,
+    event: str,
+    entry_data: None,
+    course_data: None,
 ) -> None:
     wait = main_page.wait(timeout=10)
 
@@ -303,8 +316,18 @@ def test_if_a_si_card_is_read_then_result_is_displayed(
         # send status
         item = {
             "entryType": "cardRead",
-            "entryTime": datetime.datetime.now().astimezone().isoformat(),
-            "controlCard": "7509749",
+            "entryTime": "2023-01-15T10:26:03.624810+01:00",
+            "cardType": "SI10",
+            "controlCard": "7000000",
+            "startTime": "2023-01-15T10:10:00+01:00",
+            "finishTime": "2023-01-15T10:24:39+01:00",
+            "checkTime": "2023-01-15T10:00:00+01:00",
+            "punches": [
+                {"controlCode": "121", "punchTime": "2023-01-15T10:12:09+01:00"},
+                {"controlCode": "124", "punchTime": "2023-01-15T10:15:25+01:00"},
+                {"controlCode": "122", "punchTime": "2023-01-15T10:18:14+01:00"},
+                {"controlCode": "123", "punchTime": "2023-01-15T10:22:00+01:00"},
+            ],
         }
         jsonschema.validate(instance=item, schema=schema_cardreader_log)
         client.send(bz2.compress(json.dumps(item).encode()))
@@ -313,7 +336,7 @@ def test_if_a_si_card_is_read_then_result_is_displayed(
         result = client.receive(timeout=10)
         assert len(result) == 12
         assert result["readerStatus"] == "cardRead"
-        assert result["controlCard"] == "7509749"
+        assert result["controlCard"] == "7000000"
         assert result["event"] == EVENT_NAME
         assert result["eventId"] > 0
         assert result["entryTime"] is not None
@@ -321,13 +344,128 @@ def test_if_a_si_card_is_read_then_result_is_displayed(
         assert result["lastName"] is None
         assert result["club"] is None
         assert result["class"] is None
-        assert result["status"] == "INACTIVE"
+        assert result["status"] == "FINISHED"
         assert result["time"] is None
         assert result["error"] == "Control card unknown"
 
         # check result displayed at si reader page
-        wait.until(lambda _: si1_page.get_line_1() == "7509749")
+        wait.until(lambda _: si1_page.get_line_1() == "7000000")
         wait.until(lambda _: si1_page.get_line_2() == "Control card unknown")
         wait.until(lambda _: si1_page.get_line_3() == "Bitte im WKZ melden")
+        assert si1_page.get_background_color() == si1_page.YELLOW
+    finally:
+        si1_page.close()
+
+
+def test_if_a_si_card_is_read_and_status_is_ok_then_result_is_displayed_as_ok(
+    client: WebSocketClient,
+    main_page: MainPage,
+    event: str,
+    entry_data: None,
+    course_data: None,
+) -> None:
+    wait = main_page.wait(timeout=10)
+
+    si1_page = Si1Page(driver=main_page.driver)
+    si1_page.open()
+    try:
+        # send status
+        item = {
+            "entryType": "cardRead",
+            "entryTime": "2023-01-15T10:27:03.624810+01:00",
+            "cardType": "SI10",
+            "controlCard": "7379879",
+            "startTime": "2023-01-15T10:10:00+01:00",
+            "finishTime": "2023-01-15T10:24:39+01:00",
+            "checkTime": "2023-01-15T10:00:00+01:00",
+            "punches": [
+                {"controlCode": "121", "punchTime": "2023-01-15T10:12:09+01:00"},
+                {"controlCode": "124", "punchTime": "2023-01-15T10:15:25+01:00"},
+                {"controlCode": "122", "punchTime": "2023-01-15T10:18:14+01:00"},
+                {"controlCode": "123", "punchTime": "2023-01-15T10:22:00+01:00"},
+            ],
+        }
+        jsonschema.validate(instance=item, schema=schema_cardreader_log)
+        client.send(bz2.compress(json.dumps(item).encode()))
+
+        # receive and check answer
+        result = client.receive(timeout=10)
+        assert len(result) == 13
+        assert result["readerStatus"] == "cardRead"
+        assert result["controlCard"] == "7379879"
+        assert result["event"] == EVENT_NAME
+        assert result["eventId"] > 0
+        assert result["entryTime"] is not None
+        assert result["firstName"] == "Annalena"
+        assert result["lastName"] == "Baerbock"
+        assert result["club"] == "OC Grün"
+        assert result["class"] == "Bahn A - Frauen"
+        assert result["status"] == "OK"
+        assert result["time"] == 879
+        assert result["missingControls"] == []
+        assert result["error"] is None
+
+        # check result displayed at si reader page
+        wait.until(lambda _: si1_page.get_line_1() == "Baerbock, Annalena")
+        wait.until(lambda _: si1_page.get_line_2() == "7379879, Bahn A - Frauen")
+        wait.until(lambda _: si1_page.get_line_3() == "OK, 14:39 min")
+        assert si1_page.get_background_color() == si1_page.GREEN
+    finally:
+        si1_page.close()
+
+
+def test_if_a_si_card_is_read_and_status_is_not_ok_then_result_is_displayed_as_not_ok(
+    client: WebSocketClient,
+    main_page: MainPage,
+    event: str,
+    entry_data: None,
+    course_data: None,
+) -> None:
+    wait = main_page.wait(timeout=10)
+
+    si1_page = Si1Page(driver=main_page.driver)
+    si1_page.open()
+    try:
+        # send status
+        item = {
+            "entryType": "cardRead",
+            "entryTime": "2023-01-15T10:28:03.624810+01:00",
+            "cardType": "SI10",
+            "controlCard": "7509749",
+            "startTime": "2023-01-15T10:12:00+01:00",
+            "finishTime": "2023-01-15T10:26:04+01:00",
+            "checkTime": "2023-01-15T10:08:30+01:00",
+            "punches": [
+                {"controlCode": "121", "punchTime": "2023-01-15T10:14:09+01:00"},
+                {"controlCode": "124", "punchTime": "2023-01-15T10:19:00+01:00"},
+                {"controlCode": "123", "punchTime": "2023-01-15T10:22:01+01:00"},
+            ],
+        }
+
+        jsonschema.validate(instance=item, schema=schema_cardreader_log)
+        client.send(bz2.compress(json.dumps(item).encode()))
+
+        # receive and check answer
+        result = client.receive(timeout=10)
+        assert len(result) == 13
+        assert result["readerStatus"] == "cardRead"
+        assert result["controlCard"] == "7509749"
+        assert result["event"] == EVENT_NAME
+        assert result["eventId"] > 0
+        assert result["entryTime"] is not None
+        assert result["firstName"] == "Robert"
+        assert result["lastName"] == "Habeck"
+        assert result["club"] == "OC Grün"
+        assert result["class"] == "Bahn A - Männer"
+        assert result["status"] == "MISSING_PUNCH"
+        assert result["time"] == 844
+        assert result["missingControls"] == ["122"]
+        assert result["error"] is None
+
+        # check result displayed at si reader page
+        wait.until(lambda _: si1_page.get_line_1() == "Habeck, Robert")
+        wait.until(lambda _: si1_page.get_line_2() == "7509749, Bahn A - Männer")
+        wait.until(lambda _: si1_page.get_line_3() == "MP")
+        assert si1_page.get_background_color() == si1_page.RED
     finally:
         si1_page.close()

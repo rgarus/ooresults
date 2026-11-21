@@ -38,9 +38,7 @@ from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SplitTime
 from ooresults.otypes.start_type import PersonRaceStart
-from ooresults.plugins import iof_result_list
 from ooresults.plugins.import_types.entry_dict import EntryDict
-from ooresults.plugins.iof_result_list import ResultListStatus
 from ooresults.repo import repo
 from ooresults.repo.repo import TransactionMode
 from ooresults.utils.rental_cards import is_rental_card
@@ -52,6 +50,14 @@ def import_entries(
     event_key: Optional[str] = None,
     clear_entries: bool = False,
 ) -> None:
+    """Import entries into database for the event given by event_id.
+
+    If event_key is not None and not appropriate for the event,
+    an EventNotFoundError will be raised.
+
+    If clear_entries is True, the all existing entries will be deleted before importing
+    the new entries.
+    """
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
         # check if the event still exists
         event = model.db.get_event(id=event_id)
@@ -205,30 +211,6 @@ def import_entries(
         if list_of_entries:
             model.db.add_many_entries(list_of_entries=list_of_entries)
 
-    cached_result.clear_cache(event_id=event_id)
-
-
-def import_iof_result_list(event_key: str, content: bytes) -> None:
-    #
-    # 1. Find event corresponding to event_key
-    # 2. Decode IOF xml data
-    # 3. Import entries
-    #
-    with model.db.transaction(mode=TransactionMode.IMMEDIATE):
-        for e in model.db.get_events():
-            if event_key != "" and e.key == event_key:
-                event_id = e.id
-                break
-        else:
-            raise repo.EventNotFoundError(f'Event for key "{event_key}" not found')
-
-    _, entries, status = iof_result_list.parse_result_list(content)
-    import_entries(
-        event_id=event_id,
-        entries=entries,
-        event_key=event_key,
-        clear_entries=status != ResultListStatus.DELTA,
-    )
     cached_result.clear_cache(event_id=event_id)
 
 

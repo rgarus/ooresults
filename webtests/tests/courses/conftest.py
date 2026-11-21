@@ -51,6 +51,7 @@ def course_page(main_page: MainPage, event: str) -> CoursePage:
 
 @pytest.fixture
 def delete_courses(main_page: MainPage, event: str) -> None:
+    main_page.goto_classes(event=event).delete_classes()
     main_page.goto_courses(event=event).delete_courses()
 
 

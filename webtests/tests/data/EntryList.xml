@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<EntryList xmlns="http://www.orienteering.org/datastandard/3.0" iofVersion="3.0" creator="ooresults (https://pypi.org/project/ooresults)">
+  <Event>
+    <Name>1. O-Cup 2023 (Ostpark)</Name>
+    <StartTime>
+      <Date>2023-01-15</Date>
+    </StartTime>
+  </Event>
+  <PersonEntry>
+    <Person sex="F">
+      <Name>
+        <Family>Baerbock</Family>
+        <Given>Annalena</Given>
+      </Name>
+      <BirthDate>1980-01-01</BirthDate>
+    </Person>
+    <Organisation>
+      <Name>OC Grün</Name>
+    </Organisation>
+    <ControlCard punchingSystem="SI">7379879</ControlCard>
+    <Class>
+      <Name>Bahn A - Frauen</Name>
+    </Class>
+  </PersonEntry>
+  <PersonEntry>
+    <Person sex="M">
+      <Name>
+        <Family>Buschmann</Family>
+        <Given>Marco</Given>
+      </Name>
+      <BirthDate>1977-01-01</BirthDate>
+    </Person>
+    <Organisation>
+      <Name>OC Gelb</Name>
+    </Organisation>
+    <ControlCard punchingSystem="SI">7076815</ControlCard>
+    <Class>
+      <Name>Bahn A - Männer</Name>
+    </Class>
+  </PersonEntry>
+  <PersonEntry>
+    <Person sex="F">
+      <Name>
+        <Family>Faeser</Family>
+        <Given>Nancy</Given>
+      </Name>
+      <BirthDate>1970-01-01</BirthDate>
+    </Person>
+    <Organisation>
+      <Name>OC Rot</Name>
+    </Organisation>
+    <ControlCard punchingSystem="SI">7040504</ControlCard>
+    <Class>
+      <Name>Bahn A - Frauen</Name>
+    </Class>
+  </PersonEntry>
+  <PersonEntry>
+    <Person sex="M">
+      <Name>
+        <Family>Habeck</Family>
+        <Given>Robert</Given>
+      </Name>
+      <BirthDate>1969-01-01</BirthDate>
+    </Person>
+    <Organisation>
+      <Name>OC Grün</Name>
+    </Organisation>
+    <ControlCard punchingSystem="SI">7509749</ControlCard>
+    <Class>
+      <Name>Bahn A - Männer</Name>
+    </Class>
+  </PersonEntry>
+  <PersonEntry>
+    <Person sex="M">
+      <Name>
+        <Family>Lindner</Family>
+        <Given>Christian</Given>
+      </Name>
+      <BirthDate>1979-01-01</BirthDate>
+    </Person>
+    <Organisation>
+      <Name>OC Gelb</Name>
+    </Organisation>
+    <ControlCard punchingSystem="SI">7754987</ControlCard>
+    <Class>
+      <Name>Bahn A - Männer</Name>
+    </Class>
+  </PersonEntry>
+  <PersonEntry>
+    <Person sex="M">
+      <Name>
+        <Family>Scholz</Family>
+        <Given>Olaf</Given>
+      </Name>
+      <BirthDate>1958-01-01</BirthDate>
+    </Person>
+    <Organisation>
+      <Name>OC Rot</Name>
+    </Organisation>
+    <ControlCard punchingSystem="SI">7579050</ControlCard>
+    <Class>
+      <Name>Bahn A - Männer</Name>
+    </Class>
+  </PersonEntry>
+</EntryList>

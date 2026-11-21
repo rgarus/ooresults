@@ -22,6 +22,7 @@ from typing import Optional
 from ooresults import model
 from ooresults.model import cached_result
 from ooresults.otypes.class_params import ClassParams
+from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.course_type import CourseType
 from ooresults.plugins.import_types.course_dict import ClassCourseAssignmentDict
 from ooresults.plugins.import_types.course_dict import CourseDict
@@ -119,6 +120,30 @@ def import_courses(
                             course_id=None,
                             params=ClassParams(),
                         )
+
+        # recalculate results
+        existing_classes = model.db.get_classes(event_id=event_id)
+        existing_courses = model.db.get_courses(event_id=event_id)
+        d_classes: dict[int, ClassInfoType] = {c.id: c for c in existing_classes}
+        d_courses: dict[int, list[str]] = {c.id: c.controls for c in existing_courses}
+
+        entries = model.db.get_entries(event_id=event_id)
+        for entry in entries:
+            if (class_id := entry.class_id) is not None:
+                if (course_id := d_classes[class_id].course_id) is not None:
+                    entry.result.compute_result(
+                        controls=d_courses[course_id],
+                        class_params=d_classes[class_id].params,
+                        start_time=entry.start.start_time,
+                        year=entry.year,
+                        sex=entry.sex,
+                    )
+                    model.db.update_entry_result(
+                        id=entry.id,
+                        chip=entry.chip,
+                        result=entry.result,
+                        start=entry.start,
+                    )
 
     cached_result.clear_cache(event_id=event_id)
 

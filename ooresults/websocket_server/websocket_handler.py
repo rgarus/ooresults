@@ -29,6 +29,7 @@ import time
 from collections import defaultdict
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any
 from typing import Optional
 from typing import ParamSpec
 from typing import TypeVar
@@ -43,10 +44,16 @@ from ooresults.otypes import result_type
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import ResultStatus
 from ooresults.otypes.result_type import SpStatus
+from ooresults.plugins import iof_result_list
+from ooresults.plugins.iof_result_list import ResultListStatus
 from ooresults.repo.repo import EventNotFoundError
 from ooresults.utils import render
 from ooresults.websocket_server import streaming_status
 from ooresults.websocket_server.credentials import credentials
+
+
+class FileTooLargeError(Exception):
+    pass
 
 
 class MessageError(Exception):
@@ -151,12 +158,12 @@ class WebSocketHandler:
                 logging.exception(e)
 
     async def update_event(self, event: EventType) -> None:
-        for conn, value in self.connections.items():
+        for conn, value in list(self.connections.items()):
             if event.id == value.event_id:
                 await self.send(conn=conn, event=copy.deepcopy(event), message={})
 
     async def send_to_all(self, event: EventType, message: dict) -> None:
-        for conn, value in self.connections.items():
+        for conn, value in list(self.connections.items()):
             if event.id == value.event_id:
                 await self.send(conn=conn, event=copy.deepcopy(event), message=message)
 
@@ -201,6 +208,70 @@ class WebSocketHandler:
         except websockets.exceptions.ConnectionClosed:
             pass
 
+    def process_import_message(self, event_key: str, message: bytes) -> None:
+        """Import an IOF 3.0 result list (optionally bz2 compressed).
+
+        1. Find the event corresponding to given event_key.
+           If no such event is found, an ooresults.repo.EventNotFoundError is raised.
+        2. The message can be bz2 compressed or uncompressed.
+           If the decompressed data is larger than 10 MB a FileToLargeError is raised.
+        3. Parse the IOF result list.
+        4. Import entries.
+        """
+        event = model.events.get_event_by_event_key(event_key=event_key)
+
+        try:
+            decompressor = bz2.BZ2Decompressor()
+            data = decompressor.decompress(data=message, max_length=10_000_000)
+            if not decompressor.eof:
+                raise FileTooLargeError("Decompressed result list is larger than 10 MB")
+        except OSError:
+            data = message
+
+        _, entries, status = iof_result_list.parse_result_list(content=data)
+        model.entries.import_entries(
+            event_id=event.id,
+            entries=entries,
+            event_key=event_key,
+            clear_entries=status != ResultListStatus.DELTA,
+        )
+        model.entries.cached_result.clear_cache(event_id=event.id)
+
+    def process_cardreader_message(
+        self, message: bytes, event_key: str
+    ) -> tuple[str, EventType, dict[str, Any]]:
+        event = model.events.get_event_by_event_key(event_key=event_key)
+
+        decompressor = bz2.BZ2Decompressor()
+        try:
+            d = decompressor.decompress(data=message, max_length=100_000)
+            data = d.decode()
+        except OSError:
+            raise RuntimeError("Data not bz2 compressed")
+        except UnicodeDecodeError:
+            raise RuntimeError("Data not utf-8 encoded")
+        if not decompressor.eof:
+            raise RuntimeError("Data too large")
+
+        try:
+            item = json.loads(data)
+        except Exception:
+            raise RuntimeError("Data not json deserialisable")
+
+        try:
+            item = model.results.parse_cardreader_log(item=item)
+        except Exception as e:
+            raise RuntimeError(str(e))
+
+        try:
+            return model.results.store_cardreader_result(
+                event_id=event.id,
+                event_key=event.key,
+                item=item,
+            )
+        except EventNotFoundError as e:
+            raise RuntimeError(str(e))
+
     async def handler(self, websocket: ServerConnection) -> None:
         if websocket.request is None:
             await websocket.close(code=CloseCode.ABNORMAL_CLOSURE)
@@ -217,15 +288,10 @@ class WebSocketHandler:
                         t1 = time.time()
                         if isinstance(message, str):
                             raise MessageError(code=CloseCode.INVALID_DATA)
-                        try:
-                            data = bz2.decompress(message)
-                        except Exception:
-                            data = message
-
                         await asyncio.to_thread(
-                            model.entries.import_iof_result_list,
+                            self.process_import_message,
                             event_key=event_key,
-                            content=data,
+                            message=message,
                         )
                         await websocket.send(json.dumps({"result": "ok"}))
                         t2 = time.time()
@@ -237,6 +303,8 @@ class WebSocketHandler:
                 pass
             except EventNotFoundError:
                 await websocket.send(json.dumps({"result": "eventNotFound"}))
+            except FileTooLargeError:
+                await websocket.send(json.dumps({"result": "fileTooLarge"}))
             except Exception as e:
                 logging.exception(e)
                 await websocket.send(json.dumps({"result": "error"}))
@@ -258,7 +326,7 @@ class WebSocketHandler:
                         item = json.loads(message)
                         #
                         # item = {
-                        #     'key': 4711,
+                        #     'key': '4711',
                         #     'code': ['Check', 'Start', '', '', '', '', '', '', '', '', 'Finish'],
                         #     'time': ['10:11:12', '', '', '', '', '', '', '', '', '', '10:23:23'],
                         #     'card': '1111',
@@ -272,17 +340,16 @@ class WebSocketHandler:
                             result=None,
                         )
 
-                        # add the event date to the times entered on the webpage
-                        events = await asyncio.to_thread(model.events.get_events)
-                        date_of_event = datetime.date.today()
-                        for e in events:
-                            if e.key == item.get("key", None):
-                                date_of_event = e.date
-                                break
+                        # find event and add the event date to the times entered
+                        # on the webpage
+                        event_key = item["key"]
+                        act_event = await asyncio.to_thread(
+                            model.events.get_event_by_event_key, event_key=event_key
+                        )
 
                         def parse_time(value: str) -> datetime.datetime:
                             return datetime.datetime.combine(
-                                date=date_of_event,
+                                date=act_event.date,
                                 time=datetime.datetime.strptime(
                                     value, "%H:%M:%S"
                                 ).time(),
@@ -320,6 +387,7 @@ class WebSocketHandler:
                         try:
                             xxx = await asyncio.to_thread(
                                 model.results.store_cardreader_result,
+                                event_id=act_event.id,
                                 event_key=item["key"],
                                 item=d,
                             )
@@ -365,33 +433,15 @@ class WebSocketHandler:
             try:
                 print(f">>>>>> cardreader, key: {event_key}, {addr}")
                 async for message in websocket:
-                    try:
-                        if isinstance(message, str):
-                            raise MessageError(code=CloseCode.INVALID_DATA)
-                        data = bz2.decompress(message).decode()
-                    except Exception:
-                        raise RuntimeError("Data not bz2 encoded")
+                    if isinstance(message, str):
+                        raise MessageError(code=CloseCode.INVALID_DATA)
 
-                    try:
-                        item = json.loads(data)
-                    except Exception:
-                        raise RuntimeError("Data not json deserialisable")
-
-                    try:
-                        item = model.results.parse_cardreader_log(item=item)
-                    except Exception as e:
-                        raise RuntimeError(str(e))
-
-                    try:
-                        xxx = await asyncio.to_thread(
-                            model.results.store_cardreader_result,
-                            event_key=event_key,
-                            item=item,
-                        )
-                        status, event, res = xxx
-                    except EventNotFoundError as e:
-                        raise RuntimeError(str(e))
-
+                    xxx = await asyncio.to_thread(
+                        self.process_cardreader_message,
+                        message=message,
+                        event_key=event_key,
+                    )
+                    status, event, res = xxx
                     self.cardreader_status[event.id] = status
 
                     if "entryTime" in res:

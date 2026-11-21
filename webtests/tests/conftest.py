@@ -17,6 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import pathlib
 import subprocess
 import sys
 import tempfile
@@ -46,10 +47,39 @@ def ooresults_server() -> Iterator[subprocess.Popen]:
         p.kill()
         p.wait(timeout=10)
 
+        # In Windows, the database file continues to be accessed for a short time
+        # after the ooresults server process has terminated. This prevents the
+        # temporary directory from being deleted. We wait until the database file
+        # can be deleted.
+        for i in range(10):
+            try:
+                (pathlib.Path(d_name) / "ooresults.sqlite").unlink()
+                break
+            except OSError:
+                time.sleep(1)
+
 
 @pytest.fixture(scope="session")
-def driver() -> Iterator[webdriver.Remote]:
-    driver: webdriver.Remote = webdriver.Firefox()
+def download_dir() -> Iterator[pathlib.Path]:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        yield pathlib.Path(temp_dir)
+
+
+@pytest.fixture(scope="session")
+def driver(download_dir: pathlib.Path) -> Iterator[webdriver.Remote]:
+    options = webdriver.FirefoxOptions()
+    options.set_preference("browser.download.folderList", 2)
+    options.set_preference("browser.helperApps.alwaysAsk.force", False)
+    options.set_preference("browser.download.alwaysOpenPanel", False)
+    options.set_preference("browser.download.manager.showWhenStarting", False)
+    options.set_preference("browser.download.manager.showAlertOnComplete", False)
+    options.set_preference("browser.download.dir", str(download_dir))
+    options.set_preference("pdfjs.disabled", True)
+    options.set_preference(
+        "browser.helperApps.neverAsk.saveToDisk",
+        "application/pdf,application/xml,text/csv",
+    )
+    driver: webdriver.Remote = webdriver.Firefox(options=options)
     yield driver
     driver.quit()
 

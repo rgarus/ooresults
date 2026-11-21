@@ -17,15 +17,38 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import datetime
+from datetime import date
+from datetime import datetime
+from pathlib import Path
 
 import pytest
+from lxml import etree
 
+import ooresults
 from ooresults.otypes.class_params import ClassParams
 from ooresults.otypes.class_type import ClassInfoType
 from ooresults.otypes.course_type import CourseType
 from ooresults.otypes.event_type import EventType
 from ooresults.plugins import iof_course_data
+
+
+schema_file = Path(ooresults.__file__).parent / "schema" / "IOF.xsd"
+xml_schema = etree.XMLSchema(etree.parse(str(schema_file)))
+
+
+def check_document(document: bytes, content: str, t1: datetime, t2: datetime) -> None:
+    assert xml_schema.validate(etree.XML(document))
+    root_1 = etree.XML(document)
+    root_2 = etree.XML(content.encode(encoding="utf8"))
+
+    create_time = root_1.attrib.pop("createTime", None)
+    t1 = t1.replace(microsecond=t1.microsecond // 1000 * 1000)
+    t2 = t2.replace(microsecond=t2.microsecond // 1000 * 1000)
+    assert create_time is not None and t1 <= datetime.fromisoformat(create_time) <= t2
+
+    text_1 = etree.tostring(root_1, encoding="UTF-8", xml_declaration=True)
+    text_2 = etree.tostring(root_2, encoding="UTF-8", xml_declaration=True)
+    assert text_1 == text_2
 
 
 def test_import_course_data() -> None:
@@ -91,7 +114,7 @@ def test_import_course_data() -> None:
     )
     assert event == {
         "name": "1. O-Cup 2020",
-        "date": datetime.date(year=2020, month=2, day=9),
+        "date": date(year=2020, month=2, day=9),
     }
     assert courses == [
         {
@@ -169,7 +192,7 @@ def test_import_course_data_with_class_assignment() -> None:
     )
     assert event == {
         "name": "1. O-Cup 2020",
-        "date": datetime.date(year=2020, month=2, day=9),
+        "date": date(year=2020, month=2, day=9),
     }
     assert courses == [
         {
@@ -357,11 +380,12 @@ def test_export_course_data() -> None:
   </RaceCourseData>
 </CourseData>
 """
+    t1 = datetime.now()
     document = iof_course_data.create_course_data(
         EventType(
             id=1,
             name="1. O-Cup 2020",
-            date=datetime.date(year=2020, month=2, day=9),
+            date=date(year=2020, month=2, day=9),
             key=None,
             publish=False,
             series=None,
@@ -387,7 +411,8 @@ def test_export_course_data() -> None:
         ],
         [],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 def test_export_course_data_with_class_assignment() -> None:
@@ -444,11 +469,12 @@ def test_export_course_data_with_class_assignment() -> None:
   </RaceCourseData>
 </CourseData>
 """
+    t1 = datetime.now()
     document = iof_course_data.create_course_data(
         EventType(
             id=1,
             name="1. O-Cup 2020",
-            date=datetime.date(year=2020, month=2, day=9),
+            date=date(year=2020, month=2, day=9),
             key=None,
             publish=False,
             series=None,
@@ -508,4 +534,5 @@ def test_export_course_data_with_class_assignment() -> None:
             ),
         ],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)

@@ -19,6 +19,7 @@
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.color import Color
 
 from webtests.pageobjects.table import Table
 
@@ -39,5 +40,14 @@ class ReaderPage:
 
 
 class ReaderTable(Table):
+    GREEN = Color.from_string("#70ff70")
+    YELLOW = Color.from_string("#ffff00")
+    RED = Color.from_string("#ff7070")
+
     def __init__(self, driver: webdriver.Remote) -> None:
         super().__init__(driver=driver, xpath="//table[@id='read.messages']")
+
+    def background_color_of_row(self, i: int) -> Color:
+        rows = self._table().find_elements(By.XPATH, ".//tbody//tr")
+        rows = [row for row in rows if row.is_displayed()]
+        return Color.from_string(rows[i - 1].value_of_css_property("background-color"))

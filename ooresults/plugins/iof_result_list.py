@@ -17,6 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import datetime
 import pathlib
 from datetime import timedelta
 from enum import Enum
@@ -104,6 +105,7 @@ def create_result_list(
 
     root = RESULTLIST(
         iofVersion="3.0",
+        createTime=datetime.datetime.now().isoformat(timespec="milliseconds"),
         creator="ooresults (https://pypi.org/project/ooresults)",
     )
     if status is not None:

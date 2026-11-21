@@ -171,32 +171,72 @@
                 }
             }
 
+            function fullscreen_button() {
+                const buttonP = document.createElement('p');
+                buttonP.style.textAlign = 'right';
+                buttonP.style.margin = '10px';
+
+                const button = document.createElement('button');
+                button.addEventListener('click', openFullscreen);
+                button.textContent = window.wakeStatus;
+
+                buttonP.appendChild(button);
+                return buttonP;
+            }
+
             function showMessage(text, color) {
                 newResultReceived = true;
-                document.getElementById('page').innerHTML =
-                    '<p style="text-align: right; margin: 10px"><button onclick="openFullscreen();">' + window.wakeStatus + '</button></p>' +
-                    '<div style="padding-left: 4%;">' +
-                    '<table style="text-align: left">' +
-                    '<tr>' +
-                    '<th style="padding-right: 10px">Event name:</th>' +
-                    '<td id="si1.name">' + eventName + '</td>' +
-                    '</tr>' +
-                    '<tr>' +
-                    '<th style="padding-right: 10px">Event date:</th>' +
-                    '<td id="si1.date">' + eventDate + '</td>' +
-                    '</tr>' +
-                    '</table>' +
-                    '</div>' +
-                    '<p id="si1.message" class="s2" style="padding-left: 4%; color: ' + color + '">' + text + '</p>';
+
+                // table with event name and event date
+                const container = document.createElement('div');
+                container.style.paddingLeft = '4%';
+
+                const table = document.createElement('table');
+                table.style.textAlign = 'left';
+
+                function addRow(label, id, value) {
+                    const tr = document.createElement('tr');
+
+                    const th = document.createElement('th');
+                    th.style.paddingRight = '10px';
+                    th.textContent = label;
+                    const td = document.createElement('td');
+                    td.id = id;
+                    td.textContent = value;
+
+                    tr.appendChild(th);
+                    tr.appendChild(td);
+                    table.appendChild(tr);
+                }
+
+                addRow('Event name:', 'si1.name', eventName);
+                addRow('Event date:', 'si1.date', eventDate);
+                container.appendChild(table);
+
+                // message
+                const message = document.createElement('p');
+                message.id = 'si1.message';
+                message.className = 's2';
+                message.style.paddingLeft = '4%';
+                message.style.color = color;
+                message.textContent = text;
+
+                const page = document.getElementById('page');
+                page.replaceChildren(fullscreen_button(), container, message);
             }
 
             function showResult(resultData) {
-                if (newResultReceived) {
-                    newResultReceived = false;
-                    document.getElementById('page').innerHTML =
-                        '<p style="text-align: right; margin: 10px"><button onclick="openFullscreen();">' + window.wakeStatus + '</button></p>' +
-                        '<div style="padding-left: 4%; padding-bottom: 24px">' + resultData + '</div>';
+                if (!newResultReceived) {
+                    return;
                 }
+                newResultReceived = false;
+
+                const container = document.createElement('div');
+                container.style.paddingLeft = '4%';
+                container.style.paddingBottom = '24px';
+                container.innerHTML = resultData;
+
+                document.getElementById('page').replaceChildren(fullscreen_button(), container);
             }
 
             function closeErrorDialog() {

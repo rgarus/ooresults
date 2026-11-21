@@ -17,13 +17,37 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import datetime
+from datetime import date
+from datetime import datetime
+from pathlib import Path
 
+from lxml import etree
+
+import ooresults
 from ooresults.otypes.competitor_type import Sex
 from ooresults.otypes.entry_type import EntryType
 from ooresults.otypes.event_type import EventType
 from ooresults.otypes.result_type import PersonRaceResult
 from ooresults.plugins import iof_entry_list
+
+
+schema_file = Path(ooresults.__file__).parent / "schema" / "IOF.xsd"
+xml_schema = etree.XMLSchema(etree.parse(str(schema_file)))
+
+
+def check_document(document: bytes, content: str, t1: datetime, t2: datetime) -> None:
+    assert xml_schema.validate(etree.XML(document))
+    root_1 = etree.XML(document)
+    root_2 = etree.XML(content.encode(encoding="utf8"))
+
+    create_time = root_1.attrib.pop("createTime", None)
+    t1 = t1.replace(microsecond=t1.microsecond // 1000 * 1000)
+    t2 = t2.replace(microsecond=t2.microsecond // 1000 * 1000)
+    assert create_time is not None and t1 <= datetime.fromisoformat(create_time) <= t2
+
+    text_1 = etree.tostring(root_1, encoding="UTF-8", xml_declaration=True)
+    text_2 = etree.tostring(root_2, encoding="UTF-8", xml_declaration=True)
+    assert text_1 == text_2
 
 
 def test_import_entry_list_with_one_entry() -> None:
@@ -57,7 +81,7 @@ def test_import_entry_list_with_one_entry() -> None:
     event, entries = iof_entry_list.parse_entry_list(bytes(content, encoding="utf-8"))
     assert event == {
         "name": "1. O-Cup 2020",
-        "date": datetime.date(year=2020, month=2, day=9),
+        "date": date(year=2020, month=2, day=9),
     }
     assert entries == [
         {
@@ -101,11 +125,12 @@ def test_export_entry_list_with_one_entry() -> None:
   </PersonEntry>
 </EntryList>
 """
+    t1 = datetime.now()
     document = iof_entry_list.create_entry_list(
         event=EventType(
             id=1,
             name="1. O-Cup 2020",
-            date=datetime.date(year=2020, month=2, day=9),
+            date=date(year=2020, month=2, day=9),
             key=None,
             publish=False,
             series=None,
@@ -129,7 +154,8 @@ def test_export_entry_list_with_one_entry() -> None:
             ),
         ],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 def test_import_entry_list_without_person_entries() -> None:
@@ -147,7 +173,7 @@ def test_import_entry_list_without_person_entries() -> None:
     event, entries = iof_entry_list.parse_entry_list(bytes(content, encoding="utf-8"))
     assert event == {
         "name": "1. O-Cup 2020",
-        "date": datetime.date(year=2020, month=2, day=9),
+        "date": date(year=2020, month=2, day=9),
     }
     assert entries == []
 
@@ -164,11 +190,12 @@ def test_export_entry_list_without_person_entries() -> None:
   </Event>
 </EntryList>
 """
+    t1 = datetime.now()
     document = iof_entry_list.create_entry_list(
         EventType(
             id=1,
             name="1. O-Cup 2020",
-            date=datetime.date(year=2020, month=2, day=9),
+            date=date(year=2020, month=2, day=9),
             key=None,
             publish=False,
             series=None,
@@ -176,7 +203,8 @@ def test_export_entry_list_without_person_entries() -> None:
         ),
         [],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)
 
 
 def test_import_entry_list_with_several_entries() -> None:
@@ -228,7 +256,7 @@ def test_import_entry_list_with_several_entries() -> None:
     event, entries = iof_entry_list.parse_entry_list(bytes(content, encoding="utf-8"))
     assert event == {
         "name": "1. O-Cup 2020",
-        "date": datetime.date(year=2020, month=2, day=9),
+        "date": date(year=2020, month=2, day=9),
     }
     assert entries == [
         {
@@ -310,11 +338,12 @@ def test_export_entry_list_with_several_entries() -> None:
   </PersonEntry>
 </EntryList>
 """
+    t1 = datetime.now()
     document = iof_entry_list.create_entry_list(
         event=EventType(
             id=1,
             name="1. O-Cup 2020",
-            date=datetime.date(year=2020, month=2, day=9),
+            date=date(year=2020, month=2, day=9),
             key=None,
             publish=False,
             series=None,
@@ -354,4 +383,5 @@ def test_export_entry_list_with_several_entries() -> None:
             ),
         ],
     )
-    assert document == bytes(content, encoding="utf-8")
+    t2 = datetime.now()
+    check_document(document=document, content=content, t1=t1, t2=t2)

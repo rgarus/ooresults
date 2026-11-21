@@ -52,16 +52,13 @@ from ooresults.websocket_server.websocket_server import WebSocketServer
 
 
 @bottle.route("/login", method="GET")
-def login():
-    try:
-        Users.update()
-    except Exception as e:
-        return str(e)
-    raise bottle.redirect("/")
+def login() -> None:
+    Users.update()
+    bottle.redirect("/")
 
 
 @bottle.route("/admin", method="GET")
-def admin():
+def admin() -> str:
     target = result_upload.target
     return render.main(
         events=model.events.get_events(),
@@ -70,12 +67,12 @@ def admin():
 
 
 @bottle.route("/mystatic/<filepath:path>")
-def server_static(filepath):
+def server_static(filepath) -> bottle.HTTPResponse:
     return bottle.static_file(filepath, root=pathlib.Path(__file__).parent / "static")
 
 
 @bottle.hook("after_request")
-def after_request():
+def after_request() -> None:
     logging.info(
         f"{bottle.request.method}  {bottle.request.remote_addr}  {bottle.request.path}  {bottle.response.status_line}"
     )
@@ -106,6 +103,8 @@ def my_plugin(callback):
         except bottle.MultipartError as e:
             logging.error(f"Exception: {type(e)}, {e}")
             return bottle.HTTPResponse(status=413, body="Content too large")
+        except bottle.HTTPResponse:
+            raise
         except Exception:
             logging.exception("Internal server error")
             return bottle.HTTPResponse(status=500, body="Internal server error")
@@ -170,6 +169,8 @@ def main() -> Optional[int]:
         exc_type, exc_value, _ = sys.exc_info()  # type: ignore
         logging.error(f"{exc_type.__module__}.{exc_type.__name__}: {exc_value}")
         print(f"{exc_type.__module__}.{exc_type.__name__}: {exc_value}")
+        print(f"Database {str(database)} could not be opened, server not started")
+        return 3
 
     if config.demo_reader:
         bottle.route("/demo")(ooresults.handler.demo_reader.get_update)

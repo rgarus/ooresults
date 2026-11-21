@@ -92,6 +92,8 @@ class WebSocketServer(threading.Thread):
             await self.streaming.update_event(event=event)
 
     def close(self) -> None:
+        if self.handler:
+            self.handler.executor.shutdown()
         if self.loop:
             if self.server:
                 self.server.close()

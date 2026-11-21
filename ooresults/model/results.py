@@ -19,6 +19,8 @@
 
 import json
 import pathlib
+from typing import Any
+from typing import Optional
 
 import iso8601
 import jsonschema
@@ -91,8 +93,8 @@ def parse_cardreader_log(item: dict) -> result_type.CardReaderMessage:
 
 
 def store_cardreader_result(
-    event_key: str, item: result_type.CardReaderMessage
-) -> tuple[str, EventType, dict]:
+    event_id: int, event_key: Optional[str], item: result_type.CardReaderMessage
+) -> tuple[str, EventType, dict[str, Any]]:
     def missing_controls(result: result_type.PersonRaceResult) -> list[str]:
         if result.finish_time is None:
             return ["FINISH"]
@@ -104,12 +106,10 @@ def store_cardreader_result(
                 controls.append(sp.control_code)
         return controls
 
+    clear_cache = False
     with model.db.transaction(mode=TransactionMode.IMMEDIATE):
-        for e in model.db.get_events():
-            if event_key != "" and e.key == event_key:
-                event = e
-                break
-        else:
+        event = model.db.get_event(id=event_id)
+        if not (event_key and event_key == event.key):
             raise EventNotFoundError(f'Event for key "{event_key}" not found')
 
         if item.entry_type == "cardRead":
@@ -203,7 +203,7 @@ def store_cardreader_result(
                         "error": None,
                         "missingControls": missing_controls(result=result),
                     }
-                    cached_result.clear_cache(event_id=event.id, entry_id=entry.id)
+                    clear_cache = True
 
                     # if there is an unassigned entry with the same result, delete it
                     if unassigned_entry_with_same_punches is not None:
@@ -241,6 +241,9 @@ def store_cardreader_result(
             res = {"eventId": event.id, "controlCard": item.control_card}
         else:
             res = {"eventId": event.id}
+
+    if clear_cache:
+        cached_result.clear_cache(event_id=event.id)
 
     return item.entry_type, event, res
 
