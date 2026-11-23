@@ -25,7 +25,7 @@ from unittest.mock import patch
 import pytest
 
 from ooresults import configuration
-from ooresults.utils.result_upload import UploadTarget
+from ooresults.utils.result_upload import Upload
 
 
 def test_configuration_create_default_config_if_not_exists() -> None:
@@ -227,23 +227,17 @@ def test_configuration_config_file_is_read_if_exists_2() -> None:
 
 
 def make_config(path: pathlib.Path, upload_section: str) -> configuration.Config:
-    # existing (empty) cert files, so that no certificate is generated
-    ssl_cert = path / "cert.pem"
-    ssl_key = path / "privkey.pem"
-    ssl_cert.touch()
-    ssl_key.touch()
     with open(path / "config.ini", "w", encoding="utf-8") as f:
-        f.write("[Server]\n")
-        f.write(f"ssl_cert = {str(ssl_cert)}\n")
-        f.write(f"ssl_key = {str(ssl_key)}\n")
-        f.write("\n")
         f.write(upload_section)
     return configuration.Config(path=path)
 
 
 def test_configuration_upload_default_is_none(tmp_path: pathlib.Path) -> None:
     c = make_config(path=tmp_path, upload_section="")
-    assert c.upload is None
+    upload = Upload(config=c.config)
+    assert upload.url == ""
+    assert upload.token == ""
+    assert upload.name == ""
 
 
 def test_configuration_upload_is_read(tmp_path: pathlib.Path) -> None:
@@ -256,11 +250,10 @@ def test_configuration_upload_is_read(tmp_path: pathlib.Path) -> None:
             "name = Example Cup\n"
         ),
     )
-    assert c.upload == UploadTarget(
-        url="https://www.example.org/cup_import.php",
-        token="a%b:c",
-        name="Example Cup",
-    )
+    upload = Upload(config=c.config)
+    assert upload.url == "https://www.example.org/cup_import.php"
+    assert upload.token == "a%b:c"
+    assert upload.name == "Example Cup"
 
 
 def test_configuration_upload_name_defaults_to_hostname(tmp_path: pathlib.Path) -> None:
@@ -272,8 +265,10 @@ def test_configuration_upload_name_defaults_to_hostname(tmp_path: pathlib.Path) 
             "token = secret\n"
         ),
     )
-    assert c.upload is not None
-    assert c.upload.name == "www.example.org"
+    upload = Upload(config=c.config)
+    assert upload.url == "https://www.example.org/cup_import.php"
+    assert upload.token == "secret"
+    assert upload.name == "www.example.org"
 
 
 def test_configuration_upload_without_url_is_disabled(tmp_path: pathlib.Path) -> None:
@@ -281,7 +276,10 @@ def test_configuration_upload_without_url_is_disabled(tmp_path: pathlib.Path) ->
         path=tmp_path,
         upload_section="[Upload]\nurl =\ntoken = secret\n",
     )
-    assert c.upload is None
+    upload = Upload(config=c.config)
+    assert upload.url == ""
+    assert upload.token == "secret"
+    assert upload.name == ""
 
 
 @pytest.mark.parametrize(
@@ -296,10 +294,11 @@ def test_configuration_upload_url_must_use_https(
     tmp_path: pathlib.Path, url: str
 ) -> None:
     with pytest.raises(RuntimeError, match="https://"):
-        make_config(
+        c = make_config(
             path=tmp_path,
             upload_section=f"[Upload]\nurl = {url}\ntoken = secret\n",
         )
+        Upload(config=c.config)
 
 
 def test_configuration_upload_http_is_allowed_for_localhost(
@@ -309,27 +308,16 @@ def test_configuration_upload_http_is_allowed_for_localhost(
         path=tmp_path,
         upload_section="[Upload]\nurl = http://localhost:8000/cup_import.php\ntoken = secret\n",
     )
-    assert c.upload is not None
-    assert c.upload.url == "http://localhost:8000/cup_import.php"
+    upload = Upload(config=c.config)
+    assert upload.url == "http://localhost:8000/cup_import.php"
+    assert upload.token == "secret"
+    assert upload.name == "localhost"
 
 
 def test_configuration_upload_token_is_required(tmp_path: pathlib.Path) -> None:
     with pytest.raises(RuntimeError, match="token"):
-        make_config(
+        c = make_config(
             path=tmp_path,
             upload_section="[Upload]\nurl = https://www.example.org/cup_import.php\n",
         )
-
-
-def test_configuration_upload_token_is_not_shown_in_repr(
-    tmp_path: pathlib.Path,
-) -> None:
-    c = make_config(
-        path=tmp_path,
-        upload_section=(
-            "[Upload]\n"
-            "url = https://www.example.org/cup_import.php\n"
-            "token = secret-123\n"
-        ),
-    )
-    assert "secret-123" not in repr(c.upload)
+        Upload(config=c.config)

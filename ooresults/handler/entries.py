@@ -303,8 +303,8 @@ def post_export() -> bytes | bottle.HTTPResponse:
 @bottle.post("/entry/upload")
 def post_upload() -> str | bottle.HTTPResponse:
     """Upload the results as IOF 3.0 ResultList to the configured server."""
-    target = result_upload.target
-    if target is None:
+    upload = result_upload.upload
+    if upload is None:
         return bottle.HTTPResponse(
             status=409, body="Upload is not configured (section [Upload] in config.ini)"
         )
@@ -320,7 +320,7 @@ def post_upload() -> str | bottle.HTTPResponse:
         return bottle.HTTPResponse(status=409, body="Event deleted")
 
     content = iof_result_list.create_result_list(event, class_results)
-    answer = result_upload.upload(content=content, target=target)
+    answer = upload.upload(content=content)
     return json.dumps(
         {
             "ok": answer.ok,

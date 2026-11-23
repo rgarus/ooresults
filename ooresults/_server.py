@@ -59,10 +59,10 @@ def login() -> None:
 
 @bottle.route("/admin", method="GET")
 def admin() -> str:
-    target = result_upload.target
+    upload = result_upload.upload
     return render.main(
         events=model.events.get_events(),
-        upload_name=target.name if target is not None else None,
+        upload_name=upload.name if upload is not None else None,
     )
 
 
@@ -149,16 +149,18 @@ def main() -> Optional[int]:
 
     try:
         config = configuration.Config(path=main_path)
+
+        upload = result_upload.Upload(config=config.config)
+        if upload.name:
+            result_upload.upload = upload
+            logging.info(f"Upload of results to {upload.url} enabled")
+
     except (RuntimeError, FileNotFoundError) as e:
         print(f'Error in file {str(main_path / "config.ini")}:')
         print(f"  {str(e)}")
         return 2
 
     rental_cards.read_rental_cards(path=main_path / "rental_cards.txt")
-
-    result_upload.target = config.upload
-    if config.upload is not None:
-        logging.info(f"Upload of results to {config.upload.url} enabled")
 
     try:
         model.db = SqliteRepo(db=str(database))

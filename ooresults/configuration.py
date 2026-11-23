@@ -20,16 +20,12 @@
 import configparser
 import datetime
 import pathlib
-from typing import Optional
-from urllib.parse import urlsplit
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
-
-from ooresults.utils.result_upload import UploadTarget
 
 
 class Config:
@@ -42,39 +38,33 @@ class Config:
         #  demo_reader = off
         #  import_stream = off
         #
-        #  [Upload]  (optional)
-        #  url = https://www.example.org/import.php
-        #  token = secret
-        #  name = Example Cup
-        #
 
+        self.config = configparser.ConfigParser()
         self.config_file = path / "config.ini"
         self.ssl_cert = pathlib.Path.home() / ".ooresults" / "cert" / "cert.pem"
         self.ssl_key = pathlib.Path.home() / ".ooresults" / "cert" / "privkey.pem"
         self.demo_reader = False
         self.import_stream = False
-        self.upload: Optional[UploadTarget] = None
 
-        config = configparser.ConfigParser()
         if self.config_file.exists():
-            config.read(self.config_file)
+            self.config.read(self.config_file)
         else:
-            config["Server"] = {
+            self.config["Server"] = {
                 "ssl_cert": "",
                 "ssl_key": "",
                 "demo_reader": "off",
                 "import_stream": "off",
             }
-            config["Cardreader"] = {
+            self.config["Cardreader"] = {
                 "host": "127.0.0.1",
                 "ssl_verify": "false",
                 "key": "local",
                 "serial_number": "",
             }
-            self.write_config_file(config=config)
+            self.write_config_file(config=self.config)
 
-        ssl_cert = config.get("Server", "ssl_cert", fallback=None)
-        ssl_key = config.get("Server", "ssl_key", fallback=None)
+        ssl_cert = self.config.get("Server", "ssl_cert", fallback=None)
+        ssl_key = self.config.get("Server", "ssl_key", fallback=None)
 
         if ssl_cert or ssl_key:
             if ssl_cert is not None and pathlib.Path(ssl_cert).is_file():
@@ -87,7 +77,7 @@ class Config:
                 raise FileNotFoundError(f"Private key file '{ssl_key}' not found")
 
         try:
-            self.demo_reader = config.getboolean(
+            self.demo_reader = self.config.getboolean(
                 "Server", "demo_reader", fallback=False
             )
         except ValueError:
@@ -96,7 +86,7 @@ class Config:
             )
 
         try:
-            self.import_stream = config.getboolean(
+            self.import_stream = self.config.getboolean(
                 "Server", "import_stream", fallback=False
             )
         except ValueError:
@@ -104,46 +94,12 @@ class Config:
                 "Allowed values for 'import_stream' are 'true', 'false', 'on', 'off', 'yes', 'no'"
             )
 
-        self.upload = self.read_upload_section(config=config)
-
         # create cert files for localhost if files not exist
         if (
             not pathlib.Path(self.ssl_cert).exists()
             or not pathlib.Path(self.ssl_key).exists()
         ):
             self.create_self_signed_cert()
-
-    @staticmethod
-    def read_upload_section(
-        config: configparser.ConfigParser,
-    ) -> Optional[UploadTarget]:
-        if not config.has_section("Upload"):
-            return None
-
-        # raw: a token may contain "%" characters
-        url = config.get("Upload", "url", raw=True, fallback="").strip()
-        token = config.get("Upload", "token", raw=True, fallback="").strip()
-        name = config.get("Upload", "name", raw=True, fallback="").strip()
-        if url == "":
-            return None
-
-        try:
-            parts = urlsplit(url)
-            scheme, hostname = parts.scheme, parts.hostname
-        except ValueError:
-            scheme, hostname = "", None
-        if hostname is None or scheme not in ("http", "https"):
-            raise RuntimeError(
-                "Value of 'url' in section [Upload] must be an address starting with 'https://'"
-            )
-        if scheme == "http" and hostname not in ("localhost", "127.0.0.1", "::1"):
-            raise RuntimeError(
-                "Value of 'url' in section [Upload] must start with 'https://' (the token must not be sent unencrypted)"
-            )
-        if token == "":
-            raise RuntimeError("Section [Upload] requires a value for 'token'")
-
-        return UploadTarget(url=url, token=token, name=name or hostname)
 
     def write_config_file(self, config: configparser.ConfigParser) -> None:
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
